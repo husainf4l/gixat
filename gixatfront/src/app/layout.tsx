@@ -1,41 +1,41 @@
 import type { Metadata } from "next";
-import { Cairo } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 
-const cairo = Cairo({
-  variable: "--font-cairo",
-  subsets: ["arabic"],
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-plus-jakarta-sans",
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "WIDD ننشر الوِدّ بشغف اللعبة",
-  description: "تطبيق الواقع المعزز لكرة القدم",
-  metadataBase: new URL("https://widd.ai"), // Updated to correct domain
+  title: "GIXAT - Garage System Management",
+  description: "Advanced garage management solution",
+  metadataBase: new URL("https://gixat.com"),
   openGraph: {
-    title: "WIDD ننشر الوِدّ بشغف اللعبة",
-    description:
-      "وُدّ منظومة سعودية ذكية، تمزج بين الواقع المعزز، الواقع الافتراضي، والذكاء الاصطناعي — مبنية على القيم، ومسؤولة تجاه الإنسان والمجتمع.",
-    url: "https://widd.ai", // Updated to correct domain
-    siteName: "WIDD",
+    title: "GIXAT - Garage System Management",
+    description: "Streamlined garage management solution for modern businesses",
+    url: "https://gixat.com",
+    siteName: "GIXAT",
     images: [
       {
-        url: "https://widd.ai/images/section/var.webp", // Updated to absolute URL
+        url: "https://gixat.com/images/gixat-logo.png",
         width: 1200,
         height: 630,
-        alt: "WIDD VAR",
+        alt: "GIXAT Logo",
       },
     ],
-    locale: "ar_SA",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "WIDD ننشر الوِدّ بشغف اللعبة",
-    description:
-      "وُدّ منظومة سعودية ذكية، تمزج بين الواقع المعزز، الواقع الافتراضي، والذكاء الاصطناعي — مبنية على القيم، ومسؤولة تجاه الإنسان والمجتمع.",
-    images: ["https://widd.ai/images/section/var.webp"], // Updated to absolute URL
+    title: "GIXAT - Garage System Management",
+    description: "Streamlined garage management solution for modern businesses",
+    images: ["https://gixat.com/images/gixat-logo.png"],
   },
 };
 
@@ -45,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className={cairo.variable}>
-      <body className="min-h-screen bg-background dark:bg-gray-950 text-foreground">
+    <html lang="en" className={`dark ${plusJakartaSans.variable}`}>
+      <body className="min-h-screen bg-[#020817] text-slate-50 font-sans">
         <AuthProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </AuthProvider>

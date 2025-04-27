@@ -9,7 +9,7 @@ export default function UnderConstructionPage() {
       <div className="bg-[#1a1a1a] p-8 rounded-lg shadow-lg max-w-md w-full text-center">
         <div className="mb-6 relative h-40 w-40 mx-auto">
           <Image
-            src="/images/widd-logo.webp"
+            src="/images/gixat-logow.png"
             alt="WIDD Logo"
             fill
             style={{ objectFit: "contain" }}

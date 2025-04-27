@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import Navbar from "@/app/layout/web/Navbar";
+import Footer from "@/app/layout/web/Footer";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,8 +34,7 @@ export default function LoginPage() {
     } catch (err: unknown) {
       console.error("Login error:", err);
       setError(
-        (err as Error)?.message ||
-          "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى."
+        (err as Error)?.message || "Error during sign in. Please try again."
       );
     } finally {
       setIsLoading(false);
@@ -45,7 +44,7 @@ export default function LoginPage() {
   return (
     <>
       <Navbar />
-      <main className="bg-gradient-to-b from-[#0F1118] to-[#1A1D2B] min-h-screen pt-24 pb-16">
+      <main className="bg-gradient-to-b from-[#0F172A] to-[#1E293B] min-h-screen pt-24 pb-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -53,9 +52,9 @@ export default function LoginPage() {
             transition={{ duration: 0.5 }}
             className="max-w-md mx-auto"
           >
-            <div className="bg-gradient-to-r from-gray-900 to-[#1A1D2B] rounded-xl shadow-2xl p-8">
+            <div className="bg-gradient-to-r from-gray-800 to-[#1E293B] rounded-xl shadow-2xl p-8">
               <h1 className="text-3xl font-bold text-white mb-6 text-center">
-                تسجيل <span className="text-cyan-400">الدخول</span>
+                Sign <span className="text-blue-400">In</span>
               </h1>
 
               {error && (
@@ -67,15 +66,15 @@ export default function LoginPage() {
               <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                   <label htmlFor="email" className="block text-gray-300 mb-2">
-                    البريد الإلكتروني
+                    Email
                   </label>
                   <input
                     type="email"
                     id="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#1E2235] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    placeholder="example@upthouse.com"
+                    className="w-full bg-[#2D3748] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="email@example.com"
                     required
                   />
                 </div>
@@ -85,14 +84,14 @@ export default function LoginPage() {
                     htmlFor="password"
                     className="block text-gray-300 mb-2"
                   >
-                    كلمة المرور
+                    Password
                   </label>
                   <input
                     type="password"
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#1E2235] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="w-full bg-[#2D3748] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="••••••••"
                     required
                     minLength={6}
@@ -102,7 +101,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold py-3 px-4 rounded-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-400 hover:to-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
@@ -126,21 +125,21 @@ export default function LoginPage() {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      جاري التحميل...
+                      Loading...
                     </span>
                   ) : (
-                    "تسجيل الدخول"
+                    "Sign In"
                   )}
                 </button>
 
                 <div className="mt-6 text-center">
                   <p className="text-gray-400">
-                    ليس لديك حساب؟{" "}
+                    Don't have an account?{" "}
                     <Link
                       href="/signup"
-                      className="text-cyan-400 hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
-                      إنشاء حساب جديد
+                      Create an account
                     </Link>
                   </p>
                 </div>

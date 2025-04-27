@@ -15,6 +15,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
+        sans: ["var(--font-plus-jakarta-sans)", ...fontFamily.sans],
         cairo: ["var(--font-cairo)", ...fontFamily.sans],
       },
       colors: {

@@ -2,35 +2,31 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import UserNavBar from "@/components/app/UserNavBar";
-import UserHeader from "@/components/app/UserHeader";
+import UserNavBar from "@/app/layout/app/UserNavBar";
+import UserHeader from "@/app/layout/app/UserHeader";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Generate page title from the pathname
   const getPageTitle = (): string => {
-    if (pathname === "/app") return "App";
+    if (pathname === "/app") return "Dashboard";
 
     const pathSegment = pathname.split("/").pop();
-    if (!pathSegment) return "App";
+    if (!pathSegment) return "Dashboard";
 
     return pathSegment.charAt(0).toUpperCase() + pathSegment.slice(1);
   };
 
   return (
-    <div className="flex h-screen text-white">
-      <div className="flex-1 flex flex-col overflow-hidden mr-16">
-        {/* User Header */}
+    <div className="min-h-screen text-white flex flex-row">
+      <UserNavBar />
+
+      <div className="flex flex-col flex-1 min-h-screen w-full">
         <UserHeader title={getPageTitle()} />
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto bg-[#0a0a0a] p-6">
-          {children}
-        </main>
+        <main className="w-full flex-1 p-6">{children}</main>
       </div>
-
-      <UserNavBar />
     </div>
   );
 }

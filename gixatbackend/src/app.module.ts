@@ -3,11 +3,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PassportInitMiddleware } from './middlewares/passport-init.middleware';
-import { LivekitModule } from './livekit/livekit.module';
-import { AIAgentModule } from './ai-agent/ai-agent.module';
 import { ConfigModule } from '@nestjs/config';
-import { PlayersModule } from './players/players.module';
-import { WiddPostModule } from './widdpost/widdpost.module';
+import { ClientsModule } from './clients/clients.module';
 
 @Module({
   imports: [
@@ -17,10 +14,7 @@ import { WiddPostModule } from './widdpost/widdpost.module';
     PrismaModule,
     UsersModule,
     AuthModule,
-    LivekitModule,
-    AIAgentModule,
-    PlayersModule,
-    WiddPostModule,
+    ClientsModule,
   ],
   controllers: [],
   providers: [],

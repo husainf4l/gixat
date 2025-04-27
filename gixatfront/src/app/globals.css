@@ -4,7 +4,9 @@
 @custom-variant dark (&:is(*));
 
 html {
-  font-family: var(--font-cairo), sans-serif;
+  font-family: var(--font-plus-jakarta-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Animation utilities */
@@ -130,5 +132,6 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+    letter-spacing: -0.01em;
   }
 }
