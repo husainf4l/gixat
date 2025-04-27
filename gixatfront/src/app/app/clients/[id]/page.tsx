@@ -60,10 +60,12 @@ export default function ClientDetailsPage() {
   // Handle loading state
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-48 md:h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4">Loading client data...</p>
+          <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-white mx-auto"></div>
+          <p className="mt-3 md:mt-4 text-sm md:text-base">
+            Loading client data...
+          </p>
         </div>
       </div>
     );
@@ -72,14 +74,16 @@ export default function ClientDetailsPage() {
   // Handle error state
   if (error || !client) {
     return (
-      <div className="flex flex-col items-center justify-center p-8">
-        <h1 className="text-2xl font-bold mb-4">Client Not Found</h1>
-        <p className="mb-6">
+      <div className="flex flex-col items-center justify-center p-4 md:p-8">
+        <h1 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
+          Client Not Found
+        </h1>
+        <p className="mb-4 md:mb-6 text-sm md:text-base text-center">
           {error ||
             "The client you're looking for doesn't exist or has been removed."}
         </p>
         <Link href="/app/clients">
-          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md">
+          <button className="px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-blue-600 hover:bg-blue-700 rounded-md">
             Return to Clients List
           </button>
         </Link>
@@ -94,16 +98,16 @@ export default function ClientDetailsPage() {
     client.vehicles && client.vehicles.length > 0 ? client.vehicles[0] : null;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8 px-1 md:px-0 pb-16 md:pb-6">
       {/* Back button */}
       <div>
         <button
           onClick={() => router.back()}
-          className="flex items-center text-gray-400 hover:text-white"
+          className="flex items-center text-gray-400 hover:text-white text-sm md:text-base group"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
+            className="h-4 w-4 md:h-5 md:w-5 mr-1 group-hover:-translate-x-0.5 transition-transform"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -117,133 +121,332 @@ export default function ClientDetailsPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         {/* Client Information Card */}
-        <div className="lg:col-span-1 bg-gray-800 rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-6 border-b border-gray-700 pb-2">
-            Client Information
-          </h2>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium text-gray-400">Client Name</h3>
-              <p className="text-lg">{client.name}</p>
+        <div className="lg:col-span-1 bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="bg-blue-500/20 rounded-full h-14 w-14 md:h-16 md:w-16 flex items-center justify-center text-blue-400 shrink-0">
+              <span className="text-xl md:text-2xl font-semibold">
+                {client.name.charAt(0).toUpperCase()}
+              </span>
             </div>
-
             <div>
-              <h3 className="text-sm font-medium text-gray-400">
-                Mobile Number
-              </h3>
-              <p className="text-lg">{client.mobileNumber}</p>
-            </div>
-
-            {primaryVehicle && (
-              <>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400">
-                    Car Model
-                  </h3>
-                  <p className="text-lg">{primaryVehicle.model}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400">
-                    Plate Number
-                  </h3>
-                  <p className="text-lg">{primaryVehicle.licensePlate}</p>
-                </div>
-              </>
-            )}
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-400">Last Visit</h3>
-              {client.lastVisit ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-lg">
-                    {new Date(client.lastVisit).toLocaleDateString()}
-                  </p>
-                  {daysSinceVisit && (
-                    <span
-                      className={`text-sm px-2 py-0.5 rounded-full ${
-                        daysSinceVisit > 30
-                          ? "bg-red-900 text-red-200"
-                          : daysSinceVisit > 14
-                          ? "bg-yellow-900 text-yellow-200"
-                          : "bg-green-900 text-green-200"
-                      }`}
-                    >
-                      {daysSinceVisit} days ago
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <p className="text-lg text-gray-400">No previous visits</p>
-              )}
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-400">Status</h3>
-              <p>
-                <span
-                  className={`inline-block mt-1 px-3 py-1 rounded-full text-sm font-medium ${
-                    client.status === "ACTIVE"
-                      ? "bg-green-900 text-green-200"
-                      : client.status === "INACTIVE"
-                      ? "bg-red-900 text-red-200"
-                      : "bg-yellow-900 text-yellow-200"
-                  }`}
-                >
-                  {client.status}
-                </span>
+              <h2 className="text-lg md:text-xl font-bold text-white">
+                {client.name}
+              </h2>
+              <p className="text-gray-400 text-sm md:text-base">
+                {client.mobileNumber}
               </p>
             </div>
           </div>
 
-          <div className="mt-8 flex gap-3">
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md">
+          <div className="space-y-4 md:space-y-5">
+            {/* Vehicle details with icons */}
+            {(primaryVehicle || client.carModel || client.plateNumber) && (
+              <div className="border-t border-gray-700/50 pt-4">
+                <h3 className="text-sm font-medium text-gray-400 mb-3">
+                  Vehicle Details
+                </h3>
+                <div className="space-y-2.5">
+                  {(primaryVehicle?.model || client.carModel) && (
+                    <div className="flex items-center gap-2.5">
+                      <div className="text-blue-400 bg-blue-500/10 p-1.5 rounded-md">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4.5 w-4.5 md:h-5 md:w-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M7 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                          <path d="M17 17m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                          <path d="M5 9l2 -4h8l1 4" />
+                          <path d="M5 9h12a1 1 0 0 1 1 1v4.5a1.5 1.5 0 0 1 -1.5 1.5h-12.5" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-400">Car Model</div>
+                        <div className="text-base md:text-lg text-white">
+                          {primaryVehicle?.model || client.carModel}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {(primaryVehicle?.plateNumber || client.plateNumber) && (
+                    <div className="flex items-center gap-2.5">
+                      <div className="text-blue-400 bg-blue-500/10 p-1.5 rounded-md">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4.5 w-4.5 md:h-5 md:w-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
+                          <path d="M7 9h10" />
+                          <path d="M9 17v-8" />
+                          <path d="M15 17v-8" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-400">
+                          Plate Number
+                        </div>
+                        <div className="text-base md:text-lg text-white">
+                          {primaryVehicle?.plateNumber || client.plateNumber}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Last Visit */}
+            <div className="border-t border-gray-700/50 pt-4">
+              <h3 className="text-sm font-medium text-gray-400 mb-3">
+                Visit Information
+              </h3>
+              <div className="flex items-center gap-2.5">
+                <div className="text-blue-400 bg-blue-500/10 p-1.5 rounded-md">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4.5 w-4.5 md:h-5 md:w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                    <path d="M16 3l0 4" />
+                    <path d="M8 3l0 4" />
+                    <path d="M4 11l16 0" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400">Last Visit</div>
+                  {client.lastVisit ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-base md:text-lg text-white">
+                        {new Date(client.lastVisit).toLocaleDateString()}
+                      </span>
+                      {daysSinceVisit && (
+                        <span
+                          className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            daysSinceVisit > 30
+                              ? "bg-red-900/70 text-red-200"
+                              : daysSinceVisit > 14
+                              ? "bg-yellow-900/70 text-yellow-200"
+                              : "bg-green-900/70 text-green-200"
+                          }`}
+                        >
+                          {daysSinceVisit}d
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-base md:text-lg text-gray-400">
+                      No previous visits
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 md:mt-8 pt-4 border-t border-gray-700/50 flex flex-col md:flex-row gap-2 md:gap-3">
+            <button className="w-full md:w-auto px-3 py-1.5 md:px-4 md:py-2 text-sm bg-blue-600 hover:bg-blue-500 rounded-lg flex items-center justify-center gap-2 transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M11 4h-7a2 2 0 0 0 -2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2 -2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3l-11 11h-3v-3l11 -11z" />
+              </svg>
               Edit Client
             </button>
-            <button className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md">
+            <button className="w-full md:w-auto px-3 py-1.5 md:px-4 md:py-2 text-sm bg-green-600 hover:bg-green-500 rounded-lg flex items-center justify-center gap-2 transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                <path d="M12 8l0 8" />
+                <path d="M8 12l8 0" />
+              </svg>
               New Service
             </button>
           </div>
         </div>
 
         {/* Service History Card */}
-        <div className="lg:col-span-2 bg-gray-800 rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6 border-b border-gray-700 pb-2">
-            <h2 className="text-xl font-bold">Service History</h2>
-            <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-sm rounded-md">
+        <div className="lg:col-span-2 bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 md:gap-0 mb-4 md:mb-6 border-b border-gray-700/50 pb-4">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-blue-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77 -3.77a6 6 0 0 1 -7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1 -3 -3l6.91 -6.91a6 6 0 0 1 7.94 -7.94l-3.76 3.76z" />
+              </svg>
+              <h2 className="text-lg md:text-xl font-bold">Service History</h2>
+            </div>
+            <button className="w-full md:w-auto px-3 py-1.5 md:px-3 md:py-1.5 bg-blue-600 hover:bg-blue-500 text-sm rounded-lg flex items-center justify-center gap-2 transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                <path d="M12 8l0 8" />
+                <path d="M8 12l8 0" />
+              </svg>
               Add Service Record
             </button>
           </div>
 
           {serviceHistory.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {serviceHistory.map((service) => (
-                <div key={service.id} className="bg-gray-700 p-4 rounded-md">
+                <div
+                  key={service.id}
+                  className="bg-gray-700/70 border border-gray-600/30 p-3.5 md:p-4 rounded-lg hover:bg-gray-700/90 transition-colors"
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-bold">{service.serviceType}</h3>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-300">
-                        {new Date(service.date).toLocaleDateString()}
+                    <div className="flex gap-2 items-center">
+                      <div className="bg-blue-500/20 p-1.5 rounded text-blue-400">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77 -3.77a6 6 0 0 1 -7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1 -3 -3l6.91 -6.91a6 6 0 0 1 7.94 -7.94l-3.76 3.76z" />
+                        </svg>
                       </div>
-                      <div className="font-medium text-green-400">
+                      <h3 className="font-semibold text-sm md:text-base text-white">
+                        {service.serviceType}
+                      </h3>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs md:text-sm text-gray-300 flex items-center gap-1 justify-end">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3.5 w-3.5 text-gray-400"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                          <path d="M16 3l0 4" />
+                          <path d="M8 3l0 4" />
+                          <path d="M4 11l16 0" />
+                        </svg>
+                        <span>
+                          {new Date(service.date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="font-medium text-green-400 text-sm md:text-base">
                         ${service.cost.toFixed(2)}
                       </div>
                     </div>
                   </div>
-                  <p className="text-gray-300 mb-2">{service.description}</p>
-                  <div className="text-sm text-gray-400">
-                    Technician: {service.technicianName}
+                  <p className="text-gray-300 mb-2 text-xs md:text-sm">
+                    {service.description}
+                  </p>
+                  <div className="text-xs md:text-sm text-gray-400 flex items-center gap-1.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                      <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+                      <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
+                    </svg>
+                    <span>Technician: {service.technicianName}</span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-400">
+            <div className="text-center py-8 px-4 text-gray-400 text-sm md:text-base bg-gray-700/20 rounded-lg border border-dashed border-gray-600/50">
+              <div className="flex justify-center mb-3">
+                <div className="bg-gray-700/50 p-3 rounded-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-gray-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77 -3.77a6 6 0 0 1 -7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1 -3 -3l6.91 -6.91a6 6 0 0 1 7.94 -7.94l-3.76 3.76z" />
+                  </svg>
+                </div>
+              </div>
               <p>No service history available for this client.</p>
-              <button className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md">
+              <button className="mt-3 md:mt-4 px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-blue-600 hover:bg-blue-500 rounded-lg inline-flex items-center gap-2 transition-colors">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                  <path d="M12 8l0 8" />
+                  <path d="M8 12l8 0" />
+                </svg>
                 Add First Service
               </button>
             </div>

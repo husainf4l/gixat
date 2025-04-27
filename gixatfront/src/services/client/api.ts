@@ -28,25 +28,26 @@ export interface Vehicle {
   model: string;
   year: number;
   vin: string | null;
-  licensePlate: string;
+  plateNumber: string | null;
   color: string | null;
   mileage: number | null;
   clientId: string;
   createdAt: string;
   updatedAt: string;
+  status?: string;
 }
 
 export interface Client {
   id: string;
   name: string;
   carModel: string;
-  plateNumber: string;
   mobileNumber: string;
   lastVisit: string | null;
-  status: string;
   createdAt: string;
   updatedAt: string;
   vehicles: Vehicle[];
+  plateNumber?: string;
+  status?: string;
 }
 
 export interface ServiceRecord {
@@ -57,6 +58,16 @@ export interface ServiceRecord {
   description: string;
   cost: number;
   technicianName: string;
+}
+
+export interface NewClientData {
+  name: string;
+  mobileNumber: string;
+  carModel?: string;
+  plateNumber?: string;
+  color?: string;
+  mileage?: number;
+  year?: number;
 }
 
 export const clientService = {
@@ -87,6 +98,16 @@ export const clientService = {
     } catch (error) {
       console.error(`Error fetching service history for client ${clientId}:`, error);
       return []; // Return empty array for now, can be improved with better error handling
+    }
+  },
+  
+  async createClient(clientData: NewClientData) {
+    try {
+      const response = await api.post<Client>('/clients', clientData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating client:', error);
+      throw error;
     }
   }
 };

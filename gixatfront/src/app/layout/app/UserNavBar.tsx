@@ -6,27 +6,79 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Camera, Tv, Rss, User, Settings, AlertTriangle } from "lucide-react";
 
-export default function UserNavBar() {
+interface UserNavBarProps {
+  orientation: "vertical" | "horizontal";
+}
+
+export default function UserNavBar({
+  orientation = "vertical",
+}: UserNavBarProps) {
   const pathname = usePathname();
+  const isHorizontal = orientation === "horizontal";
 
   const navItems = [
-    { id: "feed", name: "Feed", path: "/app", icon: <Rss size={20} /> },
+    {
+      id: "feed",
+      name: "Feed",
+      path: "/app",
+      icon: <Rss size={isHorizontal ? 24 : 20} />,
+    },
     {
       id: "clients",
       name: "Clients",
       path: "/app/clients",
-      icon: <User size={20} />,
+      icon: <User size={isHorizontal ? 24 : 20} />,
     },
     {
       id: "settings",
       name: "Settings",
       path: "/app/under",
-      icon: <Settings size={20} />,
+      icon: <Settings size={isHorizontal ? 24 : 20} />,
     },
   ];
 
+  // Horizontal (mobile) layout
+  if (isHorizontal) {
+    return (
+      <div className="w-full bg-[#121212] border-t border-slate-800 shadow-lg">
+        <nav className="py-1">
+          <ul className="flex items-center justify-around">
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={item.path}
+                  className={cn(
+                    "flex flex-col items-center justify-center p-1.5 rounded-md transition-colors",
+                    pathname === item.path
+                      ? "text-white"
+                      : "text-slate-400 hover:text-white"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "p-1.5 rounded-full",
+                      pathname === item.path 
+                        ? "bg-blue-600" 
+                        : "hover:bg-slate-800"
+                    )}
+                  >
+                    {item.icon}
+                  </div>
+                  <span className="text-[10px] mt-0.5 font-medium">
+                    {item.name}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    );
+  }
+
+  // Vertical (desktop) layout
   return (
-    <div className="h-screen w-16 bg-[#121212] border-r border-slate-800 flex flex-col  ">
+    <div className="h-screen w-16 bg-[#121212] border-r border-slate-800 flex flex-col">
       <div className="px-3 mb-4 mt-4">
         <div className="h-10 w-10 bg-gray-500 rounded-md flex items-center justify-center">
           <User size={18} />
