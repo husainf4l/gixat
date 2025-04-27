@@ -46,10 +46,8 @@ model Client {
   id           String        @id @default(uuid())
   name         String
   carModel     String
-  plateNumber  String
   mobileNumber String
   lastVisit    DateTime?
-  status       ClientStatus  @default(ACTIVE)
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
   vehicles     Vehicle[]
@@ -57,27 +55,31 @@ model Client {
   Appointment  Appointment[]
 }
 
-enum ClientStatus {
-  ACTIVE
-  INACTIVE
-  PENDING
+model Vehicle {
+  id          String        @id @default(uuid())
+  make        String
+  model       String
+  year        Int
+  vin         String?       @unique
+  plateNumber String?       @unique
+  color       String?
+  mileage     Int?          @map("mileage")
+  clientId    String        @map("client_id")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  serviceJobs ServiceJob[]
+  Appointment Appointment[]
+  status      VehicleStatus @default(AVAILABLE)
 }
 
-model Vehicle {
-  id           String        @id @default(uuid())
-  make         String
-  model        String
-  year         Int
-  vin          String?       @unique
-  licensePlate String?       @unique
-  color        String?
-  mileage      Int?
-  clientId     String        @map("client_id")
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  client       Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  serviceJobs  ServiceJob[]
-  Appointment  Appointment[]
+enum VehicleStatus {
+  AVAILABLE
+  IN_SERVICE
+  OUT_OF_SERVICE
+  IN_REPAIR
+  COMPLETED
+  CANCELLED
 }
 
 model ServiceType {

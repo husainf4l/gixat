@@ -10,35 +10,37 @@ export class ClientsService {
 
   async create(createClientDto: CreateClientDto) {
     try {
-      // Map DTO fields to Prisma schema fields
-      const clientData = {
-        name: createClientDto.name,
-        mobileNumber: createClientDto.mobileNumber,
-        carModel: createClientDto.carModel,
-        plateNumber: createClientDto.plateNumber,
-        // Fields from the Prisma schema
-        status: 'ACTIVE' as const, // Using a type assertion to match the ClientStatus enum
-        // Create associated vehicle
-        vehicles: {
-          create: {
-            make: createClientDto.carModel.split(' ')[0] || 'Unknown',
-            model: createClientDto.carModel,
-            year: createClientDto.year || new Date().getFullYear(),
-            licensePlate: createClientDto.plateNumber,
-            // Optional vehicle fields
-            color: createClientDto.color || null,
-            mileage: createClientDto.mileage || null,
+      // Create the client with nested vehicle creation
+      const result = await this.prisma.client.create({
+        data: {
+          name: createClientDto.name,
+          mobileNumber: createClientDto.mobileNumber,
+          carModel: createClientDto.carModel,
+          vehicles: {
+            create: {
+              make: createClientDto.carModel.split(' ')[0] || 'Unknown',
+              model: createClientDto.carModel.split(' ').slice(1).join(' ') || createClientDto.carModel,
+              year: createClientDto.year || new Date().getFullYear(),
+              plateNumber: createClientDto.plateNumber,
+              color: createClientDto.color || null,
+              mileage: createClientDto.mileage || null,
+            }
           }
-        }
-      };
-
-      return this.prisma.client.create({
-        data: clientData,
+        },
         include: {
           vehicles: true // Include the created vehicle in the response
         }
       });
+      
+      return result;
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        // Handle specific Prisma errors with more detail
+        console.error('Prisma error:', error.message, error.code);
+        if (error.code === 'P2002') {
+          throw new BadRequestException('A vehicle with this plate number already exists.');
+        }
+      }
       throw new BadRequestException(`Failed to create client: ${error.message}`);
     }
   }

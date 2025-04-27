@@ -1,5 +1,4 @@
 import { IsNotEmpty, IsOptional, IsString, IsEnum } from 'class-validator';
-import { ClientStatus } from '@prisma/client';
 
 export class CreateClientDto {
   @IsString()
@@ -18,9 +17,6 @@ export class CreateClientDto {
   @IsNotEmpty()
   plateNumber: string;
 
-  @IsEnum(ClientStatus)
-  @IsOptional()
-  status?: ClientStatus;
 
   @IsString()
   @IsOptional()
