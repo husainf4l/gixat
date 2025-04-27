@@ -4,7 +4,15 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Camera, Tv, Rss, User, Settings, AlertTriangle } from "lucide-react";
+import {
+  Camera,
+  Tv,
+  Rss,
+  User,
+  Settings,
+  AlertTriangle,
+  MessageSquare,
+} from "lucide-react";
 
 interface UserNavBarProps {
   orientation: "vertical" | "horizontal";
@@ -22,6 +30,12 @@ export default function UserNavBar({
       name: "Feed",
       path: "/app",
       icon: <Rss size={isHorizontal ? 24 : 20} />,
+    },
+    {
+      id: "chat",
+      name: "Chat",
+      path: "/app/chat",
+      icon: <MessageSquare size={isHorizontal ? 24 : 20} />,
     },
     {
       id: "clients",
@@ -57,8 +71,8 @@ export default function UserNavBar({
                   <div
                     className={cn(
                       "p-1.5 rounded-full",
-                      pathname === item.path 
-                        ? "bg-blue-600" 
+                      pathname === item.path
+                        ? "bg-blue-600"
                         : "hover:bg-slate-800"
                     )}
                   >

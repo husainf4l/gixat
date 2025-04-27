@@ -19,7 +19,8 @@ interface AuthContextType {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    garageId: string
   ) => Promise<unknown>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -78,7 +79,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    garageId: string
   ) => {
     setLoading(true);
     try {
@@ -86,7 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         firstName,
         lastName,
         email,
-        password
+        password,
+        garageId
       );
       setIsAuthenticated(true);
       // After registration, we need to get user data

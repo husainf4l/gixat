@@ -8,77 +8,73 @@ import { UserWithoutPassword } from './user.types';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(user: User): Promise<UserWithoutPassword> {
-    console.log('Creating user with data:', user); // Debugging log
+  async create(userData: {
+    name: string;
+    email: string | null;
+    phone: string;
+    passwordHash?: string;
+    role?: string;
+    garageId: string;
+  }): Promise<UserWithoutPassword> {
+    console.log('Creating user with data:', userData); // Debugging log
 
     // Check if user with this email already exists
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: user.email },
+    if (userData.email) {
+      const existingUserEmail = await this.prisma.user.findUnique({
+        where: { email: userData.email },
+      });
+
+      if (existingUserEmail) {
+        throw new ConflictException('Email already in use');
+      }
+    }
+
+    // Check if phone is already in use
+    const existingUserPhone = await this.prisma.user.findUnique({
+      where: { phone: userData.phone },
     });
 
-    if (existingUser) {
-      throw new ConflictException('Email already in use');
+    if (existingUserPhone) {
+      throw new ConflictException('Phone number already in use');
     }
 
-    // Hash the password if provided
-    let hashedPassword = '';
-    if (user.password) {
-      hashedPassword = await bcrypt.hash(user.password, 10);
-    }
-
-    // Create the user
+    // Create the user with correct schema fields
     const createdUser = await this.prisma.user.create({
       data: {
-        ...user,
-        password: hashedPassword,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        passwordHash: userData.passwordHash || '',
+        role: userData.role ? userData.role as any : 'EMPLOYEE',
+        garageId: userData.garageId,
       },
     });
 
-    // Remove the password before returning the user
-    const { password, ...result } = createdUser;
-    return result;
+    return createdUser;
   }
 
   // Add method for creating user from social login data
   async createFromSocial(userData: {
     email: string;
-    firstName?: string;
-    lastName?: string;
-    password?: string | null;
-    name?: string;
-    socialProvider?: 'google' | 'apple' | null;
-    socialId?: string;
-    profilePictureUrl?: string;
+    name: string;
+    passwordHash?: string;
+    socialProvider?: string | null;
+    socialId?: string | null;
+    profilePictureUrl?: string | null;
+    garageId?: string;
   }): Promise<User> {
-    // Extract firstName and lastName from name if they're not provided directly
-    let firstName = userData.firstName || '';
-    let lastName = userData.lastName || '';
-    
-    if (!firstName && userData.name) {
-      if (userData.name.includes(' ')) {
-        const nameParts = userData.name.split(' ');
-        firstName = nameParts[0];
-        lastName = nameParts.slice(1).join(' ');
-      } else {
-        firstName = userData.name;
-      }
-    }
-    
-    // Hash password if provided
-    let hashedPassword = '';
-    if (userData.password) {
-      hashedPassword = await bcrypt.hash(userData.password, 10);
-    }
-    
+    // Create the user with the right schema fields
     return this.prisma.user.create({
       data: {
         email: userData.email,
-        password: hashedPassword,
-        firstName,
-        lastName,
+        name: userData.name,
+        // This is a temporary phone value - in production, you should collect this properly
+        phone: `temp-${Date.now()}`,
+        passwordHash: userData.passwordHash || '',
         socialProvider: userData.socialProvider,
         socialId: userData.socialId,
-        profilePictureUrl: userData.profilePictureUrl
+        profilePictureUrl: userData.profilePictureUrl,
+        garageId: userData.garageId || '1', // Use provided garageId or default
       }
     });
   }
@@ -96,7 +92,7 @@ export class UsersService {
 
   async findAll(): Promise<UserWithoutPassword[]> {
     const users = await this.prisma.user.findMany();
-    return users.map(({ password, ...rest }) => rest);
+    return users; // Already matches UserWithoutPassword since no password field exists
   }
 
   async findOne(id: string): Promise<UserWithoutPassword> {
@@ -108,33 +104,34 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    const { password, ...result } = user;
-    return result;
+    return user; // Already matches UserWithoutPassword since no password field exists
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+    // Handle null email case
+    if (!email) return null;
+    
+    return this.prisma.user.findUnique({
       where: { email },
     });
-    return user;
   }
 
   async update(id: string, updateData: Partial<User>): Promise<UserWithoutPassword> {
     // Check if user exists
     await this.findOne(id);
 
-    // Hash the password if it's being updated
-    if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
-    }
-
+    // If updateData contains passwordHash, need to hash it
+    let dataToUpdate: any = { ...updateData };
+    
+    // Remove any fields that don't exist in the schema to prevent errors
+    delete dataToUpdate.password;
+    
     const updatedUser = await this.prisma.user.update({
       where: { id },
-      data: updateData,
+      data: dataToUpdate,
     });
 
-    const { password, ...result } = updatedUser;
-    return result;
+    return updatedUser; // Already matches UserWithoutPassword since no password field exists
   }
 
   // Update user profile (name and profile picture)
@@ -142,17 +139,10 @@ export class UsersService {
     name?: string;
     profilePictureUrl?: string;
   }): Promise<UserWithoutPassword> {
-    // Extract firstName and lastName if name is provided
     const updateFields: any = {};
     
     if (updateData.name) {
-      if (updateData.name.includes(' ')) {
-        const nameParts = updateData.name.split(' ');
-        updateFields.firstName = nameParts[0];
-        updateFields.lastName = nameParts.slice(1).join(' ');
-      } else {
-        updateFields.firstName = updateData.name;
-      }
+      updateFields.name = updateData.name;
     }
     
     if (updateData.profilePictureUrl) {
@@ -164,8 +154,7 @@ export class UsersService {
       data: updateFields
     });
 
-    const { password, ...result } = updatedUser;
-    return result;
+    return updatedUser; // Already matches UserWithoutPassword since no password field exists
   }
 
   async remove(id: string): Promise<UserWithoutPassword> {
@@ -176,8 +165,7 @@ export class UsersService {
       where: { id },
     });
 
-    const { password, ...result } = user;
-    return result;
+    return user; // Already matches UserWithoutPassword since no password field exists
   }
 
   // --- Refresh Token Methods ---

@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile sidebar overlay - only visible when menu is open */}
-      <div 
+      <div
         className={`fixed inset-0 bg-black/70 z-30 transition-opacity duration-300 md:hidden ${
           isMobileNavOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
@@ -48,14 +48,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       />
 
       {/* Mobile sidebar - slides in from left */}
-      <div 
+      <div
         className={`fixed top-0 left-0 bottom-0 w-64 bg-[#121212] border-r border-slate-800 z-40 transform transition-transform duration-300 ease-out md:hidden ${
           isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex justify-between items-center p-4 border-b border-slate-800">
           <h2 className="text-xl font-bold">Menu</h2>
-          <button 
+          <button
             onClick={toggleMobileNav}
             className="p-1.5 rounded-full hover:bg-slate-800 transition-colors"
             aria-label="Close menu"
@@ -72,7 +72,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Header - visible on all screens with menu button on mobile */}
         <div className="border-b border-slate-800 bg-[#121212]">
           <div className="flex items-center">
-            <button 
+            <button
               onClick={toggleMobileNav}
               className="md:hidden p-3.5 text-slate-300 hover:text-white"
               aria-label="Open menu"
@@ -95,9 +95,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 // NavLinks component to reuse the same links in both desktop and mobile
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  
+
   const navItems = [
     { id: "dashboard", name: "Dashboard", path: "/app" },
+    { id: "chat", name: "Chat", path: "/app/chat" },
     { id: "clients", name: "Clients", path: "/app/clients" },
     { id: "settings", name: "Settings", path: "/app/under" },
   ];

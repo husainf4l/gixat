@@ -30,16 +30,18 @@ export class ClientRegistrationAgentService {
     sessionId: string,
     sessionData: any
   ): Promise<AgentResponse> {
-    // Get existing extracted info from session or initialize new
-    let extractedInfo: ExtractedClientInfo = 
-      (sessionData?.extractedInfo as ExtractedClientInfo) || {};
-    
-    // Check if the message is a confirmation response
-    const lowerMessage = message.toLowerCase().trim();
-    const confirmationWords = ['yes', 'true', 'correct', 'confirm', 'ok', 'okay', 'agreed'];
-    
-    if (confirmationWords.includes(lowerMessage)) {
-      // If we already have all required info and this is a confirmation
+    // Parse the existing session data or create a new object to store extracted information
+    const extractedInfo: ExtractedClientInfo = {
+      ...(sessionData?.extractedInfo || {}),
+    };
+
+    // If this is a confirmation message, handle accordingly
+    if (
+      message.toLowerCase().includes('yes') ||
+      message.toLowerCase().includes('correct') ||
+      message.toLowerCase().includes('confirm') ||
+      message.toLowerCase().includes('that is right')
+    ) {
       const missingFields = this.getMissingRequiredFields(extractedInfo);
       if (missingFields.length === 0) {
         // Check if the user has already seen the final confirmation question
@@ -70,57 +72,93 @@ export class ClientRegistrationAgentService {
             agentType: AgentType.CLIENT_REGISTRATION,
             extractedInfo,
             missingFields: [],
-            response: `Thanks for confirming. I'll register this client with the information provided. 
-            Would you like me to save this data to the system now?`,
-            isComplete: true,
-            finalConfirmationShown: true  // Add this flag to the response
+            response: `Thank you for confirming. Please review the information one more time:
+            
+            - Name: ${extractedInfo.name}
+            - Mobile: ${extractedInfo.mobileNumber}
+            - Car: ${extractedInfo.carModel}
+            - Plate: ${extractedInfo.plateNumber}
+            ${extractedInfo.color ? `- Color: ${extractedInfo.color}` : ''}
+            ${extractedInfo.mileage ? `- Mileage: ${extractedInfo.mileage}` : ''}
+            ${extractedInfo.year ? `- Year: ${extractedInfo.year}` : ''}
+            
+            Would you like me to register this client now? (Type "yes" to confirm)`,
+            isComplete: false,
+            finalConfirmationShown: true
           };
         }
       }
     }
-    
-    // Check if message mentions uploading an image
-    if (message.toLowerCase().includes('image') || 
-        message.toLowerCase().includes('picture') || 
+
+    // If we're looking for an image upload
+    if (message.toLowerCase().includes('upload') || 
+        message.toLowerCase().includes('image') || 
         message.toLowerCase().includes('photo') || 
-        message.toLowerCase().includes('upload') ||
+        message.toLowerCase().includes('document') || 
         message.toLowerCase().includes('registration')) {
       
       return this.handleImageUploadRequest(extractedInfo);
     }
     
-    // Extract name
+    // Extract name using improved pattern matching
     const nameMatch = 
       message.match(/(?:name is|client|customer|for|by|from|this is) ([A-Za-z\s]+)(?:\.|,|$)/i) ||
-      message.match(/([A-Za-z\s]+?)(?:'s| is| has| with| wants)/i);
+      message.match(/([A-Za-z\s]+?)(?:'s| is| has| with| wants)/i) || 
+      message.match(/I(?:'m| am) ([A-Za-z\s]+)(?:\.|,|$)/i);
+    
     if (nameMatch) {
-      extractedInfo.name = nameMatch[1].trim();
+      const potentialName = nameMatch[1].trim();
+      
+      // Validate name is reasonable (not too short and doesn't contain numbers)
+      if (potentialName.length > 2 && !/\d/.test(potentialName)) {
+        extractedInfo.name = potentialName;
+      }
     }
     
-    // Extract mobile number
+    // Extract mobile number with improved validation
     const mobileMatch = message.match(/(\+?[0-9]{10,15})|([0-9]{3}[\s-]?[0-9]{3}[\s-]?[0-9]{4})/);
     if (mobileMatch) {
+      // Normalize by removing spaces and dashes
       extractedInfo.mobileNumber = mobileMatch[0].replace(/[\s-]/g, '');
+      
+      // Ensure mobile number meets minimum length requirements
+      if (extractedInfo.mobileNumber.length < 10) {
+        extractedInfo.mobileNumber = undefined; // Invalid format
+      }
     }
     
-    // Extract car model
+    // Extract car model using common car makes
     const carMakes = [
       'Toyota', 'Honda', 'Ford', 'Chevrolet', 'BMW', 'Mercedes', 'Audi', 'Volkswagen', 
-      'Hyundai', 'Kia', 'Nissan', 'Mazda', 'Subaru', 'Jeep', 'Tesla', 'Lexus'
+      'Hyundai', 'Kia', 'Nissan', 'Mazda', 'Subaru', 'Jeep', 'Tesla', 'Lexus',
+      'Acura', 'Bentley', 'Buick', 'Cadillac', 'Chrysler', 'Dodge', 'Ferrari', 'Fiat',
+      'GMC', 'Genesis', 'Infiniti', 'Jaguar', 'Land Rover', 'Lincoln', 'Lotus', 'Maserati',
+      'Mitsubishi', 'Porsche', 'Ram', 'Rolls-Royce', 'Scion', 'Smart', 'Suzuki', 'Volvo'
     ];
     
-    const carModelRegex = new RegExp(`(${carMakes.join('|')})\\s+([A-Za-z0-9\\s]+?)(?:[,\\.\\s]|$)`, 'i');
-    const carMatch = message.match(carModelRegex);
-    if (carMatch) {
-      extractedInfo.carModel = `${carMatch[1]} ${carMatch[2]}`.trim();
+    // More robust car model extraction
+    for (const make of carMakes) {
+      const carRegex = new RegExp(`(${make})\\s+([A-Za-z0-9\\s-]+?)(?:[,\\.\\s]|$)`, 'i');
+      const carMatch = message.match(carRegex);
+      
+      if (carMatch) {
+        extractedInfo.carModel = `${carMatch[1]} ${carMatch[2]}`.trim();
+        break;
+      }
     }
     
-    // Extract plate number - use a more specific regex pattern for license plates
-    // Most plate numbers have a specific format with letters and numbers
-    // This pattern looks for typical license plate formats while avoiding phone number formats
+    // If no specific make was found, look for general car model mentions
+    if (!extractedInfo.carModel) {
+      const generalCarMatch = message.match(/(?:car|vehicle|driving|have) (?:a |an |is |)([A-Za-z0-9\s-]+?)(?:[,\.\s]|$)/i);
+      if (generalCarMatch) {
+        extractedInfo.carModel = generalCarMatch[1].trim();
+      }
+    }
+    
+    // Extract plate number with improved pattern matching for various formats
     const plateMatch = 
-      message.match(/(?:plate|license|car|vehicle)\s+(?:number|#|is|:)?\s*([A-Za-z0-9]{2,3}[\s-]?[A-Za-z0-9]{3,4})/i) ||
-      message.match(/\b([A-Za-z]{1,3}[\s-]?[0-9]{1,4}[\s-]?[A-Za-z0-9]{1,3})\b/i);
+      message.match(/(?:plate|license|registration)(?:\s+number|\s+#|\s*is|\s*:)?\s*([A-Z0-9]{1,8}[\s-]?[A-Z0-9]{1,4}[\s-]?[A-Z0-9]{1,4})/i) ||
+      message.match(/\b([A-Z]{1,3}[\s-]?[0-9]{1,4}[\s-]?[A-Z0-9]{1,3})\b/i);
       
     if (plateMatch) {
       const potentialPlate = plateMatch[1].replace(/\s/g, '').toUpperCase();
@@ -130,31 +168,55 @@ export class ClientRegistrationAgentService {
       const digitCount = (potentialPlate.match(/\d/g) || []).length;
       const letterCount = (potentialPlate.match(/[A-Z]/g) || []).length;
       
-      // Most license plates have some letters and some numbers
-      // If it's mostly or all digits, it's more likely to be a phone number
-      if (letterCount > 0 && digitCount < 8) {
+      if ((digitCount < 10 || letterCount > 0) && potentialPlate.length >= 3) {
         extractedInfo.plateNumber = potentialPlate;
       }
     }
     
-    // Extract color
+    // Extract color with better contextual matching
     const colorMatch = message.match(/(?:color|colour)\s+(?:is|:)?\s*([a-zA-Z]+)/i) ||
-                    message.match(/([a-zA-Z]+)\s+(?:color|colour|car|vehicle)/i);
+                      message.match(/([a-zA-Z]+)\s+(?:color|colour|car|vehicle)/i) ||
+                      message.match(/(?:car|vehicle) is (?:a |an |)([a-zA-Z]+)/i);
+    
     if (colorMatch) {
-      extractedInfo.color = colorMatch[1].trim();
+      const potentialColor = colorMatch[1].trim().toLowerCase();
+      
+      // Basic validation for common car colors
+      const validColors = [
+        'red', 'blue', 'green', 'yellow', 'black', 'white', 'silver', 'gray', 'grey',
+        'brown', 'beige', 'purple', 'orange', 'gold', 'maroon', 'navy', 'tan'
+      ];
+      
+      if (validColors.includes(potentialColor)) {
+        extractedInfo.color = potentialColor.charAt(0).toUpperCase() + potentialColor.slice(1);
+      }
     }
     
-    // Extract mileage
-    const mileageMatch = message.match(/(?:mileage|odometer|miles)\s+(?:is|of|:)?\s*([0-9,]+)/i);
+    // Extract mileage with better numeric validation
+    const mileageMatch = message.match(/(?:mileage|odometer|miles|km)(?:\s+is|\s+of|\s*:)?\s*([0-9,.]+)/i);
     if (mileageMatch) {
-      extractedInfo.mileage = parseInt(mileageMatch[1].replace(/,/g, ''), 10);
+      // Remove any commas or dots that might be thousands separators
+      const cleanedMileage = mileageMatch[1].replace(/,/g, '');
+      const mileageValue = parseInt(cleanedMileage, 10);
+      
+      // Validate mileage is in a reasonable range
+      if (!isNaN(mileageValue) && mileageValue > 0 && mileageValue < 1000000) {
+        extractedInfo.mileage = mileageValue;
+      }
     }
     
-    // Extract year
-    const yearMatch = message.match(/(?:year|from|model year)\s+(?:is|:)?\s*(20[0-2][0-9]|19[8-9][0-9])/i) ||
+    // Extract year with better validation
+    const yearMatch = message.match(/(?:year|model year)(?:\s+is|\s*:)?\s*(20[0-2][0-9]|19[8-9][0-9])/i) ||
                     message.match(/(20[0-2][0-9]|19[8-9][0-9])\s+(?:model|car|vehicle)/i);
+    
     if (yearMatch) {
-      extractedInfo.year = parseInt(yearMatch[1], 10);
+      const yearValue = parseInt(yearMatch[1], 10);
+      const currentYear = new Date().getFullYear();
+      
+      // Validate year is within a reasonable range (1980 to current year + 1)
+      if (yearValue >= 1980 && yearValue <= currentYear + 1) {
+        extractedInfo.year = yearValue;
+      }
     }
     
     // Check required fields
@@ -189,101 +251,116 @@ export class ClientRegistrationAgentService {
       isComplete 
     };
   }
-  
-  /**
-   * Handle request for image upload to extract car registration information
-   * @param extractedInfo Any previously extracted info
-   * @returns Response indicating image upload is requested
-   */
-  private handleImageUploadRequest(extractedInfo: ExtractedClientInfo): AgentResponse {
-    const missingFields = this.getMissingRequiredFields(extractedInfo);
-    
-    return {
-      agentType: AgentType.CLIENT_REGISTRATION,
-      extractedInfo,
-      missingFields,
-      response: `You can upload an image of your car registration document, and I'll extract the information automatically. 
-      
-Once uploaded, I'll process the image to gather details like:
-- Owner's name
-- Car model
-- Plate number
-- Registration details
 
-Please upload a clear image of the document.`,
-      isComplete: false
-    };
-  }
-  
   /**
-   * Process an uploaded image to extract car registration information
-   * @param imageBuffer The uploaded image buffer
+   * Process an uploaded image to extract client information
+   * @param imageBuffer The image data buffer
    * @param sessionId Current session ID
    * @param sessionData Current session data
-   * @returns Extracted information from the image
+   * @returns An object containing extracted client information and response
    */
   async processUploadedImage(
-    imageBuffer: Buffer, 
+    imageBuffer: Buffer,
     sessionId: string,
     sessionData: any
   ): Promise<AgentResponse> {
-    // Get existing extracted info from session or initialize new
-    let extractedInfo: ExtractedClientInfo = 
-      (sessionData?.extractedInfo as ExtractedClientInfo) || {};
-      
-    // Mark that this data came from an image upload
-    extractedInfo.fromImageUpload = true;
+    // For now, just create a simple mock extraction as if we processed the image
+    // In a real implementation, you would use OCR or a specialized API to extract data
     
-    // In a real implementation, this would call an OCR service or ML model
-    // to extract information from the image
+    // Get the existing extraction information or create new
+    const extractedInfo: ExtractedClientInfo = {
+      ...(sessionData?.extractedInfo || {}),
+      fromImageUpload: true
+    };
     
-    // Simulate extraction with placeholder data if fields aren't already set
-    if (!extractedInfo.name) extractedInfo.name = "Extracted Name";
-    if (!extractedInfo.carModel) extractedInfo.carModel = "Extracted Car Model";
-    
-    // Use a proper plate number format instead of potentially misinterpreting a mobile number
-    if (!extractedInfo.plateNumber) extractedInfo.plateNumber = "ABC123";
-    
-    // For demo purposes, we'll keep the mobile number format clearly distinct from plate formats
-    if (!extractedInfo.mobileNumber) {
-      // We won't automatically set a mobile number from image - requires explicit user input
-      // This helps avoid confusion between plate numbers and mobile numbers
+    // If no name is extracted yet, set a placeholder asking for confirmation
+    if (!extractedInfo.name) {
+      extractedInfo.name = extractedInfo.name || '[Please confirm client name]';
     }
     
-    if (!extractedInfo.year && Math.random() > 0.5) extractedInfo.year = 2023;
-    if (!extractedInfo.color && Math.random() > 0.5) extractedInfo.color = "Silver";
+    // If no car model is extracted yet, set a placeholder
+    if (!extractedInfo.carModel) {
+      extractedInfo.carModel = extractedInfo.carModel || '[Please confirm car model]';
+    }
     
+    // Check if there are still missing required fields
     const missingFields = this.getMissingRequiredFields(extractedInfo);
     const isComplete = missingFields.length === 0;
     
     let response = '';
     if (isComplete) {
-      response = `I've successfully extracted all information from your uploaded car registration image:
+      response = `I've processed the uploaded image and extracted the following information:
         - Name: ${extractedInfo.name}
-        - Car Model: ${extractedInfo.carModel}
-        - Plate Number: ${extractedInfo.plateNumber}
+        - Mobile: ${extractedInfo.mobileNumber}
+        - Car: ${extractedInfo.carModel}
+        - Plate: ${extractedInfo.plateNumber}
         ${extractedInfo.color ? `- Color: ${extractedInfo.color}` : ''}
+        ${extractedInfo.mileage ? `- Mileage: ${extractedInfo.mileage}` : ''}
         ${extractedInfo.year ? `- Year: ${extractedInfo.year}` : ''}
         
-        I still need your mobile number to complete the registration. Can you provide that?`;
+        Is this information correct? Say "yes" to confirm and register the client.`;
     } else {
-      response = `I've analyzed your car registration image, but couldn't extract all the required information. 
+      response = `I've processed the uploaded image, but I still need some additional information:
+        ${missingFields.map(field => `- ${this.formatFieldName(field)}`).join('\n')}
         
-I still need:
-${missingFields.map(field => `- ${this.formatFieldName(field)}`).join('\n')}
-
-Please provide these details or upload a clearer image of your car registration document.`;
+        Can you please provide the missing details?`;
     }
     
-    return { 
-      agentType: AgentType.CLIENT_REGISTRATION, 
-      extractedInfo, 
-      missingFields, 
-      response, 
-      isComplete 
+    return {
+      agentType: AgentType.CLIENT_REGISTRATION,
+      extractedInfo,
+      missingFields,
+      response,
+      isComplete
     };
   }
 
+  /**
+   * Get the list of required fields that are still missing
+   * @param extractedInfo The extracted client information
+   * @returns A list of field names that need to be provided
+   */
+  getMissingRequiredFields(extractedInfo: ExtractedClientInfo): string[] {
+    const missingFields: string[] = [];
+    
+    if (!extractedInfo.name) missingFields.push('name');
+    if (!extractedInfo.mobileNumber) missingFields.push('mobileNumber');
+    if (!extractedInfo.carModel) missingFields.push('carModel');
+    if (!extractedInfo.plateNumber) missingFields.push('plateNumber');
+    
+    return missingFields;
+  }
+  
+  /**
+   * Format a field name for display in the UI
+   * @param field The field name
+   * @returns A human-friendly version of the field name
+   */
+  private formatFieldName(field: string): string {
+    switch (field) {
+      case 'name': return 'Client Name';
+      case 'mobileNumber': return 'Mobile Number';
+      case 'carModel': return 'Car Model';
+      case 'plateNumber': return 'License Plate Number';
+      default: return field.charAt(0).toUpperCase() + field.slice(1);
+    }
+  }
+  
+  /**
+   * Handle the request to upload an image
+   * @param extractedInfo Current extracted information
+   * @returns A response asking the user to upload an image
+   */
+  private handleImageUploadRequest(extractedInfo: ExtractedClientInfo): AgentResponse {
+    return {
+      agentType: AgentType.CLIENT_REGISTRATION,
+      extractedInfo,
+      missingFields: this.getMissingRequiredFields(extractedInfo),
+      response: `I'd be happy to process a registration document image. Please upload a clear photo of the vehicle registration or insurance card, and I'll extract the information automatically.`,
+      isComplete: false
+    };
+  }
+  
   /**
    * Create a client from extracted information if all required fields are present
    * @param extractedInfo The extracted client information
@@ -305,53 +382,14 @@ Please provide these details or upload a clearer image of your car registration 
       color: extractedInfo.color,
       mileage: extractedInfo.mileage,
       year: extractedInfo.year,
+      garageId: process.env.DEFAULT_GARAGE_ID || '52907745-7672-470e-a803-a2f8feb52944' // Add garageId with a default value
     };
     
     try {
       return await this.clientsService.create(createClientDto);
     } catch (error) {
-      // Check if this is a duplicate plate number error
-      if (error instanceof BadRequestException && error.message.includes('plate number already exists')) {
-        throw new BadRequestException(`A vehicle with plate number ${extractedInfo.plateNumber} already exists in the system. Please check the plate number and try again.`);
-      }
-      // Re-throw other errors
-      throw error;
-    }
-  }
-  
-  /**
-   * Check if required fields are missing
-   * @param info Extracted client information
-   * @returns Array of missing field names
-   */
-  public getMissingRequiredFields(info: ExtractedClientInfo): string[] {
-    const missingFields: string[] = [];
-    
-    if (!info.name) missingFields.push('name');
-    if (!info.mobileNumber) missingFields.push('mobileNumber');
-    if (!info.carModel) missingFields.push('carModel');
-    if (!info.plateNumber) missingFields.push('plateNumber');
-    
-    return missingFields;
-  }
-  
-  /**
-   * Format field names for user-friendly display
-   * @param field The field name
-   * @returns Formatted field name
-   */
-  private formatFieldName(field: string): string {
-    switch (field) {
-      case 'name':
-        return 'Client Name';
-      case 'mobileNumber':
-        return 'Mobile Number';
-      case 'carModel':
-        return 'Car Make and Model';
-      case 'plateNumber':
-        return 'License Plate Number';
-      default:
-        return field.charAt(0).toUpperCase() + field.slice(1);
+      // Re-throw the error to be handled by the controller
+      throw new BadRequestException(`Failed to create client: ${error.message}`);
     }
   }
 }

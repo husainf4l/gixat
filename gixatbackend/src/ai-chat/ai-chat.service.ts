@@ -24,6 +24,7 @@ export interface AgentResponse {
   isComplete?: boolean;
   handoffToAgent?: AgentType;
   finalConfirmationShown?: boolean;
+  waitingForImageUpload?: boolean;
 }
 
 interface ExtractedClientInfo {

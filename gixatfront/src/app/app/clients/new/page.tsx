@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { clientService } from "../../../../services/client/api";
@@ -18,7 +18,22 @@ export default function NewClientPage() {
     color: "",
     mileage: "",
     year: "",
+    email: "",
+    address: "",
+    contactPerson: "",
+    garageId: "",
   });
+
+  // Fetch garageId from localStorage on component mount
+  useEffect(() => {
+    const garageId = localStorage.getItem("garageId");
+    if (garageId) {
+      setFormData((prev) => ({
+        ...prev,
+        garageId,
+      }));
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -41,6 +56,10 @@ export default function NewClientPage() {
         carModel: formData.carModel,
         plateNumber: formData.plateNumber,
         color: formData.color,
+        email: formData.email,
+        address: formData.address,
+        contactPerson: formData.contactPerson,
+        garageId: formData.garageId,
         mileage: formData.mileage ? parseInt(formData.mileage) : undefined,
         year: formData.year ? parseInt(formData.year) : undefined,
       };
@@ -108,13 +127,59 @@ export default function NewClientPage() {
           </div>
 
           <div className="space-y-1 md:space-y-2">
+            <label htmlFor="email" className="block text-sm md:text-base">
+              Email Address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-gray-800 rounded-md border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="space-y-1 md:space-y-2">
+            <label
+              htmlFor="contactPerson"
+              className="block text-sm md:text-base"
+            >
+              Contact Person
+            </label>
+            <input
+              id="contactPerson"
+              name="contactPerson"
+              type="text"
+              value={formData.contactPerson}
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-gray-800 rounded-md border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="col-span-1 md:col-span-2 space-y-1 md:space-y-2">
+            <label htmlFor="address" className="block text-sm md:text-base">
+              Address
+            </label>
+            <input
+              id="address"
+              name="address"
+              type="text"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-gray-800 rounded-md border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="space-y-1 md:space-y-2">
             <label htmlFor="carModel" className="block text-sm md:text-base">
-              Car Model
+              Car Model <span className="text-red-400">*</span>
             </label>
             <input
               id="carModel"
               name="carModel"
               type="text"
+              required
               value={formData.carModel}
               onChange={handleChange}
               className="w-full px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-gray-800 rounded-md border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -123,12 +188,13 @@ export default function NewClientPage() {
 
           <div className="space-y-1 md:space-y-2">
             <label htmlFor="plateNumber" className="block text-sm md:text-base">
-              Plate Number
+              Plate Number <span className="text-red-400">*</span>
             </label>
             <input
               id="plateNumber"
               name="plateNumber"
               type="text"
+              required
               value={formData.plateNumber}
               onChange={handleChange}
               className="w-full px-3 py-1.5 md:px-4 md:py-2 text-sm md:text-base bg-gray-800 rounded-md border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"

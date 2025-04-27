@@ -8,6 +8,10 @@ import {
   Client,
   ServiceRecord,
 } from "../../../../services/client/api";
+import {
+  sessionService,
+  SessionStatus,
+} from "../../../../services/session/api";
 
 export default function ClientDetailsPage() {
   const router = useRouter();
@@ -18,6 +22,11 @@ export default function ClientDetailsPage() {
   const [serviceHistory, setServiceHistory] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const [sessionFeedback, setSessionFeedback] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -46,16 +55,68 @@ export default function ClientDetailsPage() {
     }
   }, [clientId]);
 
-  // Function to calculate days since last visit
-  const calculateDaysSinceVisit = (lastVisitDate: string | null) => {
-    if (!lastVisitDate) return null;
+  // Create a new service session for this client
+  const handleCreateServiceSession = async () => {
+    // Don't proceed if already creating a session or if client is null
+    if (isCreatingSession || !client) return;
 
-    const today = new Date();
-    const lastVisit = new Date(lastVisitDate);
-    const diffTime = Math.abs(today.getTime() - lastVisit.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    // Check if client has a vehicle in the cars array
+    const hasVehicles =
+      client.cars && Array.isArray(client.cars) && client.cars.length > 0;
+
+    if (!hasVehicles) {
+      setSessionFeedback({
+        message:
+          "Cannot create service - no vehicle associated with this client",
+        type: "error",
+      });
+      setTimeout(() => setSessionFeedback(null), 5000); // Clear after 5 seconds
+      return;
+    }
+
+    setIsCreatingSession(true);
+    try {
+      // Use the garage ID from the client object
+      const garageId = client.garageId || "default-garage-id";
+
+      // Get vehicle ID from the cars array (we already checked cars exists above)
+      const vehicleId = client.cars[0].id;
+
+      const sessionData = await sessionService.createSession({
+        customerId: client.id,
+        carId: vehicleId,
+        garageId: garageId,
+        status: SessionStatus.OPEN,
+      });
+
+      setSessionFeedback({
+        message: "Service session created successfully!",
+        type: "success",
+      });
+
+      // Optionally navigate to a service detail page
+      // router.push(`/app/services/${sessionData.id}`);
+    } catch (error) {
+      console.error("Error creating service session:", error);
+      setSessionFeedback({
+        message: "Failed to create service session. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsCreatingSession(false);
+      setTimeout(() => setSessionFeedback(null), 5000); // Clear after 5 seconds
+    }
   };
+
+  // Get the primary vehicle details - only use cars array
+  const getPrimaryVehicle = () => {
+    if (client?.cars && client.cars.length > 0) {
+      return client.cars[0];
+    }
+    return null;
+  };
+
+  const primaryVehicle = client ? getPrimaryVehicle() : null;
 
   // Handle loading state
   if (loading) {
@@ -91,14 +152,88 @@ export default function ClientDetailsPage() {
     );
   }
 
-  const daysSinceVisit = calculateDaysSinceVisit(client.lastVisit);
-
-  // Get the first vehicle details if available
-  const primaryVehicle =
-    client.vehicles && client.vehicles.length > 0 ? client.vehicles[0] : null;
-
   return (
     <div className="space-y-4 md:space-y-8 px-1 md:px-0 pb-16 md:pb-6">
+      {/* Feedback notification */}
+      {sessionFeedback && (
+        <div
+          className={`fixed right-4 top-20 max-w-sm p-4 rounded-lg shadow-lg z-50 border transition-opacity duration-300 ${
+            sessionFeedback.type === "success"
+              ? "bg-green-800/90 border-green-600"
+              : "bg-red-800/90 border-red-600"
+          }`}
+        >
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              {sessionFeedback.type === "success" ? (
+                <svg
+                  className="w-5 h-5 text-green-300"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-5 h-5 text-red-300"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              )}
+            </div>
+            <div className="ml-3">
+              <p
+                className={`text-sm font-medium ${
+                  sessionFeedback.type === "success"
+                    ? "text-green-200"
+                    : "text-red-200"
+                }`}
+              >
+                {sessionFeedback.message}
+              </p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  onClick={() => setSessionFeedback(null)}
+                  className={`inline-flex p-1.5 rounded-md focus:outline-none ${
+                    sessionFeedback.type === "success"
+                      ? "text-green-300 hover:bg-green-700"
+                      : "text-red-300 hover:bg-red-700"
+                  }`}
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg
+                    className="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back button */}
       <div>
         <button
@@ -226,38 +361,11 @@ export default function ClientDetailsPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                    <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
                     <path d="M16 3l0 4" />
                     <path d="M8 3l0 4" />
                     <path d="M4 11l16 0" />
                   </svg>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-400">Last Visit</div>
-                  {client.lastVisit ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-base md:text-lg text-white">
-                        {new Date(client.lastVisit).toLocaleDateString()}
-                      </span>
-                      {daysSinceVisit && (
-                        <span
-                          className={`text-xs px-1.5 py-0.5 rounded-full ${
-                            daysSinceVisit > 30
-                              ? "bg-red-900/70 text-red-200"
-                              : daysSinceVisit > 14
-                              ? "bg-yellow-900/70 text-yellow-200"
-                              : "bg-green-900/70 text-green-200"
-                          }`}
-                        >
-                          {daysSinceVisit}d
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-base md:text-lg text-gray-400">
-                      No previous visits
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
@@ -280,22 +388,37 @@ export default function ClientDetailsPage() {
               </svg>
               Edit Client
             </button>
-            <button className="w-full md:w-auto px-3 py-1.5 md:px-4 md:py-2 text-sm bg-green-600 hover:bg-green-500 rounded-lg flex items-center justify-center gap-2 transition-colors">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                <path d="M12 8l0 8" />
-                <path d="M8 12l8 0" />
-              </svg>
-              New Service
+            <button
+              onClick={handleCreateServiceSession}
+              disabled={isCreatingSession}
+              className={`w-full md:w-auto px-3 py-1.5 md:px-4 md:py-2 text-sm bg-green-600 hover:bg-green-500 rounded-lg flex items-center justify-center gap-2 transition-colors ${
+                isCreatingSession ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            >
+              {isCreatingSession ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                    <path d="M12 8l0 8" />
+                    <path d="M8 12l8 0" />
+                  </svg>
+                  New Service
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -376,7 +499,7 @@ export default function ClientDetailsPage() {
                           strokeLinecap="round"
                           strokeLinejoin="round"
                         >
-                          <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                          <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
                           <path d="M16 3l0 4" />
                           <path d="M8 3l0 4" />
                           <path d="M4 11l16 0" />

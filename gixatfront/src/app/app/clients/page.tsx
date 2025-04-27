@@ -37,20 +37,12 @@ export default function ClientsPage() {
         client.mobileNumber.toLowerCase().includes(searchLower)) ||
       (client.plateNumber &&
         client.plateNumber.toLowerCase().includes(searchLower)) ||
-      (client.carModel && client.carModel.toLowerCase().includes(searchLower))
+      (client.vehicles &&
+        client.vehicles.length > 0 &&
+        client.vehicles[0].model &&
+        client.vehicles[0].model.toLowerCase().includes(searchLower))
     );
   });
-
-  // Function to calculate days since last visit
-  const calculateDaysSinceVisit = (lastVisitDate: string | null) => {
-    if (!lastVisitDate) return null;
-
-    const today = new Date();
-    const lastVisit = new Date(lastVisitDate);
-    const diffTime = Math.abs(today.getTime() - lastVisit.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
 
   return (
     <div className="space-y-4 md:space-y-6 px-1 md:px-0 pb-16 md:pb-6">
@@ -125,7 +117,6 @@ export default function ClientsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-3 md:gap-4">
           {filteredClients.map((client) => {
-            const daysSinceVisit = calculateDaysSinceVisit(client.lastVisit);
             const primaryVehicle =
               client.vehicles && client.vehicles.length > 0
                 ? client.vehicles[0]
@@ -142,14 +133,15 @@ export default function ClientsPage() {
                           {client.name}
                         </h3>
                         <p className="text-gray-400 text-xs md:text-sm">
-                          {client.mobileNumber}
+                          {client.mobileNumber ||
+                            (client.phone && `${client.phone}`)}
                         </p>
                       </div>
                     </div>
 
                     {/* Vehicle Info */}
                     <div className="flex flex-wrap gap-x-5 gap-y-2">
-                      {(primaryVehicle?.model || client.carModel) && (
+                      {primaryVehicle && (
                         <div className="flex items-center gap-1.5">
                           <div className="text-blue-400">
                             <svg
@@ -169,7 +161,11 @@ export default function ClientsPage() {
                             </svg>
                           </div>
                           <span className="text-sm md:text-base text-gray-200">
-                            {primaryVehicle?.model || client.carModel}
+                            {primaryVehicle.make && primaryVehicle.model
+                              ? `${primaryVehicle.make} ${
+                                  primaryVehicle.model
+                                } ${primaryVehicle.year || ""}`
+                              : client.carModel}
                           </span>
                         </div>
                       )}
@@ -212,7 +208,7 @@ export default function ClientsPage() {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                             >
-                              <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                              <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
                               <path d="M16 3l0 4" />
                               <path d="M8 3l0 4" />
                               <path d="M4 11l16 0" />
@@ -222,19 +218,35 @@ export default function ClientsPage() {
                             <span>
                               {new Date(client.lastVisit).toLocaleDateString()}
                             </span>
-                            {daysSinceVisit && (
-                              <span
-                                className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                  daysSinceVisit > 30
-                                    ? "bg-red-900/70 text-red-200"
-                                    : daysSinceVisit > 14
-                                    ? "bg-yellow-900/70 text-yellow-200"
-                                    : "bg-green-900/70 text-green-200"
-                                }`}
-                              >
-                                {daysSinceVisit}d
-                              </span>
-                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* For clients with no last visit, show created date instead */}
+                      {!client.lastVisit && client.createdAt && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="text-blue-400">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 md:h-4.5 md:w-4.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
+                              <path d="M16 3l0 4" />
+                              <path d="M8 3l0 4" />
+                              <path d="M4 11l16 0" />
+                            </svg>
+                          </div>
+                          <div className="flex items-center gap-1 text-sm md:text-base text-gray-200">
+                            <span>
+                              Added:{" "}
+                              {new Date(client.createdAt).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
                       )}

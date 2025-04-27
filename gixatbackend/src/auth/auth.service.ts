@@ -20,11 +20,10 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
 
     if (user) {
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
       if (isPasswordValid) {
-        const { password, ...result } = user;
-        return result;
+        return user;
       }
     }
     return null;
@@ -37,7 +36,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = { email: user.email, sub: user.id, role: user.role , garageId: user.garageId };
     const access_token = this.jwtService.sign(payload);
     const refresh_token = await this.issueRefreshToken(user.id);
 
@@ -49,9 +48,9 @@ export class AuthService {
       user: {
         id: user.id,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        name: user.name,
         role: user.role,
+        garageId: user.garageId,
       },
     };
   }
@@ -105,7 +104,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       email: user.email,
-      name: user.firstName + (user.lastName ? ` ${user.lastName}` : ''),
+      name: user.name,
       role: user.role
     };
     
@@ -140,7 +139,6 @@ export class AuthService {
         user = await this.usersService.createFromSocial({
           email: userInfo.email,
           name: userInfo.name,
-          password: null,
           socialProvider: provider,
           socialId: userInfo.id,
           profilePictureUrl: userInfo.picture,
@@ -158,9 +156,7 @@ export class AuthService {
         user: {
           id: user.id,
           email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          // Use optional chaining to avoid type errors
+          name: user.name,
           profilePictureUrl: user?.profilePictureUrl,
           role: user.role,
         },
@@ -184,16 +180,14 @@ export class AuthService {
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(registerDto.password, saltRounds);
 
-
-
       const newUser = await this.usersService.createFromSocial({
         email: registerDto.email,
-        password: registerDto.password,
-        firstName: registerDto.firstName,
-        lastName: registerDto.lastName || 'null',
+        name: `${registerDto.firstName} ${registerDto.lastName || ''}`.trim(),
+        passwordHash: hashedPassword,
         socialProvider: null,
-        socialId: undefined,
-        profilePictureUrl: undefined
+        socialId: null,
+        profilePictureUrl: null,
+        garageId: registerDto.garageId  // Pass the garageId from the DTO
       });
 
       // Generate tokens
@@ -209,8 +203,7 @@ export class AuthService {
         user: {
           id: newUser.id,
           email: newUser.email,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
+          name: newUser.name,
           role: newUser.role,
         },
       };

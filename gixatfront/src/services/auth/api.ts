@@ -22,8 +22,8 @@ api.interceptors.request.use((config) => {
 });
 
 export const authService = {
-  async register(firstName: string, lastName: string, email: string, password: string) {
-    const response = await api.post('/register', { firstName, lastName, email, password });
+  async register(firstName: string, lastName: string, email: string, password: string, garageId: string) {
+    const response = await api.post('/register', { firstName, lastName, email, password, garageId });
     if (response.data.access_token) {
       localStorage.setItem('access_token', response.data.access_token);
       localStorage.setItem('refresh_token', response.data.refresh_token);
@@ -37,6 +37,12 @@ export const authService = {
       localStorage.setItem('access_token', response.data.access_token);
       localStorage.setItem('refresh_token', response.data.refresh_token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
+      
+      // Save garage ID if it exists in the user object
+      if (response.data.user && response.data.user.garageId) {
+        localStorage.setItem('garageId', response.data.user.garageId);
+      }
+      
       // If liveToken is present, store it as before
       if (response.data.liveToken) {
         localStorage.setItem('liveToken', response.data.liveToken);
@@ -51,6 +57,8 @@ export const authService = {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
+    localStorage.removeItem('garageId');
+    localStorage.removeItem('liveToken'); // Also remove liveToken if it exists
   },
 
   async refreshToken() {

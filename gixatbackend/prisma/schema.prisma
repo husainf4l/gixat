@@ -1,3 +1,7 @@
+// This is the schema for GIXAT - Smart Garage Management System
+// The database schema defines the core entities and relationships for managing
+// auto repair shops and garages operations efficiently
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,160 +11,289 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                String         @id @default(uuid())
-  email             String         @unique
-  password          String
-  firstName         String?
-  lastName          String?
-  role              Role           @default(USER)
-  isActive          Boolean        @default(true)
-  livekitToken      String?
-  createdAt         DateTime       @default(now()) @map("created_at")
-  updatedAt         DateTime       @updatedAt @map("updated_at")
-  refreshTokens     RefreshToken[]
-  socialProvider    String?
-  socialId          String?
-  profilePictureUrl String?
+// ======= GARAGE MANAGEMENT MODELS =======
+
+model Garage {
+  id            String  @id @default(uuid())
+  name          String
+  logoUrl       String? // Garage branding logo (optional)
+  openAiKey     String? // Optional private OpenAI Key
+  quickBooksKey String? // Optional private QuickBooks Key
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  users     User[]
+  customers Customer[]
+  cars      Car[]
+  sessions  Session[]
+
+  @@map("garages")
 }
 
+// ======= USER MANAGEMENT MODELS =======
+
+model User {
+  id                String   @id @default(uuid())
+  name              String
+  phone             String   @unique
+  email             String?  @unique @db.VarChar(255)
+  passwordHash      String
+  role              UserRole @default(EMPLOYEE)
+  socialProvider    String?  @db.VarChar(50)
+  socialId          String?  @db.VarChar(255)
+  profilePictureUrl String?  @db.Text
+  isActive          Boolean  @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  garageId      String
+  garage        Garage         @relation(fields: [garageId], references: [id])
+  refreshTokens RefreshToken[]
+
+  @@index([email])
+  @@index([garageId])
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+/// Refresh tokens for maintaining user sessions
 model RefreshToken {
   id        String   @id @default(uuid())
-  token     String   @unique
+  token     String   @unique @db.Text
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
-  userId    String   @map("user_id")
   revoked   Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
 }
 
-enum Role {
-  USER
-  ADMIN
-  MODERATOR
+model Customer {
+  id      String  @id @default(uuid())
+  name    String
+  phone   String  @unique @db.VarChar(15)
+  address String? @db.Text
+  notes   String? @db.Text
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  garageId String
+  garage   Garage    @relation(fields: [garageId], references: [id])
+  cars     Car[]
+  sessions Session[]
+
+  @@index([phone])
+  @@index([garageId])
+  @@index([name]) // Adding index for name searches
+  @@map("customers")
 }
 
-//Gixat is a smart garage management software designed to help auto repair shops and garages manage their operations efficiently. It streamlines tasks like booking, customer management, invoicing, inventory tracking, and job scheduling, all in one easy-to-use platform.
+model Car {
+  id          String  @id @default(uuid())
+  make        String? // Optional (can be filled later)
+  model       String? // Optional
+  year        Int? // Optional
+  plateNumber String? @unique
+  vin         String? @unique
+  color       String? @db.VarChar(30)
 
-model Client {
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  garageId   String
+  garage     Garage    @relation(fields: [garageId], references: [id])
+  sessions   Session[]
+
+  @@index([plateNumber])
+  @@index([vin])
+  @@index([customerId])
+  @@index([garageId])
+  @@map("cars")
+}
+
+model Session {
   id           String        @id @default(uuid())
-  name         String
-  carModel     String
-  mobileNumber String
-  lastVisit    DateTime?
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
-  vehicles     Vehicle[]
-  serviceJobs  ServiceJob[]
-  Appointment  Appointment[]
+  status       SessionStatus @default(OPEN)
+  quickBooksId String? // Estimate ID (optional)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  customerId String
+  customer   Customer       @relation(fields: [customerId], references: [id])
+  carId      String
+  car        Car            @relation(fields: [carId], references: [id])
+  garageId   String
+  garage     Garage         @relation(fields: [garageId], references: [id])
+  entries    SessionEntry[]
+  inspection Inspection?
+  preJobcard PreJobcard?
+  quotation  Quotation?
+  jobcard    Jobcard?
+  aiCarData  AICarData?
+
+  @@index([status])
+  @@index([customerId])
+  @@index([carId])
+  @@index([garageId])
+  @@map("sessions")
 }
 
-model Vehicle {
-  id          String        @id @default(uuid())
-  make        String
-  model       String
-  year        Int
-  vin         String?       @unique
-  plateNumber String?       @unique
-  color       String?
-  mileage     Int?          @map("mileage")
-  clientId    String        @map("client_id")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  serviceJobs ServiceJob[]
-  Appointment Appointment[]
-  status      VehicleStatus @default(AVAILABLE)
-}
-
-enum VehicleStatus {
-  AVAILABLE
-  IN_SERVICE
-  OUT_OF_SERVICE
-  IN_REPAIR
+enum SessionStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_APPROVAL
+  APPROVED
+  REJECTED
   COMPLETED
-  CANCELLED
+  CLOSED
 }
 
-model ServiceType {
-  id           String       @id @default(uuid())
-  name         String
-  description  String?
-  defaultPrice Float?
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
-  serviceJobs  ServiceJob[]
+model SessionEntry {
+  id              String           @id @default(uuid())
+  type            SessionEntryType
+  originalMessage String? // Original employee text or transcribed voice
+  cleanedMessage  String? // AI cleaned text
+  photoUrl        String? // Photo if attached
+  audioUrl        String? // Voice recording file if available
+  createdById     String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  // Relationships
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@map("session_entries")
 }
 
-model ServiceJob {
-  id            String      @id @default(uuid())
-  status        JobStatus   @default(PENDING)
-  startDate     DateTime    @map("start_date")
-  endDate       DateTime?   @map("end_date")
-  totalCost     Float?      @map("total_cost")
-  notes         String?
-  vehicleId     String      @map("vehicle_id")
-  clientId      String      @map("client_id")
-  serviceTypeId String      @map("service_type_id")
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
-  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id])
-  client        Client      @relation(fields: [clientId], references: [id])
-  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id])
+enum SessionEntryType {
+  NOTE
+  PHOTO
+  VOICE_NOTE
+  QUOTATION_CREATED
+  QUOTATION_SENT
+  CUSTOMER_APPROVAL
+  JOB_STARTED
+  JOB_COMPLETED
+  SYSTEM_MESSAGE
 }
 
-enum JobStatus {
+model Inspection {
+  id             String  @id @default(uuid())
+  notes          String?
+  checklist      Json? // Flexible inspection checklist
+  testDriveNotes String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@map("inspections")
+}
+
+model PreJobcard {
+  id       String  @id @default(uuid())
+  services Json? // Suggested repairs list
+  notes    String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@map("pre_jobcards")
+}
+
+model Quotation {
+  id           String          @id @default(uuid())
+  quotationUrl String
+  totalAmount  Float
+  status       QuotationStatus @default(PENDING)
+  sentAt       DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@map("quotations")
+}
+
+enum QuotationStatus {
   PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
+  APPROVED
+  REJECTED
 }
 
-model JobService {
-  id           String               @id @default(uuid())
-  name         String
-  description  String?
-  price        Float
-  duration     Int // duration in minutes
-  isActive     Boolean              @default(true)
-  createdAt    DateTime             @default(now()) @map("created_at")
-  updatedAt    DateTime             @updatedAt @map("updated_at")
-  appointments AppointmentService[]
+model Jobcard {
+  id          String    @id @default(uuid())
+  startDate   DateTime?
+  endDate     DateTime?
+  workDetails Json? // Work done details
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@map("jobcards")
 }
 
-model Appointment {
-  id         String               @id @default(uuid())
-  startTime  DateTime             @map("start_time")
-  endTime    DateTime             @map("end_time")
-  status     AppointmentStatus    @default(SCHEDULED)
-  totalPrice Float?               @map("total_price")
-  notes      String?
-  vehicleId  String               @map("vehicle_id")
-  clientId   String               @map("client_id")
-  createdAt  DateTime             @default(now()) @map("created_at")
-  updatedAt  DateTime             @updatedAt @map("updated_at")
-  vehicle    Vehicle              @relation(fields: [vehicleId], references: [id])
-  client     Client               @relation(fields: [clientId], references: [id])
-  services   AppointmentService[]
-}
+model AICarData {
+  id          String  @id @default(uuid())
+  make        String?
+  model       String?
+  year        Int?
+  vin         String?
+  plateNumber String?
+  country     String?
 
-model AppointmentService {
-  id            String      @id @default(uuid())
-  appointmentId String      @map("appointment_id")
-  serviceId     String      @map("service_id")
-  price         Float // Store price at time of appointment
-  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
-  service       JobService  @relation(fields: [serviceId], references: [id])
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  // Timestamps
+  createdAt DateTime @default(now())
 
-  @@unique([appointmentId, serviceId])
-}
+  // Relationships
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id])
 
-enum AppointmentStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  NO_SHOW
+  @@map("ai_car_data")
 }

@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [garageId, setGarageId] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -45,7 +46,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      await register(firstName, lastName, email, password);
+      await register(firstName, lastName, email, password, garageId);
       router.push("/app"); // Redirect to app after successful registration
     } catch (err: unknown) {
       console.error("Signup error:", err);
@@ -129,6 +130,24 @@ export default function SignupPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-[#2D3748] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="email@example.com"
+                    required
+                  />
+                </div>
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="garageId"
+                    className="block text-gray-300 mb-2"
+                  >
+                    Garage ID
+                  </label>
+                  <input
+                    type="text"
+                    id="garageId"
+                    value={garageId}
+                    onChange={(e) => setGarageId(e.target.value)}
+                    className="w-full bg-[#2D3748] text-white rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your garage ID"
                     required
                   />
                 </div>

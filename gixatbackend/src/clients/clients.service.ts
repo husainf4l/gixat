@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import { Client, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ClientsService {
@@ -10,87 +10,162 @@ export class ClientsService {
 
   async create(createClientDto: CreateClientDto) {
     try {
-      // Create the client with nested vehicle creation
-      const result = await this.prisma.client.create({
-        data: {
-          name: createClientDto.name,
-          mobileNumber: createClientDto.mobileNumber,
-          carModel: createClientDto.carModel,
-          vehicles: {
-            create: {
-              make: createClientDto.carModel.split(' ')[0] || 'Unknown',
-              model: createClientDto.carModel.split(' ').slice(1).join(' ') || createClientDto.carModel,
-              year: createClientDto.year || new Date().getFullYear(),
-              plateNumber: createClientDto.plateNumber,
-              color: createClientDto.color || null,
-              mileage: createClientDto.mileage || null,
-            }
+      // Using a transaction to ensure both operations succeed or fail together
+      return await this.prisma.$transaction(async (tx) => {
+        // Create the customer
+        const customer = await tx.customer.create({
+          data: {
+            name: createClientDto.name,
+            phone: createClientDto.mobileNumber, // Match schema field names
+            // Use the garageId from the DTO
+            garageId: createClientDto.garageId,
+            // Add optional fields if present
+            email: createClientDto.email,
+            address: createClientDto.address,
+            notes: createClientDto.contactPerson ? `Contact: ${createClientDto.contactPerson}` : undefined,
+          },
+        });
+        
+        // Create the associated car with more structured data
+        const car = await tx.car.create({
+          data: {
+            // Parse car model to get make and model separately
+            make: this.extractMake(createClientDto.carModel),
+            model: this.extractModel(createClientDto.carModel),
+            year: createClientDto.year || new Date().getFullYear(),
+            plateNumber: createClientDto.plateNumber,
+            color: createClientDto.color || null,
+            customerId: customer.id,
+            garageId: createClientDto.garageId, // Use the same garageId
           }
-        },
-        include: {
-          vehicles: true // Include the created vehicle in the response
-        }
+        });
+        
+        // Return the customer with cars, but without duplicating data
+        return {
+          ...customer,
+          cars: [car]
+        };
       });
-      
-      return result;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         // Handle specific Prisma errors with more detail
         console.error('Prisma error:', error.message, error.code);
         if (error.code === 'P2002') {
-          throw new BadRequestException('A vehicle with this plate number already exists.');
+          const target = error.meta?.target as string[];
+          if (target?.includes('plateNumber')) {
+            throw new BadRequestException('A vehicle with this plate number already exists.');
+          } else if (target?.includes('phone')) {
+            throw new BadRequestException('A client with this mobile number already exists.');
+          }
         }
       }
       throw new BadRequestException(`Failed to create client: ${error.message}`);
     }
   }
 
-  async findAll() {
-    return this.prisma.client.findMany({
-      include: {
-        vehicles: true // Include vehicles in the response
+  async findAll(page = 1, limit = 50, search?: string) {
+    // Adding pagination and basic search functionality
+    const skip = (page - 1) * limit;
+    
+    // Properly typed Prisma where condition
+    const where = search ? {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' as const } },
+        { phone: { contains: search } },
+        { cars: { some: { plateNumber: { contains: search, mode: 'insensitive' as const } } } }
+      ]
+    } : {};
+    
+    const [customers, total] = await Promise.all([
+      this.prisma.customer.findMany({
+        where,
+        include: {
+          cars: true // Include cars in the response
+        },
+        skip,
+        take: limit,
+        orderBy: { updatedAt: 'desc' }
+      }),
+      this.prisma.customer.count({ where })
+    ]);
+    
+    // Return customers with their cars without duplicating data
+    return {
+      data: customers,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
       }
-    });
+    };
   }
 
   async findOne(id: string) {
-    const client = await this.prisma.client.findUnique({
+    const customer = await this.prisma.customer.findUnique({
       where: { id },
       include: {
-        vehicles: true, // Include vehicles in the response
-        serviceJobs: true, // Include service jobs
-        Appointment: true // Include appointments
+        cars: true // Include cars in the response
       }
     });
     
-    if (!client) {
+    if (!customer) {
       throw new NotFoundException(`Client with ID ${id} not found`);
     }
     
-    return client;
+    // Return the customer with cars but no duplicated data
+    return customer;
   }
 
   async update(id: string, updateClientDto: UpdateClientDto) {
     try {
-      // First check if client exists
-      const client = await this.prisma.client.findUnique({
-        where: { id }
+      // First check if customer exists
+      const customer = await this.prisma.customer.findUnique({
+        where: { id },
+        include: { cars: true }
       });
       
-      if (!client) {
+      if (!customer) {
         throw new NotFoundException(`Client with ID ${id} not found`);
       }
       
-      // Extract only the fields that belong to the Client model
-      const { carModel, plateNumber, ...clientData } = updateClientDto;
-      
-      // Update the client
-      return await this.prisma.client.update({
-        where: { id },
-        data: clientData,
-        include: {
-          vehicles: true
+      return await this.prisma.$transaction(async (tx) => {
+        // Update customer info
+        const updatedCustomer = await tx.customer.update({
+          where: { id },
+          data: {
+            name: updateClientDto.name,
+            phone: updateClientDto.mobileNumber, // Match schema field names
+          },
+          include: {
+            cars: true
+          }
+        });
+        
+        // If we have car-specific updates and there's a primary car
+        if ((updateClientDto.carModel || updateClientDto.color || updateClientDto.mileage || updateClientDto.year) && customer.cars.length > 0) {
+          // Update the first/primary car
+          const primaryCar = customer.cars[0];
+          
+          await tx.car.update({
+            where: { id: primaryCar.id },
+            data: {
+              ...(updateClientDto.carModel && {
+                make: this.extractMake(updateClientDto.carModel),
+                model: this.extractModel(updateClientDto.carModel)
+              }),
+              ...(updateClientDto.plateNumber && { plateNumber: updateClientDto.plateNumber }),
+              ...(updateClientDto.color && { color: updateClientDto.color }),
+              ...(updateClientDto.year && { year: updateClientDto.year })
+            }
+          });
         }
+        
+        // Get the updated customer with cars
+        return await tx.customer.findUnique({
+          where: { id },
+          include: { cars: true }
+        });
       });
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -102,17 +177,17 @@ export class ClientsService {
 
   async remove(id: string) {
     try {
-      // Check if client exists first
-      const client = await this.prisma.client.findUnique({
+      // Check if customer exists first
+      const customer = await this.prisma.customer.findUnique({
         where: { id }
       });
       
-      if (!client) {
+      if (!customer) {
         throw new NotFoundException(`Client with ID ${id} not found`);
       }
       
-      // Delete the client - this will cascade delete related vehicles based on your schema
-      return await this.prisma.client.delete({
+      // Delete the customer - this will cascade delete related cars based on your schema
+      return await this.prisma.customer.delete({
         where: { id }
       });
     } catch (error) {
@@ -121,5 +196,16 @@ export class ClientsService {
       }
       throw new BadRequestException(`Failed to delete client: ${error.message}`);
     }
+  }
+  
+  // Helper methods to extract make and model from a combined string
+  private extractMake(carModel: string): string {
+    const parts = carModel.trim().split(' ');
+    return parts[0] || 'Unknown';
+  }
+  
+  private extractModel(carModel: string): string {
+    const parts = carModel.trim().split(' ');
+    return parts.length > 1 ? parts.slice(1).join(' ') : carModel;
   }
 }

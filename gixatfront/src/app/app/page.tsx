@@ -1,390 +1,131 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { env } from "@/config/env";
 
-// Extended MessageType definition to handle structured data
-type MessageType = {
-  id: string;
-  content: string;
-  sender: "user" | "ai";
-  timestamp: Date;
-  imageUrl?: string;
-  requiresConfirmation?: boolean;
-  extractedInfo?: Record<string, string>;
-  missingFields?: string[];
-  isComplete?: boolean;
-  agentType?: string;
-  activeAgent?: string;
+// Dashboard feature card component
+const FeatureCard = ({
+  title,
+  description,
+  icon,
+  href,
+  color,
+}: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  href: string;
+  color: string;
+}) => {
+  return (
+    <Link
+      href={href}
+      className={`block p-6 transition-all duration-300 ${color} rounded-xl shadow-lg hover:shadow-xl hover:translate-y-[-5px] border border-gray-700/50`}
+    >
+      <div className="flex items-center mb-3">
+        <div className="mr-3 p-2 bg-black/20 rounded-lg">{icon}</div>
+        <h3 className="text-xl font-semibold text-white">{title}</h3>
+      </div>
+      <p className="text-sm text-gray-300 leading-relaxed">{description}</p>
+    </Link>
+  );
 };
 
 export default function AppPage() {
-  const [messages, setMessages] = useState<MessageType[]>([
-    {
-      id: "1",
-      content: "Hello! How can I help you today?",
-      sender: "ai",
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputMessage, setInputMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Initialize session or retrieve existing one from localStorage
-  useEffect(() => {
-    const savedSessionId = localStorage.getItem("chatSessionId");
-    if (savedSessionId) {
-      setSessionId(savedSessionId);
-      // Fetch existing session messages
-      fetchSessionMessages(savedSessionId);
-    }
-  }, []);
-
-  // Fetch messages for an existing session
-  const fetchSessionMessages = async (sid: string) => {
-    try {
-      const response = await fetch(`${env.apiUrl}/ai-chat/session/${sid}`);
-      if (response.ok) {
-        const sessionData = await response.json();
-        if (sessionData.messages && sessionData.messages.length > 0) {
-          // Transform API messages to our MessageType format
-          const formattedMessages = sessionData.messages.map((msg: any) => ({
-            id: msg.id || Date.now().toString(),
-            content: msg.content,
-            sender: msg.sender,
-            timestamp: new Date(msg.timestamp),
-            imageUrl: msg.imageUrl,
-            requiresConfirmation: msg.requiresConfirmation,
-          }));
-          setMessages(formattedMessages);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching session:", error);
-    }
-  };
-
-  // Scroll to bottom whenever messages change
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  // Send message function
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (inputMessage.trim() === "") return;
-
-    // Add user message to UI immediately
-    const userMessage: MessageType = {
-      id: Date.now().toString(),
-      content: inputMessage,
-      sender: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputMessage("");
-    setIsTyping(true);
-
-    // Send message to API
-    try {
-      const response = await fetch(`${env.apiUrl}/ai-chat/message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-          sessionId: sessionId,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Save session ID if it's a new session
-        if (data.sessionId && !sessionId) {
-          setSessionId(data.sessionId);
-          localStorage.setItem("chatSessionId", data.sessionId);
-        }
-
-        // Handle structured response format (for client registration)
-        if (data.response) {
-          // Create AI message from the structured response
-          const aiMessage: MessageType = {
-            id: Date.now().toString(),
-            content: data.response,
-            sender: "ai",
-            timestamp: new Date(),
-            extractedInfo: data.extractedInfo,
-            missingFields: data.missingFields,
-            isComplete: data.isComplete,
-            agentType: data.agentType,
-            activeAgent: data.activeAgent,
-          };
-
-          setMessages((prev) => [...prev, aiMessage]);
-        } else {
-          // Handle traditional response format
-          const aiMessage: MessageType = {
-            id: data.id || Date.now().toString(),
-            content: data.content,
-            sender: "ai",
-            timestamp: new Date(),
-            imageUrl: data.imageUrl,
-            requiresConfirmation: data.requiresConfirmation,
-          };
-
-          setMessages((prev) => [...prev, aiMessage]);
-        }
-
-        // Set confirmation state if needed
-        if (data.requiresConfirmation) {
-          setAwaitingConfirmation(true);
-        }
-      } else {
-        // Handle error
-        const errorMessage: MessageType = {
-          id: Date.now().toString(),
-          content:
-            "Sorry, there was an error processing your message. Please try again.",
-          sender: "ai",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      const errorMessage: MessageType = {
-        id: Date.now().toString(),
-        content: "Network error. Please check your connection and try again.",
-        sender: "ai",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  // Handle file upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Only proceed with image files
-    if (file.type.startsWith("image/")) {
-      // Create a preview for immediate display
-      const imageUrl = URL.createObjectURL(file);
-      const userMessage: MessageType = {
-        id: Date.now().toString(),
-        content: "I uploaded an image:",
-        sender: "user",
-        timestamp: new Date(),
-        imageUrl: imageUrl,
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
-      setIsTyping(true);
-
-      // Upload image to server
-      try {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        if (sessionId) {
-          formData.append("sessionId", sessionId);
-        }
-
-        const response = await fetch(`${env.apiUrl}/ai-chat/upload-image`, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-
-          // Save session ID if it's a new session
-          if (data.sessionId && !sessionId) {
-            setSessionId(data.sessionId);
-            localStorage.setItem("chatSessionId", data.sessionId);
-          }
-
-          // Handle structured response format (for client registration)
-          if (data.response) {
-            // Create AI message from the structured response
-            const aiMessage: MessageType = {
-              id: Date.now().toString(),
-              content: data.response,
-              sender: "ai",
-              timestamp: new Date(),
-              extractedInfo: data.extractedInfo,
-              missingFields: data.missingFields,
-              isComplete: data.isComplete,
-              agentType: data.agentType,
-              activeAgent: data.activeAgent,
-            };
-
-            setMessages((prev) => [...prev, aiMessage]);
-          } else {
-            // Handle traditional response format
-            const aiMessage: MessageType = {
-              id: data.id || Date.now().toString(),
-              content: data.content,
-              sender: "ai",
-              timestamp: new Date(),
-              imageUrl: data.imageUrl,
-              requiresConfirmation: data.requiresConfirmation,
-            };
-
-            setMessages((prev) => [...prev, aiMessage]);
-          }
-
-          // Set confirmation state if needed
-          if (data.requiresConfirmation) {
-            setAwaitingConfirmation(true);
-          }
-        } else {
-          // Handle error
-          const errorMessage: MessageType = {
-            id: Date.now().toString(),
-            content:
-              "Sorry, there was an error uploading your image. Please try again.",
-            sender: "ai",
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, errorMessage]);
-        }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-        const errorMessage: MessageType = {
-          id: Date.now().toString(),
-          content: "Network error. Please check your connection and try again.",
-          sender: "ai",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      } finally {
-        setIsTyping(false);
-      }
-    }
-
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  // Handle confirmation (used when AI suggests actions that require user confirmation)
-  const handleConfirmation = async (confirm: boolean) => {
-    if (!sessionId) return;
-
-    setIsTyping(true);
-    setAwaitingConfirmation(false);
-
-    try {
-      const response = await fetch(`${env.apiUrl}/ai-chat/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sessionId: sessionId,
-          confirm: confirm,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-
-        // Handle structured response format (for client registration)
-        if (data.response) {
-          // Create AI message from the structured response
-          const aiMessage: MessageType = {
-            id: Date.now().toString(),
-            content: data.response,
-            sender: "ai",
-            timestamp: new Date(),
-            extractedInfo: data.extractedInfo,
-            missingFields: data.missingFields,
-            isComplete: data.isComplete,
-            agentType: data.agentType,
-            activeAgent: data.activeAgent,
-          };
-
-          setMessages((prev) => [...prev, aiMessage]);
-        } else {
-          // Handle traditional response format
-          const aiMessage: MessageType = {
-            id: data.id || Date.now().toString(),
-            content: data.content,
-            sender: "ai",
-            timestamp: new Date(),
-            imageUrl: data.imageUrl,
-          };
-
-          setMessages((prev) => [...prev, aiMessage]);
-        }
-      } else {
-        // Handle error
-        const errorMessage: MessageType = {
-          id: Date.now().toString(),
-          content:
-            "Sorry, there was an error processing your confirmation. Please try again.",
-          sender: "ai",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, errorMessage]);
-      }
-    } catch (error) {
-      console.error("Error sending confirmation:", error);
-      const errorMessage: MessageType = {
-        id: Date.now().toString(),
-        content: "Network error. Please check your connection and try again.",
-        sender: "ai",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  // Clear chat session
-  const handleClearSession = () => {
-    setMessages([
-      {
-        id: "1",
-        content: "Hello! How can I help you today?",
-        sender: "ai",
-        timestamp: new Date(),
-      },
-    ]);
-    setSessionId(null);
-    localStorage.removeItem("chatSessionId");
-    setAwaitingConfirmation(false);
-  };
-
   return (
-    <div className="flex flex-col h-[calc(100vh-theme(spacing.28))] md:h-[calc(100vh-theme(spacing.20))] bg-gradient-to-b from-gray-800 to-gray-900 rounded-xl shadow-xl border border-gray-700">
-      {/* Chat header */}
-      <div className="p-4 bg-gray-800/60 backdrop-blur-md border-b border-gray-700/50 rounded-t-xl flex items-center justify-between">
-        <div className="flex items-center">
-          <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+    <div className="space-y-8">
+      {/* Welcome header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg">
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+          Welcome to Gixat Dashboard
+        </h1>
+        <p className="text-blue-100">
+          Manage and explore your Gixat services from this central hub.
+        </p>
+      </div>
+
+      {/* Quick stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/50 flex items-center justify-between shadow-md">
+          <div>
+            <p className="text-gray-400 text-sm">Active Clients</p>
+            <h3 className="text-2xl font-bold text-white">24</h3>
+          </div>
+          <div className="h-12 w-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 text-white"
+              className="h-6 w-6 text-blue-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/50 flex items-center justify-between shadow-md">
+          <div>
+            <p className="text-gray-400 text-sm">Total Sessions</p>
+            <h3 className="text-2xl font-bold text-white">189</h3>
+          </div>
+          <div className="h-12 w-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-purple-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <div className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/50 flex items-center justify-between shadow-md">
+          <div>
+            <p className="text-gray-400 text-sm">Completion Rate</p>
+            <h3 className="text-2xl font-bold text-white">86%</h3>
+          </div>
+          <div className="h-12 w-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-green-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Feature cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <FeatureCard
+          title="AI Assistant"
+          description="Access your AI assistant for tasks, information, and real-time support."
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-blue-300"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -396,176 +137,151 @@ export default function AppPage() {
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
               />
             </svg>
-          </div>
-          <h1 className="text-lg font-semibold text-white">AI Assistant</h1>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={handleClearSession}
-            className="text-gray-400 hover:text-white text-xs border border-gray-700 hover:border-gray-500 px-2 py-1 rounded-md transition-colors"
-            title="Start new conversation"
-          >
-            New Chat
-          </button>
-          <div className="flex space-x-1">
-            <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-            <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-          </div>
-        </div>
+          }
+          href="/app/chat"
+          color="bg-gradient-to-br from-blue-900/70 to-blue-700/70"
+        />
+
+        <FeatureCard
+          title="Client Management"
+          description="View, add, and manage your client list with detailed profiles and history."
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-indigo-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          }
+          href="/app/clients"
+          color="bg-gradient-to-br from-indigo-900/70 to-indigo-700/70"
+        />
+
+        <FeatureCard
+          title="Camera & Recognition"
+          description="Use our advanced camera recognition tools for identification and verification."
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-emerald-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          }
+          href="/app/under"
+          color="bg-gradient-to-br from-emerald-900/70 to-emerald-700/70"
+        />
+
+        <FeatureCard
+          title="Analytics Dashboard"
+          description="Visualize your data with comprehensive analytics and reporting tools."
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-amber-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+          }
+          href="/app/under"
+          color="bg-gradient-to-br from-amber-900/70 to-amber-700/70"
+        />
+
+        <FeatureCard
+          title="Settings"
+          description="Configure your account preferences, notifications, and application settings."
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-gray-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          }
+          href="/app/under"
+          color="bg-gradient-to-br from-gray-800/70 to-gray-700/70"
+        />
+
+        <FeatureCard
+          title="Help & Support"
+          description="Access documentation, FAQs, and contact support for assistance."
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-purple-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          }
+          href="/app/under"
+          color="bg-gradient-to-br from-purple-900/70 to-purple-700/70"
+        />
       </div>
 
-      {/* Chat messages container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-800/20 to-gray-900/30 backdrop-blur-sm">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.sender === "user" ? "justify-end" : "justify-start"
-            }`}
+      {/* Quick access section */}
+      <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-700/50 shadow-lg">
+        <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Link
+            href="/app/clients/new"
+            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
           >
-            {message.sender === "ai" && (
-              <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-              </div>
-            )}
-            <div
-              className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-md ${
-                message.sender === "user"
-                  ? "bg-blue-600 text-white rounded-tr-none"
-                  : "bg-gray-800/80 text-gray-100 rounded-tl-none border border-gray-700/50"
-              }`}
-            >
-              <div className="text-sm md:text-base">{message.content}</div>
-
-              {/* Render image if present */}
-              {message.imageUrl && (
-                <div className="mt-2 rounded-lg overflow-hidden border border-gray-600/30">
-                  <Image
-                    src={message.imageUrl}
-                    alt="Shared image"
-                    width={300}
-                    height={200}
-                    className="object-contain"
-                  />
-                </div>
-              )}
-
-              {/* Display extracted information (for client registration) */}
-              {message.extractedInfo &&
-                Object.keys(message.extractedInfo).length > 0 && (
-                  <div className="mt-3 bg-gray-700/50 rounded-lg p-3 border border-gray-600/30">
-                    <div className="text-sm font-medium text-blue-300 mb-1">
-                      Extracted Information:
-                    </div>
-                    <div className="space-y-1">
-                      {Object.entries(message.extractedInfo).map(
-                        ([key, value]) => (
-                          <div
-                            key={key}
-                            className="flex justify-between text-sm"
-                          >
-                            <span className="text-gray-300 capitalize">
-                              {key}:
-                            </span>
-                            <span className="text-white font-medium">
-                              {value}
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-
-              {/* Display missing fields (for client registration) */}
-              {message.missingFields && message.missingFields.length > 0 && (
-                <div className="mt-3 bg-gray-700/50 rounded-lg p-3 border border-gray-600/30">
-                  <div className="text-sm font-medium text-amber-300 mb-1">
-                    Missing Information:
-                  </div>
-                  <div className="space-y-1">
-                    {message.missingFields.map((field) => (
-                      <div key={field} className="flex items-center text-sm">
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 mr-2"></span>
-                        <span className="text-gray-200 capitalize">
-                          {field}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Confirmation buttons if required */}
-              {message.requiresConfirmation && awaitingConfirmation && (
-                <div className="mt-3 flex space-x-2">
-                  <button
-                    onClick={() => handleConfirmation(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-                  >
-                    Confirm
-                  </button>
-                  <button
-                    onClick={() => handleConfirmation(false)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md text-sm transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-
-              {/* Message timestamp */}
-              <div
-                className={`text-xs mt-1 ${
-                  message.sender === "user" ? "text-blue-200" : "text-gray-400"
-                }`}
-              >
-                {message.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </div>
-            </div>
-            {message.sender === "user" && (
-              <div className="h-8 w-8 bg-blue-500/20 border border-blue-500/30 rounded-full flex items-center justify-center ml-2 flex-shrink-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 text-blue-300"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* AI typing indicator */}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center mr-2">
+            <div className="h-10 w-10 bg-blue-600/30 rounded-full flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 text-white"
+                className="h-5 w-5 text-blue-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -574,98 +290,82 @@ export default function AppPage() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                 />
               </svg>
             </div>
-            <div className="bg-gray-800/80 text-gray-100 rounded-2xl rounded-tl-none px-4 py-3 shadow-md border border-gray-700/50">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
-                <div
-                  className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                  style={{ animationDelay: "0.2s" }}
-                ></div>
-                <div
-                  className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"
-                  style={{ animationDelay: "0.4s" }}
-                ></div>
-              </div>
+            <span className="text-sm text-gray-200">Add Client</span>
+          </Link>
+
+          <Link
+            href="/app/chat"
+            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
+          >
+            <div className="h-10 w-10 bg-green-600/30 rounded-full flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-green-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                />
+              </svg>
             </div>
-          </div>
-        )}
+            <span className="text-sm text-gray-200">New Chat</span>
+          </Link>
 
-        <div ref={messagesEndRef} />
-      </div>
+          <Link
+            href="/app/under"
+            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
+          >
+            <div className="h-10 w-10 bg-amber-600/30 rounded-full flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <span className="text-sm text-gray-200">Recent Activity</span>
+          </Link>
 
-      {/* Input area */}
-      <div className="p-4 bg-gray-800/60 backdrop-blur-md border-t border-gray-700/50 rounded-b-xl">
-        <form
-          onSubmit={handleSendMessage}
-          className="flex items-center space-x-2"
-        >
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700/70 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-            title="Upload image"
+          <Link
+            href="/app/under"
+            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            className="hidden"
-            accept="image/*"
-          />
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="w-full bg-gray-700/70 text-white rounded-full px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600/50"
-              disabled={awaitingConfirmation}
-            />
-          </div>
-          <button
-            type="submit"
-            className={`p-3 rounded-full ${
-              inputMessage.trim() && !awaitingConfirmation
-                ? "bg-blue-600 hover:bg-blue-700"
-                : "bg-gray-700/50 cursor-not-allowed"
-            } text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            disabled={!inputMessage.trim() || awaitingConfirmation}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </button>
-        </form>
+            <div className="h-10 w-10 bg-purple-600/30 rounded-full flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-purple-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </div>
+            <span className="text-sm text-gray-200">Export Data</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

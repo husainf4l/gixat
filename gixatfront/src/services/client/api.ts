@@ -30,8 +30,10 @@ export interface Vehicle {
   vin: string | null;
   plateNumber: string | null;
   color: string | null;
-  mileage: number | null;
-  clientId: string;
+  mileage?: number | null;
+  customerId?: string;
+  clientId?: string;
+  garageId?: string;
   createdAt: string;
   updatedAt: string;
   status?: string;
@@ -40,14 +42,28 @@ export interface Vehicle {
 export interface Client {
   id: string;
   name: string;
-  carModel: string;
-  mobileNumber: string;
-  lastVisit: string | null;
+  phone?: string;
+  address?: string;
+  notes?: string;
+  carModel?: string;
+  mobileNumber?: string;
+  lastVisit?: string | null;
   createdAt: string;
   updatedAt: string;
-  vehicles: Vehicle[];
+  garageId?: string;
   plateNumber?: string;
   status?: string;
+  cars: Vehicle[];   // Only cars, no vehicles
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
 }
 
 export interface ServiceRecord {
@@ -62,7 +78,10 @@ export interface ServiceRecord {
 
 export interface NewClientData {
   name: string;
-  mobileNumber: string;
+  mobileNumber?: string;
+  phone?: string;
+  address?: string;
+  notes?: string;
   carModel?: string;
   plateNumber?: string;
   color?: string;
@@ -73,8 +92,15 @@ export interface NewClientData {
 export const clientService = {
   async getClients() {
     try {
-      const response = await api.get<Client[]>('/clients');
-      return response.data;
+      const response = await api.get<Client[] | PaginatedResponse<Client>>('/clients');
+      
+      // Check if the response has a data property (paginated structure)
+      if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      
+      // Otherwise, return the response data (assuming it's an array)
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching clients:', error);
       throw error;
@@ -83,7 +109,13 @@ export const clientService = {
 
   async getClientById(id: string) {
     try {
-      const response = await api.get<Client>(`/clients/${id}`);
+      const response = await api.get<Client | { data: Client }>(`/clients/${id}`);
+      
+      // Check if the response has a data property (nested structure)
+      if (response.data && 'data' in response.data) {
+        return response.data.data;
+      }
+      
       return response.data;
     } catch (error) {
       console.error(`Error fetching client with ID ${id}:`, error);

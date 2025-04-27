@@ -6,6 +6,7 @@ import { PassportInitMiddleware } from './middlewares/passport-init.middleware';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule } from './clients/clients.module';
 import { AiChatModule } from './ai-chat/ai-chat.module';
+import { SessionsModule } from './sessions/sessions.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AiChatModule } from './ai-chat/ai-chat.module';
     AuthModule,
     ClientsModule,
     AiChatModule,
+    SessionsModule,
   ],
   controllers: [],
   providers: [],

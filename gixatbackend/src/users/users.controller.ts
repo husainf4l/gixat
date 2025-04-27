@@ -27,8 +27,7 @@ export class UsersController {
     return {
       id: user.id,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      name: user.name,
       profilePictureUrl: user.profilePictureUrl,
     };
   }
