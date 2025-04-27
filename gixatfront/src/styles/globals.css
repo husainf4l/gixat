@@ -1,0 +1,16 @@
+/* ...existing code... */
+
+.neural-animation {
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.2), transparent);
+  animation: neuralPulse 3s infinite ease-in-out;
+  mix-blend-mode: overlay;
+}
+
+@keyframes neuralPulse {
+  0%, 100% {
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.2), transparent);
+  }
+  50% {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+  }
+}

@@ -1,0 +1,38 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background representing Saudi Arabia -->
+  <rect width="800" height="600" fill="#2B5B63"/>
+  
+  <!-- Desert/landscape background -->
+  <path d="M0 450 Q 200 350, 400 450 T 800 450 V 600 H 0 Z" fill="#E5A940" opacity="0.8"/>
+  
+  <!-- Stylized city skyline with modern and traditional buildings -->
+  <!-- Modern Buildings -->
+  <rect x="100" y="300" width="40" height="150" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="150" y="250" width="60" height="200" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="220" y="200" width="40" height="250" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="270" y="320" width="50" height="130" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="330" y="280" width="30" height="170" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="370" y="230" width="60" height="220" fill="#F3F2EE" opacity="0.9"/>
+  
+  <!-- Traditional Domes and Minarets -->
+  <ellipse cx="500" cy="350" rx="40" ry="20" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="490" y="350" width="20" height="100" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="600" y="320" width="10" height="130" fill="#F3F2EE" opacity="0.9"/>
+  <ellipse cx="605" cy="320" rx="20" ry="10" fill="#F3F2EE" opacity="0.9"/>
+  <rect x="700" y="300" width="15" height="150" fill="#F3F2EE" opacity="0.9"/>
+  <ellipse cx="707" cy="300" rx="25" ry="12" fill="#F3F2EE" opacity="0.9"/>
+  
+  <!-- Data visualization elements overlaid on the city -->
+  <circle cx="150" cy="200" r="30" fill="#E5A940" opacity="0.3"/>
+  <circle cx="370" cy="180" r="50" fill="#E5A940" opacity="0.3"/>
+  <circle cx="600" cy="250" r="40" fill="#E5A940" opacity="0.3"/>
+  
+  <!-- Connection lines representing WIDD's data network -->
+  <line x1="150" y1="200" x2="370" y2="180" stroke="#F3F2EE" stroke-width="2" stroke-dasharray="5 5"/>
+  <line x1="370" y1="180" x2="600" y2="250" stroke="#F3F2EE" stroke-width="2" stroke-dasharray="5 5"/>
+  <line x1="600" y1="250" x2="150" y2="200" stroke="#F3F2EE" stroke-width="2" stroke-dasharray="5 5"/>
+  
+  <!-- Saudi flag colors incorporated discreetly -->
+  <rect x="0" y="0" width="800" height="15" fill="#E5A940" opacity="0.7"/>
+  <rect x="0" y="15" width="800" height="15" fill="#F3F2EE" opacity="0.7"/>
+</svg>

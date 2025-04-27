@@ -1,0 +1,59 @@
+<svg width="800" height="800" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with Saudi-inspired pattern -->
+  <rect width="800" height="800" fill="#2B5B63"/>
+  <path d="M0 0 L800 800" stroke="#E5A940" stroke-width="1" stroke-opacity="0.3" />
+  <path d="M800 0 L0 800" stroke="#E5A940" stroke-width="1" stroke-opacity="0.3" />
+  
+  <!-- Geometric pattern inspired by Saudi architecture -->
+  <g opacity="0.2">
+    <path d="M100 100 L200 100 L200 200 L100 200 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M300 100 L400 100 L400 200 L300 200 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M500 100 L600 100 L600 200 L500 200 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M700 100 L800 100 L800 200 L700 200 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    
+    <path d="M100 300 L200 300 L200 400 L100 400 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M300 300 L400 300 L400 400 L300 400 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M500 300 L600 300 L600 400 L500 400 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M700 300 L800 300 L800 400 L700 400 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    
+    <path d="M100 500 L200 500 L200 600 L100 600 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M300 500 L400 500 L400 600 L300 600 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M500 500 L600 500 L600 600 L500 600 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M700 500 L800 500 L800 600 L700 600 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    
+    <path d="M100 700 L200 700 L200 800 L100 800 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M300 700 L400 700 L400 800 L300 800 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M500 700 L600 700 L600 800 L500 800 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+    <path d="M700 700 L800 700 L800 800 L700 800 Z" stroke="#F3F2EE" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Saudi Vision 2030 inspired elements -->
+  <circle cx="400" cy="400" r="200" fill="#2B5B63" stroke="#E5A940" stroke-width="4"/>
+  
+  <!-- Stylized palm tree - representing Saudi heritage -->
+  <path d="M380 500 L420 500 L410 300 L390 300 Z" fill="#E5A940"/>
+  <path d="M350 300 Q 400 250 450 300" stroke="#E5A940" stroke-width="6" fill="none"/>
+  <path d="M360 310 Q 400 270 440 310" stroke="#E5A940" stroke-width="5" fill="none"/>
+  <path d="M370 320 Q 400 290 430 320" stroke="#E5A940" stroke-width="4" fill="none"/>
+  
+  <!-- Modern technological elements representing WIDD.AI -->
+  <circle cx="400" cy="400" r="150" stroke="#F3F2EE" stroke-width="1" stroke-dasharray="4 4" fill="none"/>
+  <circle cx="400" cy="400" r="100" stroke="#F3F2EE" stroke-width="1" stroke-dasharray="4 4" fill="none"/>
+  
+  <!-- Data points and connections representing sports analytics -->
+  <circle cx="320" cy="350" r="8" fill="#F3F2EE"/>
+  <circle cx="480" cy="350" r="8" fill="#F3F2EE"/>
+  <circle cx="400" cy="320" r="8" fill="#F3F2EE"/>
+  <circle cx="350" cy="450" r="8" fill="#F3F2EE"/>
+  <circle cx="450" cy="450" r="8" fill="#F3F2EE"/>
+  
+  <line x1="320" y1="350" x2="400" y2="320" stroke="#F3F2EE" stroke-width="2"/>
+  <line x1="480" y1="350" x2="400" y2="320" stroke="#F3F2EE" stroke-width="2"/>
+  <line x1="320" y1="350" x2="350" y2="450" stroke="#F3F2EE" stroke-width="2"/>
+  <line x1="480" y1="350" x2="450" y2="450" stroke="#F3F2EE" stroke-width="2"/>
+  <line x1="350" y1="450" x2="450" y2="450" stroke="#F3F2EE" stroke-width="2"/>
+  
+  <!-- Saudi Vision 2030 text -->
+  <text x="400" y="600" font-family="Arial" font-size="24" fill="#E5A940" text-anchor="middle">SAUDI VISION 2030</text>
+  <text x="400" y="630" font-family="Arial" font-size="16" fill="#F3F2EE" text-anchor="middle">INNOVATION • TECHNOLOGY • HERITAGE</text>
+</svg>
