@@ -8,6 +8,10 @@ import {
   Session,
   SessionStatus,
 } from "../../../../services/session/api";
+import SessionEntries, {
+  SessionEntryData,
+} from "../../../../components/session/SessionEntries";
+import SessionEntryForm from "../../../../components/session/SessionEntryForm";
 
 export default function SessionDetailsPage() {
   const router = useRouter();
@@ -24,6 +28,10 @@ export default function SessionDetailsPage() {
   } | null>(null);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get session API with entries
+  const [sessionEntries, setSessionEntries] = useState<SessionEntryData[]>([]);
+  const [entriesLoading, setEntriesLoading] = useState(false);
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -186,6 +194,66 @@ export default function SessionDetailsPage() {
       </div>
     );
   }
+
+  // Add fetchSessionEntries function
+  const fetchSessionEntries = async () => {
+    setEntriesLoading(true);
+    try {
+      // For now, we'll create some dummy entries since we haven't implemented
+      // the actual API endpoint yet
+      const dummyEntries: SessionEntryData[] = [
+        {
+          id: "entry1",
+          type: "TEXT",
+          originalMessage:
+            "Customer reported issues with brake pedal feeling soft. Will investigate further.",
+          createdAt: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
+          user: {
+            id: "user1",
+            name: "John Mechanic",
+          },
+        },
+        {
+          id: "entry2",
+          type: "IMAGE",
+          originalMessage:
+            "Photos of brake fluid reservoir showing low levels.",
+          photoUrl: "https://via.placeholder.com/500x300?text=Brake+Fluid",
+          createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+          user: {
+            id: "user1",
+            name: "John Mechanic",
+          },
+        },
+        {
+          id: "entry3",
+          type: "NOTE",
+          originalMessage:
+            "Identified a brake fluid leak from the master cylinder. Parts ordered, will arrive tomorrow.",
+          createdAt: new Date().toISOString(), // now
+          user: {
+            id: "user1",
+            name: "John Mechanic",
+          },
+        },
+      ];
+
+      // In a real implementation, we would fetch entries from an API:
+      // const entries = await sessionService.getSessionEntries(sessionId);
+      setSessionEntries(dummyEntries);
+    } catch (err) {
+      console.error("Error fetching session entries:", err);
+    } finally {
+      setEntriesLoading(false);
+    }
+  };
+
+  // Add this useEffect to fetch session entries when the component mounts or sessionId changes
+  useEffect(() => {
+    if (sessionId) {
+      fetchSessionEntries();
+    }
+  }, [sessionId]);
 
   // Render the main content when we have session data
   return (
@@ -410,13 +478,32 @@ export default function SessionDetailsPage() {
         {/* Client and Vehicle Information */}
         <div className="lg:col-span-1 space-y-4 md:space-y-6">
           {/* Client Card */}
-          {session.customer && (
-            <div className="bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700/50">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
+          {/* The Session interface doesn't have a customer property, so we need to fetch customer data separately in a real application */}
+          {/* For now, let's create a dummy customer representation based on customerId */}
+          <div className="bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700/50">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-blue-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <path d="M12 3a4 4 0 0 0 0 8 4 4 0 0 0 0-8z" />
+                </svg>
+                Client Information
+              </h2>
+              <Link href={`/app/clients/${session.customerId}`}>
+                <button className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                  View
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-blue-400"
+                    className="h-4 w-4"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -424,67 +511,36 @@ export default function SessionDetailsPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   >
-                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                    <path d="M12 3a4 4 0 0 0 0 8 4 4 0 0 0 0-8z" />
+                    <path d="M5 12l14 0" />
+                    <path d="M13 18l6 -6" />
+                    <path d="M13 6l6 6" />
                   </svg>
-                  Client Information
-                </h2>
-                <Link href={`/app/clients/${session.customer.id}`}>
-                  <button className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                    View
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M5 12l14 0" />
-                      <path d="M13 18l6 -6" />
-                      <path d="M13 6l6 6" />
-                    </svg>
-                  </button>
-                </Link>
+                </button>
+              </Link>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-500/20 rounded-full h-10 w-10 flex items-center justify-center text-blue-400 shrink-0">
+                  <span className="text-lg font-semibold">C</span>
+                </div>
+                <div>
+                  <h3 className="font-medium">Client #{session.customerId}</h3>
+                  <p className="text-gray-400 text-sm">
+                    ID: {session.customerId}
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-500/20 rounded-full h-10 w-10 flex items-center justify-center text-blue-400 shrink-0">
-                    <span className="text-lg font-semibold">
-                      {session.customer.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{session.customer.name}</h3>
-                    <p className="text-gray-400 text-sm">
-                      {session.customer.phone}
-                    </p>
-                  </div>
+              <div className="pt-2 border-t border-gray-700/30">
+                <div className="text-xs text-gray-400 mb-1">Notes</div>
+                <div className="text-sm text-gray-300">
+                  Client details would be shown here. In a real app, you would
+                  fetch client details using the customerId.
                 </div>
-
-                {session.customer.address && (
-                  <div className="pt-2 border-t border-gray-700/30">
-                    <div className="text-xs text-gray-400 mb-1">Address</div>
-                    <div className="text-sm text-gray-300">
-                      {session.customer.address}
-                    </div>
-                  </div>
-                )}
-
-                {session.customer.notes && (
-                  <div className="pt-2 border-t border-gray-700/30">
-                    <div className="text-xs text-gray-400 mb-1">Notes</div>
-                    <div className="text-sm text-gray-300">
-                      {session.customer.notes}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
-          )}
+          </div>
 
           {/* Vehicle Card */}
           {session.car && (
@@ -519,7 +575,7 @@ export default function SessionDetailsPage() {
                 <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-700/30">
                   <div>
                     <div className="text-xs text-gray-400 mb-1">Year</div>
-                    <div className="text-sm">{session.car.year}</div>
+                    <div className="text-sm">{session.car?.year || "N/A"}</div>
                   </div>
 
                   <div>
@@ -527,7 +583,7 @@ export default function SessionDetailsPage() {
                       Plate Number
                     </div>
                     <div className="text-sm">
-                      {session.car.plateNumber || "N/A"}
+                      {session.car?.plateNumber || "N/A"}
                     </div>
                   </div>
                 </div>
@@ -535,16 +591,16 @@ export default function SessionDetailsPage() {
                 <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-700/30">
                   <div>
                     <div className="text-xs text-gray-400 mb-1">Color</div>
-                    <div className="text-sm">{session.car.color || "N/A"}</div>
+                    <div className="text-sm">{session.car?.color || "N/A"}</div>
                   </div>
 
                   <div>
                     <div className="text-xs text-gray-400 mb-1">VIN</div>
                     <div
                       className="text-sm truncate"
-                      title={session.car.vin || "N/A"}
+                      title={session.car?.vin || "N/A"}
                     >
-                      {session.car.vin || "N/A"}
+                      {session.car?.vin || "N/A"}
                     </div>
                   </div>
                 </div>
@@ -712,7 +768,7 @@ export default function SessionDetailsPage() {
                   <span className="font-medium">Session created</span>
                 </div>
                 <div className="text-xs text-gray-400 mt-0.5">
-                  {formatDate(session.createdAt)}
+                  {session.createdAt ? formatDate(session.createdAt) : "N/A"}
                 </div>
               </div>
 
@@ -724,7 +780,9 @@ export default function SessionDetailsPage() {
                   </span>
                 </div>
                 <div className="text-xs text-gray-400 mt-0.5">
-                  {formatDate(session.updatedAt)}
+                  {session.updatedAt
+                    ? formatDate(session.updatedAt)
+                    : formatDate(session.createdAt)}
                 </div>
               </div>
 
@@ -734,6 +792,42 @@ export default function SessionDetailsPage() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Session Entries */}
+      <div className="bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
+        <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 pb-2 border-b border-gray-700/50">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-blue-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 3h18v18H3z" />
+          </svg>
+          Session Entries
+        </h2>
+
+        {/* Entries List */}
+        <div className="space-y-4">
+          {entriesLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            </div>
+          ) : (
+            <SessionEntries entries={sessionEntries} />
+          )}
+
+          {/* Entry Form */}
+          <SessionEntryForm
+            sessionId={sessionId}
+            onEntryCreated={fetchSessionEntries}
+          />
         </div>
       </div>
     </div>

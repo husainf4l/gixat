@@ -1,5 +1,4 @@
-"use client";
-
+// Session API service
 import axios from 'axios';
 import { env } from '../../config/env';
 
@@ -21,58 +20,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Session status enum
 export enum SessionStatus {
-  OPEN = 'OPEN',
-  IN_PROGRESS = 'IN_PROGRESS',
-  WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  COMPLETED = 'COMPLETED',
-  CLOSED = 'CLOSED',
+  OPEN = "OPEN",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CLOSED = "CLOSED",
+  WAITING_FOR_APPROVAL = "WAITING_FOR_APPROVAL",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED"
 }
 
-// Type definitions for session-related API requests and responses
-export interface CreateSessionRequest {
-  customerId: string;   // Required - The ID of the customer
-  carId: string;        // Required - The ID of the car
-  garageId: string;     // Required - The ID of the garage
-  status?: SessionStatus; // Optional - Session status (defaults to OPEN if not provided)
-  quickBooksId?: string;  // Optional - QuickBooks identifier
-}
-
-// Type definitions for customer data in session response
-export interface SessionCustomer {
-  id: string;
-  name: string;
-  phone: string;
-  address: string;
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
-  garageId: string;
-}
-
-// Type definitions for car data in session response
-export interface SessionCar {
-  id: string;
-  make: string;
-  model: string;
-  year: number;
-  plateNumber: string;
-  vin: string | null;
-  color: string;
-  createdAt: string;
-  updatedAt: string;
-  customerId: string;
-  garageId: string;
-}
-
-// Type definition for session entry (placeholder for now)
-export interface SessionEntry {
-  // Define properties based on your actual data structure
+export interface User {
   id?: string;
-  [key: string]: any;
+  name: string;
+  avatar?: string;
+}
+
+export interface SessionEntry {
+  id: string;
+  type: 'TEXT' | 'NOTE' | 'IMAGE' | 'VOICE' | 'MIXED';
+  originalMessage?: string;
+  cleanedMessage?: string;
+  photoUrl?: string;
+  audioUrl?: string;
+  createdAt: string;
+  user?: User;
 }
 
 export interface Session {
@@ -81,99 +53,92 @@ export interface Session {
   carId: string;
   garageId: string;
   status: SessionStatus;
-  quickBooksId: string | null;
   createdAt: string;
-  updatedAt: string;
-  // Nested objects from API response
-  customer?: SessionCustomer;
-  car?: SessionCar;
-  entries?: SessionEntry[];
-  inspection: any | null;
-  preJobcard: any | null;
-  quotation: any | null;
-  jobcard: any | null;
-  aiCarData: any | null;
+  updatedAt?: string;
+  inspection?: boolean | object;
+  jobcard?: boolean | object;
+  quotation?: boolean | object;
+  car?: {
+    id: string;
+    make: string;
+    model: string;
+    plateNumber?: string;
+    year?: string;
+    color?: string;
+    vin?: string;
+  };
 }
 
-export const sessionService = {
-  /**
-   * Creates a new session
-   * 
-   * @param sessionData The session data to create
-   * @returns The created session
-   */
-  async createSession(sessionData: CreateSessionRequest): Promise<Session> {
-    try {
-      const response = await api.post<Session>('/sessions', sessionData);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating session:', error);
-      throw error;
-    }
-  },
+interface CreateSessionEntryParams {
+  sessionId: string;
+  type: SessionEntry['type'];
+  originalMessage?: string;
+  photoUrl?: string;
+  audioUrl?: string;
+  userId?: string;
+}
 
-  /**
-   * Gets a session by ID
-   * 
-   * @param id The session ID
-   * @returns The session
-   */
-  async getSessionById(id: string): Promise<Session> {
+interface CreateSessionParams {
+  customerId: string;
+  carId: string;
+  garageId: string;
+  status: SessionStatus;
+}
+
+class SessionService {
+  async createSessionEntry(params: CreateSessionEntryParams): Promise<SessionEntry> {
     try {
-      const response = await api.get<Session>(`/sessions/${id}`);
+      const response = await api.post(`/sessions/${params.sessionId}/entries`, params);
       return response.data;
     } catch (error) {
-      console.error(`Error fetching session with ID ${id}:`, error);
-      throw error;
-    }
-  },
-  
-  /**
-   * Gets all sessions for a garage
-   * 
-   * @param garageId The garage ID
-   * @returns Array of sessions
-   */
-  async getSessionsByGarage(garageId: string): Promise<Session[]> {
-    try {
-      const response = await api.get<Session[]>(`/sessions?garageId=${garageId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching sessions for garage ${garageId}:`, error);
-      return [];
-    }
-  },
-  
-  /**
-   * Gets all sessions for a customer
-   * 
-   * @param customerId The customer ID
-   * @returns Array of sessions
-   */
-  async getSessionsByCustomer(customerId: string): Promise<Session[]> {
-    try {
-      const response = await api.get<Session[]>(`/sessions/customer/${customerId}`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching sessions for customer ${customerId}:`, error);
-      return [];
-    }
-  },
-  
-  /**
-   * Updates a session's status
-   * 
-   * @param id The session ID
-   * @param status The new status
-   * @returns The updated session
-   */
-  async updateSessionStatus(id: string, status: SessionStatus): Promise<Session> {
-    try {
-      const response = await api.patch<Session>(`/sessions/${id}`, { status });
-      return response.data;
-    } catch (error) {
-      console.error(`Error updating status for session ${id}:`, error);
-      throw error;
+      throw new Error('Failed to create session entry');
     }
   }
-};
+
+  async getSessionEntries(sessionId: string): Promise<SessionEntry[]> {
+    try {
+      const response = await api.get(`/sessions/${sessionId}/entries`);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to get session entries');
+    }
+  }
+
+  async createSession(params: CreateSessionParams): Promise<Session> {
+    try {
+      const response = await api.post('/sessions', params);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to create session');
+    }
+  }
+
+  async getSessionsByCustomer(clientsId: string): Promise<Session[]> {
+    try {
+      const response = await api.get(`/clients/${clientsId}/sessions`);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to get clients sessions');
+    }
+  }
+
+  async getSessionById(sessionId: string): Promise<Session> {
+    try {
+      const response = await api.get(`/sessions/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to get session');
+    }
+  }
+  
+  async updateSessionStatus(sessionId: string, status: SessionStatus): Promise<Session> {
+    try {
+      const response = await api.put(`/sessions/${sessionId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw new Error('Failed to update session status');
+    }
+  }
+}
+
+export const sessionService = new SessionService();

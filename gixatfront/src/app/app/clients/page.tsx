@@ -37,10 +37,10 @@ export default function ClientsPage() {
         client.mobileNumber.toLowerCase().includes(searchLower)) ||
       (client.plateNumber &&
         client.plateNumber.toLowerCase().includes(searchLower)) ||
-      (client.vehicles &&
-        client.vehicles.length > 0 &&
-        client.vehicles[0].model &&
-        client.vehicles[0].model.toLowerCase().includes(searchLower))
+      (client.cars &&
+        client.cars.length > 0 &&
+        client.cars[0].model &&
+        client.cars[0].model.toLowerCase().includes(searchLower))
     );
   });
 
@@ -118,9 +118,7 @@ export default function ClientsPage() {
         <div className="grid grid-cols-1 gap-3 md:gap-4">
           {filteredClients.map((client) => {
             const primaryVehicle =
-              client.vehicles && client.vehicles.length > 0
-                ? client.vehicles[0]
-                : null;
+              client.cars && client.cars.length > 0 ? client.cars[0] : null;
 
             return (
               <Link key={client.id} href={`/app/clients/${client.id}`}>
