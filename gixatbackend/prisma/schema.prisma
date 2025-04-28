@@ -250,7 +250,7 @@ enum ActivityLogType {
 model Inspection {
   id             String  @id @default(uuid())
   notes          String?
-  checklist      Json? // Flexible inspection checklist
+  checklist      Json?
   testDriveNotes String?
 
   // Timestamps
@@ -258,10 +258,29 @@ model Inspection {
   updatedAt DateTime @updatedAt
 
   // Relationships
-  sessionId String  @unique
-  session   Session @relation(fields: [sessionId], references: [id])
+  sessionId String            @unique
+  session   Session           @relation(fields: [sessionId], references: [id])
+  images    InspectionImage[] // New relationship to inspection images
 
   @@map("inspections")
+}
+
+// New model for storing inspection images
+model InspectionImage {
+  id          String  @id @default(uuid())
+  imageUrl    String
+  description String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  inspectionId String
+  inspection   Inspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@index([inspectionId])
+  @@map("inspection_images")
 }
 
 model PreJobcard {

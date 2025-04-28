@@ -12,8 +12,9 @@ import { InspectionService } from './inspection.service';
 import { CreateInspectionDto } from './dto/create-inspection.dto';
 import { UpdateInspectionDto } from './dto/update-inspection.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CreateInspectionImageDto } from './dto/create-inspection-image.dto';
 
-@Controller('sessions/inspection')
+@Controller('inspection')
 @UseGuards(JwtAuthGuard)
 export class InspectionController {
   constructor(private readonly inspectionService: InspectionService) {}
@@ -46,5 +47,19 @@ export class InspectionController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.inspectionService.remove(id);
+  }
+
+  // New endpoints for managing inspection images
+  @Post(':id/images')
+  addImage(
+    @Param('id') id: string,
+    @Body() createImageDto: CreateInspectionImageDto,
+  ) {
+    return this.inspectionService.addImageToInspection(id, createImageDto);
+  }
+
+  @Delete('images/:imageId')
+  removeImage(@Param('imageId') imageId: string) {
+    return this.inspectionService.removeImage(imageId);
   }
 }

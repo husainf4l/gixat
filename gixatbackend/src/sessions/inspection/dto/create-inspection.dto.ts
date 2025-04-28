@@ -1,4 +1,6 @@
-import { IsOptional, IsString, IsObject, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsObject, IsUUID, IsArray, ValidateNested, IsDefined } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateInspectionImageDto } from './create-inspection-image.dto';
 
 export class CreateInspectionDto {
   @IsUUID()
@@ -15,4 +17,10 @@ export class CreateInspectionDto {
   @IsOptional()
   @IsString()
   testDriveNotes?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateInspectionImageDto)
+  images?: CreateInspectionImageDto[];
 }
