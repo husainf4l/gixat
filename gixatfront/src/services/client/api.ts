@@ -1,25 +1,6 @@
 "use client";
 
-import axios from 'axios';
-import { env } from '../../config/env';
-
-const API_URL = `${env.apiUrl}`;
-
-export const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add authorization header for protected requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import { apiClient } from '../../lib/api-client';
 
 // Type definitions for the API response
 export interface Vehicle {
@@ -53,7 +34,7 @@ export interface Client {
   garageId?: string;
   plateNumber?: string;
   status?: string;
-  cars: Vehicle[];   // Only cars, no vehicles
+  cars: Vehicle[];
 }
 
 export interface PaginatedResponse<T> {
@@ -89,10 +70,10 @@ export interface NewClientData {
   year?: number;
 }
 
-export const clientService = {
-  async getClients() {
+class ClientService {
+  async getClients(): Promise<Client[]> {
     try {
-      const response = await api.get<Client[] | PaginatedResponse<Client>>('/clients');
+      const response = await apiClient.get<Client[] | PaginatedResponse<Client>>('/clients');
       
       // Check if the response has a data property (paginated structure)
       if (response.data && 'data' in response.data && Array.isArray(response.data.data)) {
@@ -105,11 +86,11 @@ export const clientService = {
       console.error('Error fetching clients:', error);
       throw error;
     }
-  },
+  }
 
-  async getClientById(id: string) {
+  async getClientById(id: string): Promise<Client> {
     try {
-      const response = await api.get<Client | { data: Client }>(`/clients/${id}`);
+      const response = await apiClient.get<Client | { data: Client }>(`/clients/${id}`);
       
       // Check if the response has a data property (nested structure)
       if (response.data && 'data' in response.data) {
@@ -121,25 +102,27 @@ export const clientService = {
       console.error(`Error fetching client with ID ${id}:`, error);
       throw error;
     }
-  },
+  }
 
-  async getClientServiceHistory(clientId: string) {
+  async getClientServiceHistory(clientId: string): Promise<ServiceRecord[]> {
     try {
-      const response = await api.get<ServiceRecord[]>(`/clients/${clientId}/services`);
+      const response = await apiClient.get<ServiceRecord[]>(`/clients/${clientId}/services`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching service history for client ${clientId}:`, error);
       return []; // Return empty array for now, can be improved with better error handling
     }
-  },
+  }
   
-  async createClient(clientData: NewClientData) {
+  async createClient(clientData: NewClientData): Promise<Client> {
     try {
-      const response = await api.post<Client>('/clients', clientData);
+      const response = await apiClient.post<Client>('/clients', clientData);
       return response.data;
     } catch (error) {
       console.error('Error creating client:', error);
       throw error;
     }
   }
-};
+}
+
+export const clientService = new ClientService();

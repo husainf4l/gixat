@@ -1,24 +1,8 @@
 // Session API service
-import axios from 'axios';
+"use client";
+
+import { apiClient } from '../../lib/api-client';
 import { env } from '../../config/env';
-
-const API_URL = `${env.apiUrl}`;
-
-export const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add authorization header for protected requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
 
 export enum SessionStatus {
   OPEN = "OPEN",
@@ -60,10 +44,24 @@ export interface Customer {
   garageId: string;
 }
 
-// Add this interface for the Inspection type
+// Add these interfaces if they don't already exist
+export interface InspectionImage {
+  id: string;
+  imageUrl: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Inspection {
-  status: string;
-  notes: string;
+  id: string;
+  notes?: string;
+  checklist?: any[]; // You might want to type this more specifically
+  testDriveNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+  sessionId: string;
+  images: InspectionImage[];
 }
 
 export interface Session {
@@ -121,11 +119,18 @@ interface CreateSessionParams {
   status: SessionStatus;
 }
 
+interface CreateInspectionDto {
+  sessionId: string;
+  notes?: string;
+  checklist?: any[];
+  testDriveNotes?: string;
+}
+
 class SessionService {
   async createSessionEntry(params: CreateSessionEntryParams): Promise<SessionEntryData> {
     try {
       const { sessionId, ...entryData } = params;
-      const response = await api.post(`/sessions/${sessionId}/entries`, {
+      const response = await apiClient.post(`/sessions/${sessionId}/entries`, {
         type: entryData.type,
         originalMessage: entryData.originalMessage,
         cleanedMessage: entryData.cleanedMessage,
@@ -143,7 +148,7 @@ class SessionService {
   async createMixedMediaEntry(params: MixedMediaEntryParams): Promise<SessionEntryData> {
     try {
       const { sessionId, ...entryData } = params;
-      const response = await api.post(`/sessions/${sessionId}/entries/mixed-media`, entryData);
+      const response = await apiClient.post(`/sessions/${sessionId}/entries/mixed-media`, entryData);
       return response.data;
     } catch (error) {
       throw new Error('Failed to create mixed media entry');
@@ -159,9 +164,9 @@ class SessionService {
         formData.append('text', text);
       }
       
-      // Use axios with formData - need different headers
+      // Use fetch for file uploads as it handles FormData better
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${API_URL}/sessions/${sessionId}/entries/upload`, {
+      const response = await fetch(`${env.apiUrl}/sessions/${sessionId}/entries/upload`, {
         method: 'POST',
         headers: {
           'Authorization': token ? `Bearer ${token}` : '',
@@ -181,7 +186,7 @@ class SessionService {
 
   async getSessionEntries(sessionId: string): Promise<SessionEntryData[]> {
     try {
-      const response = await api.get(`/sessions/${sessionId}/entries`);
+      const response = await apiClient.get(`/sessions/${sessionId}/entries`);
       return response.data;
     } catch (error) {
       throw new Error('Failed to get session entries');
@@ -190,7 +195,7 @@ class SessionService {
 
   async createSession(params: CreateSessionParams): Promise<Session> {
     try {
-      const response = await api.post('/sessions', params);
+      const response = await apiClient.post('/sessions', params);
       return response.data;
     } catch (error) {
       throw new Error('Failed to create session');
@@ -199,7 +204,7 @@ class SessionService {
 
   async getSessionsByCustomer(clientsId: string): Promise<Session[]> {
     try {
-      const response = await api.get(`/clients/${clientsId}/sessions`);
+      const response = await apiClient.get(`/clients/${clientsId}/sessions`);
       return response.data;
     } catch (error) {
       throw new Error('Failed to get clients sessions');
@@ -208,7 +213,7 @@ class SessionService {
 
   async getSessionById(sessionId: string): Promise<Session> {
     try {
-      const response = await api.get(`/sessions/${sessionId}`);
+      const response = await apiClient.get(`/sessions/${sessionId}`);
       return response.data;
     } catch (error) {
       throw new Error('Failed to get session');
@@ -217,28 +222,201 @@ class SessionService {
   
   async updateSessionStatus(sessionId: string, status: SessionStatus): Promise<Session> {
     try {
-      const response = await api.put(`/sessions/${sessionId}/status`, { status });
+      const response = await apiClient.put(`/sessions/${sessionId}/status`, { status });
       return response.data;
     } catch (error) {
       throw new Error('Failed to update session status');
     }
   }
 
-  async createInspection(sessionId: string, inspectionData: { status: string; notes: string }): Promise<Session> {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sessions/${sessionId}/inspection`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify(inspectionData),
-    });
+  // Add these new methods to your sessionService object:
 
-    if (!response.ok) {
+  // Get inspection for a session - now correctly using the controller path
+  async getInspection(sessionId: string) {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${env.apiUrl}/sessions/inspection/session/${sessionId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+      });
+
+      if (!response.ok) {
+        // If the response is a 404, it means there's no inspection yet for this session
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`Failed to fetch inspection: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Ensure the data has the expected structure
+      if (!data.images) {
+        data.images = [];
+      }
+      
+      // Convert checklist from empty object to array if needed
+      if (!Array.isArray(data.checklist)) {
+        data.checklist = [];
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching inspection:', error);
+      return null;
+    }
+  }
+
+  // Create a new inspection
+  async createInspection(inspectionData: CreateInspectionDto) {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${env.apiUrl}/sessions/inspection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify(inspectionData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create inspection: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Ensure the data has the expected structure
+      if (!data.images) {
+        data.images = [];
+      }
+      
+      // Convert checklist from empty object to array if needed
+      if (!Array.isArray(data.checklist)) {
+        data.checklist = [];
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating inspection:', error);
       throw new Error('Failed to create inspection');
     }
+  }
 
-    return response.json();
+  // Update an existing inspection by ID
+  async updateInspection(inspectionId: string, inspectionData: any) {
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${env.apiUrl}/sessions/inspection/${inspectionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify(inspectionData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update inspection: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Ensure the data has the expected structure
+      if (!data.images) {
+        data.images = [];
+      }
+      
+      // Convert checklist from empty object to array if needed
+      if (!Array.isArray(data.checklist)) {
+        data.checklist = [];
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating inspection:', error);
+      throw new Error('Failed to update inspection');
+    }
+  }
+
+  // Upload an inspection image - updated to use the inspection ID
+  async uploadInspectionImage(inspectionId: string, file: File, description?: string): Promise<InspectionImage> {
+    try {
+      // First upload the file
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      if (description) {
+        formData.append('description', description);
+      }
+
+      const token = localStorage.getItem('access_token');
+      
+      // Upload the file first
+      const uploadResponse = await fetch(`${env.apiUrl}/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: formData
+      });
+      
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image file');
+      }
+      
+      const uploadData = await uploadResponse.json();
+      
+      // Create the image record using the endpoint from the controller
+      const imageData = {
+        imageUrl: uploadData.url,
+        description,
+      };
+      
+      const response = await fetch(`${env.apiUrl}/sessions/inspection/${inspectionId}/images`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: JSON.stringify(imageData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create inspection image record');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error uploading inspection image:', error);
+      throw new Error('Failed to upload inspection image');
+    }
+  }
+
+  // Delete an inspection image
+  async deleteInspectionImage(imageId: string): Promise<{ id: string; deleted: boolean }> {
+    try {
+      const token = localStorage.getItem('access_token');
+      
+      const response = await fetch(`${env.apiUrl}/sessions/inspection/images/${imageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete inspection image');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting inspection image:', error);
+      throw new Error('Failed to delete inspection image');
+    }
   }
 }
 

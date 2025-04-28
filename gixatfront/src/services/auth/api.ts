@@ -1,38 +1,26 @@
 "use client";
 
-import axios from 'axios';
-import { env } from '../../config/env';
+import { authApiClient } from '../../lib/api-client';
 
-const API_URL = `${env.apiUrl}/auth`;
+export interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  user: any;
+  liveToken?: string;
+}
 
-export const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add authorization header for protected requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-export const authService = {
-  async register(firstName: string, lastName: string, email: string, password: string, garageId: string) {
-    const response = await api.post('/register', { firstName, lastName, email, password, garageId });
+class AuthService {
+  async register(firstName: string, lastName: string, email: string, password: string, garageId: string): Promise<AuthResponse> {
+    const response = await authApiClient.post('/register', { firstName, lastName, email, password, garageId });
     if (response.data.access_token) {
       localStorage.setItem('access_token', response.data.access_token);
       localStorage.setItem('refresh_token', response.data.refresh_token);
     }
     return response.data;
-  },
+  }
 
-  async login(email: string, password: string) {
-    const response = await api.post('/login', { email, password });
+  async login(email: string, password: string): Promise<AuthResponse> {
+    const response = await authApiClient.post('/login', { email, password });
     if (response.data.access_token) {
       localStorage.setItem('access_token', response.data.access_token);
       localStorage.setItem('refresh_token', response.data.refresh_token);
@@ -49,24 +37,24 @@ export const authService = {
       }
     }
     return response.data;
-  },
+  }
 
-  logout() {
+  logout(): void {
     const refreshToken = localStorage.getItem('refresh_token');
-    api.post('/logout', { refreshToken });
+    authApiClient.post('/logout', { refreshToken });
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     localStorage.removeItem('garageId');
     localStorage.removeItem('liveToken'); // Also remove liveToken if it exists
-  },
+  }
 
-  async refreshToken() {
+  async refreshToken(): Promise<AuthResponse | null> {
     const refreshToken = localStorage.getItem('refresh_token');
     if (!refreshToken) return null;
 
     try {
-      const response = await api.post('/refresh-token', { refreshToken });
+      const response = await authApiClient.post('/refresh-token', { refreshToken });
       if (response.data.access_token) {
         localStorage.setItem('access_token', response.data.access_token);
       }
@@ -76,17 +64,19 @@ export const authService = {
       this.logout();
       return null;
     }
-  },
+  }
 
-  isAuthenticated() {
+  isAuthenticated(): boolean {
     return !!localStorage.getItem('access_token');
-  },
+  }
 
-  getCurrentUser() {
+  getCurrentUser(): any | null {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       return JSON.parse(userStr);
     }
     return null;
-  },
-};
+  }
+}
+
+export const authService = new AuthService();

@@ -92,32 +92,36 @@ export default function UserNavBar({
 
   // Vertical (desktop) layout
   return (
-    <div className="h-screen w-16 bg-[#121212] border-r border-slate-800 flex flex-col">
-      <div className="px-3 mb-4 mt-4">
-        <div className="h-10 w-10 bg-gray-500 rounded-md flex items-center justify-center">
-          <User size={18} />
+    <>
+      <div className="fixed top-0 left-0 h-screen w-16 bg-[#121212] border-r border-slate-800 flex flex-col z-40">
+        <div className="px-3 mb-4 mt-4">
+          <div className="h-10 w-10 bg-gray-500 rounded-md flex items-center justify-center">
+            <User size={18} />
+          </div>
         </div>
+        <nav className="flex-1 px-3 py-4">
+          <ul className="space-y-6">
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={item.path}
+                  className={cn(
+                    "flex items-center justify-center px-2 py-2 text-sm rounded-md transition-colors",
+                    pathname === item.path
+                      ? "bg-slate-800 text-white"
+                      : "text-slate-400 hover:text-white hover:bg-slate-800"
+                  )}
+                  title={item.name}
+                >
+                  {item.icon}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
-      <nav className="flex-1 px-3 py-4">
-        <ul className="space-y-6">
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <Link
-                href={item.path}
-                className={cn(
-                  "flex items-center justify-center px-2 py-2 text-sm rounded-md transition-colors",
-                  pathname === item.path
-                    ? "bg-slate-800 text-white"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800"
-                )}
-                title={item.name}
-              >
-                {item.icon}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </div>
+      {/* Spacer div to push content to the right of the fixed navbar */}
+      <div className="w-16 flex-shrink-0"></div>
+    </>
   );
 }

@@ -594,7 +594,12 @@ export default function SessionDetailsPage() {
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3">
+              <button
+                onClick={() =>
+                  router.push(`/app/sessions/${sessionId}/inspection`)
+                }
+                className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3"
+              >
                 <div className="bg-blue-500/20 p-2.5 rounded text-blue-400">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -621,7 +626,12 @@ export default function SessionDetailsPage() {
                 </div>
               </button>
 
-              <button className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3">
+              <button
+                onClick={() =>
+                  router.push(`/app/sessions/${sessionId}/jobcard`)
+                }
+                className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3"
+              >
                 <div className="bg-blue-500/20 p-2.5 rounded text-blue-400">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -647,7 +657,12 @@ export default function SessionDetailsPage() {
                 </div>
               </button>
 
-              <button className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3">
+              <button
+                onClick={() =>
+                  router.push(`/app/sessions/${sessionId}/quotation`)
+                }
+                className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3"
+              >
                 <div className="bg-blue-500/20 p-2.5 rounded text-blue-400">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -674,7 +689,12 @@ export default function SessionDetailsPage() {
                 </div>
               </button>
 
-              <button className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3">
+              <button
+                onClick={() =>
+                  router.push(`/app/sessions/${sessionId}/invoice`)
+                }
+                className="bg-gray-700/70 border border-gray-600/30 p-4 rounded-lg hover:bg-gray-700/90 transition-colors text-left flex items-start gap-3"
+              >
                 <div className="bg-blue-500/20 p-2.5 rounded text-blue-400">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
