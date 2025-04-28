@@ -60,6 +60,12 @@ export interface Customer {
   garageId: string;
 }
 
+// Add this interface for the Inspection type
+export interface Inspection {
+  status: string;
+  notes: string;
+}
+
 export interface Session {
   id: string;
   customerId: string;
@@ -68,7 +74,7 @@ export interface Session {
   status: SessionStatus;
   createdAt: string;
   updatedAt?: string;
-  inspection?: boolean | object;
+  inspection?: Inspection;
   jobcard?: boolean | object;
   quotation?: boolean | object;
   car?: {
@@ -216,6 +222,23 @@ class SessionService {
     } catch (error) {
       throw new Error('Failed to update session status');
     }
+  }
+
+  async createInspection(sessionId: string, inspectionData: { status: string; notes: string }): Promise<Session> {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sessions/${sessionId}/inspection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(inspectionData),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create inspection');
+    }
+
+    return response.json();
   }
 }
 

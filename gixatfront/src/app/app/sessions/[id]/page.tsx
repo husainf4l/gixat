@@ -8,7 +8,7 @@ import {
   Session,
   SessionStatus,
   SessionEntryData,
-  Customer
+  Customer,
 } from "../../../../services/session/api";
 import SessionEntries from "../../../../components/session/SessionEntries";
 import SessionEntryForm from "../../../../components/session/SessionEntryForm";
@@ -39,12 +39,12 @@ export default function SessionDetailsPage() {
       try {
         const sessionData = await sessionService.getSessionById(sessionId);
         setSession(sessionData);
-        
+
         // Set entries from the session response if available
         if (sessionData.entries && Array.isArray(sessionData.entries)) {
           setSessionEntries(sessionData.entries);
         }
-        
+
         setError("");
       } catch (err) {
         console.error("Failed to fetch session data:", err);
@@ -154,32 +154,16 @@ export default function SessionDetailsPage() {
 
   // Get next status options based on current status
   const getNextStatusOptions = (currentStatus: SessionStatus) => {
-    switch (currentStatus) {
-      case SessionStatus.OPEN:
-        return [SessionStatus.IN_PROGRESS, SessionStatus.CLOSED];
-      case SessionStatus.IN_PROGRESS:
-        return [
-          SessionStatus.WAITING_FOR_APPROVAL,
-          SessionStatus.OPEN,
-          SessionStatus.CLOSED,
-        ];
-      case SessionStatus.WAITING_FOR_APPROVAL:
-        return [
-          SessionStatus.APPROVED,
-          SessionStatus.REJECTED,
-          SessionStatus.IN_PROGRESS,
-        ];
-      case SessionStatus.APPROVED:
-        return [SessionStatus.COMPLETED, SessionStatus.IN_PROGRESS];
-      case SessionStatus.REJECTED:
-        return [SessionStatus.IN_PROGRESS, SessionStatus.CLOSED];
-      case SessionStatus.COMPLETED:
-        return [SessionStatus.CLOSED];
-      case SessionStatus.CLOSED:
-        return [SessionStatus.OPEN]; // Can reopen if needed
-      default:
-        return [];
-    }
+    // Show all possible statuses
+    return [
+      SessionStatus.OPEN,
+      SessionStatus.IN_PROGRESS,
+      SessionStatus.WAITING_FOR_APPROVAL,
+      SessionStatus.APPROVED,
+      SessionStatus.REJECTED,
+      SessionStatus.COMPLETED,
+      SessionStatus.CLOSED,
+    ];
   };
 
   // Handle loading state
@@ -317,7 +301,7 @@ export default function SessionDetailsPage() {
       </div>
 
       {/* Session Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm relative z-[101]">
         <div className="flex gap-4 items-start md:items-center">
           <div className="bg-blue-500/20 rounded-md p-3 text-blue-400">
             <svg
@@ -375,7 +359,7 @@ export default function SessionDetailsPage() {
 
         {/* Status Update Dropdown */}
         <div className="flex-shrink-0">
-          <div className="relative" ref={statusDropdownRef}>
+          <div className="relative z-[102]" ref={statusDropdownRef}>
             <button
               className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium flex items-center gap-2"
               onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
@@ -408,7 +392,12 @@ export default function SessionDetailsPage() {
             {statusDropdownOpen && (
               <div
                 id="status-dropdown"
-                className="absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10"
+                className="absolute right-0 top-full mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-[103]"
+                style={{
+                  position: "absolute",
+                  marginTop: "8px",
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)",
+                }}
               >
                 <div className="py-1">
                   {getNextStatusOptions(session.status).map((status) => (
@@ -477,7 +466,9 @@ export default function SessionDetailsPage() {
               <div className="flex items-center gap-3">
                 <div className="bg-blue-500/20 rounded-full h-10 w-10 flex items-center justify-center text-blue-400 shrink-0">
                   <span className="text-lg font-semibold">
-                    {session.customer?.name ? session.customer.name.charAt(0) : 'C'}
+                    {session.customer?.name
+                      ? session.customer.name.charAt(0)
+                      : "C"}
                   </span>
                 </div>
                 <div>
@@ -485,7 +476,7 @@ export default function SessionDetailsPage() {
                     {session.customer?.name || `Client #${session.customerId}`}
                   </h3>
                   <p className="text-gray-400 text-sm">
-                    {session.customer?.phone || 'No phone number provided'}
+                    {session.customer?.phone || "No phone number provided"}
                   </p>
                 </div>
               </div>
@@ -494,7 +485,7 @@ export default function SessionDetailsPage() {
                 <div className="pt-2 border-t border-gray-700/30">
                   <div className="text-xs text-gray-400 mb-1">Address</div>
                   <div className="text-sm text-gray-300">
-                    {session.customer.address || 'No address provided'}
+                    {session.customer.address || "No address provided"}
                   </div>
                 </div>
               )}
@@ -621,11 +612,11 @@ export default function SessionDetailsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-medium">Pre-Inspection</h3>
+                  <h3 className="font-medium">Inspection</h3>
                   <p className="text-sm text-gray-400 mt-1">
                     {session.inspection
                       ? "View saved inspection"
-                      : "Create an inspection checklist"}
+                      : "Create an inspection "}
                   </p>
                 </div>
               </button>
