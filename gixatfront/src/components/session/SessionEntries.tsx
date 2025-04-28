@@ -1,8 +1,6 @@
 // Display the session entries
 import React from "react";
-import { SessionEntry } from "../../services/session/api";
-
-export type SessionEntryData = SessionEntry;
+import { SessionEntryData } from "../../services/session/api";
 
 type SessionEntriesProps = {
   entries: SessionEntryData[];
@@ -93,33 +91,34 @@ const SessionEntries: React.FC<SessionEntriesProps> = ({ entries }) => {
                 {/* Entry type badge */}
                 <div
                   className={`px-2 py-0.5 rounded text-xs font-medium ${
-                    entry.type === "text"
+                    entry.type === "SYSTEM_MESSAGE"
                       ? "bg-blue-500/20 text-blue-400"
-                      : entry.type === "image"
+                      : entry.type === "PHOTO"
                       ? "bg-green-500/20 text-green-400"
-                      : entry.type === "voice"
+                      : entry.type === "VOICE_NOTE"
                       ? "bg-purple-500/20 text-purple-400"
                       : "bg-yellow-500/20 text-yellow-400"
                   }`}
                 >
-                  {entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}
+                  {entry.type.charAt(0).toUpperCase() +
+                    entry.type.slice(1).toLowerCase().replace("_", " ")}
                 </div>
               </div>
             </div>
           </div>
 
           {/* Entry content based on type */}
-          <div className="ml-13 pl-13">
+          <div className="ml-12">
             {/* Text or Note content */}
-            {(entry.type === "TEXT" || entry.type === "NOTE") &&
+            {(entry.type === "SYSTEM_MESSAGE" || entry.type === "NOTE") &&
               entry.originalMessage && (
-                <div className="text-gray-200 mt-2 ml-13">
+                <div className="text-gray-200 mt-2">
                   {entry.cleanedMessage || entry.originalMessage}
                 </div>
               )}
 
             {/* Image content */}
-            {entry.type === "IMAGE" && entry.photoUrl && (
+            {entry.type === "PHOTO" && entry.photoUrl && (
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <a
                   href={entry.photoUrl}
@@ -137,7 +136,7 @@ const SessionEntries: React.FC<SessionEntriesProps> = ({ entries }) => {
             )}
 
             {/* Voice recording */}
-            {(entry.type === "VOICE" ||
+            {(entry.type === "VOICE_NOTE" ||
               (entry.type === "MIXED" && entry.audioUrl)) && (
               <div className="mt-3 bg-gray-800/70 rounded-lg p-3 flex items-center">
                 <div className="bg-purple-500/20 p-2 rounded-full text-purple-400 mr-3">
@@ -164,7 +163,7 @@ const SessionEntries: React.FC<SessionEntriesProps> = ({ entries }) => {
 
             {/* Mixed media - show both text and media */}
             {entry.type === "MIXED" && entry.originalMessage && (
-              <div className="text-gray-200 mt-2 ml-13">
+              <div className="text-gray-200 mt-2">
                 {entry.cleanedMessage || entry.originalMessage}
               </div>
             )}

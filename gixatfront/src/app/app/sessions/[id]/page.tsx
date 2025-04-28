@@ -7,10 +7,10 @@ import {
   sessionService,
   Session,
   SessionStatus,
-} from "../../../../services/session/api";
-import SessionEntries, {
   SessionEntryData,
-} from "../../../../components/session/SessionEntries";
+  Customer
+} from "../../../../services/session/api";
+import SessionEntries from "../../../../components/session/SessionEntries";
 import SessionEntryForm from "../../../../components/session/SessionEntryForm";
 
 export default function SessionDetailsPage() {
@@ -29,7 +29,7 @@ export default function SessionDetailsPage() {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const statusDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get session API with entries
+  // Session entries state from API response
   const [sessionEntries, setSessionEntries] = useState<SessionEntryData[]>([]);
   const [entriesLoading, setEntriesLoading] = useState(false);
 
@@ -39,6 +39,12 @@ export default function SessionDetailsPage() {
       try {
         const sessionData = await sessionService.getSessionById(sessionId);
         setSession(sessionData);
+        
+        // Set entries from the session response if available
+        if (sessionData.entries && Array.isArray(sessionData.entries)) {
+          setSessionEntries(sessionData.entries);
+        }
+        
         setError("");
       } catch (err) {
         console.error("Failed to fetch session data:", err);
@@ -52,6 +58,21 @@ export default function SessionDetailsPage() {
       fetchSessionData();
     }
   }, [sessionId]);
+
+  // Function to fetch session entries (can be used for refreshing entries)
+  const fetchSessionEntries = async () => {
+    setEntriesLoading(true);
+    try {
+      const sessionData = await sessionService.getSessionById(sessionId);
+      if (sessionData.entries && Array.isArray(sessionData.entries)) {
+        setSessionEntries(sessionData.entries);
+      }
+    } catch (err) {
+      console.error("Error fetching session entries:", err);
+    } finally {
+      setEntriesLoading(false);
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -164,13 +185,8 @@ export default function SessionDetailsPage() {
   // Handle loading state
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-48 md:h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-3 md:mt-4 text-sm md:text-base">
-            Loading session data...
-          </p>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -194,66 +210,6 @@ export default function SessionDetailsPage() {
       </div>
     );
   }
-
-  // Add fetchSessionEntries function
-  const fetchSessionEntries = async () => {
-    setEntriesLoading(true);
-    try {
-      // For now, we'll create some dummy entries since we haven't implemented
-      // the actual API endpoint yet
-      const dummyEntries: SessionEntryData[] = [
-        {
-          id: "entry1",
-          type: "TEXT",
-          originalMessage:
-            "Customer reported issues with brake pedal feeling soft. Will investigate further.",
-          createdAt: new Date(Date.now() - 3600000 * 2).toISOString(), // 2 hours ago
-          user: {
-            id: "user1",
-            name: "John Mechanic",
-          },
-        },
-        {
-          id: "entry2",
-          type: "IMAGE",
-          originalMessage:
-            "Photos of brake fluid reservoir showing low levels.",
-          photoUrl: "https://via.placeholder.com/500x300?text=Brake+Fluid",
-          createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-          user: {
-            id: "user1",
-            name: "John Mechanic",
-          },
-        },
-        {
-          id: "entry3",
-          type: "NOTE",
-          originalMessage:
-            "Identified a brake fluid leak from the master cylinder. Parts ordered, will arrive tomorrow.",
-          createdAt: new Date().toISOString(), // now
-          user: {
-            id: "user1",
-            name: "John Mechanic",
-          },
-        },
-      ];
-
-      // In a real implementation, we would fetch entries from an API:
-      // const entries = await sessionService.getSessionEntries(sessionId);
-      setSessionEntries(dummyEntries);
-    } catch (err) {
-      console.error("Error fetching session entries:", err);
-    } finally {
-      setEntriesLoading(false);
-    }
-  };
-
-  // Add this useEffect to fetch session entries when the component mounts or sessionId changes
-  useEffect(() => {
-    if (sessionId) {
-      fetchSessionEntries();
-    }
-  }, [sessionId]);
 
   // Render the main content when we have session data
   return (
@@ -478,8 +434,6 @@ export default function SessionDetailsPage() {
         {/* Client and Vehicle Information */}
         <div className="lg:col-span-1 space-y-4 md:space-y-6">
           {/* Client Card */}
-          {/* The Session interface doesn't have a customer property, so we need to fetch customer data separately in a real application */}
-          {/* For now, let's create a dummy customer representation based on customerId */}
           <div className="bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4 md:p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700/50">
               <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -522,23 +476,37 @@ export default function SessionDetailsPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="bg-blue-500/20 rounded-full h-10 w-10 flex items-center justify-center text-blue-400 shrink-0">
-                  <span className="text-lg font-semibold">C</span>
+                  <span className="text-lg font-semibold">
+                    {session.customer?.name ? session.customer.name.charAt(0) : 'C'}
+                  </span>
                 </div>
                 <div>
-                  <h3 className="font-medium">Client #{session.customerId}</h3>
+                  <h3 className="font-medium">
+                    {session.customer?.name || `Client #${session.customerId}`}
+                  </h3>
                   <p className="text-gray-400 text-sm">
-                    ID: {session.customerId}
+                    {session.customer?.phone || 'No phone number provided'}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-gray-700/30">
-                <div className="text-xs text-gray-400 mb-1">Notes</div>
-                <div className="text-sm text-gray-300">
-                  Client details would be shown here. In a real app, you would
-                  fetch client details using the customerId.
+              {session.customer && (
+                <div className="pt-2 border-t border-gray-700/30">
+                  <div className="text-xs text-gray-400 mb-1">Address</div>
+                  <div className="text-sm text-gray-300">
+                    {session.customer.address || 'No address provided'}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {session.customer?.notes && (
+                <div className="pt-2 border-t border-gray-700/30">
+                  <div className="text-xs text-gray-400 mb-1">Notes</div>
+                  <div className="text-sm text-gray-300">
+                    {session.customer.notes}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -819,8 +787,12 @@ export default function SessionDetailsPage() {
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
-          ) : (
+          ) : sessionEntries.length > 0 ? (
             <SessionEntries entries={sessionEntries} />
+          ) : (
+            <div className="text-center py-8 text-gray-400">
+              No entries yet. Add the first entry below.
+            </div>
           )}
 
           {/* Entry Form */}

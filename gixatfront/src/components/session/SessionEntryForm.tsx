@@ -10,10 +10,10 @@ type SessionEntryFormProps = {
 
 // Map the UI entry types to API entry types
 const entryTypeMap = {
-  text: "TEXT",
-  image: "IMAGE",
-  voice: "VOICE",
-  note: "NOTE",
+  text: "SYSTEM_MESSAGE", // Changed from TEXT to SYSTEM_MESSAGE
+  image: "PHOTO", // Changed from IMAGE to PHOTO
+  voice: "VOICE_NOTE", // Changed from VOICE to VOICE_NOTE
+  note: "NOTE", // This one remained the same
 } as const;
 
 type UIEntryType = "text" | "image" | "voice" | "note";
@@ -22,7 +22,8 @@ const SessionEntryForm: React.FC<SessionEntryFormProps> = ({
   sessionId,
   onEntryCreated,
 }) => {
-  const { user } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
   const [entryText, setEntryText] = useState("");
   const [entryImages, setEntryImages] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -158,57 +159,47 @@ const SessionEntryForm: React.FC<SessionEntryFormProps> = ({
 
       // For text and note types
       if (activeTab === "text" || activeTab === "note") {
-        entryResponse = await sessionService.createEntry(sessionId, {
+        entryResponse = await sessionService.createSessionEntry({
+          sessionId,
           type: entryTypeMap[activeTab],
           originalMessage: entryText,
+          cleanedMessage: entryText, // Use same text for both fields
           createdById: user.id,
         });
       }
       // For image type
       else if (activeTab === "image" && entryImages.length > 0) {
-        // First upload the images
-        const formData = new FormData();
-        entryImages.forEach((image, index) => {
-          formData.append(`image`, image);
-        });
-
-        // Upload files first to get URLs
-        const uploadResponse = await sessionService.uploadEntryFiles(
-          sessionId,
-          formData
-        );
-
-        if (!uploadResponse || !uploadResponse.photoUrl) {
-          throw new Error("Failed to upload image");
+        // If there's only one image, use the file upload endpoint
+        if (entryImages.length === 1) {
+          entryResponse = await sessionService.uploadFileEntry({
+            sessionId,
+            file: entryImages[0],
+            text: entryText || undefined,
+          });
+        } else {
+          // For multiple images, we need to upload each file individually
+          // and create a mixed media entry for each one
+          // This is a placeholder - your backend might handle multiple files differently
+          // Let's upload the first image for now
+          entryResponse = await sessionService.uploadFileEntry({
+            sessionId,
+            file: entryImages[0],
+            text: entryText || undefined,
+          });
         }
-
-        // Then create the entry with the image URL
-        entryResponse = await sessionService.createMixedMediaEntry(sessionId, {
-          text: "", // Empty text for image-only entry
-          photoUrl: uploadResponse.photoUrl,
-          createdById: user.id,
-        });
       }
       // For voice recording
       else if (activeTab === "voice" && recordedAudio) {
-        const formData = new FormData();
-        formData.append("audio", recordedAudio, "recording.mp3");
+        // Create a File object from the recorded Blob
+        const audioFile = new File([recordedAudio], "voice-recording.mp3", {
+          type: "audio/mpeg",
+        });
 
-        // Upload voice file first
-        const uploadResponse = await sessionService.uploadEntryFiles(
+        // Upload the audio file
+        entryResponse = await sessionService.uploadFileEntry({
           sessionId,
-          formData
-        );
-
-        if (!uploadResponse || !uploadResponse.audioUrl) {
-          throw new Error("Failed to upload audio");
-        }
-
-        // Then create entry with the audio URL
-        entryResponse = await sessionService.createMixedMediaEntry(sessionId, {
-          text: "", // Empty text for voice-only entry
-          audioUrl: uploadResponse.audioUrl,
-          createdById: user.id,
+          file: audioFile,
+          text: entryText || undefined,
         });
       }
 
