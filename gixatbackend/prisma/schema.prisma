@@ -150,12 +150,13 @@ model Session {
   garageId   String
   garage     Garage   @relation(fields: [garageId], references: [id])
 
-  entries    SessionEntry[] // Chat timeline: notes, customer requests, approvals
-  inspection Inspection? // Full inspection model (linked checklist + photos)
-  preJobcard PreJobcard? // Suggested services
-  quotation  Quotation? // Pricing and WhatsApp link
-  jobcard    Jobcard? // Final work order
-  aiCarData  AICarData? // (Optional: if AI VIN/Plate reading used)
+  entries      SessionEntry[] // Chat timeline: notes, customer requests, approvals
+  inspection   Inspection? // Full inspection model (linked checklist + photos)
+  preJobcard   PreJobcard? // Suggested services
+  quotation    Quotation? // Pricing and WhatsApp link
+  jobcard      Jobcard? // Final work order
+  aiCarData    AICarData? // (Optional: if AI VIN/Plate reading used)
+  activityLogs ActivityLog[] // Activity logs for tracking changes
 
   @@index([status])
   @@index([customerId])
@@ -204,6 +205,46 @@ enum SessionEntryType {
   JOB_STARTED
   JOB_COMPLETED
   SYSTEM_MESSAGE
+}
+
+// New model for tracking session activities
+model ActivityLog {
+  id          String          @id @default(uuid())
+  type        ActivityLogType
+  description String
+  metadata    Json? // For storing additional context about the activity
+  performedBy String? // User ID who performed the action (null for system actions)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  // Relationships
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+enum ActivityLogType {
+  SESSION_CREATED
+  SESSION_UPDATED
+  STATUS_CHANGED
+  INSPECTION_CREATED
+  INSPECTION_UPDATED
+  PRE_JOBCARD_CREATED
+  PRE_JOBCARD_UPDATED
+  QUOTATION_CREATED
+  QUOTATION_SENT
+  QUOTATION_APPROVED
+  QUOTATION_REJECTED
+  JOBCARD_CREATED
+  JOBCARD_UPDATED
+  CAR_INFO_UPDATED
+  ENTRY_ADDED
+  SYSTEM_ACTION
+  CUSTOMER_INTERACTION
 }
 
 model Inspection {
