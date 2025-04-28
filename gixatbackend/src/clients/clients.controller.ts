@@ -3,10 +3,14 @@ import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SessionsService } from '../sessions/sessions.service';
 
 @Controller('clients')
 export class ClientsController {
-  constructor(private readonly clientsService: ClientsService) {}
+  constructor(
+    private readonly clientsService: ClientsService,
+    private readonly sessionsService: SessionsService,
+  ) {}
 
   @Post()
   async create(@Body() createClientDto: CreateClientDto) {
@@ -39,6 +43,11 @@ export class ClientsController {
   async findOne(@Param('id') id: string) {
     const client = await this.clientsService.findOne(id);
     return this.addBackwardCompatibilityFields(client);
+  }
+
+  @Get(':id/sessions')
+  async getClientSessions(@Param('id') id: string) {
+    return this.sessionsService.findByCustomer(id);
   }
 
   @Put(':id')

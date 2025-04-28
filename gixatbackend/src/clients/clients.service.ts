@@ -20,7 +20,6 @@ export class ClientsService {
             // Use the garageId from the DTO
             garageId: createClientDto.garageId,
             // Add optional fields if present
-            email: createClientDto.email,
             address: createClientDto.address,
             notes: createClientDto.contactPerson ? `Contact: ${createClientDto.contactPerson}` : undefined,
           },

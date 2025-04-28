@@ -94,6 +94,7 @@ export class SessionsService {
     return this.prisma.session.findMany({
       where: { customerId },
       include: {
+        customer: true,
         car: true,
         entries: {
           orderBy: {
@@ -101,6 +102,11 @@ export class SessionsService {
           },
           take: 5,
         },
+        inspection: true,
+        preJobcard: true,
+        quotation: true,
+        jobcard: true,
+        aiCarData: true,
       },
       orderBy: {
         createdAt: 'desc',
