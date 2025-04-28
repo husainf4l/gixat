@@ -7,7 +7,8 @@ import {
   Body, 
   Param, 
   Query, 
-  UseGuards 
+  UseGuards,
+  Put
 } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { CreateSessionDto } from './dto/create-session.dto';
@@ -42,6 +43,14 @@ export class SessionsController {
 
   @Patch(':id/status')
   updateStatus(
+    @Param('id') id: string, 
+    @Body('status') status: SessionStatus
+  ) {
+    return this.sessionsService.updateStatus(id, status);
+  }
+
+  @Put(':id/status')
+  updateStatusPut(
     @Param('id') id: string, 
     @Body('status') status: SessionStatus
   ) {
