@@ -53,8 +53,8 @@ export class SessionsController {
     return this.sessionsService.remove(id);
   }
 
-  @Get('customer/:customerId')
-  findByCustomer(@Param('customerId') customerId: string) {
+  @Get('clients/:clientId')
+  findByCustomer(@Param('clientId') customerId: string) {
     return this.sessionsService.findByCustomer(customerId);
   }
 
