@@ -21,13 +21,13 @@ const FeatureCard = ({
   return (
     <Link
       href={href}
-      className={`block p-6 transition-all duration-300 ${color} rounded-xl shadow-lg hover:shadow-xl hover:translate-y-[-5px] border border-gray-700/50`}
+      className={`block p-6 transition-all duration-300 ${color} rounded-xl shadow-lg hover:shadow-xl hover:translate-y-[-5px] border border-gray-600`}
     >
       <div className="flex items-center mb-3">
-        <div className="mr-3 p-2 bg-black/20 rounded-lg">{icon}</div>
-        <h3 className="text-xl font-semibold text-white">{title}</h3>
+        <div className="mr-3 p-2 bg-gray-700 rounded-lg">{icon}</div>
+        <h3 className="text-xl font-semibold text-gray-100">{title}</h3>
       </div>
-      <p className="text-sm text-gray-300 leading-relaxed">{description}</p>
+      <p className="text-sm text-gray-400 leading-relaxed">{description}</p>
     </Link>
   );
 };
@@ -36,26 +36,26 @@ export default function AppPage() {
   return (
     <div className="space-y-8">
       {/* Welcome header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 shadow-lg">
-        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+      <div className="bg-gray-800 rounded-xl p-6 shadow-lg">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-100 mb-2">
           Welcome to Gixat Dashboard
         </h1>
-        <p className="text-blue-100">
+        <p className="text-gray-400">
           Manage and explore your Gixat services from this central hub.
         </p>
       </div>
 
       {/* Quick stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/50 flex items-center justify-between shadow-md">
+        <div className="bg-gray-700 p-5 rounded-xl border border-gray-600 flex items-center justify-between shadow-md">
           <div>
             <p className="text-gray-400 text-sm">Active Clients</p>
-            <h3 className="text-2xl font-bold text-white">24</h3>
+            <h3 className="text-2xl font-bold text-gray-100">24</h3>
           </div>
-          <div className="h-12 w-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
+          <div className="h-12 w-12 bg-gray-600 rounded-lg flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-blue-400"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -70,15 +70,15 @@ export default function AppPage() {
           </div>
         </div>
 
-        <div className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/50 flex items-center justify-between shadow-md">
+        <div className="bg-gray-700 p-5 rounded-xl border border-gray-600 flex items-center justify-between shadow-md">
           <div>
             <p className="text-gray-400 text-sm">Total Sessions</p>
-            <h3 className="text-2xl font-bold text-white">189</h3>
+            <h3 className="text-2xl font-bold text-gray-100">189</h3>
           </div>
-          <div className="h-12 w-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+          <div className="h-12 w-12 bg-gray-600 rounded-lg flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-purple-400"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -93,15 +93,15 @@ export default function AppPage() {
           </div>
         </div>
 
-        <div className="bg-gray-800/60 p-5 rounded-xl border border-gray-700/50 flex items-center justify-between shadow-md">
+        <div className="bg-gray-700 p-5 rounded-xl border border-gray-600 flex items-center justify-between shadow-md">
           <div>
             <p className="text-gray-400 text-sm">Completion Rate</p>
-            <h3 className="text-2xl font-bold text-white">86%</h3>
+            <h3 className="text-2xl font-bold text-gray-100">86%</h3>
           </div>
-          <div className="h-12 w-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+          <div className="h-12 w-12 bg-gray-600 rounded-lg flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-green-400"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -125,7 +125,7 @@ export default function AppPage() {
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-blue-300"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -139,7 +139,7 @@ export default function AppPage() {
             </svg>
           }
           href="/app/chat"
-          color="bg-gradient-to-br from-blue-900/70 to-blue-700/70"
+          color="bg-gray-700"
         />
 
         <FeatureCard
@@ -148,7 +148,7 @@ export default function AppPage() {
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-indigo-300"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -162,7 +162,7 @@ export default function AppPage() {
             </svg>
           }
           href="/app/clients"
-          color="bg-gradient-to-br from-indigo-900/70 to-indigo-700/70"
+          color="bg-gray-700"
         />
 
         <FeatureCard
@@ -171,7 +171,7 @@ export default function AppPage() {
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-emerald-300"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -191,7 +191,7 @@ export default function AppPage() {
             </svg>
           }
           href="/app/under"
-          color="bg-gradient-to-br from-emerald-900/70 to-emerald-700/70"
+          color="bg-gray-700"
         />
 
         <FeatureCard
@@ -200,7 +200,7 @@ export default function AppPage() {
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-amber-300"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -214,7 +214,7 @@ export default function AppPage() {
             </svg>
           }
           href="/app/under"
-          color="bg-gradient-to-br from-amber-900/70 to-amber-700/70"
+          color="bg-gray-700"
         />
 
         <FeatureCard
@@ -223,7 +223,7 @@ export default function AppPage() {
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-gray-300"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -243,7 +243,7 @@ export default function AppPage() {
             </svg>
           }
           href="/app/under"
-          color="bg-gradient-to-br from-gray-800/70 to-gray-700/70"
+          color="bg-gray-700"
         />
 
         <FeatureCard
@@ -252,7 +252,7 @@ export default function AppPage() {
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-purple-300"
+              className="h-6 w-6 text-gray-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -266,22 +266,24 @@ export default function AppPage() {
             </svg>
           }
           href="/app/under"
-          color="bg-gradient-to-br from-purple-900/70 to-purple-700/70"
+          color="bg-gray-700"
         />
       </div>
 
       {/* Quick access section */}
-      <div className="bg-gray-800/40 rounded-xl p-6 border border-gray-700/50 shadow-lg">
-        <h2 className="text-xl font-semibold text-white mb-4">Quick Actions</h2>
+      <div className="bg-gray-700 rounded-xl p-6 border border-gray-600 shadow-lg">
+        <h2 className="text-xl font-semibold text-gray-100 mb-4">
+          Quick Actions
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link
             href="/app/clients/new"
-            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
+            className="flex flex-col items-center p-4 bg-gray-600 rounded-lg hover:bg-gray-500 transition-colors border border-gray-600"
           >
-            <div className="h-10 w-10 bg-blue-600/30 rounded-full flex items-center justify-center mb-2">
+            <div className="h-10 w-10 bg-gray-500 rounded-full flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-blue-400"
+                className="h-5 w-5 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -299,12 +301,12 @@ export default function AppPage() {
 
           <Link
             href="/app/chat"
-            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
+            className="flex flex-col items-center p-4 bg-gray-600 rounded-lg hover:bg-gray-500 transition-colors border border-gray-600"
           >
-            <div className="h-10 w-10 bg-green-600/30 rounded-full flex items-center justify-center mb-2">
+            <div className="h-10 w-10 bg-gray-500 rounded-full flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-green-400"
+                className="h-5 w-5 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -322,12 +324,12 @@ export default function AppPage() {
 
           <Link
             href="/app/under"
-            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
+            className="flex flex-col items-center p-4 bg-gray-600 rounded-lg hover:bg-gray-500 transition-colors border border-gray-600"
           >
-            <div className="h-10 w-10 bg-amber-600/30 rounded-full flex items-center justify-center mb-2">
+            <div className="h-10 w-10 bg-gray-500 rounded-full flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-amber-400"
+                className="h-5 w-5 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -345,12 +347,12 @@ export default function AppPage() {
 
           <Link
             href="/app/under"
-            className="flex flex-col items-center p-4 bg-gray-800/80 rounded-lg hover:bg-gray-700/80 transition-colors border border-gray-700/50"
+            className="flex flex-col items-center p-4 bg-gray-600 rounded-lg hover:bg-gray-500 transition-colors border border-gray-600"
           >
-            <div className="h-10 w-10 bg-purple-600/30 rounded-full flex items-center justify-center mb-2">
+            <div className="h-10 w-10 bg-gray-500 rounded-full flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-purple-400"
+                className="h-5 w-5 text-gray-400"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

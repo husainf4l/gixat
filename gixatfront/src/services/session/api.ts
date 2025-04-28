@@ -25,8 +25,11 @@ api.interceptors.request.use((config) => {
 export enum SessionStatus {
   OPEN = 'OPEN',
   IN_PROGRESS = 'IN_PROGRESS',
+  WAITING_FOR_APPROVAL = 'WAITING_FOR_APPROVAL',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  CLOSED = 'CLOSED',
 }
 
 // Type definitions for session-related API requests and responses
@@ -38,15 +41,58 @@ export interface CreateSessionRequest {
   quickBooksId?: string;  // Optional - QuickBooks identifier
 }
 
+// Type definitions for customer data in session response
+export interface SessionCustomer {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  garageId: string;
+}
+
+// Type definitions for car data in session response
+export interface SessionCar {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  plateNumber: string;
+  vin: string | null;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+  customerId: string;
+  garageId: string;
+}
+
+// Type definition for session entry (placeholder for now)
+export interface SessionEntry {
+  // Define properties based on your actual data structure
+  id?: string;
+  [key: string]: any;
+}
+
 export interface Session {
   id: string;
   customerId: string;
   carId: string;
   garageId: string;
   status: SessionStatus;
-  quickBooksId?: string;
+  quickBooksId: string | null;
   createdAt: string;
   updatedAt: string;
+  // Nested objects from API response
+  customer?: SessionCustomer;
+  car?: SessionCar;
+  entries?: SessionEntry[];
+  inspection: any | null;
+  preJobcard: any | null;
+  quotation: any | null;
+  jobcard: any | null;
+  aiCarData: any | null;
 }
 
 export const sessionService = {
@@ -106,7 +152,7 @@ export const sessionService = {
    */
   async getSessionsByCustomer(customerId: string): Promise<Session[]> {
     try {
-      const response = await api.get<Session[]>(`/sessions?customerId=${customerId}`);
+      const response = await api.get<Session[]>(`/sessions/customer/${customerId}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching sessions for customer ${customerId}:`, error);
