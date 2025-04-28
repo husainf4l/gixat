@@ -43,6 +43,7 @@ export class SessionsService {
             createdAt: 'asc',
           },
         },
+        
         inspection: true,
         preJobcard: true,
         quotation: true,
