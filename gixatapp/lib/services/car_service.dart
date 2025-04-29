@@ -16,10 +16,20 @@ class CarService {
       final docRef = await _carsCollection.add(car.toMap());
       final carId = docRef.id;
 
-      // Create session with the new car ID
+      // Add the car ID to the client's carsId array
+      await _firestore.collection('clients').doc(car.clientId).update({
+        'carsId': FieldValue.arrayUnion([carId]),
+      });
+
+      // Pass all car data to the session
       final sessionId = await _sessionService.createSession(
         clientId: car.clientId,
+        clientName: car.clientName, // Pass client name
+        clientPhoneNumber: car.clientPhoneNumber, // Pass client phone number
         carId: carId,
+        carMake: car.make, // Pass car make
+        carModel: car.model, // Pass car model
+        plateNumber: car.plateNumber, // Pass plate number
         garageId: car.garageId,
       );
 
@@ -28,6 +38,11 @@ class CarService {
         final updatedCar = car.addSession(sessionId);
         await _carsCollection.doc(carId).update({
           'sessions': updatedCar.sessions,
+        });
+
+        // Add the session ID to the client's sessionsId array
+        await _firestore.collection('clients').doc(car.clientId).update({
+          'sessionsId': FieldValue.arrayUnion([sessionId]),
         });
 
         // Return both IDs for next steps

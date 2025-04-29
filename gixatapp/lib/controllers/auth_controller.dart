@@ -7,7 +7,6 @@ import 'package:crypto/crypto.dart';
 import 'dart:math';
 import 'dart:io' show Platform;
 import '../services/database_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user.dart'
     as app_models; // Import our custom User model with an alias
 
@@ -30,6 +29,7 @@ class AuthController extends GetxController {
   // Getters for user states
   firebase_auth.User? get firebaseUser => _firebaseUser.value;
   app_models.User? get currentUser => _appUser.value;
+  String? get garageId => currentUser?.garageId;
 
   @override
   void onInit() {

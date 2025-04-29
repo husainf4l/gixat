@@ -6,6 +6,8 @@ class Car {
   final String plateNumber;
   final String vin;
   final String clientId;
+  final String clientName; // Added client name
+  final String clientPhoneNumber; // Added client phone number
   final String garageId;
   final List<String> sessions; // IDs of service sessions
 
@@ -17,6 +19,8 @@ class Car {
     required this.plateNumber,
     this.vin = '', // Optional VIN number
     required this.clientId,
+    required this.clientName, // Added client name
+    required this.clientPhoneNumber, // Added client phone number
     required this.garageId,
     this.sessions = const [], // Default to empty list
   });
@@ -29,6 +33,8 @@ class Car {
       'plateNumber': plateNumber,
       'vin': vin,
       'clientId': clientId,
+      'clientName': clientName, // Added client name
+      'clientPhoneNumber': clientPhoneNumber, // Added client phone number
       'garageId': garageId,
       'sessions': sessions,
     };
@@ -43,6 +49,9 @@ class Car {
       plateNumber: map['plateNumber'] ?? '',
       vin: map['vin'] ?? '',
       clientId: map['clientId'] ?? '',
+      clientName: map['clientName'] ?? '', // Added client name
+      clientPhoneNumber:
+          map['clientPhoneNumber'] ?? '', // Added client phone number
       garageId: map['garageId'] ?? '',
       sessions: List<String>.from(map['sessions'] ?? []),
     );
@@ -57,6 +66,8 @@ class Car {
     String? plateNumber,
     String? vin,
     String? clientId,
+    String? clientName, // Added client name
+    String? clientPhoneNumber, // Added client phone number
     String? garageId,
     List<String>? sessions,
   }) {
@@ -68,6 +79,10 @@ class Car {
       plateNumber: plateNumber ?? this.plateNumber,
       vin: vin ?? this.vin,
       clientId: clientId ?? this.clientId,
+      clientName: clientName ?? this.clientName, // Added client name
+      clientPhoneNumber:
+          clientPhoneNumber ??
+          this.clientPhoneNumber, // Added client phone number
       garageId: garageId ?? this.garageId,
       sessions: sessions ?? this.sessions,
     );

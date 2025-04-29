@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gixatapp/screens/clients/clients_screen.dart';
 import '../controllers/navigation_controller.dart';
-import '../screens/feed_screen.dart';
-import '../screens/search_screen.dart';
+import 'sessions/sessions_screen.dart';
 import '../screens/add_client_screen.dart';
 import '../screens/messages_screen.dart';
 import '../screens/profile_screen.dart';
@@ -18,8 +18,8 @@ class MainNavigationScreen extends StatelessWidget {
 
     // List of screens to be shown in the tab view
     final List<Widget> screens = [
-      const FeedScreen(),
-      const SearchScreen(),
+      const SessionsScreen(),
+      const ClientsScreen(),
       const MessagesScreen(),
       const ProfileScreen(),
     ];
@@ -71,8 +71,8 @@ class MainNavigationScreen extends StatelessWidget {
                   ),
                   _buildNavItem(
                     context: context,
-                    icon: Icons.search_outlined,
-                    activeIcon: Icons.search,
+                    icon: Icons.people_outline,
+                    activeIcon: Icons.people,
                     index: 1,
                     currentIndex: navController.currentIndex.value,
                     onTap: () => navController.changeTab(1),

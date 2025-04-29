@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../controllers/auth_controller.dart';
 import '../services/session_service.dart';
+import '../services/client_notes_service.dart';
+import 'main_navigation_screen.dart';
 
 class ClientNotesScreen extends StatefulWidget {
   final String clientId;
@@ -24,6 +27,7 @@ class ClientNotesScreen extends StatefulWidget {
 class _ClientNotesScreenState extends State<ClientNotesScreen> {
   final AuthController _authController = Get.find<AuthController>();
   final SessionService _sessionService = SessionService();
+  final ClientNotesService _clientNotesService = ClientNotesService();
 
   final TextEditingController _customRequestController =
       TextEditingController();
@@ -53,55 +57,60 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
   }
 
   void _showAddRequestDialog() {
-    final TextEditingController dialogController = TextEditingController();
+    if (!mounted) return;
 
+    // Use StatefulBuilder to keep controller in dialog's scope and lifecycle
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder:
-          (context) => AlertDialog(
-            title: const Text('Add New Request'),
-            content: TextField(
-              controller: dialogController,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Enter service request',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.build_circle),
-              ),
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: (value) {
-                if (value.trim().isNotEmpty) {
-                  setState(() {
-                    _selectedRequests.add(value.trim());
-                  });
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('CANCEL'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  final request = dialogController.text.trim();
-                  if (request.isNotEmpty) {
-                    setState(() {
-                      _selectedRequests.add(request);
-                    });
-                    Navigator.pop(context);
-                  }
-                },
-                child: const Text('ADD'),
-              ),
-            ],
+          (dialogContext) => StatefulBuilder(
+            builder: (dialogContext, setDialogState) {
+              // Create controller inside the builder to ensure fresh instance
+              final dialogController = TextEditingController();
+
+              return AlertDialog(
+                title: const Text('Add New Request'),
+                content: TextField(
+                  controller: dialogController,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter service request',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.build_circle),
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty && mounted) {
+                      setState(() {
+                        _selectedRequests.add(value.trim());
+                      });
+                      Navigator.of(dialogContext).pop();
+                    }
+                  },
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('CANCEL'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      final request = dialogController.text.trim();
+                      if (request.isNotEmpty && mounted) {
+                        setState(() {
+                          _selectedRequests.add(request);
+                        });
+                        Navigator.of(dialogContext).pop();
+                      }
+                    },
+                    child: const Text('ADD'),
+                  ),
+                ],
+              );
+            },
           ),
-    ).then((_) {
-      if (mounted) {
-        dialogController.dispose();
-      }
-    });
+    );
   }
 
   void _removeRequest(String request) {
@@ -111,47 +120,52 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
   }
 
   void _showNotesDialog() {
-    final TextEditingController notesDialogController = TextEditingController(
-      text: _clientNotes ?? '',
-    );
+    if (!mounted) return;
 
     showDialog(
       context: context,
+      barrierDismissible: true,
       builder:
-          (context) => AlertDialog(
-            title: const Text('Add Client Notes'),
-            content: TextField(
-              controller: notesDialogController,
-              autofocus: true,
-              maxLines: 5,
-              decoration: const InputDecoration(
-                hintText: 'Enter notes about client requests and issues',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.note_alt),
-              ),
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('CANCEL'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _clientNotes = notesDialogController.text.trim();
-                  });
-                  Navigator.pop(context);
-                },
-                child: const Text('SAVE'),
-              ),
-            ],
+          (dialogContext) => StatefulBuilder(
+            builder: (dialogContext, setDialogState) {
+              final notesDialogController = TextEditingController(
+                text: _clientNotes ?? '',
+              );
+
+              return AlertDialog(
+                title: const Text('Add Client Notes'),
+                content: TextField(
+                  controller: notesDialogController,
+                  autofocus: true,
+                  maxLines: 5,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter notes about client requests and issues',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.note_alt),
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(dialogContext).pop(),
+                    child: const Text('CANCEL'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (mounted) {
+                        setState(() {
+                          _clientNotes = notesDialogController.text.trim();
+                        });
+                        Navigator.of(dialogContext).pop();
+                      }
+                    },
+                    child: const Text('SAVE'),
+                  ),
+                ],
+              );
+            },
           ),
-    ).then((_) {
-      if (mounted) {
-        notesDialogController.dispose();
-      }
-    });
+    );
   }
 
   Future<void> _saveNotes() async {
@@ -162,14 +176,36 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
     });
 
     try {
-      if (!mounted) return;
-      Get.snackbar(
-        'Success',
-        'Client notes saved successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      final clientNotesId = await _clientNotesService.saveClientNote(
+        sessionId: widget.sessionId,
+        carId: widget.carId,
+        clientId: widget.clientId,
+        notes: _clientNotes ?? '',
+        requests: _selectedRequests,
+        images: [], // Placeholder for images
       );
+
+      if (clientNotesId != null) {
+        final success = await _sessionService.updateSessionWithClientNote(
+          sessionId: widget.sessionId,
+          clientNoteId: clientNotesId,
+        );
+        if (success) {
+          Get.snackbar(
+            'Success',
+            'Client notes saved successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+          Get.offAll(() => const MainNavigationScreen());
+        } else {
+          throw Exception('Failed to update session with clientNotesId');
+        }
+      } else {
+        throw Exception('Failed to save client notes');
+      }
+
       await Future.delayed(const Duration(milliseconds: 800));
     } catch (e) {
       if (mounted) {

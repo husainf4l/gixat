@@ -97,8 +97,7 @@ class _AddCarScreenState extends State<AddCarScreen> {
     });
 
     try {
-      final carService = CarService();
-
+      final Map<String, dynamic> args = Get.arguments ?? {}; // Ensure args is accessible
       final newCar = Car(
         id: '', // Will be set by Firestore
         make: _make,
@@ -107,10 +106,12 @@ class _AddCarScreenState extends State<AddCarScreen> {
         plateNumber: _plateNumber,
         vin: _vin,
         clientId: _clientId,
+        clientName: _clientName ?? 'Unknown', // Added client name
+        clientPhoneNumber: args['clientPhoneNumber'] ?? 'Unknown', // Added client phone number
         garageId: _authController.currentUser?.garageId ?? '',
       );
 
-      final result = await carService.addCarAndCreateSession(newCar);
+      final result = await _carService.addCarAndCreateSession(newCar);
 
       if (result != null) {
         final carId = result['carId'] ?? '';

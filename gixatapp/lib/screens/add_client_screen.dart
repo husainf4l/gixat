@@ -96,7 +96,11 @@ class _AddClientScreenState extends State<AddClientScreen> {
         // Use Get.to() with arguments instead of constructor parameters
         Get.to(
           () => const AddCarScreen(),
-          arguments: {'clientId': clientId, 'clientName': _name},
+          arguments: {
+            'clientId': clientId,
+            'clientName': _name,
+            'clientPhoneNumber': _phone, // Added client phone number
+          },
           transition: Transition.rightToLeft,
         );
       } else {
