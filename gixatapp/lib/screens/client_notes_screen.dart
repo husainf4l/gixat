@@ -22,74 +22,147 @@ class ClientNotesScreen extends StatefulWidget {
 }
 
 class _ClientNotesScreenState extends State<ClientNotesScreen> {
-  final _formKey = GlobalKey<FormState>();
   final AuthController _authController = Get.find<AuthController>();
   final SessionService _sessionService = SessionService();
 
-  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _customRequestController =
+      TextEditingController();
 
   final List<String> _selectedRequests = [];
-  final List<String> _availableRequests = [
-    'Oil Change',
-    'Brake Service',
-    'Tire Rotation',
-    'Engine Diagnostics',
-    'AC Service',
-    'Battery Replacement',
-  ];
+  String? _clientNotes;
 
   bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Add gesture detector to dismiss keyboard when tapping outside
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      GestureDetector(
-        onTap: () {
-          // This ensures keyboard is dismissed when tapping anywhere else
-          FocusScope.of(context).unfocus();
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Container(),
-      );
-    });
-  }
-
-  @override
   void dispose() {
-    _notesController.dispose();
+    _customRequestController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveNotes() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
+  void _addCustomRequest() {
+    final request = _customRequestController.text.trim();
+    if (request.isNotEmpty) {
+      setState(() {
+        _selectedRequests.add(request);
+        _customRequestController.clear();
+      });
+      FocusScope.of(context).unfocus();
+    } else {
+      _showAddRequestDialog();
     }
+  }
+
+  void _showAddRequestDialog() {
+    final TextEditingController dialogController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add New Request'),
+            content: TextField(
+              controller: dialogController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'Enter service request',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.build_circle),
+              ),
+              textCapitalization: TextCapitalization.sentences,
+              onSubmitted: (value) {
+                if (value.trim().isNotEmpty) {
+                  setState(() {
+                    _selectedRequests.add(value.trim());
+                  });
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('CANCEL'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final request = dialogController.text.trim();
+                  if (request.isNotEmpty) {
+                    setState(() {
+                      _selectedRequests.add(request);
+                    });
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('ADD'),
+              ),
+            ],
+          ),
+    ).then((_) {
+      if (mounted) {
+        dialogController.dispose();
+      }
+    });
+  }
+
+  void _removeRequest(String request) {
+    setState(() {
+      _selectedRequests.remove(request);
+    });
+  }
+
+  void _showNotesDialog() {
+    final TextEditingController notesDialogController = TextEditingController(
+      text: _clientNotes ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add Client Notes'),
+            content: TextField(
+              controller: notesDialogController,
+              autofocus: true,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                hintText: 'Enter notes about client requests and issues',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.note_alt),
+              ),
+              textCapitalization: TextCapitalization.sentences,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('CANCEL'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _clientNotes = notesDialogController.text.trim();
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('SAVE'),
+              ),
+            ],
+          ),
+    ).then((_) {
+      if (mounted) {
+        notesDialogController.dispose();
+      }
+    });
+  }
+
+  Future<void> _saveNotes() async {
+    if (!mounted) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Here you would save the client note to Firebase
-      // For example:
-      // final clientNoteId = await _clientNoteService.createClientNote(
-      //   clientId: widget.clientId,
-      //   carId: widget.carId,
-      //   garageId: _authController.currentUser!.garageId,
-      //   sessionId: widget.sessionId,
-      //   notes: _notesController.text,
-      //   clientRequests: _selectedRequests,
-      // );
-
-      // Then update the session with the client note ID
-      // await _sessionService.updateSessionWithClientNote(
-      //   sessionId: widget.sessionId,
-      //   clientNoteId: clientNoteId!,
-      // );
-
-      // For now, just show success message
+      if (!mounted) return;
       Get.snackbar(
         'Success',
         'Client notes saved successfully',
@@ -97,21 +170,23 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-
-      // Navigate to main/home
-      Get.offAllNamed('/home');
+      await Future.delayed(const Duration(milliseconds: 800));
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'An error occurred: $e',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      if (mounted) {
+        Get.snackbar(
+          'Error',
+          'An error occurred: $e',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -120,13 +195,14 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
@@ -153,114 +229,187 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
                       Get.back();
                     },
                   ),
+                  const SizedBox(width: 4),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _saveNotes,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child:
+                        _isLoading
+                            ? SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                            : const Text('SAVE'),
+                  ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        controller: _notesController,
-                        decoration: InputDecoration(
-                          labelText: 'Client Notes',
-                          prefixIcon: const Icon(Icons.note_alt),
-                          border: const OutlineInputBorder(),
-                          hintText:
-                              'Enter notes about client requests and issues',
-                          // Add an explicit "keyboard done" button in the suffix
-                          suffixIcon: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.keyboard_hide),
-                                tooltip: 'Done',
-                                onPressed: () {
-                                  // Close keyboard when done icon is tapped
-                                  FocusScope.of(context).unfocus();
-                                },
-                              ),
-                            ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_clientNotes != null && _clientNotes!.isNotEmpty)
+                    Card(
+                      color: theme.colorScheme.surfaceVariant,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        leading: const Icon(Icons.note_alt),
+                        title: Text(_clientNotes!),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: _showNotesDialog,
+                        ),
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.note_add),
+                      label: Text(
+                        _clientNotes == null || _clientNotes!.isEmpty
+                            ? 'Add Client Notes'
+                            : 'Edit Client Notes',
+                      ),
+                      onPressed: _showNotesDialog,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Client Requests:',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child:
+                    _selectedRequests.isEmpty
+                        ? Center(
+                          child: Text(
+                            'No requests added yet',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                        maxLines: 5,
-                        // Use multiline keyboard type
-                        keyboardType: TextInputType.multiline,
-                        // Allow natural newlines with the return key
-                        textInputAction: TextInputAction.newline,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter some notes';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Client Requests:',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _availableRequests.length,
+                        )
+                        : ListView.builder(
+                          itemCount: _selectedRequests.length,
                           itemBuilder: (context, index) {
-                            final request = _availableRequests[index];
-                            return CheckboxListTile(
-                              title: Text(request),
-                              value: _selectedRequests.contains(request),
-                              secondary: Icon(
-                                _getIconForRequest(request),
-                                color: theme.primaryColor,
+                            final request = _selectedRequests[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 4),
+                              child: ListTile(
+                                title: Text(request),
+                                leading: Icon(
+                                  _getIconForRequest(request),
+                                  color: theme.primaryColor,
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => _removeRequest(request),
+                                ),
                               ),
-                              onChanged: (bool? selected) {
-                                setState(() {
-                                  if (selected == true) {
-                                    _selectedRequests.add(request);
-                                  } else {
-                                    _selectedRequests.remove(request);
-                                  }
-                                });
-                              },
                             );
                           },
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _saveNotes,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child:
-                              _isLoading
-                                  ? const CircularProgressIndicator()
-                                  : const Text('SAVE NOTES'),
+              ),
+            ),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.attach_file,
+                                color: Colors.grey,
+                              ),
+                              tooltip: 'Attach image',
+                              onPressed: () {
+                                // TODO: Implement image picker logic
+                              },
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _customRequestController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Type a service request...',
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 0,
+                                    vertical: 14,
+                                  ),
+                                ),
+                                textInputAction: TextInputAction.send,
+                                onSubmitted: (_) => _addCustomRequest(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 8),
+                    CircleAvatar(
+                      backgroundColor: theme.primaryColor,
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: _addCustomRequest,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Helper method to get appropriate icons for different request types
   IconData _getIconForRequest(String request) {
     switch (request.toLowerCase()) {
       case 'oil change':
         return Icons.oil_barrel;
-
       case 'tire rotation':
         return Icons.tire_repair;
       case 'engine diagnostics':
