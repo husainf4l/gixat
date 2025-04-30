@@ -9,40 +9,7 @@ class MessagesScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     // Sample chat data - in a real app, this would come from a database
-    final List<Map<String, dynamic>> chats = [
-      {
-        'id': '1',
-        'name': 'Service Center',
-        'lastMessage': 'Your car is ready for pickup.',
-        'time': DateTime.now().subtract(const Duration(minutes: 30)),
-        'unread': 2,
-        'avatar': 'https://randomuser.me/api/portraits/men/1.jpg',
-      },
-      {
-        'id': '2',
-        'name': 'Parts Department',
-        'lastMessage': 'The parts you ordered have arrived.',
-        'time': DateTime.now().subtract(const Duration(hours: 3)),
-        'unread': 0,
-        'avatar': 'https://randomuser.me/api/portraits/women/2.jpg',
-      },
-      {
-        'id': '3',
-        'name': 'Support Team',
-        'lastMessage': 'How can we help you today?',
-        'time': DateTime.now().subtract(const Duration(days: 1)),
-        'unread': 0,
-        'avatar': 'https://randomuser.me/api/portraits/men/3.jpg',
-      },
-      {
-        'id': '4',
-        'name': 'Car Inspection',
-        'lastMessage': 'Your inspection report is ready.',
-        'time': DateTime.now().subtract(const Duration(days: 2)),
-        'unread': 1,
-        'avatar': 'https://randomuser.me/api/portraits/women/4.jpg',
-      },
-    ];
+    final List<Map<String, dynamic>> chats = [];
 
     return SafeArea(
       child: Padding(
@@ -51,7 +18,7 @@ class MessagesScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Messages',
+              'ai Actions',
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),

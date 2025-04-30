@@ -34,7 +34,7 @@ class ClientsScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(Icons.add),
                   onPressed: () {
                     // Refresh logic can be added here
                   },

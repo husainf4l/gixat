@@ -34,12 +34,7 @@ class SessionsScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: () {
-                    Get.to(AddClientScreen());
-                  },
-                ),
+                IconButton(icon: const Icon(Icons.add), onPressed: () {}),
               ],
             ),
             const SizedBox(height: 16),
