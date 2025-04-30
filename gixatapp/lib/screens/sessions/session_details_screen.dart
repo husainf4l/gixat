@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import '../../models/session.dart';
+import '../../services/client_notes_service.dart';
+import 'client_notes_details_screen.dart';
 
 class SessionDetailsScreen extends StatelessWidget {
   final Session session;
@@ -127,7 +130,26 @@ class SessionDetailsScreen extends StatelessWidget {
                           icon: Icons.sticky_note_2_outlined,
                           title: 'Client Notes',
                           color: primaryColor,
-                          onTap: () {},
+                          onTap: () {
+                            // Navigate to the client notes details screen
+                            final clientNotesId = session.clientNoteId;
+                            final carMake = session.car['make'] ?? '';
+                            final carModel = session.car['model'] ?? '';
+                            final plateNumber =
+                                session.car['plateNumber'] ?? '';
+                            final carDetails =
+                                '$carMake $carModel ${plateNumber.isNotEmpty ? '• $plateNumber' : ''}';
+
+                            Get.to(
+                              () => ClientNotesDetailsScreen(
+                                session: session,
+                                clientNotesId: clientNotesId,
+                                clientName: session.client['name'] ?? 'Unknown',
+                                carDetails: carDetails,
+                              ),
+                              transition: Transition.rightToLeft,
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -203,7 +225,6 @@ class SessionDetailsScreen extends StatelessWidget {
                     );
                   }
 
-                  
                   if (snapshot.hasError) {
                     return Center(
                       child: Text(

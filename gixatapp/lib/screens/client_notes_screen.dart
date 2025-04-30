@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 import '../controllers/auth_controller.dart';
 import '../services/session_service.dart';
 import '../services/client_notes_service.dart';
@@ -28,14 +31,18 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
   final AuthController _authController = Get.find<AuthController>();
   final SessionService _sessionService = SessionService();
   final ClientNotesService _clientNotesService = ClientNotesService();
+  final ImagePicker _imagePicker = ImagePicker();
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   final TextEditingController _customRequestController =
       TextEditingController();
 
   final List<String> _selectedRequests = [];
   String? _clientNotes;
-
+  List<File> _selectedImages = [];
+  List<String> _uploadedImageUrls = [];
   bool _isLoading = false;
+  bool _isUploading = false;
 
   @override
   void dispose() {
@@ -176,13 +183,18 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
     });
 
     try {
+      // First upload any selected images to Firebase Storage
+      if (_selectedImages.isNotEmpty) {
+        await _uploadImagesToFirebase();
+      }
+
       final clientNotesId = await _clientNotesService.saveClientNote(
         sessionId: widget.sessionId,
         carId: widget.carId,
         clientId: widget.clientId,
         notes: _clientNotes ?? '',
         requests: _selectedRequests,
-        images: [], // Placeholder for images
+        images: _uploadedImageUrls,
       );
 
       if (clientNotesId != null) {
@@ -224,6 +236,303 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
         });
       }
     }
+  }
+
+  // Pick images from gallery or camera
+  Future<void> _pickImages({
+    required ImageSource source,
+    bool multiple = false,
+  }) async {
+    try {
+      setState(() {
+        _isUploading = true;
+      });
+
+      if (source == ImageSource.gallery && multiple) {
+        // Pick multiple images from gallery
+        final List<XFile> pickedFiles = await _imagePicker.pickMultiImage();
+        if (pickedFiles.isNotEmpty) {
+          setState(() {
+            for (var file in pickedFiles) {
+              _selectedImages.add(File(file.path));
+            }
+          });
+        }
+      } else {
+        // Pick single image from gallery or camera
+        final XFile? pickedFile = await _imagePicker.pickImage(
+          source: source,
+          imageQuality: 80, // Reduce quality to save storage
+        );
+
+        if (pickedFile != null) {
+          setState(() {
+            _selectedImages.add(File(pickedFile.path));
+          });
+        }
+      }
+
+      // Show selected images preview
+      if (_selectedImages.isNotEmpty) {
+        _showImagesPreview();
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to pick image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  // Show image source options (camera or gallery)
+  void _showImageSourceOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Take Photo'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImages(source: ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImages(source: ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Select Multiple Images'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImages(source: ImageSource.gallery, multiple: true);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Upload images to Firebase Storage
+  Future<List<String>> _uploadImagesToFirebase() async {
+    if (_selectedImages.isEmpty) return [];
+
+    setState(() {
+      _isUploading = true;
+    });
+
+    try {
+      List<String> newlyUploadedUrls = [];
+
+      for (var imageFile in _selectedImages) {
+        try {
+          // Create a unique file name with timestamp
+          String fileName =
+              'session_${widget.sessionId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+          // Create a reference to the specified Firebase Storage bucket and path
+          Reference storageRef = FirebaseStorage.instance
+              .refFromURL('gs://gixat-app.firebasestorage.app')
+              .child('client_notes_images/$fileName');
+
+          // Upload the file
+          await storageRef.putFile(imageFile);
+
+          // Get the download URL
+          String downloadUrl = await storageRef.getDownloadURL();
+          newlyUploadedUrls.add(downloadUrl);
+        } catch (e) {
+          print('Error uploading individual image: $e');
+          // Continue with the other images even if one fails
+        }
+      }
+
+      // Add the newly uploaded URLs to the list of uploaded URLs
+      _uploadedImageUrls.addAll(newlyUploadedUrls);
+
+      // Clear the selected images list since they've been uploaded
+      setState(() {
+        _selectedImages.clear();
+      });
+
+      // Show success message if any images were uploaded
+      if (newlyUploadedUrls.isNotEmpty) {
+        Get.snackbar(
+          'Success',
+          'Images uploaded successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }
+
+      return _uploadedImageUrls;
+    } catch (e) {
+      print('Error in _uploadImagesToFirebase: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to upload images: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return [];
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  // Show preview of selected images in a dialog
+  void _showImagesPreview() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Selected Images',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (_selectedImages.isEmpty)
+                    // Show empty container when there are no images
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'No images selected',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      height: 300,
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                        itemCount: _selectedImages.length,
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(
+                                  _selectedImages[index],
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedImages.removeAt(index);
+                                    });
+                                    Navigator.pop(context);
+                                    if (_selectedImages.isNotEmpty) {
+                                      _showImagesPreview();
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+    );
   }
 
   @override
@@ -401,9 +710,7 @@ class _ClientNotesScreenState extends State<ClientNotesScreen> {
                                 color: Colors.grey,
                               ),
                               tooltip: 'Attach image',
-                              onPressed: () {
-                                // TODO: Implement image picker logic
-                              },
+                              onPressed: _showImageSourceOptions,
                             ),
                             Expanded(
                               child: TextField(
