@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 
-class ClientNotesService {
+class InspectionService {
   final CollectionReference _jobCardCollection = FirebaseFirestore.instance
       .collection('jobCard');
   final CollectionReference _activityCollection = FirebaseFirestore.instance
@@ -12,12 +12,12 @@ class ClientNotesService {
   final AuthController? _authController =
       Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
 
-  Future<String?> saveClientNote({
+  Future<String?> saveInspection({
     required String sessionId,
     required String carId,
     required String clientId,
     required String notes,
-    required List<String> requests,
+    required List<String> findings,
     required List<String> images,
   }) async {
     try {
@@ -28,27 +28,27 @@ class ClientNotesService {
               .toList();
 
       // Create Firestore document
-      final clientNoteData = {
+      final inspectionData = {
         'sessionId': sessionId,
         'carId': carId,
         'clientId': clientId,
         'notes': notes,
-        'requests': requests,
+        'findings': findings,
         'images': validImages,
-        'type': 'clientNotes',
+        'type': 'inspection',
         'timestamp': FieldValue.serverTimestamp(),
       };
 
       // Add document to Firestore
       final DocumentReference docRef = await _jobCardCollection.add(
-        clientNoteData,
+        inspectionData,
       );
 
       // Create activity record for tracking
       await _createActivityRecord(
         sessionId: sessionId,
-        title: 'Client note updated',
-        type: 'note',
+        title: 'Inspection completed',
+        type: 'inspection',
       );
 
       return docRef.id;
@@ -61,15 +61,15 @@ class ClientNotesService {
     }
   }
 
-  // Get client notes for a specific session
-  Future<Map<String, dynamic>?> getClientNotesForSession(
+  // Get inspection for a specific session
+  Future<Map<String, dynamic>?> getInspectionForSession(
     String sessionId,
   ) async {
     try {
       final snapshot =
           await _jobCardCollection
               .where('sessionId', isEqualTo: sessionId)
-              .where('type', isEqualTo: 'clientNotes')
+              .where('type', isEqualTo: 'inspection')
               .get();
 
       if (snapshot.docs.isNotEmpty) {
@@ -83,17 +83,17 @@ class ClientNotesService {
     }
   }
 
-  // Update an existing client note
-  Future<bool> updateClientNote({
-    required String clientNoteId,
+  // Update an existing inspection
+  Future<bool> updateInspection({
+    required String inspectionId,
     required String notes,
-    required List<String> requests,
+    required List<String> findings,
     List<String>? images,
   }) async {
     try {
       final updateData = {
         'notes': notes,
-        'requests': requests,
+        'findings': findings,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -111,26 +111,26 @@ class ClientNotesService {
         }
       }
 
-      await _jobCardCollection.doc(clientNoteId).update(updateData);
+      await _jobCardCollection.doc(inspectionId).update(updateData);
 
       // Get the session ID for activity logging
-      final noteDoc = await _jobCardCollection.doc(clientNoteId).get();
-      if (noteDoc.exists) {
-        final noteData = noteDoc.data() as Map<String, dynamic>;
-        final sessionId = noteData['sessionId'] as String?;
+      final inspectionDoc = await _jobCardCollection.doc(inspectionId).get();
+      if (inspectionDoc.exists) {
+        final inspectionData = inspectionDoc.data() as Map<String, dynamic>;
+        final sessionId = inspectionData['sessionId'] as String?;
 
         if (sessionId != null) {
-          // Create activity record for the note update
+          // Create activity record for the inspection update
           await _activityCollection.add({
             'sessionId': sessionId,
-            'clientNoteId': clientNoteId,
+            'inspectionId': inspectionId,
             'timestamp': FieldValue.serverTimestamp(),
-            'type': 'note_update',
-            'title': 'Client Notes Updated',
+            'type': 'inspection_update',
+            'title': 'Inspection Updated',
             'description':
                 notes.isNotEmpty
                     ? 'Notes: $notes'
-                    : 'Client requests were updated',
+                    : 'Inspection findings were updated',
             'userId': _authController?.firebaseUser?.uid,
             'userName': _authController?.currentUser?.displayName,
           });

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class DatabaseService extends GetxService {
   // Firestore instance
@@ -15,17 +16,23 @@ class DatabaseService extends GetxService {
       // Initialize Firestore with settings for better reliability
       _firestore = FirebaseFirestore.instance;
 
-      // Optional: Configure Firestore settings for better performance/reliability
-      await (_firestore.settings.persistenceEnabled == true)
-          ? null
-          : _firestore
-              .enablePersistence(
-                const PersistenceSettings(synchronizeTabs: true),
-              )
-              .catchError((e) {
-                print('Error enabling persistence: $e');
-                // Continue even if persistence fails
-              });
+      // Configure Firestore persistence based on platform
+      // Web uses enablePersistence, other platforms use settings
+      if (kIsWeb) {
+        // Web-specific persistence configuration
+        await _firestore
+            .enablePersistence(const PersistenceSettings(synchronizeTabs: true))
+            .catchError((e) {
+              print('Error enabling persistence on web: $e');
+              // Continue even if persistence fails
+            });
+      } else {
+        // iOS, Android, and other platforms use settings
+        _firestore.settings = Settings(
+          persistenceEnabled: true,
+          cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+        );
+      }
 
       // Verify connection by performing a simple operation
       await _firestore

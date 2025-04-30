@@ -3,8 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 import '../models/car.dart';
+import '../models/session.dart';
 import '../services/car_service.dart';
-import '../screens/client_notes_screen.dart';
+import '../screens/sessions/session_details_screen.dart';
 
 class AddCarScreen extends StatefulWidget {
   const AddCarScreen({super.key});
@@ -97,7 +98,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
     });
 
     try {
-      final Map<String, dynamic> args = Get.arguments ?? {}; // Ensure args is accessible
+      final Map<String, dynamic> args =
+          Get.arguments ?? {}; // Ensure args is accessible
       final newCar = Car(
         id: '', // Will be set by Firestore
         make: _make,
@@ -107,7 +109,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
         vin: _vin,
         clientId: _clientId,
         clientName: _clientName ?? 'Unknown', // Added client name
-        clientPhoneNumber: args['clientPhoneNumber'] ?? 'Unknown', // Added client phone number
+        clientPhoneNumber:
+            args['clientPhoneNumber'] ?? 'Unknown', // Added client phone number
         garageId: _authController.currentUser?.garageId ?? '',
       );
 
@@ -119,25 +122,43 @@ class _AddCarScreenState extends State<AddCarScreen> {
 
         Get.snackbar(
           'Success',
-          'Car added successfully. Now add client notes.',
+          'Car added successfully.',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
           duration: const Duration(seconds: 2),
         );
 
-        // Use MaterialPageRoute for navigation with null checking
-        Navigator.push(
+        // Create a session object for navigation
+        final car = {
+          'id': carId,
+          'make': _make,
+          'model': _model,
+          'year': _year,
+          'plateNumber': _plateNumber,
+          'vin': _vin,
+        };
+
+        final client = {
+          'id': _clientId,
+          'name': _clientName ?? 'Unknown',
+          'phoneNumber': args['clientPhoneNumber'] ?? 'Unknown',
+        };
+
+        final session = Session(
+          id: sessionId,
+          car: car,
+          client: client,
+          garageId: _authController.currentUser?.garageId ?? '',
+          status: 'OPEN',
+          clientNoteId: null,
+        );
+
+        // Navigate to session details screen
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder:
-                (context) => ClientNotesScreen(
-                  clientId: _clientId,
-                  clientName:
-                      _clientName ?? 'Client', // Provide default value if null
-                  carId: carId,
-                  sessionId: sessionId,
-                ),
+            builder: (context) => SessionDetailsScreen(session: session),
           ),
         );
       } else {

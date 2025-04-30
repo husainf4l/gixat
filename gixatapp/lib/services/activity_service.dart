@@ -1,62 +1,78 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
-import '../models/activity.dart';
 
 class ActivityService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final CollectionReference _activitiesCollection = FirebaseFirestore.instance
+  final CollectionReference _activityCollection = FirebaseFirestore.instance
       .collection('activity');
-  final AuthController _authController = Get.find<AuthController>();
 
-  // Create a new activity
+  // Try to get the AuthController if it's available
+  final AuthController? _authController =
+      Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+
+  /// Log an activity for tracking user actions
+  Future<String?> logActivity({
+    required String sessionId,
+    required String title,
+    required String type,
+    String? description,
+    String? relatedDocumentId,
+    String? relatedDocumentType,
+    Map<String, dynamic>? additionalData,
+  }) async {
+    try {
+      final activityData = {
+        'sessionId': sessionId,
+        'timestamp': FieldValue.serverTimestamp(),
+        'type': type,
+        'title': title,
+        'description': description ?? '',
+        'userId': _authController?.firebaseUser?.uid,
+        'userName': _authController?.currentUser?.displayName,
+      };
+
+      // Add optional fields if provided
+      if (relatedDocumentId != null) {
+        activityData['relatedDocumentId'] = relatedDocumentId;
+      }
+
+      if (relatedDocumentType != null) {
+        activityData['relatedDocumentType'] = relatedDocumentType;
+      }
+
+      // Add any additional data
+      if (additionalData != null) {
+        activityData.addAll(additionalData);
+      }
+
+      // Add to Firestore
+      final docRef = await _activityCollection.add(activityData);
+      return docRef.id;
+    } catch (e) {
+      debugPrint('Error logging activity: $e');
+      return null;
+    }
+  }
+
+  /// Create an activity (method called by SessionService)
   Future<String?> createActivity({
     required String sessionId,
     required String type,
     required String title,
     String? description,
+    Map<String, dynamic>? additionalData,
   }) async {
-    try {
-      final activityData = {
-        'sessionId': sessionId,
-        'type': type,
-        'title': title,
-        'description': description,
-        'timestamp': FieldValue.serverTimestamp(),
-        'userId': _authController.firebaseUser?.uid,
-        'userName': _authController.currentUser?.displayName,
-      };
-
-      final docRef = await _activitiesCollection.add(activityData);
-      return docRef.id;
-    } catch (e) {
-      print('Error creating activity: $e');
-      return null;
-    }
+    return logActivity(
+      sessionId: sessionId,
+      title: title,
+      type: type,
+      description: description,
+      additionalData: additionalData,
+    );
   }
 
-  // Get activities for a specific session
-  Future<List<Activity>> getSessionActivities(String sessionId) async {
-    try {
-      final snapshot =
-          await _activitiesCollection
-              .where('sessionId', isEqualTo: sessionId)
-              .orderBy('timestamp', descending: true)
-              .get();
-
-      return snapshot.docs
-          .map(
-            (doc) =>
-                Activity.fromMap(doc.data() as Map<String, dynamic>, doc.id),
-          )
-          .toList();
-    } catch (e) {
-      print('Error getting session activities: $e');
-      return [];
-    }
-  }
-
-  // Create a status change activity
+  /// Create a status change activity (method called by SessionService)
   Future<String?> createStatusChangeActivity({
     required String sessionId,
     required String oldStatus,
@@ -64,61 +80,119 @@ class ActivityService {
   }) async {
     return createActivity(
       sessionId: sessionId,
-      type: 'status_change',
+      type: 'status_changed',
       title: 'Status Changed',
-      description: 'Status updated from $oldStatus to $newStatus',
+      description: 'Status changed from $oldStatus to $newStatus',
+      additionalData: {'oldStatus': oldStatus, 'newStatus': newStatus},
     );
   }
 
-  // Create a note activity
+  /// Create a note activity (method called by SessionService)
   Future<String?> createNoteActivity({
     required String sessionId,
     String? notes,
   }) async {
     return createActivity(
       sessionId: sessionId,
-      type: 'note',
-      title: 'Client Notes Added',
+      type: 'note_added',
+      title: 'Notes Added',
       description: notes,
     );
   }
 
-  // Create an inspection activity
-  Future<String?> createInspectionActivity({
-    required String sessionId,
-    String? description,
+  /// Get activities for a specific session
+  Future<List<Map<String, dynamic>>> getActivitiesForSession(
+    String sessionId, {
+    int? limit,
+    String? typeFilter,
   }) async {
-    return createActivity(
-      sessionId: sessionId,
-      type: 'inspection',
-      title: 'Inspection Completed',
-      description: description,
-    );
+    try {
+      Query query = _activityCollection
+          .where('sessionId', isEqualTo: sessionId)
+          .orderBy('timestamp', descending: true);
+
+      if (typeFilter != null) {
+        query = query.where('type', isEqualTo: typeFilter);
+      }
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      final snapshot = await query.get();
+
+      return snapshot.docs.map((doc) {
+        return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+      }).toList();
+    } catch (e) {
+      debugPrint('Error getting activities: $e');
+      return [];
+    }
   }
 
-  // Create a test drive activity
-  Future<String?> createTestDriveActivity({
-    required String sessionId,
-    String? notes,
-  }) async {
-    return createActivity(
-      sessionId: sessionId,
-      type: 'test_drive',
-      title: 'Test Drive Completed',
-      description: notes,
-    );
+  /// Stream activities for a specific session in real-time
+  Stream<List<Map<String, dynamic>>> streamActivitiesForSession(
+    String sessionId, {
+    int? limit,
+    String? typeFilter,
+  }) {
+    try {
+      Query query = _activityCollection
+          .where('sessionId', isEqualTo: sessionId)
+          .orderBy('timestamp', descending: true);
+
+      if (typeFilter != null) {
+        query = query.where('type', isEqualTo: typeFilter);
+      }
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      return query.snapshots().map((snapshot) {
+        return snapshot.docs.map((doc) {
+          return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+        }).toList();
+      });
+    } catch (e) {
+      debugPrint('Error streaming activities: $e');
+      return Stream.value([]);
+    }
   }
 
-  // Create a job order activity
-  Future<String?> createJobOrderActivity({
-    required String sessionId,
-    String? description,
-  }) async {
-    return createActivity(
-      sessionId: sessionId,
-      type: 'job_order',
-      title: 'Job Order Created',
-      description: description,
-    );
+  /// Delete activity records
+  Future<bool> deleteActivity(String activityId) async {
+    try {
+      await _activityCollection.doc(activityId).delete();
+      return true;
+    } catch (e) {
+      debugPrint('Error deleting activity: $e');
+      return false;
+    }
+  }
+
+  /// Get the latest activity of a specific type for a session
+  Future<Map<String, dynamic>?> getLatestActivityByType(
+    String sessionId,
+    String type,
+  ) async {
+    try {
+      final snapshot =
+          await _activityCollection
+              .where('sessionId', isEqualTo: sessionId)
+              .where('type', isEqualTo: type)
+              .orderBy('timestamp', descending: true)
+              .limit(1)
+              .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final doc = snapshot.docs.first;
+        return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting latest activity: $e');
+      return null;
+    }
   }
 }

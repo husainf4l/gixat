@@ -4,15 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../models/session.dart';
-import '../../services/client_notes_service.dart';
+import '../../services/test_drive_service.dart';
 import '../../services/session_service.dart';
 import '../../services/image_handling_service.dart';
 import '../../widgets/image_grid_widget.dart';
 import '../../widgets/notes_editor_widget.dart';
-import '../../widgets/request_list_widget.dart';
 import '../../widgets/detail_screen_header.dart';
 
-class ClientNotesDetailsScreen extends StatefulWidget {
+class TestDriveDetailsScreen extends StatefulWidget {
   // Required parameters
   final String sessionId;
   final String clientId;
@@ -22,14 +21,14 @@ class ClientNotesDetailsScreen extends StatefulWidget {
 
   // Optional parameters
   final Session? session;
-  final String? clientNotesId;
+  final String? testDriveId;
 
-  const ClientNotesDetailsScreen({
+  const TestDriveDetailsScreen({
     super.key,
     this.session,
     required this.clientName,
     required this.carDetails,
-    this.clientNotesId,
+    this.testDriveId,
     String? sessionId,
     String? clientId,
     String? carId,
@@ -38,19 +37,18 @@ class ClientNotesDetailsScreen extends StatefulWidget {
        carId = carId ?? '';
 
   @override
-  State<ClientNotesDetailsScreen> createState() =>
-      _ClientNotesDetailsScreenState();
+  State<TestDriveDetailsScreen> createState() => _TestDriveDetailsScreenState();
 }
 
-class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
-  final ClientNotesService _clientNotesService = ClientNotesService();
+class _TestDriveDetailsScreenState extends State<TestDriveDetailsScreen> {
+  final TestDriveService _testDriveService = TestDriveService();
   final SessionService _sessionService = SessionService();
   final ImageHandlingService _imageHandlingService = ImageHandlingService();
-  final TextEditingController _customRequestController =
+  final TextEditingController _customObservationController =
       TextEditingController();
 
   String? _notes;
-  List<String> _requests = [];
+  List<String> _observations = [];
   List<File> _selectedImages = [];
   List<String> _uploadedImageUrls = [];
   bool _isLoading = true;
@@ -71,40 +69,40 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
     _clientId = widget.session?.client['id'] ?? widget.clientId;
     _carId = widget.session?.car['id'] ?? widget.carId;
 
-    // If no clientNotesId is provided, start in edit mode for a new note
-    if (widget.clientNotesId == null) {
+    // If no testDriveId is provided, start in edit mode for a new test drive
+    if (widget.testDriveId == null) {
       _isEditing = true;
     }
-    _fetchClientNotes();
+    _fetchTestDrive();
   }
 
   @override
   void dispose() {
-    _customRequestController.dispose();
+    _customObservationController.dispose();
     super.dispose();
   }
 
-  Future<void> _fetchClientNotes() async {
+  Future<void> _fetchTestDrive() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      if (widget.clientNotesId != null) {
-        // Fetch existing client notes from jobCard collection
-        final clientNoteDoc =
+      if (widget.testDriveId != null) {
+        // Fetch existing test drive from jobCard collection
+        final testDriveDoc =
             await FirebaseFirestore.instance
                 .collection('jobCard')
-                .doc(widget.clientNotesId)
+                .doc(widget.testDriveId)
                 .get();
 
-        if (clientNoteDoc.exists) {
-          final data = clientNoteDoc.data() as Map<String, dynamic>;
+        if (testDriveDoc.exists) {
+          final data = testDriveDoc.data() as Map<String, dynamic>;
           setState(() {
             _notes = data['notes'] as String?;
-            if (data['requests'] != null) {
-              _requests = List<String>.from(data['requests']);
+            if (data['observations'] != null) {
+              _observations = List<String>.from(data['observations']);
             }
 
             // Load existing image URLs
@@ -114,10 +112,10 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
           });
         }
       }
-      // If clientNotesId is null, we're creating a new note, so no need to fetch
+      // If testDriveId is null, we're creating a new test drive, so no need to fetch
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error loading client notes: $e';
+        _errorMessage = 'Error loading test drive: $e';
       });
     } finally {
       setState(() {
@@ -146,35 +144,56 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
     );
   }
 
-  void _addCustomRequest() {
-    final request = _customRequestController.text.trim();
-    if (request.isNotEmpty) {
+  void _addCustomObservation() {
+    final observation = _customObservationController.text.trim();
+    if (observation.isNotEmpty) {
       setState(() {
-        _requests.add(request);
-        _customRequestController.clear();
+        _observations.add(observation);
+        _customObservationController.clear();
       });
       FocusScope.of(context).unfocus();
     } else {
-      _showAddRequestDialog();
+      _showAddObservationDialog();
     }
   }
 
-  void _showAddRequestDialog() {
-    RequestListWidget.showAddRequestDialog(
-      context,
-      onAddRequest: (request) {
-        if (mounted) {
-          setState(() {
-            _requests.add(request);
-          });
-        }
-      },
+  void _showAddObservationDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add Test Drive Observation'),
+            content: TextField(
+              autofocus: true,
+              controller: _customObservationController,
+              decoration: const InputDecoration(
+                hintText: 'Enter test drive observation',
+              ),
+              onSubmitted: (_) {
+                _addCustomObservation();
+                Navigator.pop(context);
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _addCustomObservation();
+                  Navigator.pop(context);
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
     );
   }
 
-  void _removeRequest(String request) {
+  void _removeObservation(String observation) {
     setState(() {
-      _requests.remove(request);
+      _observations.remove(observation);
     });
   }
 
@@ -204,7 +223,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
         final List<String> newImageUrls = await _imageHandlingService
             .uploadImagesToFirebase(
               imageFiles: _selectedImages,
-              storagePath: 'client_notes_images',
+              storagePath: 'test_drive_images',
               uniqueIdentifier: 'session_${_sessionId}',
             );
 
@@ -212,42 +231,31 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
         _selectedImages.clear();
       }
 
-      String? clientNotesId = widget.clientNotesId;
+      String? testDriveId = widget.testDriveId;
 
-      if (clientNotesId != null) {
-        // Update existing client notes
-        await _clientNotesService.updateClientNote(
-          clientNoteId: clientNotesId,
+      if (testDriveId != null) {
+        // Update existing test drive
+        await _testDriveService.updateTestDrive(
+          testDriveId: testDriveId,
           notes: _notes ?? '',
-          requests: _requests,
+          observations: _observations,
           images: _uploadedImageUrls,
         );
       } else {
-        // Create new client notes
-        clientNotesId = await _clientNotesService.saveClientNote(
+        // Create new test drive
+        testDriveId = await _testDriveService.saveTestDrive(
           sessionId: _sessionId,
           carId: _carId,
           clientId: _clientId,
           notes: _notes ?? '',
-          requests: _requests,
+          observations: _observations,
           images: _uploadedImageUrls,
         );
-
-        if (clientNotesId != null) {
-          // Link the notes to the session
-          await _sessionService.updateSessionWithClientNote(
-            sessionId: _sessionId,
-            clientNoteId: clientNotesId,
-            notes: _notes,
-          );
-        } else {
-          throw Exception('Failed to create client notes');
-        }
       }
 
       Get.snackbar(
         'Success',
-        'Client notes saved successfully',
+        'Test drive saved successfully',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -261,12 +269,12 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
       // Intentionally not navigating away to stay on the screen after saving
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error saving client notes: $e';
+        _errorMessage = 'Error saving test drive: $e';
       });
 
       Get.snackbar(
         'Error',
-        'Failed to save client notes: ${e.toString()}',
+        'Failed to save test drive: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -329,7 +337,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                   Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
                   const SizedBox(height: 16),
                   Text(
-                    'Error Loading Notes',
+                    'Error Loading Test Drive',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: Colors.red[400],
                       fontWeight: FontWeight.bold,
@@ -362,16 +370,14 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
             // Header with the reusable DetailScreenHeader widget
             DetailScreenHeader(
               title:
-                  widget.clientNotesId == null
-                      ? 'New Client Notes'
-                      : 'Client Notes',
-              subtitle: 'by ${widget.clientName}',
+                  widget.testDriveId == null ? 'New Test Drive' : 'Test Drive',
+              subtitle: widget.clientName,
               isEditing: _isEditing,
               isSaving: _isSaving,
               onSavePressed: _saveChanges,
               onEditPressed: _toggleEditMode,
               onCancelPressed:
-                  widget.clientNotesId == null ? null : _toggleEditMode,
+                  widget.testDriveId == null ? null : _toggleEditMode,
             ),
 
             // Main content
@@ -423,7 +429,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
                       // Images Section using the reusable ImageGridWidget
                       Text(
-                        'Uploaded Images',
+                        'Test Drive Images',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -455,7 +461,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
                       // Notes Section using the reusable NotesEditorWidget
                       Text(
-                        'Notes',
+                        'Test Drive Notes',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -469,25 +475,98 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Requests Section using the reusable RequestListWidget
+                      // Observations Section
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Service Requests',
+                            'Test Drive Observations',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          if (_isEditing)
+                            IconButton(
+                              icon: Icon(
+                                Icons.add_circle,
+                                color: theme.primaryColor,
+                              ),
+                              onPressed: _showAddObservationDialog,
+                              tooltip: 'Add Observation',
+                            ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      RequestListWidget(
-                        requests: _requests,
-                        isEditing: _isEditing,
-                        onRemoveRequest: _isEditing ? _removeRequest : null,
-                        onAddRequest: _isEditing ? _showAddRequestDialog : null,
-                      ),
+                      _observations.isEmpty
+                          ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                _isEditing
+                                    ? 'Add test drive observations using the + button'
+                                    : 'No test drive observations recorded',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          )
+                          : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _observations.length,
+                            itemBuilder: (context, index) {
+                              final observation = _observations[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black12,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.primaryColor.withOpacity(
+                                        0.1,
+                                      ),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.directions_car,
+                                        size: 20,
+                                        color: theme.primaryColor,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          observation,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                      ),
+                                      if (_isEditing)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            size: 18,
+                                            color: Colors.grey,
+                                          ),
+                                          onPressed:
+                                              () => _removeObservation(
+                                                observation,
+                                              ),
+                                          tooltip: 'Remove Observation',
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
 
                       const SizedBox(height: 24),
                     ],
@@ -496,7 +575,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
               ),
             ),
 
-            // Input area for adding requests - only shown in edit mode
+            // Input area for adding observations - only shown in edit mode
             if (_isEditing)
               SafeArea(
                 top: false,
@@ -529,9 +608,9 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                               ),
                               Expanded(
                                 child: TextField(
-                                  controller: _customRequestController,
+                                  controller: _customObservationController,
                                   decoration: const InputDecoration(
-                                    hintText: 'Add a service request...',
+                                    hintText: 'Add a test drive observation...',
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -539,7 +618,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                                     ),
                                   ),
                                   textInputAction: TextInputAction.send,
-                                  onSubmitted: (_) => _addCustomRequest(),
+                                  onSubmitted: (_) => _addCustomObservation(),
                                 ),
                               ),
                             ],
@@ -551,7 +630,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                         backgroundColor: theme.primaryColor,
                         child: IconButton(
                           icon: const Icon(Icons.send, color: Colors.white),
-                          onPressed: _addCustomRequest,
+                          onPressed: _addCustomObservation,
                         ),
                       ),
                     ],

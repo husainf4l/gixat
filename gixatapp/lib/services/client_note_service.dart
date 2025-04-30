@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/client_note.dart';
 
 class ClientNoteService {
-  final CollectionReference _clientNotesCollection = FirebaseFirestore.instance
-      .collection('client_notes');
+  final CollectionReference _jobCardCollection = FirebaseFirestore.instance
+      .collection('jobCard');
 
   // Create a new client note
   Future<String?> createClientNote({
@@ -26,7 +26,11 @@ class ClientNoteService {
         createdAt: DateTime.now(),
       );
 
-      final docRef = await _clientNotesCollection.add(clientNote.toMap());
+      // Add type field to identify this as a client note
+      final Map<String, dynamic> noteData = clientNote.toMap();
+      noteData['type'] = 'clientNotes';
+
+      final docRef = await _jobCardCollection.add(noteData);
       return docRef.id;
     } catch (e) {
       print('Error creating client note: $e');

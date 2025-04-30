@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import '../../models/session.dart';
 import '../../services/client_notes_service.dart';
 import 'client_notes_details_screen.dart';
+import 'inspection_details_screen.dart';
+import 'test_drive_details_screen.dart';
 
 class SessionDetailsScreen extends StatelessWidget {
   final Session session;
@@ -158,7 +160,39 @@ class SessionDetailsScreen extends StatelessWidget {
                           icon: Icons.search,
                           title: 'Inspection',
                           color: primaryColor,
-                          onTap: () {},
+                          onTap: () {
+                            // Navigate to the inspection details screen
+                            final carMake = session.car['make'] ?? '';
+                            final carModel = session.car['model'] ?? '';
+                            final plateNumber =
+                                session.car['plateNumber'] ?? '';
+                            final carDetails =
+                                '$carMake $carModel ${plateNumber.isNotEmpty ? '• $plateNumber' : ''}';
+
+                            // Check Firestore for existing inspection record
+                            FirebaseFirestore.instance
+                                .collection('jobCard')
+                                .where('sessionId', isEqualTo: session.id)
+                                .where('type', isEqualTo: 'inspection')
+                                .get()
+                                .then((snapshot) {
+                                  String? inspectionId;
+                                  if (snapshot.docs.isNotEmpty) {
+                                    inspectionId = snapshot.docs.first.id;
+                                  }
+
+                                  Get.to(
+                                    () => InspectionDetailsScreen(
+                                      session: session,
+                                      inspectionId: inspectionId,
+                                      clientName:
+                                          session.client['name'] ?? 'Unknown',
+                                      carDetails: carDetails,
+                                    ),
+                                    transition: Transition.rightToLeft,
+                                  );
+                                });
+                          },
                         ),
                       ),
                     ],
@@ -171,7 +205,39 @@ class SessionDetailsScreen extends StatelessWidget {
                           icon: Icons.directions_car,
                           title: 'Test Drive',
                           color: primaryColor,
-                          onTap: () {},
+                          onTap: () {
+                            // Navigate to the test drive details screen
+                            final carMake = session.car['make'] ?? '';
+                            final carModel = session.car['model'] ?? '';
+                            final plateNumber =
+                                session.car['plateNumber'] ?? '';
+                            final carDetails =
+                                '$carMake $carModel ${plateNumber.isNotEmpty ? '• $plateNumber' : ''}';
+
+                            // Check Firestore for existing test drive record
+                            FirebaseFirestore.instance
+                                .collection('jobCard')
+                                .where('sessionId', isEqualTo: session.id)
+                                .where('type', isEqualTo: 'testDrive')
+                                .get()
+                                .then((snapshot) {
+                                  String? testDriveId;
+                                  if (snapshot.docs.isNotEmpty) {
+                                    testDriveId = snapshot.docs.first.id;
+                                  }
+
+                                  Get.to(
+                                    () => TestDriveDetailsScreen(
+                                      session: session,
+                                      testDriveId: testDriveId,
+                                      clientName:
+                                          session.client['name'] ?? 'Unknown',
+                                      carDetails: carDetails,
+                                    ),
+                                    transition: Transition.rightToLeft,
+                                  );
+                                });
+                          },
                         ),
                       ),
                       const SizedBox(width: 16),

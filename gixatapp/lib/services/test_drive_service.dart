@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
 
-class ClientNotesService {
+class TestDriveService {
   final CollectionReference _jobCardCollection = FirebaseFirestore.instance
       .collection('jobCard');
   final CollectionReference _activityCollection = FirebaseFirestore.instance
@@ -12,12 +12,12 @@ class ClientNotesService {
   final AuthController? _authController =
       Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
 
-  Future<String?> saveClientNote({
+  Future<String?> saveTestDrive({
     required String sessionId,
     required String carId,
     required String clientId,
     required String notes,
-    required List<String> requests,
+    required List<String> observations,
     required List<String> images,
   }) async {
     try {
@@ -28,27 +28,27 @@ class ClientNotesService {
               .toList();
 
       // Create Firestore document
-      final clientNoteData = {
+      final testDriveData = {
         'sessionId': sessionId,
         'carId': carId,
         'clientId': clientId,
         'notes': notes,
-        'requests': requests,
+        'observations': observations,
         'images': validImages,
-        'type': 'clientNotes',
+        'type': 'testDrive',
         'timestamp': FieldValue.serverTimestamp(),
       };
 
       // Add document to Firestore
       final DocumentReference docRef = await _jobCardCollection.add(
-        clientNoteData,
+        testDriveData,
       );
 
       // Create activity record for tracking
       await _createActivityRecord(
         sessionId: sessionId,
-        title: 'Client note updated',
-        type: 'note',
+        title: 'Test drive completed',
+        type: 'test_drive',
       );
 
       return docRef.id;
@@ -61,15 +61,13 @@ class ClientNotesService {
     }
   }
 
-  // Get client notes for a specific session
-  Future<Map<String, dynamic>?> getClientNotesForSession(
-    String sessionId,
-  ) async {
+  // Get test drive for a specific session
+  Future<Map<String, dynamic>?> getTestDriveForSession(String sessionId) async {
     try {
       final snapshot =
           await _jobCardCollection
               .where('sessionId', isEqualTo: sessionId)
-              .where('type', isEqualTo: 'clientNotes')
+              .where('type', isEqualTo: 'testDrive')
               .get();
 
       if (snapshot.docs.isNotEmpty) {
@@ -83,17 +81,17 @@ class ClientNotesService {
     }
   }
 
-  // Update an existing client note
-  Future<bool> updateClientNote({
-    required String clientNoteId,
+  // Update an existing test drive
+  Future<bool> updateTestDrive({
+    required String testDriveId,
     required String notes,
-    required List<String> requests,
+    required List<String> observations,
     List<String>? images,
   }) async {
     try {
       final updateData = {
         'notes': notes,
-        'requests': requests,
+        'observations': observations,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -111,26 +109,26 @@ class ClientNotesService {
         }
       }
 
-      await _jobCardCollection.doc(clientNoteId).update(updateData);
+      await _jobCardCollection.doc(testDriveId).update(updateData);
 
       // Get the session ID for activity logging
-      final noteDoc = await _jobCardCollection.doc(clientNoteId).get();
-      if (noteDoc.exists) {
-        final noteData = noteDoc.data() as Map<String, dynamic>;
-        final sessionId = noteData['sessionId'] as String?;
+      final testDriveDoc = await _jobCardCollection.doc(testDriveId).get();
+      if (testDriveDoc.exists) {
+        final testDriveData = testDriveDoc.data() as Map<String, dynamic>;
+        final sessionId = testDriveData['sessionId'] as String?;
 
         if (sessionId != null) {
-          // Create activity record for the note update
+          // Create activity record for the test drive update
           await _activityCollection.add({
             'sessionId': sessionId,
-            'clientNoteId': clientNoteId,
+            'testDriveId': testDriveId,
             'timestamp': FieldValue.serverTimestamp(),
-            'type': 'note_update',
-            'title': 'Client Notes Updated',
+            'type': 'test_drive_update',
+            'title': 'Test Drive Updated',
             'description':
                 notes.isNotEmpty
                     ? 'Notes: $notes'
-                    : 'Client requests were updated',
+                    : 'Test drive observations were updated',
             'userId': _authController?.firebaseUser?.uid,
             'userName': _authController?.currentUser?.displayName,
           });

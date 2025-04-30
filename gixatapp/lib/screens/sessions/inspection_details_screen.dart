@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../models/session.dart';
-import '../../services/client_notes_service.dart';
+import '../../services/inspection_service.dart';
 import '../../services/session_service.dart';
 import '../../services/image_handling_service.dart';
 import '../../widgets/image_grid_widget.dart';
@@ -12,7 +12,7 @@ import '../../widgets/notes_editor_widget.dart';
 import '../../widgets/request_list_widget.dart';
 import '../../widgets/detail_screen_header.dart';
 
-class ClientNotesDetailsScreen extends StatefulWidget {
+class InspectionDetailsScreen extends StatefulWidget {
   // Required parameters
   final String sessionId;
   final String clientId;
@@ -22,14 +22,14 @@ class ClientNotesDetailsScreen extends StatefulWidget {
 
   // Optional parameters
   final Session? session;
-  final String? clientNotesId;
+  final String? inspectionId;
 
-  const ClientNotesDetailsScreen({
+  const InspectionDetailsScreen({
     super.key,
     this.session,
     required this.clientName,
     required this.carDetails,
-    this.clientNotesId,
+    this.inspectionId,
     String? sessionId,
     String? clientId,
     String? carId,
@@ -38,19 +38,19 @@ class ClientNotesDetailsScreen extends StatefulWidget {
        carId = carId ?? '';
 
   @override
-  State<ClientNotesDetailsScreen> createState() =>
-      _ClientNotesDetailsScreenState();
+  State<InspectionDetailsScreen> createState() =>
+      _InspectionDetailsScreenState();
 }
 
-class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
-  final ClientNotesService _clientNotesService = ClientNotesService();
+class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
+  final InspectionService _inspectionService = InspectionService();
   final SessionService _sessionService = SessionService();
   final ImageHandlingService _imageHandlingService = ImageHandlingService();
-  final TextEditingController _customRequestController =
+  final TextEditingController _customFindingController =
       TextEditingController();
 
   String? _notes;
-  List<String> _requests = [];
+  List<String> _findings = [];
   List<File> _selectedImages = [];
   List<String> _uploadedImageUrls = [];
   bool _isLoading = true;
@@ -71,40 +71,40 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
     _clientId = widget.session?.client['id'] ?? widget.clientId;
     _carId = widget.session?.car['id'] ?? widget.carId;
 
-    // If no clientNotesId is provided, start in edit mode for a new note
-    if (widget.clientNotesId == null) {
+    // If no inspectionId is provided, start in edit mode for a new inspection
+    if (widget.inspectionId == null) {
       _isEditing = true;
     }
-    _fetchClientNotes();
+    _fetchInspection();
   }
 
   @override
   void dispose() {
-    _customRequestController.dispose();
+    _customFindingController.dispose();
     super.dispose();
   }
 
-  Future<void> _fetchClientNotes() async {
+  Future<void> _fetchInspection() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      if (widget.clientNotesId != null) {
-        // Fetch existing client notes from jobCard collection
-        final clientNoteDoc =
+      if (widget.inspectionId != null) {
+        // Fetch existing inspection from jobCard collection
+        final inspectionDoc =
             await FirebaseFirestore.instance
                 .collection('jobCard')
-                .doc(widget.clientNotesId)
+                .doc(widget.inspectionId)
                 .get();
 
-        if (clientNoteDoc.exists) {
-          final data = clientNoteDoc.data() as Map<String, dynamic>;
+        if (inspectionDoc.exists) {
+          final data = inspectionDoc.data() as Map<String, dynamic>;
           setState(() {
             _notes = data['notes'] as String?;
-            if (data['requests'] != null) {
-              _requests = List<String>.from(data['requests']);
+            if (data['findings'] != null) {
+              _findings = List<String>.from(data['findings']);
             }
 
             // Load existing image URLs
@@ -114,10 +114,10 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
           });
         }
       }
-      // If clientNotesId is null, we're creating a new note, so no need to fetch
+      // If inspectionId is null, we're creating a new inspection, so no need to fetch
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error loading client notes: $e';
+        _errorMessage = 'Error loading inspection: $e';
       });
     } finally {
       setState(() {
@@ -146,35 +146,56 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
     );
   }
 
-  void _addCustomRequest() {
-    final request = _customRequestController.text.trim();
-    if (request.isNotEmpty) {
+  void _addCustomFinding() {
+    final finding = _customFindingController.text.trim();
+    if (finding.isNotEmpty) {
       setState(() {
-        _requests.add(request);
-        _customRequestController.clear();
+        _findings.add(finding);
+        _customFindingController.clear();
       });
       FocusScope.of(context).unfocus();
     } else {
-      _showAddRequestDialog();
+      _showAddFindingDialog();
     }
   }
 
-  void _showAddRequestDialog() {
-    RequestListWidget.showAddRequestDialog(
-      context,
-      onAddRequest: (request) {
-        if (mounted) {
-          setState(() {
-            _requests.add(request);
-          });
-        }
-      },
+  void _showAddFindingDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Add Inspection Finding'),
+            content: TextField(
+              autofocus: true,
+              controller: _customFindingController,
+              decoration: const InputDecoration(
+                hintText: 'Enter inspection finding',
+              ),
+              onSubmitted: (_) {
+                _addCustomFinding();
+                Navigator.pop(context);
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _addCustomFinding();
+                  Navigator.pop(context);
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
     );
   }
 
-  void _removeRequest(String request) {
+  void _removeFinding(String finding) {
     setState(() {
-      _requests.remove(request);
+      _findings.remove(finding);
     });
   }
 
@@ -204,7 +225,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
         final List<String> newImageUrls = await _imageHandlingService
             .uploadImagesToFirebase(
               imageFiles: _selectedImages,
-              storagePath: 'client_notes_images',
+              storagePath: 'inspection_images',
               uniqueIdentifier: 'session_${_sessionId}',
             );
 
@@ -212,42 +233,31 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
         _selectedImages.clear();
       }
 
-      String? clientNotesId = widget.clientNotesId;
+      String? inspectionId = widget.inspectionId;
 
-      if (clientNotesId != null) {
-        // Update existing client notes
-        await _clientNotesService.updateClientNote(
-          clientNoteId: clientNotesId,
+      if (inspectionId != null) {
+        // Update existing inspection
+        await _inspectionService.updateInspection(
+          inspectionId: inspectionId,
           notes: _notes ?? '',
-          requests: _requests,
+          findings: _findings,
           images: _uploadedImageUrls,
         );
       } else {
-        // Create new client notes
-        clientNotesId = await _clientNotesService.saveClientNote(
+        // Create new inspection
+        inspectionId = await _inspectionService.saveInspection(
           sessionId: _sessionId,
           carId: _carId,
           clientId: _clientId,
           notes: _notes ?? '',
-          requests: _requests,
+          findings: _findings,
           images: _uploadedImageUrls,
         );
-
-        if (clientNotesId != null) {
-          // Link the notes to the session
-          await _sessionService.updateSessionWithClientNote(
-            sessionId: _sessionId,
-            clientNoteId: clientNotesId,
-            notes: _notes,
-          );
-        } else {
-          throw Exception('Failed to create client notes');
-        }
       }
 
       Get.snackbar(
         'Success',
-        'Client notes saved successfully',
+        'Inspection saved successfully',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.green,
         colorText: Colors.white,
@@ -261,12 +271,12 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
       // Intentionally not navigating away to stay on the screen after saving
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error saving client notes: $e';
+        _errorMessage = 'Error saving inspection: $e';
       });
 
       Get.snackbar(
         'Error',
-        'Failed to save client notes: ${e.toString()}',
+        'Failed to save inspection: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -329,7 +339,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                   Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
                   const SizedBox(height: 16),
                   Text(
-                    'Error Loading Notes',
+                    'Error Loading Inspection',
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: Colors.red[400],
                       fontWeight: FontWeight.bold,
@@ -362,16 +372,16 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
             // Header with the reusable DetailScreenHeader widget
             DetailScreenHeader(
               title:
-                  widget.clientNotesId == null
-                      ? 'New Client Notes'
-                      : 'Client Notes',
-              subtitle: 'by ${widget.clientName}',
+                  widget.inspectionId == null
+                      ? 'New Inspection'
+                      : 'Inspection Details',
+              subtitle: widget.clientName,
               isEditing: _isEditing,
               isSaving: _isSaving,
               onSavePressed: _saveChanges,
               onEditPressed: _toggleEditMode,
               onCancelPressed:
-                  widget.clientNotesId == null ? null : _toggleEditMode,
+                  widget.inspectionId == null ? null : _toggleEditMode,
             ),
 
             // Main content
@@ -423,7 +433,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
                       // Images Section using the reusable ImageGridWidget
                       Text(
-                        'Uploaded Images',
+                        'Inspection Images',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -455,7 +465,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
                       // Notes Section using the reusable NotesEditorWidget
                       Text(
-                        'Notes',
+                        'Inspection Notes',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -469,25 +479,96 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Requests Section using the reusable RequestListWidget
+                      // Findings Section (similar to Requests in ClientNotes)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Service Requests',
+                            'Inspection Findings',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+                          if (_isEditing)
+                            IconButton(
+                              icon: Icon(
+                                Icons.add_circle,
+                                color: theme.primaryColor,
+                              ),
+                              onPressed: _showAddFindingDialog,
+                              tooltip: 'Add Finding',
+                            ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      RequestListWidget(
-                        requests: _requests,
-                        isEditing: _isEditing,
-                        onRemoveRequest: _isEditing ? _removeRequest : null,
-                        onAddRequest: _isEditing ? _showAddRequestDialog : null,
-                      ),
+                      _findings.isEmpty
+                          ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                _isEditing
+                                    ? 'Add inspection findings using the + button'
+                                    : 'No inspection findings recorded',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          )
+                          : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _findings.length,
+                            itemBuilder: (context, index) {
+                              final finding = _findings[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black12,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: theme.primaryColor.withOpacity(
+                                        0.1,
+                                      ),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.search,
+                                        size: 20,
+                                        color: theme.primaryColor,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          finding,
+                                          style: theme.textTheme.bodyMedium,
+                                        ),
+                                      ),
+                                      if (_isEditing)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.close,
+                                            size: 18,
+                                            color: Colors.grey,
+                                          ),
+                                          onPressed:
+                                              () => _removeFinding(finding),
+                                          tooltip: 'Remove Finding',
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
 
                       const SizedBox(height: 24),
                     ],
@@ -496,7 +577,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
               ),
             ),
 
-            // Input area for adding requests - only shown in edit mode
+            // Input area for adding findings - only shown in edit mode
             if (_isEditing)
               SafeArea(
                 top: false,
@@ -529,9 +610,9 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                               ),
                               Expanded(
                                 child: TextField(
-                                  controller: _customRequestController,
+                                  controller: _customFindingController,
                                   decoration: const InputDecoration(
-                                    hintText: 'Add a service request...',
+                                    hintText: 'Add an inspection finding...',
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -539,7 +620,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                                     ),
                                   ),
                                   textInputAction: TextInputAction.send,
-                                  onSubmitted: (_) => _addCustomRequest(),
+                                  onSubmitted: (_) => _addCustomFinding(),
                                 ),
                               ),
                             ],
@@ -551,7 +632,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                         backgroundColor: theme.primaryColor,
                         child: IconButton(
                           icon: const Icon(Icons.send, color: Colors.white),
-                          onPressed: _addCustomRequest,
+                          onPressed: _addCustomFinding,
                         ),
                       ),
                     ],
