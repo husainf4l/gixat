@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'activity_service.dart';
 
@@ -14,7 +15,7 @@ class SessionService {
     // Extract index creation URL from Firebase exception if available
     if (error is FirebaseException && error.code == 'failed-precondition') {
       // This typically means a required index is missing
-      print('Index Error: ${error.message}');
+      debugPrint('Index Error: ${error.message}');
 
       // Extract the index creation link if present
       if (error.message != null &&
@@ -24,10 +25,10 @@ class SessionService {
         ).firstMatch(error.message!);
         if (indexLinkMatch != null) {
           final indexLink = indexLinkMatch.group(0);
-          print('=========== MISSING INDEX DETECTED ===========');
-          print('Create the required index by visiting:');
-          print(indexLink);
-          print('==============================================');
+          debugPrint('=========== MISSING INDEX DETECTED ===========');
+          debugPrint('Create the required index by visiting:');
+          debugPrint(indexLink);
+          debugPrint('==============================================');
 
           // Show a snackbar to the user with guidance
           Get.snackbar(
@@ -39,7 +40,7 @@ class SessionService {
         }
       }
     } else {
-      print(errorMessage);
+      debugPrint(errorMessage);
     }
   }
 

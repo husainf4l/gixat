@@ -1,8 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import '../models/client.dart';
+import 'error_service.dart';
 
 class ClientService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Get error service for error logging
+  final ErrorService _errorService = Get.find<ErrorService>(
+    tag: 'ErrorService',
+  );
 
   // Collection reference
   CollectionReference get _clientsCollection =>
@@ -26,8 +33,12 @@ class ClientService {
         return Client.fromFirestore(doc);
       }
       return null;
-    } catch (e) {
-      print('Error getting client: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientService.getClientById',
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -39,8 +50,12 @@ class ClientService {
         client.toFirestore(),
       );
       return docRef.id;
-    } catch (e) {
-      print('Error adding client: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientService.addClient',
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -50,8 +65,12 @@ class ClientService {
     try {
       await _clientsCollection.doc(client.id).update(client.toFirestore());
       return true;
-    } catch (e) {
-      print('Error updating client: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientService.updateClient',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -61,8 +80,12 @@ class ClientService {
     try {
       await _clientsCollection.doc(clientId).delete();
       return true;
-    } catch (e) {
-      print('Error deleting client: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientService.deleteClient',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -74,8 +97,12 @@ class ClientService {
         'carsId': FieldValue.arrayUnion([carId]),
       });
       return true;
-    } catch (e) {
-      print('Error adding car to client: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientService.addCarToClient',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -87,8 +114,12 @@ class ClientService {
         'sessionsId': FieldValue.arrayUnion([sessionId]),
       });
       return true;
-    } catch (e) {
-      print('Error adding session to client: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientService.addSessionToClient',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }

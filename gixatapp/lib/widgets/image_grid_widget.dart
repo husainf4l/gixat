@@ -175,7 +175,7 @@ class ImageGridWidget extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.black.withOpacity(0.6), Colors.transparent],
+                    colors: [Colors.black.withAlpha(153), Colors.transparent],
                   ),
                 ),
                 child: const Center(

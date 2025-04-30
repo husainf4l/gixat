@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../../models/session.dart';
-import '../../services/client_notes_service.dart';
 import 'client_notes_details_screen.dart';
 import 'inspection_details_screen.dart';
 import 'test_drive_details_screen.dart';
@@ -10,8 +9,7 @@ import 'test_drive_details_screen.dart';
 class SessionDetailsScreen extends StatelessWidget {
   final Session session;
 
-  const SessionDetailsScreen({Key? key, required this.session})
-    : super(key: key);
+  const SessionDetailsScreen({super.key, required this.session});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +36,7 @@ class SessionDetailsScreen extends StatelessWidget {
                 color: theme.scaffoldBackgroundColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withAlpha(20),
                     blurRadius: 12,
                     offset: const Offset(0, 3),
                   ),
@@ -73,9 +71,7 @@ class SessionDetailsScreen extends StatelessWidget {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(
-                            session.status,
-                          ).withOpacity(0.15),
+                          color: _getStatusColor(session.status).withAlpha(38),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -458,7 +454,7 @@ class _SessionBox extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.black12,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.2), width: 1),
+          border: Border.all(color: color.withAlpha(51), width: 1),
         ),
         child: Stack(
           children: [
@@ -469,7 +465,7 @@ class _SessionBox extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [color.withOpacity(0.03), Colors.transparent],
+                  colors: [color.withAlpha(8), Colors.transparent],
                 ),
               ),
             ),
@@ -481,7 +477,7 @@ class _SessionBox extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
+                      color: color.withAlpha(26),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(icon, size: 24, color: color),
@@ -529,7 +525,7 @@ class _ActivityItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.black12,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.1), width: 1),
+        border: Border.all(color: color.withAlpha(51), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -541,7 +537,7 @@ class _ActivityItem extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withAlpha(26),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(

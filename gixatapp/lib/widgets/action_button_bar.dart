@@ -26,7 +26,7 @@ class ActionButtonBar extends StatelessWidget {
                 color: backgroundColor ?? theme.scaffoldBackgroundColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withAlpha(13),
                     spreadRadius: 1,
                     blurRadius: 5,
                     offset: const Offset(0, -3),

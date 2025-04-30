@@ -4,10 +4,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
+import 'error_service.dart';
 
 class ImageHandlingService {
   final ImagePicker _picker = ImagePicker();
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
+  // Get error service for error logging
+  final ErrorService _errorService = Get.find<ErrorService>(
+    tag: 'ErrorService',
+  );
 
   // Pick a single image from camera or gallery
   Future<File?> pickSingleImage({required ImageSource source}) async {
@@ -21,8 +28,12 @@ class ImageHandlingService {
         return File(pickedFile.path);
       }
       return null;
-    } catch (e) {
-      debugPrint('Error picking image: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ImageHandlingService.pickSingleImage',
+        stackTrace: stackTrace,
+      );
       rethrow;
     }
   }
@@ -35,8 +46,12 @@ class ImageHandlingService {
       );
 
       return pickedFiles.map((xFile) => File(xFile.path)).toList();
-    } catch (e) {
-      debugPrint('Error picking multiple images: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ImageHandlingService.pickMultipleImages',
+        stackTrace: stackTrace,
+      );
       rethrow;
     }
   }
@@ -119,8 +134,12 @@ class ImageHandlingService {
         // Get download URL
         final String downloadUrl = await snapshot.ref.getDownloadURL();
         uploadedUrls.add(downloadUrl);
-      } catch (e) {
-        debugPrint('Error uploading image: $e');
+      } catch (e, stackTrace) {
+        _errorService.logError(
+          e,
+          context: 'ImageHandlingService.uploadImagesToFirebase',
+          stackTrace: stackTrace,
+        );
         // Continue with other uploads even if one fails
       }
     }
@@ -135,8 +154,12 @@ class ImageHandlingService {
       final Reference ref = _storage.refFromURL(imageUrl);
       await ref.delete();
       return true;
-    } catch (e) {
-      debugPrint('Error deleting image: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ImageHandlingService.deleteImageFromFirebase',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }

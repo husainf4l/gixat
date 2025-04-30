@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import '../models/car.dart';
 import 'session_service.dart';
 
@@ -51,7 +52,7 @@ class CarService {
 
       return null;
     } catch (e) {
-      print('Error adding car and creating session: $e');
+      debugPrint('Error adding car and creating session: $e');
       return null;
     }
   }
@@ -62,7 +63,7 @@ class CarService {
       final docRef = await _carsCollection.add(car.toMap());
       return docRef.id;
     } catch (e) {
-      print('Error adding car: $e');
+      debugPrint('Error adding car: $e');
       return null;
     }
   }
@@ -76,7 +77,7 @@ class CarService {
       }
       return null;
     } catch (e) {
-      print('Error getting car: $e');
+      debugPrint('Error getting car: $e');
       return null;
     }
   }
@@ -91,7 +92,7 @@ class CarService {
           .map((doc) => Car.fromMap(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
     } catch (e) {
-      print('Error getting client cars: $e');
+      debugPrint('Error getting client cars: $e');
       return [];
     }
   }
@@ -106,7 +107,7 @@ class CarService {
           .map((doc) => Car.fromMap(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
     } catch (e) {
-      print('Error getting garage cars: $e');
+      debugPrint('Error getting garage cars: $e');
       return [];
     }
   }
@@ -117,7 +118,7 @@ class CarService {
       await _carsCollection.doc(id).update(data);
       return true;
     } catch (e) {
-      print('Error updating car: $e');
+      debugPrint('Error updating car: $e');
       return false;
     }
   }
@@ -130,7 +131,7 @@ class CarService {
       });
       return true;
     } catch (e) {
-      print('Error adding session to car: $e');
+      debugPrint('Error adding session to car: $e');
       return false;
     }
   }
@@ -143,7 +144,7 @@ class CarService {
       });
       return true;
     } catch (e) {
-      print('Error removing session from car: $e');
+      debugPrint('Error removing session from car: $e');
       return false;
     }
   }
@@ -154,7 +155,7 @@ class CarService {
       await _carsCollection.doc(id).delete();
       return true;
     } catch (e) {
-      print('Error deleting car: $e');
+      debugPrint('Error deleting car: $e');
       return false;
     }
   }

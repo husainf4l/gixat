@@ -22,16 +22,13 @@ class NotesEditorWidget extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color:
-              isEditing
-                  ? theme.primaryColor.withOpacity(0.05)
-                  : theme.cardColor,
+          color: isEditing ? theme.primaryColor.withAlpha(13) : theme.cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color:
                 isEditing
-                    ? theme.primaryColor.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.2),
+                    ? theme.primaryColor.withAlpha(77)
+                    : Colors.grey.withAlpha(51),
           ),
         ),
         child: Column(

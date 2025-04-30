@@ -40,7 +40,7 @@ class MainNavigationScreen extends StatelessWidget {
                     : Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withAlpha(26),
                 blurRadius: 10,
                 offset: const Offset(0, -5),
               ),
@@ -143,7 +143,7 @@ class MainNavigationScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color:
                       isSelected
-                          ? primaryColor.withOpacity(0.1)
+                          ? primaryColor.withAlpha(26)
                           : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),

@@ -21,7 +21,7 @@ class CarDetailWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.black12,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+        border: Border.all(color: theme.primaryColor.withAlpha(51)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +32,7 @@ class CarDetailWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.1),
+                  color: theme.primaryColor.withAlpha(26),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

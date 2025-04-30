@@ -156,11 +156,11 @@ class NotificationsScreen extends StatelessWidget {
       color:
           notification['isRead']
               ? theme.cardColor
-              : theme.primaryColor.withOpacity(0.05),
+              : theme.primaryColor.withAlpha(13),
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
         leading: CircleAvatar(
-          backgroundColor: iconColor.withOpacity(0.2),
+          backgroundColor: iconColor.withAlpha(51),
           child: Icon(notificationIcon, color: iconColor),
         ),
         title: Text(

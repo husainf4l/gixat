@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
+import 'error_service.dart';
 
 class ClientNotesService {
   final CollectionReference _jobCardCollection = FirebaseFirestore.instance
@@ -8,9 +9,14 @@ class ClientNotesService {
   final CollectionReference _activityCollection = FirebaseFirestore.instance
       .collection('activity');
 
-  // Try to get the AuthController if it's available
+  // Get auth controller if available
   final AuthController? _authController =
       Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+
+  // Get error service for error logging
+  final ErrorService _errorService = Get.find<ErrorService>(
+    tag: 'ErrorService',
+  );
 
   Future<String?> saveClientNote({
     required String sessionId,
@@ -52,11 +58,14 @@ class ClientNotesService {
       );
 
       return docRef.id;
-    } catch (e) {
-      if (e is FirebaseException) {
-        // Specific handling for Firebase errors
-        return null;
-      }
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientNotesService.saveClientNote',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
+
       return null;
     }
   }
@@ -78,7 +87,14 @@ class ClientNotesService {
         return {'id': doc.id, ...data};
       }
       return null;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientNotesService.getClientNotesForSession',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
+
       return null;
     }
   }
@@ -138,7 +154,14 @@ class ClientNotesService {
       }
 
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ClientNotesService.updateClientNote',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
+
       return false;
     }
   }
@@ -160,8 +183,14 @@ class ClientNotesService {
         'userId': _authController?.firebaseUser?.uid,
         'userName': _authController?.currentUser?.displayName,
       });
-    } catch (e) {
-      // Silently handle errors in activity logging
+    } catch (e, stackTrace) {
+      // Log error but don't propagate since this is a non-critical operation
+      _errorService.logError(
+        e,
+        context: 'ClientNotesService._createActivityRecord',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
     }
   }
 }

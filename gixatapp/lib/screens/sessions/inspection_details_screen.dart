@@ -395,7 +395,7 @@ class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
                           color: Colors.black12,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: theme.primaryColor.withOpacity(0.2),
+                            color: theme.primaryColor.withAlpha(51),
                           ),
                         ),
                         child: Row(
@@ -403,7 +403,7 @@ class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: theme.primaryColor.withOpacity(0.1),
+                                color: theme.primaryColor.withAlpha(26),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -525,9 +525,7 @@ class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
                                     color: Colors.black12,
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: theme.primaryColor.withOpacity(
-                                        0.1,
-                                      ),
+                                      color: theme.primaryColor.withAlpha(26),
                                     ),
                                   ),
                                   padding: const EdgeInsets.symmetric(
@@ -588,7 +586,7 @@ class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withAlpha(10),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),

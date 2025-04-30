@@ -23,7 +23,8 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         surface: Colors.white,
-        background: lightBackground,
+        // Replacing deprecated 'background' with appropriate property
+        surfaceContainerLowest: lightBackground,
       ),
       scaffoldBackgroundColor: lightBackground,
       textTheme: const TextTheme(
@@ -72,7 +73,8 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         surface: darkSurface,
-        background: darkBackground,
+        // Replacing deprecated 'background' with appropriate property
+        surfaceContainerLowest: darkBackground,
       ),
       scaffoldBackgroundColor: darkBackground,
       textTheme: const TextTheme(

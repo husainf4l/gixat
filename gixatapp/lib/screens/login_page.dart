@@ -241,7 +241,7 @@ class LoginPage extends StatelessWidget {
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceVariant,
+          color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(icon, color: theme.colorScheme.onSurfaceVariant, size: 28),

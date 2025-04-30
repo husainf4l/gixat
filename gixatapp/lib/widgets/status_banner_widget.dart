@@ -73,7 +73,7 @@ class StatusBannerWidget extends StatelessWidget {
                 child: Icon(
                   Icons.close,
                   size: 16,
-                  color: _getIconColor().withOpacity(0.7),
+                  color: _getIconColor().withAlpha(179),
                 ),
               ),
             ),

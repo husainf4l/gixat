@@ -82,7 +82,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withAlpha(26),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -161,7 +161,7 @@ class _SearchScreenState extends State<SearchScreen> {
             },
             // Add some visual interest with a leading icon
             leading: CircleAvatar(
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+              backgroundColor: theme.colorScheme.primary.withAlpha(51),
               child: Icon(
                 index % 2 == 0 ? Icons.auto_stories : Icons.car_repair,
                 color: theme.colorScheme.primary,

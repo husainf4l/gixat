@@ -25,7 +25,7 @@ class RequestListWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          border: Border.all(color: Colors.grey.withAlpha(51)),
         ),
         child: Center(
           child: Text(

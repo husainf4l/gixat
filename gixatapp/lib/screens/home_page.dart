@@ -74,7 +74,7 @@ class HomePage extends StatelessWidget {
                               CircleAvatar(
                                 radius: 30,
                                 backgroundColor: theme.colorScheme.primary
-                                    .withOpacity(0.2),
+                                    .withAlpha(51),
                                 backgroundImage:
                                     photoUrl.isNotEmpty
                                         ? NetworkImage(photoUrl)
@@ -228,7 +228,7 @@ class HomePage extends StatelessWidget {
                               child: ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor: theme.colorScheme.primary
-                                      .withOpacity(0.2),
+                                      .withAlpha(51),
                                   child: Icon(
                                     activityIcon,
                                     color: theme.colorScheme.primary,

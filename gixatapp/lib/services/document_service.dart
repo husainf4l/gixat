@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'error_service.dart';
 
 /// A generic service for handling Firestore document operations.
 /// This service provides a standard interface for creating, reading, updating and deleting
 /// documents across different collections.
 class DocumentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ErrorService _errorService = Get.find<ErrorService>(
+    tag: 'ErrorService',
+  );
 
   /// Create a new document in the specified collection
   Future<String?> createDocument({
@@ -28,8 +32,12 @@ class DocumentService {
         final docRef = await _firestore.collection(collectionPath).add(data);
         return docRef.id;
       }
-    } catch (e) {
-      debugPrint('Error creating document: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.createDocument',
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -48,8 +56,12 @@ class DocumentService {
         return {'id': docSnapshot.id, ...docSnapshot.data()!};
       }
       return null;
-    } catch (e) {
-      debugPrint('Error getting document: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.getDocument',
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -86,8 +98,12 @@ class DocumentService {
       return querySnapshot.docs.map((doc) {
         return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
       }).toList();
-    } catch (e) {
-      debugPrint('Error querying documents: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.queryDocuments',
+        stackTrace: stackTrace,
+      );
       return [];
     }
   }
@@ -111,8 +127,12 @@ class DocumentService {
           .set(data, SetOptions(merge: merge));
 
       return true;
-    } catch (e) {
-      debugPrint('Error updating document: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.updateDocument',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -125,8 +145,12 @@ class DocumentService {
     try {
       await _firestore.collection(collectionPath).doc(documentId).delete();
       return true;
-    } catch (e) {
-      debugPrint('Error deleting document: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.deleteDocument',
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -136,16 +160,34 @@ class DocumentService {
     required String collectionPath,
     required String documentId,
   }) {
-    return _firestore
-        .collection(collectionPath)
-        .doc(documentId)
-        .snapshots()
-        .map((snapshot) {
-          if (snapshot.exists) {
-            return {'id': snapshot.id, ...snapshot.data()!};
-          }
-          return null;
-        });
+    try {
+      return _firestore
+          .collection(collectionPath)
+          .doc(documentId)
+          .snapshots()
+          .map((snapshot) {
+            if (snapshot.exists) {
+              return {'id': snapshot.id, ...snapshot.data()!};
+            }
+            return null;
+          })
+          .handleError((e, stackTrace) {
+            _errorService.logError(
+              e,
+              context: 'DocumentService.documentStream',
+              stackTrace: stackTrace,
+            );
+            return null;
+          });
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.documentStream',
+        stackTrace: stackTrace,
+      );
+      // Return an empty stream
+      return Stream.value(null);
+    }
   }
 
   /// Listen to a collection query for real-time updates
@@ -156,28 +198,48 @@ class DocumentService {
     bool descending = false,
     int? limit,
   }) {
-    Query query = _firestore.collection(collectionPath);
+    try {
+      Query query = _firestore.collection(collectionPath);
 
-    // Apply filters
-    for (final filter in filters) {
-      query = filter.applyFilter(query);
+      // Apply filters
+      for (final filter in filters) {
+        query = filter.applyFilter(query);
+      }
+
+      // Apply ordering if specified
+      if (orderBy != null) {
+        query = query.orderBy(orderBy, descending: descending);
+      }
+
+      // Apply limit if specified
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      return query
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) {
+              return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+            }).toList();
+          })
+          .handleError((e, stackTrace) {
+            _errorService.logError(
+              e,
+              context: 'DocumentService.queryStream',
+              stackTrace: stackTrace,
+            );
+            return <Map<String, dynamic>>[];
+          });
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'DocumentService.queryStream',
+        stackTrace: stackTrace,
+      );
+      // Return an empty stream
+      return Stream.value(<Map<String, dynamic>>[]);
     }
-
-    // Apply ordering if specified
-    if (orderBy != null) {
-      query = query.orderBy(orderBy, descending: descending);
-    }
-
-    // Apply limit if specified
-    if (limit != null) {
-      query = query.limit(limit);
-    }
-
-    return query.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
-      }).toList();
-    });
   }
 }
 

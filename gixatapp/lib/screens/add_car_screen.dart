@@ -154,13 +154,8 @@ class _AddCarScreenState extends State<AddCarScreen> {
           clientNoteId: null,
         );
 
-        // Navigate to session details screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SessionDetailsScreen(session: session),
-          ),
-        );
+        // Navigate to session details screen using GetX instead of Navigator
+        Get.off(() => SessionDetailsScreen(session: session));
       } else {
         Get.snackbar(
           'Error',

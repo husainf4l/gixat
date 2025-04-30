@@ -8,7 +8,7 @@ import 'database_service.dart';
 
 class ErrorService extends GetxService {
   // Database service for Firestore operations
-  final DatabaseService _databaseService = Get.find<DatabaseService>();
+  late final DatabaseService _databaseService;
 
   // Collection name for error logs
   static const String _errorCollection = 'error_logs';
@@ -22,6 +22,9 @@ class ErrorService extends GetxService {
   // Initialize the service
   Future<ErrorService> init() async {
     try {
+      // Get the database service
+      _databaseService = Get.find<DatabaseService>();
+
       // Get package info for app version details
       _packageInfo = await PackageInfo.fromPlatform();
       return this;

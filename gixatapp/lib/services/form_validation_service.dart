@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// A service class providing common form validation functions
 class FormValidationService {
   /// Validates that a field is not empty
@@ -138,8 +136,6 @@ class FormValidationService {
     if (value == null) {
       return null; // Allow null if needed
     }
-
-    final today = DateTime.now();
 
     if (minDate != null && value.isBefore(minDate)) {
       return '${fieldName ?? 'Date'} cannot be before ${_formatDate(minDate)}';

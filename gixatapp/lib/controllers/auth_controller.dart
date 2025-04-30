@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -69,7 +68,7 @@ class AuthController extends GetxController {
         _errorService.logError(
           e,
           context: 'AuthController._fetchAppUser',
-          userId: firebaseUser?.uid,
+          userId: firebaseUser.uid,
         );
         _appUser.value = null;
       }
@@ -118,7 +117,7 @@ class AuthController extends GetxController {
   Future<void> signIn(String email, String password) async {
     try {
       isLoading.value = true;
-      final userCredential = await _auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password.trim(),
       );
@@ -150,7 +149,7 @@ class AuthController extends GetxController {
   Future<void> signUp(String email, String password) async {
     try {
       isLoading.value = true;
-      final userCredential = await _auth.createUserWithEmailAndPassword(
+      await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password.trim(),
       );

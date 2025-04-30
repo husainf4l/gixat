@@ -50,7 +50,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
 
   String? _notes;
   List<String> _requests = [];
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
   List<String> _uploadedImageUrls = [];
   bool _isLoading = true;
   bool _isSaving = false;
@@ -204,7 +204,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
             .uploadImagesToFirebase(
               imageFiles: _selectedImages,
               storagePath: 'client_notes_images',
-              uniqueIdentifier: 'session_${_sessionId}',
+              uniqueIdentifier: 'session_$_sessionId',
             );
 
         _uploadedImageUrls.addAll(newImageUrls);
@@ -388,7 +388,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                           color: Colors.black12,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: theme.primaryColor.withOpacity(0.2),
+                            color: theme.primaryColor.withAlpha(51),
                           ),
                         ),
                         child: Row(
@@ -396,7 +396,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: theme.primaryColor.withOpacity(0.1),
+                                color: theme.primaryColor.withAlpha(26),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -510,7 +510,7 @@ class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
                             borderRadius: BorderRadius.circular(24),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
+                                color: Colors.black.withAlpha(10),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),

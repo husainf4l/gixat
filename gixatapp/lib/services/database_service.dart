@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:gixatapp/services/error_service.dart';
+import 'package:flutter/foundation.dart';
 
 class DatabaseService extends GetxService {
   // Firestore instance
   late final FirebaseFirestore _firestore;
+
+  // Error Service - will be initialized after this service
+  // We don't inject it in the constructor to avoid circular dependencies
+  late final dynamic _errorService;
 
   // Service initialization status
   final RxBool isInitialized = false.obs;
@@ -18,16 +21,13 @@ class DatabaseService extends GetxService {
       _firestore = FirebaseFirestore.instance;
 
       // Configure Firestore persistence based on platform
-      // Web uses enablePersistence, other platforms use settings
+      // All platforms now use Settings for configuration
       if (kIsWeb) {
         // Web-specific persistence configuration
-        await _firestore
-            .enablePersistence(const PersistenceSettings(synchronizeTabs: true))
-            .catchError((e) {
-              //to add the error service
-
-              // Continue even if persistence fails
-            });
+        _firestore.settings = Settings(
+          persistenceEnabled: true,
+          // Cache size and other settings can be configured here if needed
+        );
       } else {
         // iOS, Android, and other platforms use settings
         _firestore.settings = Settings(
@@ -51,13 +51,18 @@ class DatabaseService extends GetxService {
           );
 
       isInitialized.value = true;
-      print('Firestore initialized successfully');
+      debugPrint('Firestore initialized successfully');
       return this;
     } catch (e) {
-      print('Error initializing Firestore: $e');
+      debugPrint('Error initializing Firestore: $e');
       // Still return this service even if there was an error, just mark as not initialized
       return this;
     }
+  }
+
+  // Set error service after it's initialized
+  void setErrorService(dynamic errorService) {
+    _errorService = errorService;
   }
 
   // Collection references
@@ -72,7 +77,7 @@ class DatabaseService extends GetxService {
     try {
       return await _firestore.collection(collection).add(data);
     } catch (e) {
-      print('Error adding document to $collection: $e');
+      _logError('Error adding document to $collection', e);
       rethrow;
     }
   }
@@ -87,7 +92,7 @@ class DatabaseService extends GetxService {
     try {
       return await _firestore.collection(collection).doc(documentId).set(data);
     } catch (e) {
-      print('Error setting document $documentId in $collection: $e');
+      _logError('Error setting document $documentId in $collection', e);
       rethrow;
     }
   }
@@ -105,7 +110,7 @@ class DatabaseService extends GetxService {
           .doc(documentId)
           .update(data);
     } catch (e) {
-      print('Error updating document $documentId in $collection: $e');
+      _logError('Error updating document $documentId in $collection', e);
       rethrow;
     }
   }
@@ -116,7 +121,7 @@ class DatabaseService extends GetxService {
     try {
       return await _firestore.collection(collection).doc(documentId).delete();
     } catch (e) {
-      print('Error deleting document $documentId from $collection: $e');
+      _logError('Error deleting document $documentId from $collection', e);
       rethrow;
     }
   }
@@ -130,7 +135,7 @@ class DatabaseService extends GetxService {
     try {
       return await _firestore.collection(collection).doc(documentId).get();
     } catch (e) {
-      print('Error getting document $documentId from $collection: $e');
+      _logError('Error getting document $documentId from $collection', e);
       rethrow;
     }
   }
@@ -141,7 +146,7 @@ class DatabaseService extends GetxService {
     try {
       return _firestore.collection(collection).snapshots();
     } catch (e) {
-      print('Error getting collection $collection: $e');
+      _logError('Error getting collection $collection', e);
       rethrow;
     }
   }
@@ -161,7 +166,7 @@ class DatabaseService extends GetxService {
 
       return query.snapshots();
     } catch (e) {
-      print('Error querying collection $collection: $e');
+      _logError('Error querying collection $collection', e);
       rethrow;
     }
   }
@@ -172,7 +177,7 @@ class DatabaseService extends GetxService {
     try {
       return usersCollection.doc(uid).snapshots();
     } catch (e) {
-      print('Error getting user by UID $uid: $e');
+      _logError('Error getting user by UID $uid', e);
       rethrow;
     }
   }
@@ -185,7 +190,7 @@ class DatabaseService extends GetxService {
           .doc(uid)
           .set(userData, SetOptions(merge: true));
     } catch (e) {
-      print('Error saving user data for UID $uid: $e');
+      _logError('Error saving user data for UID $uid', e);
       rethrow;
     }
   }
@@ -193,7 +198,28 @@ class DatabaseService extends GetxService {
   // Helper to check if service is initialized
   void _checkInitialized() {
     if (!isInitialized.value) {
-      print('Warning: DatabaseService not properly initialized');
+      debugPrint('Warning: DatabaseService not properly initialized');
+    }
+  }
+
+  // Helper to log errors using ErrorService if available
+  void _logError(String message, dynamic error, [StackTrace? stackTrace]) {
+    if (isInitialized.value && Get.isRegistered<dynamic>(tag: 'ErrorService')) {
+      try {
+        _errorService.logError(
+          error,
+          context: 'DatabaseService.$message',
+          stackTrace: stackTrace ?? StackTrace.current,
+        );
+      } catch (e) {
+        // Fallback to print if ErrorService fails
+        debugPrint('$message: $error');
+        if (stackTrace != null) debugPrint(stackTrace.toString());
+      }
+    } else {
+      // Fallback to print if ErrorService not available
+      debugPrint('$message: $error');
+      if (stackTrace != null) debugPrint(stackTrace.toString());
     }
   }
 }

@@ -187,7 +187,6 @@ class NotificationService {
       case NotificationType.warning:
         return Colors.amber.shade50;
       case NotificationType.info:
-      default:
         return Colors.blue.shade50;
     }
   }
@@ -201,7 +200,6 @@ class NotificationService {
       case NotificationType.warning:
         return Colors.amber.shade900;
       case NotificationType.info:
-      default:
         return Colors.blue.shade900;
     }
   }
@@ -215,7 +213,6 @@ class NotificationService {
       case NotificationType.warning:
         return Icons.warning_amber_outlined;
       case NotificationType.info:
-      default:
         return Icons.info_outline;
     }
   }
@@ -229,7 +226,6 @@ class NotificationService {
       case NotificationType.warning:
         return Colors.amber.shade700;
       case NotificationType.info:
-      default:
         return Colors.blue.shade700;
     }
   }
@@ -243,7 +239,6 @@ class NotificationService {
       case NotificationType.warning:
         return Colors.amber;
       case NotificationType.info:
-      default:
         return Colors.blue;
     }
   }

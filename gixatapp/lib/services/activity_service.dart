@@ -1,15 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/auth_controller.dart';
+import 'error_service.dart';
 
 class ActivityService {
   final CollectionReference _activityCollection = FirebaseFirestore.instance
       .collection('activity');
 
-  // Try to get the AuthController if it's available
+  // Get auth controller if available
   final AuthController? _authController =
       Get.isRegistered<AuthController>() ? Get.find<AuthController>() : null;
+
+  // Get error service for error logging
+  final ErrorService _errorService = Get.find<ErrorService>(
+    tag: 'ErrorService',
+  );
 
   /// Log an activity for tracking user actions
   Future<String?> logActivity({
@@ -49,8 +54,13 @@ class ActivityService {
       // Add to Firestore
       final docRef = await _activityCollection.add(activityData);
       return docRef.id;
-    } catch (e) {
-      debugPrint('Error logging activity: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ActivityService.logActivity',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
@@ -124,8 +134,13 @@ class ActivityService {
       return snapshot.docs.map((doc) {
         return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
       }).toList();
-    } catch (e) {
-      debugPrint('Error getting activities: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ActivityService.getActivitiesForSession',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
       return [];
     }
   }
@@ -149,13 +164,29 @@ class ActivityService {
         query = query.limit(limit);
       }
 
-      return query.snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
-        }).toList();
-      });
-    } catch (e) {
-      debugPrint('Error streaming activities: $e');
+      return query
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs.map((doc) {
+              return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+            }).toList();
+          })
+          .handleError((e, stackTrace) {
+            _errorService.logError(
+              e,
+              context: 'ActivityService.streamActivitiesForSession',
+              userId: _authController?.firebaseUser?.uid,
+              stackTrace: stackTrace,
+            );
+            return <Map<String, dynamic>>[];
+          });
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ActivityService.streamActivitiesForSession',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
       return Stream.value([]);
     }
   }
@@ -165,8 +196,13 @@ class ActivityService {
     try {
       await _activityCollection.doc(activityId).delete();
       return true;
-    } catch (e) {
-      debugPrint('Error deleting activity: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ActivityService.deleteActivity',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -190,8 +226,13 @@ class ActivityService {
         return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
       }
       return null;
-    } catch (e) {
-      debugPrint('Error getting latest activity: $e');
+    } catch (e, stackTrace) {
+      _errorService.logError(
+        e,
+        context: 'ActivityService.getLatestActivityByType',
+        userId: _authController?.firebaseUser?.uid,
+        stackTrace: stackTrace,
+      );
       return null;
     }
   }
