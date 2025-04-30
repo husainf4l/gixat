@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io' show Platform;
 import '../controllers/auth_controller.dart';
 
 class LoginPage extends StatelessWidget {
@@ -207,12 +208,14 @@ class LoginPage extends StatelessWidget {
                                 authController.signInWithGoogle();
                               },
                             ),
-                            const SizedBox(width: 16),
 
-                            const SizedBox(width: 16),
-                            _buildSocialButton(context, Icons.apple, () {
-                              authController.signInWithApple();
-                            }),
+                            // Only show Apple sign in button on iOS
+                            if (Platform.isIOS) ...[
+                              const SizedBox(width: 16),
+                              _buildSocialButton(context, Icons.apple, () {
+                                authController.signInWithApple();
+                              }),
+                            ],
                           ],
                         ),
                       ],

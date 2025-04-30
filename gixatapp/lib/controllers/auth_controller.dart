@@ -235,6 +235,16 @@ class AuthController extends GetxController {
 
   // Sign in with Apple
   Future<void> signInWithApple() async {
+    // Only proceed if the platform is iOS
+    if (!Platform.isIOS) {
+      Get.snackbar(
+        'Not Available',
+        'Sign in with Apple is only available on iOS devices',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     try {
       isLoading.value = true;
 
@@ -250,15 +260,14 @@ class AuthController extends GetxController {
         ],
         nonce: nonce,
         // Add webAuthenticationOptions with specific redirect URI for iOS
-        webAuthenticationOptions:
-            Platform.isIOS
-                ? WebAuthenticationOptions(
-                  clientId: 'com.roxate.gixatapp',
-                  redirectUri: Uri.parse(
-                    'https://gixat-app.firebaseapp.com/__/auth/handler',
-                  ),
-                )
-                : null,
+        webAuthenticationOptions: Platform.isIOS
+            ? WebAuthenticationOptions(
+                clientId: 'com.roxate.gixatapp',
+                redirectUri: Uri.parse(
+                  'https://gixat-app.firebaseapp.com/__/auth/handler',
+                ),
+              )
+            : null,
       );
 
       // Create an OAuthCredential from the Apple credential

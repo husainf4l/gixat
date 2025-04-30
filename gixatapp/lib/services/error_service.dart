@@ -34,13 +34,6 @@ class ErrorService extends GetxService {
     }
   }
 
-  /// Log an error to Firestore
-  ///
-  /// Parameters:
-  /// - error: The error object or message
-  /// - context: Where the error occurred (e.g., 'AuthController.signIn')
-  /// - userId: The ID of the user who experienced the error (optional)
-  /// - stackTrace: The stack trace associated with the error (optional)
   Future<void> logError(
     dynamic error, {
     required String context,
@@ -54,7 +47,6 @@ class ErrorService extends GetxService {
         if (stackTrace != null) debugPrint(stackTrace.toString());
       }
 
-      // Prepare error data
       final Map<String, dynamic> errorData = {
         'timestamp': FieldValue.serverTimestamp(),
         'error': error.toString(),
