@@ -8,6 +8,7 @@ import 'screens/main_navigation_screen.dart'; // Import the new navigation scree
 import 'screens/garage_setup_screen.dart'; // Import the new garage setup screen
 import 'theme/app_theme.dart';
 import 'services/database_service.dart';
+import 'services/error_service.dart'; // Import the new error service
 
 void main() async {
   // Ensure Flutter is initialized
@@ -21,6 +22,9 @@ void main() async {
 
     // Initialize and register the DatabaseService after Firebase is initialized
     await Get.putAsync(() => DatabaseService().init());
+
+    // Initialize the ErrorService after DatabaseService
+    await Get.putAsync(() => ErrorService().init());
 
     // Initialize the AuthController after services are set up
     Get.put(AuthController());

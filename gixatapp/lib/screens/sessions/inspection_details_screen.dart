@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../models/session.dart';
 import '../../services/inspection_service.dart';
-import '../../services/session_service.dart';
 import '../../services/image_handling_service.dart';
 import '../../widgets/image_grid_widget.dart';
 import '../../widgets/notes_editor_widget.dart';
-import '../../widgets/request_list_widget.dart';
 import '../../widgets/detail_screen_header.dart';
 
 class InspectionDetailsScreen extends StatefulWidget {
@@ -44,14 +41,13 @@ class InspectionDetailsScreen extends StatefulWidget {
 
 class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
   final InspectionService _inspectionService = InspectionService();
-  final SessionService _sessionService = SessionService();
   final ImageHandlingService _imageHandlingService = ImageHandlingService();
   final TextEditingController _customFindingController =
       TextEditingController();
 
   String? _notes;
   List<String> _findings = [];
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
   List<String> _uploadedImageUrls = [];
   bool _isLoading = true;
   bool _isSaving = false;
@@ -226,7 +222,7 @@ class _InspectionDetailsScreenState extends State<InspectionDetailsScreen> {
             .uploadImagesToFirebase(
               imageFiles: _selectedImages,
               storagePath: 'inspection_images',
-              uniqueIdentifier: 'session_${_sessionId}',
+              uniqueIdentifier: 'session_$_sessionId',
             );
 
         _uploadedImageUrls.addAll(newImageUrls);

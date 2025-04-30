@@ -33,7 +33,7 @@ class CustomTextField extends StatelessWidget {
   final bool autocorrect;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.labelText,
     this.hintText,
@@ -63,7 +63,7 @@ class CustomTextField extends StatelessWidget {
     this.onSubmitted,
     this.enableSuggestions = true,
     this.autocorrect = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

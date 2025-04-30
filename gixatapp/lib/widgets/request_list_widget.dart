@@ -7,12 +7,12 @@ class RequestListWidget extends StatelessWidget {
   final Function()? onAddRequest;
 
   const RequestListWidget({
-    Key? key,
+    super.key,
     required this.requests,
     this.isEditing = false,
     this.onRemoveRequest,
     this.onAddRequest,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,12 +7,12 @@ class ActionButtonBar extends StatelessWidget {
   final Color? backgroundColor;
 
   const ActionButtonBar({
-    Key? key,
+    super.key,
     required this.actions,
     this.padding = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
     this.elevated = true,
     this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

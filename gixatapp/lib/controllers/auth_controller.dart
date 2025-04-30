@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -7,6 +8,7 @@ import 'package:crypto/crypto.dart';
 import 'dart:math';
 import 'dart:io' show Platform;
 import '../services/database_service.dart';
+import '../services/error_service.dart';
 import '../models/user.dart'
     as app_models; // Import our custom User model with an alias
 
@@ -16,6 +18,8 @@ class AuthController extends GetxController {
 
   // Get database service from GetX
   late final DatabaseService _databaseService = Get.find<DatabaseService>();
+  // Get error service from GetX
+  late final ErrorService _errorService = Get.find<ErrorService>();
 
   // Observable Firebase auth user state
   final Rx<firebase_auth.User?> _firebaseUser = Rx<firebase_auth.User?>(null);
@@ -62,7 +66,11 @@ class AuthController extends GetxController {
           _appUser.value = app_models.User.fromFirestore(newUserDoc);
         }
       } catch (e) {
-        print('Error fetching app user data: ${e.toString()}');
+        _errorService.logError(
+          e,
+          context: 'AuthController._fetchAppUser',
+          userId: firebaseUser?.uid,
+        );
         _appUser.value = null;
       }
     } else {
@@ -98,7 +106,11 @@ class AuthController extends GetxController {
         await _databaseService.setDocument('users', user.uid, userData);
       }
     } catch (e) {
-      print('Error saving user data to Firestore: ${e.toString()}');
+      _errorService.logError(
+        e,
+        context: 'AuthController._saveUserToFirestore',
+        userId: user.uid,
+      );
     }
   }
 
@@ -276,7 +288,11 @@ class AuthController extends GetxController {
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
-      print('Apple Sign In Error: ${e.toString()}');
+      _errorService.logError(
+        e,
+        context: 'AuthController.signInWithApple',
+        userId: _firebaseUser.value?.uid,
+      );
       Get.snackbar(
         'Error',
         'Failed to sign in with Apple: ${e.toString()}',
@@ -303,7 +319,11 @@ class AuthController extends GetxController {
 
       return true;
     } catch (e) {
-      print('Error updating garage ID: ${e.toString()}');
+      _errorService.logError(
+        e,
+        context: 'AuthController.updateGarageId',
+        userId: _firebaseUser.value?.uid,
+      );
       return false;
     }
   }

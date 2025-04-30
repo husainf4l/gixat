@@ -10,13 +10,13 @@ class StatusBannerWidget extends StatelessWidget {
   final bool isDismissible;
 
   const StatusBannerWidget({
-    Key? key,
+    super.key,
     required this.message,
     this.type = BannerType.info,
     this.onActionPressed,
     this.actionText,
     this.isDismissible = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

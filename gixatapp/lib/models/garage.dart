@@ -60,13 +60,13 @@ class Garage {
     String? quickBooksKey,
   }) {
     return Garage(
-      id: this.id,
+      id: id,
       garageName: garageName ?? this.garageName,
       logoUrl: logoUrl ?? this.logoUrl,
       openAiKey: openAiKey ?? this.openAiKey,
       quickBooksKey: quickBooksKey ?? this.quickBooksKey,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 

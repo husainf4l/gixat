@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import '../models/client_note.dart';
+import 'error_service.dart';
 
 class ClientNoteService {
   final CollectionReference _jobCardCollection = FirebaseFirestore.instance
       .collection('jobCard');
+
+  // Get error service from GetX
+  final ErrorService _errorService = Get.find<ErrorService>();
 
   // Create a new client note
   Future<String?> createClientNote({
@@ -33,7 +38,7 @@ class ClientNoteService {
       final docRef = await _jobCardCollection.add(noteData);
       return docRef.id;
     } catch (e) {
-      print('Error creating client note: $e');
+      _errorService.logError(e, context: 'ClientNoteService.createClientNote');
       return null;
     }
   }

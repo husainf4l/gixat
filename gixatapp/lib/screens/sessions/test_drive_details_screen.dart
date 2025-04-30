@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../../models/session.dart';
 import '../../services/test_drive_service.dart';
-import '../../services/session_service.dart';
 import '../../services/image_handling_service.dart';
 import '../../widgets/image_grid_widget.dart';
 import '../../widgets/notes_editor_widget.dart';
@@ -42,14 +40,13 @@ class TestDriveDetailsScreen extends StatefulWidget {
 
 class _TestDriveDetailsScreenState extends State<TestDriveDetailsScreen> {
   final TestDriveService _testDriveService = TestDriveService();
-  final SessionService _sessionService = SessionService();
   final ImageHandlingService _imageHandlingService = ImageHandlingService();
   final TextEditingController _customObservationController =
       TextEditingController();
 
   String? _notes;
   List<String> _observations = [];
-  List<File> _selectedImages = [];
+  final List<File> _selectedImages = [];
   List<String> _uploadedImageUrls = [];
   bool _isLoading = true;
   bool _isSaving = false;
@@ -224,7 +221,7 @@ class _TestDriveDetailsScreenState extends State<TestDriveDetailsScreen> {
             .uploadImagesToFirebase(
               imageFiles: _selectedImages,
               storagePath: 'test_drive_images',
-              uniqueIdentifier: 'session_${_sessionId}',
+              uniqueIdentifier: 'session_$_sessionId',
             );
 
         _uploadedImageUrls.addAll(newImageUrls);

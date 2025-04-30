@@ -70,14 +70,14 @@ class User {
     bool? isActive,
   }) {
     return User(
-      uid: this.uid,
-      email: this.email,
+      uid: uid,
+      email: email,
       displayName: displayName ?? this.displayName,
       photoURL: photoURL ?? this.photoURL,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       garageId: garageId ?? this.garageId,
-      createdAt: this.createdAt,
-      lastLoginAt: this.lastLoginAt,
+      createdAt: createdAt,
+      lastLoginAt: lastLoginAt,
       isActive: isActive ?? this.isActive,
     );
   }

@@ -6,11 +6,11 @@ class CarDetailWidget extends StatelessWidget {
   final bool showFullDetails;
 
   const CarDetailWidget({
-    Key? key,
+    super.key,
     required this.carDetails,
     this.carData,
     this.showFullDetails = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

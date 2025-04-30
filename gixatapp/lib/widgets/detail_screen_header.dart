@@ -11,7 +11,7 @@ class DetailScreenHeader extends StatelessWidget {
   final Function()? onCancelPressed;
 
   const DetailScreenHeader({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.isEditing = false,
@@ -19,7 +19,7 @@ class DetailScreenHeader extends StatelessWidget {
     this.onEditPressed,
     this.onSavePressed,
     this.onCancelPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,12 +7,12 @@ class SectionHeaderWidget extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   const SectionHeaderWidget({
-    Key? key,
+    super.key,
     required this.title,
     this.trailing,
     this.showDivider = false,
     this.padding = const EdgeInsets.only(bottom: 8.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

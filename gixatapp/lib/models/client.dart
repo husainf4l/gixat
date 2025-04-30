@@ -46,8 +46,8 @@ class Client {
     required this.garageId,
     List<String>? carsId,
     List<String>? sessionsId,
-  }) : this.carsId = carsId ?? [],
-       this.sessionsId = sessionsId ?? [];
+  }) : carsId = carsId ?? [],
+       sessionsId = sessionsId ?? [];
 
   // Create a Client from Firestore document
   factory Client.fromFirestore(DocumentSnapshot doc) {
@@ -97,7 +97,7 @@ class Client {
     List<String>? sessionsId,
   }) {
     return Client(
-      id: this.id,
+      id: id,
       name: name ?? this.name,
       phone: phone ?? this.phone,
       address: address ?? this.address,

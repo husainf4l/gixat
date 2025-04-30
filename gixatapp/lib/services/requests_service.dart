@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'error_service.dart';
 
 class RequestsService {
+  // Get error service from GetX
+  final ErrorService _errorService = Get.find<ErrorService>();
+
   // Get default service requests based on service type
   List<String> getDefaultRequests(String serviceType) {
     switch (serviceType.toLowerCase()) {
@@ -40,7 +45,11 @@ class RequestsService {
           .doc(documentId)
           .update({'requests': requests});
     } catch (e) {
-      debugPrint('Error saving requests: $e');
+      _errorService.logError(
+        e,
+        context: 'RequestsService.saveRequests',
+        stackTrace: StackTrace.current,
+      );
       rethrow;
     }
   }
@@ -62,7 +71,11 @@ class RequestsService {
       }
       return [];
     } catch (e) {
-      debugPrint('Error getting requests: $e');
+      _errorService.logError(
+        e,
+        context: 'RequestsService.getRequests',
+        stackTrace: StackTrace.current,
+      );
       return [];
     }
   }
@@ -92,7 +105,11 @@ class RequestsService {
         );
       }
     } catch (e) {
-      debugPrint('Error adding request: $e');
+      _errorService.logError(
+        e,
+        context: 'RequestsService.addRequest',
+        stackTrace: StackTrace.current,
+      );
       rethrow;
     }
   }
@@ -120,7 +137,11 @@ class RequestsService {
         collectionName: collectionName,
       );
     } catch (e) {
-      debugPrint('Error removing request: $e');
+      _errorService.logError(
+        e,
+        context: 'RequestsService.removeRequest',
+        stackTrace: StackTrace.current,
+      );
       rethrow;
     }
   }

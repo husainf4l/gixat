@@ -66,8 +66,8 @@ class Car {
     String? plateNumber,
     String? vin,
     String? clientId,
-    String? clientName, // Added client name
-    String? clientPhoneNumber, // Added client phone number
+    String? clientName,
+    String? clientPhoneNumber,
     String? garageId,
     List<String>? sessions,
   }) {
@@ -79,10 +79,8 @@ class Car {
       plateNumber: plateNumber ?? this.plateNumber,
       vin: vin ?? this.vin,
       clientId: clientId ?? this.clientId,
-      clientName: clientName ?? this.clientName, // Added client name
-      clientPhoneNumber:
-          clientPhoneNumber ??
-          this.clientPhoneNumber, // Added client phone number
+      clientName: clientName ?? this.clientName,
+      clientPhoneNumber: clientPhoneNumber ?? this.clientPhoneNumber,
       garageId: garageId ?? this.garageId,
       sessions: sessions ?? this.sessions,
     );

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:gixatapp/services/error_service.dart';
 
 class DatabaseService extends GetxService {
   // Firestore instance
@@ -23,7 +24,8 @@ class DatabaseService extends GetxService {
         await _firestore
             .enablePersistence(const PersistenceSettings(synchronizeTabs: true))
             .catchError((e) {
-              print('Error enabling persistence on web: $e');
+              //to add the error service
+
               // Continue even if persistence fails
             });
       } else {

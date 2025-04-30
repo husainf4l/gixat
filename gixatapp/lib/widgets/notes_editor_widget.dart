@@ -6,11 +6,11 @@ class NotesEditorWidget extends StatelessWidget {
   final Function() onEditPressed;
 
   const NotesEditorWidget({
-    Key? key,
+    super.key,
     this.notes,
     required this.isEditing,
     required this.onEditPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

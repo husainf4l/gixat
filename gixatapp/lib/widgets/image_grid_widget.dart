@@ -10,14 +10,14 @@ class ImageGridWidget extends StatelessWidget {
   final Function(String)? onImageTap;
 
   const ImageGridWidget({
-    Key? key,
+    super.key,
     required this.uploadedImageUrls,
     this.selectedImages = const [],
     this.isEditing = false,
     this.onRemoveUploadedImage,
     this.onRemoveSelectedImage,
     this.onImageTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
