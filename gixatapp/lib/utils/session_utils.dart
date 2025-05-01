@@ -12,6 +12,10 @@ class SessionUtils {
         return Colors.purple;
       case 'TESTED':
         return Colors.blue;
+      case 'PRICING':
+        return Colors.teal;
+      case 'REPORTED':
+        return Colors.indigo;
       case 'CLOSED':
         return Colors.red;
       default:
@@ -30,6 +34,10 @@ class SessionUtils {
         return 'Inspected';
       case 'TESTED':
         return 'Tested';
+      case 'PRICING':
+        return 'Pricing';
+      case 'REPORTED':
+        return 'Reported';
       case 'CLOSED':
         return 'Closed';
       default:
@@ -48,6 +56,10 @@ class SessionUtils {
         return Icons.visibility;
       case 'TESTED':
         return Icons.directions_car;
+      case 'PRICING':
+        return Icons.attach_money;
+      case 'REPORTED':
+        return Icons.summarize;
       case 'COMPLETED':
         return Icons.task_alt;
       case 'CLOSED':

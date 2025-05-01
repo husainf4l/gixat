@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import '../../models/session.dart';
 import '../../services/client_notes_service.dart';
-import '../../services/session_service.dart';
 import '../../services/image_handling_service.dart';
 import '../../widgets/image_grid_widget.dart';
 import '../../widgets/notes_editor_widget.dart';
@@ -44,7 +43,6 @@ class ClientNotesDetailsScreen extends StatefulWidget {
 
 class _ClientNotesDetailsScreenState extends State<ClientNotesDetailsScreen> {
   final ClientNotesService _clientNotesService = ClientNotesService();
-  final SessionService _sessionService = SessionService();
   final ImageHandlingService _imageHandlingService = ImageHandlingService();
   final TextEditingController _customRequestController =
       TextEditingController();

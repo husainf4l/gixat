@@ -7,6 +7,7 @@ import '../../utils/session_utils.dart';
 import 'client_notes_details_screen.dart';
 import 'inspection_details_screen.dart';
 import 'test_drive_details_screen.dart';
+import 'report_details_screen.dart';
 
 class SessionDetailsScreen extends StatelessWidget {
   final Session session;
@@ -267,10 +268,35 @@ class SessionDetailsScreen extends StatelessWidget {
                       const SizedBox(width: 16),
                       Expanded(
                         child: _SessionBox(
-                          icon: Icons.assignment,
-                          title: 'Job Order',
+                          icon: Icons.directions_car,
+                          title: 'G Report',
                           color: primaryColor,
-                          onTap: () {},
+                          hasData: session.reportId != null,
+                          onTap: () {
+                            // Navigate directly with only session ID - G Report page will fetch all needed data
+                            Get.to(
+                              () => ReportDetailsScreen(
+                                sessionId: session.id,
+                                reportId: session.reportId,
+                              ),
+                              transition: Transition.rightToLeft,
+                            )?.then((result) {
+                              if (result != null && result['refresh'] == true) {
+                                // Refresh session data
+                                FirebaseFirestore.instance
+                                    .collection('sessions')
+                                    .doc(session.id)
+                                    .get()
+                                    .then((snapshot) {
+                                      if (snapshot.exists &&
+                                          snapshot.data() != null) {
+                                        // Refresh UI by returning to previous screen with updated data
+                                        Get.back(result: {'refresh': true});
+                                      }
+                                    });
+                              }
+                            });
+                          },
                         ),
                       ),
                     ],
