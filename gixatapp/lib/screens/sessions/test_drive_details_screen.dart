@@ -8,6 +8,7 @@ import '../../services/image_handling_service.dart';
 import '../../widgets/image_grid_widget.dart';
 import '../../widgets/notes_editor_widget.dart';
 import '../../widgets/detail_screen_header.dart';
+import '../sessions/session_details_screen.dart';
 
 class TestDriveDetailsScreen extends StatefulWidget {
   // Required parameters
@@ -248,6 +249,15 @@ class _TestDriveDetailsScreenState extends State<TestDriveDetailsScreen> {
           observations: _observations,
           images: _uploadedImageUrls,
         );
+
+        // Update session with the new test drive ID directly
+        await FirebaseFirestore.instance
+            .collection('sessions')
+            .doc(_sessionId)
+            .update({
+              'testDriveId': testDriveId,
+              'status': 'TESTED', // Update session status as tested
+            });
       }
 
       Get.snackbar(
@@ -258,12 +268,23 @@ class _TestDriveDetailsScreenState extends State<TestDriveDetailsScreen> {
         colorText: Colors.white,
       );
 
-      // Toggle out of edit mode after successfully saving
-      if (mounted) {
-        _toggleEditMode();
-      }
+      // Navigate directly back to the session details screen with updated session data
+      final sessionDoc =
+          await FirebaseFirestore.instance
+              .collection('sessions')
+              .doc(_sessionId)
+              .get();
 
-      // Intentionally not navigating away to stay on the screen after saving
+      if (sessionDoc.exists) {
+        final sessionData = sessionDoc.data() as Map<String, dynamic>;
+        // Create Session object with both the map and ID
+        final session = Session.fromMap(sessionData, _sessionId);
+        // Navigate to session details with updated session
+        Get.off(() => SessionDetailsScreen(session: session));
+      } else {
+        // If session doesn't exist for some reason, just go back
+        Get.back(result: {'refresh': true});
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error saving test drive: $e';

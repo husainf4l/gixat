@@ -44,6 +44,11 @@ class TestDriveService {
         testDriveData,
       );
 
+      await FirebaseFirestore.instance
+          .collection('sessions')
+          .doc(sessionId)
+          .update({'status': 'TESTED'});
+
       // Create activity record for tracking
       await _createActivityRecord(
         sessionId: sessionId,

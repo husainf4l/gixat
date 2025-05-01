@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:gixatapp/screens/main_navigation_screen.dart';
 import '../../models/session.dart';
+import '../../utils/session_utils.dart';
 import 'client_notes_details_screen.dart';
 import 'inspection_details_screen.dart';
 import 'test_drive_details_screen.dart';
@@ -49,21 +51,7 @@ class SessionDetailsScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Back button with minimal design
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.black12,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+
                       // Session status indicator
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -71,15 +59,33 @@ class SessionDetailsScreen extends StatelessWidget {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: _getStatusColor(session.status).withAlpha(38),
+                          color: SessionUtils.getStatusColor(
+                            session.status,
+                          ).withAlpha(38),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          _formatStatus(session.status),
+                          SessionUtils.formatStatus(session.status),
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: _getStatusColor(session.status),
+                            color: SessionUtils.getStatusColor(session.status),
+                          ),
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: () => Get.off(() => MainNavigationScreen()),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black12,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 18,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -128,9 +134,9 @@ class SessionDetailsScreen extends StatelessWidget {
                           icon: Icons.sticky_note_2_outlined,
                           title: 'Client Notes',
                           color: primaryColor,
+                          hasData: session.clientNoteId != null,
                           onTap: () {
                             // Navigate to the client notes details screen
-                            final clientNotesId = session.clientNoteId;
                             final carMake = session.car['make'] ?? '';
                             final carModel = session.car['model'] ?? '';
                             final plateNumber =
@@ -138,15 +144,31 @@ class SessionDetailsScreen extends StatelessWidget {
                             final carDetails =
                                 '$carMake $carModel ${plateNumber.isNotEmpty ? '• $plateNumber' : ''}';
 
+                            // Navigate directly with or without existing clientNoteId
                             Get.to(
                               () => ClientNotesDetailsScreen(
                                 session: session,
-                                clientNotesId: clientNotesId,
+                                clientNotesId: session.clientNoteId,
                                 clientName: session.client['name'] ?? 'Unknown',
                                 carDetails: carDetails,
                               ),
                               transition: Transition.rightToLeft,
-                            );
+                            )?.then((result) {
+                              if (result != null && result['refresh'] == true) {
+                                // Refresh session data
+                                FirebaseFirestore.instance
+                                    .collection('sessions')
+                                    .doc(session.id)
+                                    .get()
+                                    .then((snapshot) {
+                                      if (snapshot.exists &&
+                                          snapshot.data() != null) {
+                                        // Refresh UI by returning to previous screen with updated data
+                                        Get.back(result: {'refresh': true});
+                                      }
+                                    });
+                              }
+                            });
                           },
                         ),
                       ),
@@ -156,6 +178,7 @@ class SessionDetailsScreen extends StatelessWidget {
                           icon: Icons.search,
                           title: 'Inspection',
                           color: primaryColor,
+                          hasData: session.inspectionId != null,
                           onTap: () {
                             // Navigate to the inspection details screen
                             final carMake = session.car['make'] ?? '';
@@ -165,29 +188,31 @@ class SessionDetailsScreen extends StatelessWidget {
                             final carDetails =
                                 '$carMake $carModel ${plateNumber.isNotEmpty ? '• $plateNumber' : ''}';
 
-                            // Check Firestore for existing inspection record
-                            FirebaseFirestore.instance
-                                .collection('jobCard')
-                                .where('sessionId', isEqualTo: session.id)
-                                .where('type', isEqualTo: 'inspection')
-                                .get()
-                                .then((snapshot) {
-                                  String? inspectionId;
-                                  if (snapshot.docs.isNotEmpty) {
-                                    inspectionId = snapshot.docs.first.id;
-                                  }
-
-                                  Get.to(
-                                    () => InspectionDetailsScreen(
-                                      session: session,
-                                      inspectionId: inspectionId,
-                                      clientName:
-                                          session.client['name'] ?? 'Unknown',
-                                      carDetails: carDetails,
-                                    ),
-                                    transition: Transition.rightToLeft,
-                                  );
-                                });
+                            // Navigate directly with or without existing inspectionId
+                            Get.to(
+                              () => InspectionDetailsScreen(
+                                session: session,
+                                inspectionId: session.inspectionId,
+                                clientName: session.client['name'] ?? 'Unknown',
+                                carDetails: carDetails,
+                              ),
+                              transition: Transition.rightToLeft,
+                            )?.then((result) {
+                              if (result != null && result['refresh'] == true) {
+                                // Refresh session data
+                                FirebaseFirestore.instance
+                                    .collection('sessions')
+                                    .doc(session.id)
+                                    .get()
+                                    .then((snapshot) {
+                                      if (snapshot.exists &&
+                                          snapshot.data() != null) {
+                                        // Refresh UI by returning to previous screen with updated data
+                                        Get.back(result: {'refresh': true});
+                                      }
+                                    });
+                              }
+                            });
                           },
                         ),
                       ),
@@ -201,6 +226,7 @@ class SessionDetailsScreen extends StatelessWidget {
                           icon: Icons.directions_car,
                           title: 'Test Drive',
                           color: primaryColor,
+                          hasData: session.testDriveId != null,
                           onTap: () {
                             // Navigate to the test drive details screen
                             final carMake = session.car['make'] ?? '';
@@ -210,29 +236,31 @@ class SessionDetailsScreen extends StatelessWidget {
                             final carDetails =
                                 '$carMake $carModel ${plateNumber.isNotEmpty ? '• $plateNumber' : ''}';
 
-                            // Check Firestore for existing test drive record
-                            FirebaseFirestore.instance
-                                .collection('jobCard')
-                                .where('sessionId', isEqualTo: session.id)
-                                .where('type', isEqualTo: 'testDrive')
-                                .get()
-                                .then((snapshot) {
-                                  String? testDriveId;
-                                  if (snapshot.docs.isNotEmpty) {
-                                    testDriveId = snapshot.docs.first.id;
-                                  }
-
-                                  Get.to(
-                                    () => TestDriveDetailsScreen(
-                                      session: session,
-                                      testDriveId: testDriveId,
-                                      clientName:
-                                          session.client['name'] ?? 'Unknown',
-                                      carDetails: carDetails,
-                                    ),
-                                    transition: Transition.rightToLeft,
-                                  );
-                                });
+                            // Navigate directly with or without existing testDriveId
+                            Get.to(
+                              () => TestDriveDetailsScreen(
+                                session: session,
+                                testDriveId: session.testDriveId,
+                                clientName: session.client['name'] ?? 'Unknown',
+                                carDetails: carDetails,
+                              ),
+                              transition: Transition.rightToLeft,
+                            )?.then((result) {
+                              if (result != null && result['refresh'] == true) {
+                                // Refresh session data
+                                FirebaseFirestore.instance
+                                    .collection('sessions')
+                                    .doc(session.id)
+                                    .get()
+                                    .then((snapshot) {
+                                      if (snapshot.exists &&
+                                          snapshot.data() != null) {
+                                        // Refresh UI by returning to previous screen with updated data
+                                        Get.back(result: {'refresh': true});
+                                      }
+                                    });
+                              }
+                            });
                           },
                         ),
                       ),
@@ -334,7 +362,6 @@ class SessionDetailsScreen extends StatelessWidget {
                         activity: activity,
                         color: primaryColor,
                         formatTimestamp: _formatTimestamp,
-                        getActivityIcon: _getActivityIcon,
                       );
                     },
                   );
@@ -375,60 +402,6 @@ class SessionDetailsScreen extends StatelessWidget {
 
     return '';
   }
-
-  // Helper method to format status text
-  String _formatStatus(String status) {
-    switch (status.toUpperCase()) {
-      case 'OPEN':
-        return 'Open';
-      case 'IN_PROGRESS':
-        return 'In Progress';
-      case 'WAITING_FOR_APPROVAL':
-        return 'Awaiting Approval';
-      case 'COMPLETED':
-        return 'Completed';
-      case 'CLOSED':
-        return 'Closed';
-      default:
-        return status;
-    }
-  }
-
-  // Helper method to get status color
-  Color _getStatusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'OPEN':
-        return Colors.amber;
-      case 'IN_PROGRESS':
-        return Colors.blue;
-      case 'WAITING_FOR_APPROVAL':
-        return Colors.purple;
-      case 'COMPLETED':
-        return Colors.green;
-      case 'CLOSED':
-        return Colors.grey;
-      default:
-        return Colors.blue;
-    }
-  }
-
-  // Helper method to get contextual icons for activities
-  IconData _getActivityIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'note':
-        return Icons.note_alt_rounded;
-      case 'inspection':
-        return Icons.search_rounded;
-      case 'test_drive':
-        return Icons.directions_car_rounded;
-      case 'job_order':
-        return Icons.assignment_rounded;
-      case 'status_change':
-        return Icons.sync_rounded;
-      default:
-        return Icons.event_note_rounded;
-    }
-  }
 }
 
 // Refined session box with consistent styling
@@ -437,12 +410,14 @@ class _SessionBox extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final Color color;
+  final bool hasData; // New parameter to indicate if activity has data
 
   const _SessionBox({
     required this.icon,
     required this.title,
     required this.onTap,
     required this.color,
+    this.hasData = false, // Default to false
   });
 
   @override
@@ -480,7 +455,12 @@ class _SessionBox extends StatelessWidget {
                       color: color.withAlpha(26),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, size: 24, color: color),
+                    child: Icon(
+                      icon,
+                      size: 24,
+                      // Change icon color to green if has data
+                      color: hasData ? Colors.green : color,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(
@@ -495,6 +475,20 @@ class _SessionBox extends StatelessWidget {
                 ],
               ),
             ),
+            // Add small indicator dot if has data
+            if (hasData)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -507,13 +501,11 @@ class _ActivityItem extends StatelessWidget {
   final Map<String, dynamic> activity;
   final Color color;
   final String Function(dynamic) formatTimestamp;
-  final IconData Function(String) getActivityIcon;
 
   const _ActivityItem({
     required this.activity,
     required this.color,
     required this.formatTimestamp,
-    required this.getActivityIcon,
   });
 
   @override
@@ -532,22 +524,6 @@ class _ActivityItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Activity icon
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withAlpha(26),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                getActivityIcon(activity['type'] ?? 'default'),
-                color: color,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Activity content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,6 +5,8 @@ class Session {
   final String garageId;
   final String status; // OPEN, IN_PROGRESS, COMPLETED, etc.
   final String? clientNoteId; // ID of associated client notes
+  final String? inspectionId; // ID of associated inspection
+  final String? testDriveId; // ID of associated test drive
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -15,6 +17,8 @@ class Session {
     required this.garageId,
     required this.status,
     this.clientNoteId,
+    this.inspectionId,
+    this.testDriveId,
     this.createdAt,
     this.updatedAt,
   });
@@ -26,6 +30,8 @@ class Session {
       'garageId': garageId,
       'status': status,
       'clientNoteId': clientNoteId,
+      'inspectionId': inspectionId,
+      'testDriveId': testDriveId,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };
@@ -39,6 +45,8 @@ class Session {
       garageId: map['garageId'] ?? '',
       status: map['status'] ?? 'UNKNOWN',
       clientNoteId: map['clientNoteId'],
+      inspectionId: map['inspectionId'],
+      testDriveId: map['testDriveId'],
       createdAt: map['createdAt']?.toDate(),
       updatedAt: map['updatedAt']?.toDate(),
     );

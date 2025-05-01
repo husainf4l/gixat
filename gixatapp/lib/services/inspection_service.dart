@@ -44,7 +44,12 @@ class InspectionService {
         inspectionData,
       );
 
-      // Create activity record for tracking
+      // Update session with the new inspection ID
+      await FirebaseFirestore.instance
+          .collection('sessions')
+          .doc(sessionId)
+          .update({'status': 'INSPECTED'});
+
       await _createActivityRecord(
         sessionId: sessionId,
         title: 'Inspection completed',

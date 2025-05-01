@@ -8,6 +8,7 @@ import '../../services/client_service.dart';
 import '../../services/car_service.dart';
 import '../../services/session_service.dart';
 import '../../screens/sessions/session_details_screen.dart';
+import '../../utils/session_utils.dart';
 
 class ClientDetailsScreen extends StatelessWidget {
   final String clientId;
@@ -446,16 +447,9 @@ class ClientDetailsScreen extends StatelessWidget {
                                 }
 
                                 // Status color
-                                Color statusColor = Colors.grey;
-                                if (session.status == 'OPEN') {
-                                  statusColor = Colors.green;
-                                } else if (session.status == 'IN_PROGRESS') {
-                                  statusColor = Colors.orange;
-                                } else if (session.status == 'COMPLETED') {
-                                  statusColor = Colors.blue;
-                                } else if (session.status == 'CLOSED') {
-                                  statusColor = Colors.red;
-                                }
+                                Color statusColor = SessionUtils.getStatusColor(
+                                  session.status,
+                                );
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 8),
@@ -492,7 +486,9 @@ class ClientDetailsScreen extends StatelessWidget {
                                         border: Border.all(color: statusColor),
                                       ),
                                       child: Text(
-                                        session.status,
+                                        SessionUtils.formatStatus(
+                                          session.status,
+                                        ),
                                         style: TextStyle(
                                           color: statusColor,
                                           fontWeight: FontWeight.bold,
