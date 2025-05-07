@@ -1,38 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:gixat/widgets/app/gixat_text_field.dart';
+import 'package:gixat/utils/theme.dart';
 
 /// A comprehensive address input widget that includes:
 /// - Street text field
 /// - Country dropdown (limited to launch countries)
 /// - City dropdown (dynamically populated based on selected country)
 /// - Phone number field with country code automatically populated
-class AddressInput extends StatefulWidget {
-  final TextEditingController streetController;
-  final TextEditingController phoneController;
+class AppAddressInput extends StatefulWidget {
+  final TextEditingController? streetController;
+  final TextEditingController? phoneController;
   final Function(String) onCountryChanged;
   final Function(String) onCityChanged;
   final Function(String) onPhoneChanged;
   final String? initialCountry;
   final String? initialCity;
   final String? initialPhone;
+  final String? Function(String?)?
+  phoneValidator; // Added phoneValidator parameter
 
-  const AddressInput({
+  const AppAddressInput({
     super.key,
-    required this.streetController,
-    required this.phoneController,
+    this.streetController,
+    this.phoneController,
     required this.onCountryChanged,
     required this.onCityChanged,
     required this.onPhoneChanged,
     this.initialCountry,
     this.initialCity,
     this.initialPhone,
+    this.phoneValidator, // Added phoneValidator parameter
   });
 
   @override
-  AddressInputState createState() => AddressInputState();
+  AppAddressInputState createState() => AppAddressInputState();
 }
 
-class AddressInputState extends State<AddressInput> {
+class AppAddressInputState extends State<AppAddressInput> {
   String? selectedCountry;
   String? selectedCity;
 
@@ -159,7 +163,7 @@ class AddressInputState extends State<AddressInput> {
     }
 
     if (widget.initialPhone != null) {
-      widget.phoneController.text = widget.initialPhone!;
+      widget.phoneController?.text = widget.initialPhone!;
     }
   }
 
@@ -169,29 +173,28 @@ class AddressInputState extends State<AddressInput> {
 
     return Column(
       children: [
-        // Street input field
-        GixatTextField(
-          controller: widget.streetController,
-          labelText: 'Street',
-          hintText: 'Enter your street address',
-          prefixIcon: const Icon(
-            Icons.location_on_rounded,
-            color: Color(0xFF1B75BB),
-            size: 22,
+        if (widget.streetController != null) ...[
+          GixatTextField(
+            controller: widget.streetController,
+            labelText: 'Street',
+            hintText: 'Enter your street address',
+            prefixIcon: Icon(
+              Icons.location_on_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 22,
+            ),
+            textInputAction: TextInputAction.next,
           ),
-          textInputAction: TextInputAction.next,
-        ),
-
-        const SizedBox(height: 12),
-
+          const SizedBox(height: 12),
+        ],
         // Country dropdown
         _buildDropdown(
           value: selectedCountry,
           hint: 'Select Country',
           items: _countriesAndCities.keys.toList(),
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.public_rounded,
-            color: Color(0xFF1B75BB),
+            color: Theme.of(context).colorScheme.primary,
             size: 22,
           ),
           onChanged: (value) {
@@ -199,24 +202,22 @@ class AddressInputState extends State<AddressInput> {
               setState(() {
                 selectedCountry = value;
                 selectedCity = null; // Reset city when country changes
-                widget.phoneController.text = _phoneCode ?? '';
+                widget.phoneController?.text = _phoneCode ?? '';
               });
               widget.onCountryChanged(value);
             }
           },
           isDark: isDark,
         ),
-
         const SizedBox(height: 12),
-
         // City dropdown (enabled only if a country is selected)
         _buildDropdown(
           value: selectedCity,
           hint: 'Select City',
           items: _cities,
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.location_city_rounded,
-            color: Color(0xFF1B75BB),
+            color: Theme.of(context).colorScheme.primary,
             size: 22,
           ),
           onChanged: (value) {
@@ -230,23 +231,22 @@ class AddressInputState extends State<AddressInput> {
           enabled: selectedCountry != null,
           isDark: isDark,
         ),
-
-        const SizedBox(height: 12),
-
-        // Phone number input field
-        GixatTextField(
-          controller: widget.phoneController,
-          labelText: 'Phone Number',
-          hintText: 'Enter your phone number',
-          prefixIcon: const Icon(
-            Icons.phone_rounded,
-            color: Color(0xFF1B75BB),
-            size: 22,
+        const SizedBox(height: 14),
+        if (widget.phoneController != null)
+          GixatTextField(
+            controller: widget.phoneController,
+            labelText: 'Phone Number',
+            hintText: 'Enter your phone number',
+            prefixIcon: Icon(
+              Icons.phone_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 22,
+            ),
+            keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.next,
+            onChanged: widget.onPhoneChanged,
+            validator: widget.phoneValidator, // Added phoneValidator usage
           ),
-          keyboardType: TextInputType.phone,
-          textInputAction: TextInputAction.done,
-          onChanged: widget.onPhoneChanged,
-        ),
       ],
     );
   }
@@ -265,7 +265,10 @@ class AddressInputState extends State<AddressInput> {
       value: value,
       hint: Text(hint),
       isExpanded: true,
-      icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF1B75BB)),
+      icon: Icon(
+        Icons.arrow_drop_down,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       style: TextStyle(
         fontSize: 16,
         color: isDark ? Colors.white : Colors.black87,
@@ -278,19 +281,18 @@ class AddressInputState extends State<AddressInput> {
         prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-          ),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(
-            color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-          ),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: const Color(0xFF1B75BB), width: 2),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 2,
+          ),
         ),
         fillColor:
             isDark ? Colors.white.withAlpha(20) : const Color(0xFFF2F4F8),

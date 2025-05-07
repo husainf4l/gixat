@@ -11,6 +11,8 @@ class AppColors {
   static const onPrimary = Colors.white;
   static const onSecondary = Colors.black;
   static const error = Colors.redAccent;
+  static const borderLight = Color(0xFFE0E0E0); // light border
+  static const borderDark = Color(0xFF444444); // dark border
 }
 
 /// Shared text styles
@@ -46,6 +48,14 @@ InputDecorationTheme inputDecorationTheme(Color color) {
     ),
     labelStyle: TextStyle(color: color),
   );
+}
+
+/// Extension on ColorScheme for custom border color
+extension CustomColorScheme on ColorScheme {
+  Color get border =>
+      brightness == Brightness.dark
+          ? AppColors.borderDark
+          : AppColors.borderLight;
 }
 
 /// Light Theme

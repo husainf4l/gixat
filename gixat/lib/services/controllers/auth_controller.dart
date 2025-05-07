@@ -76,6 +76,9 @@ class AuthController extends GetxController {
       if (doc.exists) {
         // User exists in Firestore
         gixatUser.value = GixatUser.fromDocument(doc);
+        debugPrint(
+          'Loaded user: \n${gixatUser.value?.toMap()}',
+        ); // Debug print for garageId
       } else {
         // Create new user
         final newUser = GixatUser(
@@ -516,4 +519,6 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  // Check if phone number is registered under garage/clients
 }

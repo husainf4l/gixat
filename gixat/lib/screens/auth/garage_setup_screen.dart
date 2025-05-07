@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:gixat/controllers/auth_controller.dart';
+import 'package:gixat/services/controllers/auth_controller.dart';
 import 'package:gixat/widgets/setup_steps/garage_info_step.dart';
 import 'package:gixat/widgets/setup_steps/location_step.dart';
 import 'package:gixat/widgets/setup_steps/privacy_step.dart';

@@ -8,4 +8,6 @@ abstract class Routes {
   static const termsOfService = '/terms';
   static const privacyPolicy = '/privacy';
   static const authSplash = '/auth-splash';
+  static const addClient = '/add-client';
+  static const clientDetails = '/client-details';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gixat/services/controllers/auth_controller.dart';
 
 class MainSession extends StatelessWidget {
   const MainSession({super.key});
@@ -6,7 +7,14 @@ class MainSession extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: const Scaffold(body: Center(child: Text('Main Session'))),
+      child: Scaffold(
+        body: Center(
+          child: IconButton(
+            onPressed: AuthController().signOut,
+            icon: const Icon(Icons.logout),
+          ),
+        ),
+      ),
     );
   }
 }

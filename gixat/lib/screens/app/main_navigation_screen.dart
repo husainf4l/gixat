@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gixat/controllers/navigation_controller.dart';
+import 'package:gixat/services/controllers/navigation_controller.dart';
+import 'package:gixat/screens/app/clients/clients_page.dart';
 import 'package:gixat/screens/app/sessions/main_session.dart';
-import 'package:gixat/widgets/custom_app_bar.dart';
 
 class MainNavigationScreen extends StatelessWidget {
   const MainNavigationScreen({super.key});
@@ -16,18 +16,13 @@ class MainNavigationScreen extends StatelessWidget {
     // List of screens to be shown in the tab view
     final List<Widget> screens = [
       const MainSession(),
-      const MainSession(),
+      const ClientsPage(),
       const MainSession(),
       const MainSession(),
       const MainSession(),
     ];
 
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Sessions',
-        showBackButton: false,
-        onNotification: null,
-      ),
       body: Obx(
         () => IndexedStack(
           index: navController.currentIndex.value,

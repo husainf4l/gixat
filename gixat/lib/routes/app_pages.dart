@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:gixat/routes/auth_binding.dart';
+import 'package:gixat/screens/app/clients/add_client.dart';
+import 'package:gixat/screens/app/clients/client_details/client_details_page.dart';
 import 'package:gixat/screens/auth/login.dart';
 import 'package:gixat/screens/app/main_navigation_screen.dart';
 import 'package:gixat/screens/auth/connect_garage_screen.dart';
@@ -26,5 +28,7 @@ class AppPages {
       name: Routes.privacyPolicy,
       page: () => const PrivacyPolicyScreen(),
     ),
+    GetPage(name: Routes.addClient, page: () => const AddClient()),
+    GetPage(name: Routes.clientDetails, page: () => const ClientDetailsPage()),
   ];
 }

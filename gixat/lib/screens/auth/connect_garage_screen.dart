@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gixat/controllers/auth_controller.dart';
+import 'package:gixat/services/controllers/auth_controller.dart';
 import 'dart:ui';
 import 'package:gixat/routes/app_pages.dart';
 

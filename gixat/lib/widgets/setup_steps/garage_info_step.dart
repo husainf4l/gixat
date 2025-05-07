@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gixat/widgets/text_field.dart';
+import 'package:gixat/widgets/app/gixat_text_field.dart';
 import 'package:get/get.dart';
 
 class GarageInfoStep extends StatelessWidget {
