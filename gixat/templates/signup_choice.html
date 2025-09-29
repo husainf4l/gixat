@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Get Started - GIXAT{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl w-full space-y-8">
+        <div>
+            <div class="flex justify-center">
+                <img class="h-12 w-auto" src="{% static 'images/gixat-logo.png' %}" alt="GIXAT">
+            </div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Get Started with GIXAT
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Choose how you'd like to begin your garage management journey
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Register New Organization -->
+            <div class="bg-white shadow-lg rounded-lg p-8 border-2 border-transparent hover:border-[#1b75bc] transition duration-200">
+                <div class="text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-3 bg-[#1b75bc] rounded-full">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">
+                        Register New Organization
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Start a new garage business and become the administrator. Perfect for new businesses or garages looking to digitize their operations.
+                    </p>
+                    <ul class="text-left text-sm text-gray-600 mb-6 space-y-2">
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Full administrative control
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Add team members and technicians
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Manage all garage operations
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Complete setup in minutes
+                        </li>
+                    </ul>
+                    <a href="{% url 'register_organization' %}" class="w-full bg-[#1b75bc] text-white py-3 px-4 rounded-lg hover:bg-[#1565a0] transition duration-200 inline-block text-center font-medium">
+                        Register New Organization
+                    </a>
+                </div>
+            </div>
+
+            <!-- Join Existing Organization -->
+            <div class="bg-white shadow-lg rounded-lg p-8 border-2 border-transparent hover:border-[#1b75bc] transition duration-200">
+                <div class="text-center">
+                    <div class="flex justify-center mb-4">
+                        <div class="p-3 bg-green-600 rounded-full">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">
+                        Join Existing Organization
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Join your garage team as a technician, manager, or other role. Perfect for employees joining an established garage.
+                    </p>
+                    <ul class="text-left text-sm text-gray-600 mb-6 space-y-2">
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Join existing garage team
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Choose your role and responsibilities
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Access work assignments immediately
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="h-4 w-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            Quick and simple registration
+                        </li>
+                    </ul>
+                    <a href="{% url 'signup' %}" class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 inline-block text-center font-medium">
+                        Join Existing Organization
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <p class="text-sm text-gray-600">
+                Already have an account? 
+                <a href="{% url 'login' %}" class="font-medium text-[#1b75bc] hover:text-[#1565a0]">
+                    Sign in here
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

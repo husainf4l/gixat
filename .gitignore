@@ -62,6 +62,29 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+settings_local.py
+settings/local.py
+settings/production.py
+*.pyc
+__pycache__/
+
+# Django migrations (uncomment if you want to ignore migrations)
+# */migrations/*
+# !*/migrations/__init__.py
+
+# Django collected static files
+/static/
+/staticfiles/
+/collected-static/
+
+# Django media files
+/media/
+
+# Django session files
+django_session/
+
+# Django cache
+/cache/
 
 # Flask stuff:
 instance/
@@ -156,6 +179,13 @@ build/
 .env.production.local
 .env.production
 .env.development
+*.env
+.envrc
+
+# PostgreSQL
+*.sql
+*.dump
+*.backup
 
 # Debug
 npm-debug.log*
@@ -197,3 +227,56 @@ media/
 
 # Tailwind build
 gixat/static/css/dist/
+
+# Docker
+Dockerfile.prod
+docker-compose.prod.yml
+.dockerignore
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*~
+
+# Secrets and keys
+*.key
+*.pem
+*.p12
+secrets.json
+
+# Local development
+.vscode/settings.json
+.idea/workspace.xml
+*.sublime-workspace
+*.sublime-project
+
+# Redis
+dump.rdb
+
+# Celery
+celerybeat-schedule.db
+
+# Coverage reports
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Jupyter notebooks
+*.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
