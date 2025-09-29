@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Gixat Auto Repair{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white shadow-lg">
+        <div class="p-6">
+            <h2 class="text-2xl font-bold text-gray-800">Gixat</h2>
+        </div>
+        <nav class="mt-6">
+            <a href="{% url 'dashboard' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-200">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
+                </svg>
+                Dashboard
+            </a>
+            <a href="{% url 'appointments' %}" class="flex items-center px-6 py-3 bg-blue-100 text-blue-900 border-r-4 border-blue-500">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Appointments
+            </a>
+            <a href="{% url 'services' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-200">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Services
+            </a>
+            <a href="{% url 'inventory' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-200">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                Inventory
+            </a>
+            <a href="{% url 'reports' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-200">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Reports
+            </a>
+            <a href="{% url 'settings' %}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 hover:text-gray-900 transition duration-200">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Settings
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-semibold text-gray-800">{{ title }}</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">Logged in as {{ request.user.get_full_name }}</span>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <!-- Session Details -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+            <div class="max-w-6xl mx-auto space-y-6">
+                <!-- Session Information -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between items-center mb-6">
+                        <a href="{% url 'appointments' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            ← Back to Appointments
+                        </a>
+                        <a href="{% url 'edit_session' session.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            Edit Session
+                        </a>
+                    </div>
+
+                    <!-- Session Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Basic Information -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Session Information</h3>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Session Number</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.session_number }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Vehicle</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.car }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Client</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.car.client.full_name }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Technician</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.technician.user.get_full_name }}</p>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Status</label>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if session.status == 'scheduled' %}bg-blue-100 text-blue-800
+                                    {% elif session.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                    {% elif session.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ session.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Information -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Schedule & Duration</h3>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Scheduled Date & Time</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.scheduled_date|date:"M d, Y g:i A" }}</p>
+                            </div>
+
+                            {% if session.actual_start_time %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Actual Start Time</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.actual_start_time|date:"M d, Y g:i A" }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if session.actual_end_time %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Actual End Time</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.actual_end_time|date:"M d, Y g:i A" }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if session.duration %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Duration</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.duration }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Cost Information -->
+                        <div class="space-y-4 md:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Cost Information</h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Estimated Cost</label>
+                                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                                        {% if session.estimated_cost %}
+                                            ${{ session.estimated_cost|floatformat:2 }}
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Actual Cost</label>
+                                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">
+                                        {% if session.actual_cost %}
+                                            ${{ session.actual_cost|floatformat:2 }}
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description and Notes -->
+                        <div class="space-y-4 md:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Description & Notes</h3>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Description</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.description|default:"No description provided" }}</p>
+                            </div>
+
+                            {% if session.notes %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Notes</label>
+                                <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.notes }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Timestamps -->
+                        <div class="space-y-4 md:col-span-2">
+                            <h3 class="text-lg font-semibold text-gray-800 border-b pb-2">Record Information</h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Created</label>
+                                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.created_at|date:"M d, Y g:i A" }}</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Last Updated</label>
+                                    <p class="mt-1 text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded">{{ session.updated_at|date:"M d, Y g:i A" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Cards -->
+                {% if job_cards %}
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Job Cards ({{ job_cards|length }})</h3>
+
+                    <div class="space-y-4">
+                        {% for job_card in job_cards %}
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="text-md font-semibold text-gray-800">{{ job_card.title }}</h4>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if job_card.status == 'pending' %}bg-gray-100 text-gray-800
+                                    {% elif job_card.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                    {% elif job_card.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ job_card.get_status_display }}
+                                </span>
+                            </div>
+
+                            <p class="text-sm text-gray-600 mb-2">{{ job_card.description }}</p>
+
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <span class="font-medium text-gray-700">Priority:</span>
+                                    <span class="{% if job_card.priority == 'urgent' %}text-red-600{% elif job_card.priority == 'high' %}text-orange-600{% elif job_card.priority == 'medium' %}text-yellow-600{% else %}text-green-600{% endif %}">
+                                        {{ job_card.get_priority_display }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Assigned:</span>
+                                    {{ job_card.assigned_technician.user.get_full_name }}
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Est. Hours:</span>
+                                    {% if job_card.estimated_hours %}{{ job_card.estimated_hours }}{% else %}N/A{% endif %}
+                                </div>
+                                <div>
+                                    <span class="font-medium text-gray-700">Total Cost:</span>
+                                    ${{ job_card.total_cost|floatformat:2 }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

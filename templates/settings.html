@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Gixat Auto Repair{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-40 hidden bg-black bg-opacity-50 lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:shadow-none">
+        <div class="flex flex-col h-full">
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800">Gixat</h2>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 px-4 py-6 space-y-2">
+                <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-blue-100 text-blue-900 border-r-4 border-blue-500{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %} transition duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
+                    </svg>
+                    Overview
+                </a>
+                <a href="{% url 'appointments' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {% if request.resolver_match.url_name == 'appointments' %}bg-blue-100 text-blue-900 border-r-4 border-blue-500{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %} transition duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Appointments
+                </a>
+                <a href="{% url 'services' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {% if request.resolver_match.url_name == 'services' %}bg-blue-100 text-blue-900 border-r-4 border-blue-500{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %} transition duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                    Services
+                </a>
+                <a href="{% url 'inventory' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {% if request.resolver_match.url_name == 'inventory' %}bg-blue-100 text-blue-900 border-r-4 border-blue-500{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %} transition duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
+                    Inventory
+                </a>
+                <a href="{% url 'reports' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {% if request.resolver_match.url_name == 'reports' %}bg-blue-100 text-blue-900 border-r-4 border-blue-500{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %} transition duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Reports
+                </a>
+                <a href="{% url 'settings' %}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {% if request.resolver_match.url_name == 'settings' %}bg-blue-100 text-blue-900 border-r-4 border-blue-500{% else %}text-gray-700 hover:bg-gray-100 hover:text-gray-900{% endif %} transition duration-200">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Settings
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:ml-80">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm border-b border-gray-200 px-4 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Mobile menu button -->
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <h1 class="text-xl lg:text-2xl font-semibold text-gray-800">Settings</h1>
+
+                <div class="flex items-center space-x-4">
+                    <span class="hidden md:block text-sm text-gray-600">Logged in as {{ request.user.get_full_name }}</span>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <!-- Settings Content -->
+        <main class="p-4 lg:p-8 bg-gray-100 min-h-screen">
+            <div class="max-w-4xl mx-auto">
+                <!-- Profile Settings -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">Profile Settings</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="post" class="space-y-6">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">First Name</label>
+                                    {{ profile_form.first_name }}
+                                    {% if profile_form.first_name.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ profile_form.first_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                                    {{ profile_form.last_name }}
+                                    {% if profile_form.last_name.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ profile_form.last_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                {{ profile_form.email }}
+                                {% if profile_form.email.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ profile_form.email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Phone</label>
+                                {{ profile_form.phone }}
+                                {% if profile_form.phone.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ profile_form.phone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Employee ID</label>
+                                {{ profile_form.employee_id }}
+                                {% if profile_form.employee_id.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ profile_form.employee_id.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" name="save_profile" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Save Profile
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Organization Settings -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">Organization Settings</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="post" class="space-y-6">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Organization Name</label>
+                                {{ organization_form.name }}
+                                {% if organization_form.name.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ organization_form.name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                                    {{ organization_form.phone }}
+                                    {% if organization_form.phone.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ organization_form.phone.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                                    {{ organization_form.email }}
+                                    {% if organization_form.email.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ organization_form.email.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Address</label>
+                                {{ organization_form.address }}
+                                {% if organization_form.address.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ organization_form.address.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Registration Number</label>
+                                {{ organization_form.registration_number }}
+                                {% if organization_form.registration_number.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ organization_form.registration_number.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" name="save_organization" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Save Organization
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">Security Settings</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="post" class="space-y-6">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Current Password</label>
+                                {{ password_form.current_password }}
+                                {% if password_form.current_password.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ password_form.current_password.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">New Password</label>
+                                {{ password_form.new_password }}
+                                {% if password_form.new_password.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ password_form.new_password.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                {{ password_form.confirm_password }}
+                                {% if password_form.confirm_password.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ password_form.confirm_password.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            {% if password_form.non_field_errors %}
+                                <div class="text-sm text-red-600">
+                                    {{ password_form.non_field_errors }}
+                                </div>
+                            {% endif %}
+                            <div class="flex justify-end">
+                                <button type="submit" name="change_password" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Change Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">Notification Settings</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="post" class="space-y-4">
+                            {% csrf_token %}
+                            <div class="flex items-center">
+                                {{ preferences_form.email_new_appointments }}
+                                <label class="ml-2 block text-sm text-gray-900">Email notifications for new appointments</label>
+                            </div>
+                            <div class="flex items-center">
+                                {{ preferences_form.email_completed_services }}
+                                <label class="ml-2 block text-sm text-gray-900">Email notifications for completed services</label>
+                            </div>
+                            <div class="flex items-center">
+                                {{ preferences_form.email_inventory_alerts }}
+                                <label class="ml-2 block text-sm text-gray-900">Email notifications for low inventory alerts</label>
+                            </div>
+                            <div class="flex items-center">
+                                {{ preferences_form.sms_urgent_matters }}
+                                <label class="ml-2 block text-sm text-gray-900">SMS notifications for urgent matters</label>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" name="save_preferences" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Save Preferences
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- System Settings -->
+                <div class="bg-white rounded-lg shadow mb-8">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800">System Settings</h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="post" class="space-y-6">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Default Timezone</label>
+                                {{ system_form.timezone }}
+                                {% if system_form.timezone.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ system_form.timezone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Default Currency</label>
+                                {{ system_form.currency }}
+                                {% if system_form.currency.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ system_form.currency.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="flex items-center">
+                                {{ system_form.auto_backup }}
+                                <label class="ml-2 block text-sm text-gray-900">Enable automatic backups</label>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="submit" name="save_settings" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    Save Settings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="bg-white rounded-lg shadow border-l-4 border-red-400">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-red-800">Danger Zone</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">Delete Account</h3>
+                                <p class="text-sm text-gray-500">Once you delete your account, there is no going back. Please be certain.</p>
+                            </div>
+                            <div class="flex justify-end">
+                                <form method="post" class="inline">
+                                    {% csrf_token %}
+                                    <button type="submit" name="delete_account" onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                        Delete Account
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (window.innerWidth < 1024) { // lg breakpoint
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    }
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const toggleBtn = event.target.closest('button[onclick="toggleSidebar()"]');
+
+    if (!sidebar.contains(event.target) && !toggleBtn && window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+});
+
+// Initialize sidebar state
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+    }
+});
+</script>
+{% endblock %}
