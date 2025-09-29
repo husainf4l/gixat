@@ -1,0 +1,3 @@
+# This is a placeholder for your logo file
+# Replace this file with your actual logo (PNG, SVG, JPG, etc.)
+# Recommended filename: logo.png or logo.svg
