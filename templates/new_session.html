@@ -1,48 +1,30 @@
-{% extends 'base.html' %}
+{% extends 'dashboard_layout.html' %}
 {% load static %}
 
-{% block title %}Create New Repair Session - Gixat Auto Workshop{% endblock %}
+{% block title %}Create New Service Session - Gixat Auto Workshop{% endblock %}
 
-{% block navbar %}{% endblock %}
+{% block page_title %}Create New Service Session{% endblock %}
+{% block page_description %}Comprehensive session management with timeline tracking{% endblock %}
 
-{% block content %}
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-    <!-- Header -->
-    <div class="bg-white shadow-lg border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a href="{% url 'repair_sessions' %}" class="text-gray-400 hover:text-blue-600 mr-4 transition-colors duration-200">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </a>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Create New Repair Session</h1>
-                        <p class="text-sm text-gray-500">Comprehensive session management with timeline tracking</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-6">
-                    <div class="text-center">
-                        <span class="text-xs text-gray-500 block">Progress</span>
-                        <span class="text-sm font-semibold text-blue-600">All Steps Active</span>
-                    </div>
-                    <div class="flex space-x-1">
-                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
-                        <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
-                        <div class="w-2 h-2 bg-blue-200 rounded-full"></div>
-                        <div class="w-2 h-2 bg-blue-100 rounded-full"></div>
-                        <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+{% block top_actions %}
+<div class="flex items-center space-x-4">
+    <div class="text-center">
+        <span class="text-xs text-gray-500 block">Progress</span>
+        <span class="text-sm font-semibold text-blue-600">All Steps Active</span>
     </div>
+    <div class="flex space-x-1">
+        <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+        <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+        <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+        <div class="w-2 h-2 bg-blue-300 rounded-full"></div>
+        <div class="w-2 h-2 bg-blue-200 rounded-full"></div>
+        <div class="w-2 h-2 bg-blue-100 rounded-full"></div>
+        <div class="w-2 h-2 bg-gray-200 rounded-full"></div>
+    </div>
+</div>
+{% endblock %}
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+{% block dashboard_content %}
         <form method="post" enctype="multipart/form-data" class="space-y-8">
             {% csrf_token %}
 
@@ -721,9 +703,9 @@
                 </div>
             </div>
         </form>
-    </div>
-</div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 let jobCardCount = 0;
 let partCount = 0;
@@ -1131,5 +1113,5 @@ input:focus, select:focus, textarea:focus {
     background: #94a3b8;
 }
 </style>
-
+</script>
 {% endblock %}

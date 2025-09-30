@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Include Sidebar Component -->
+    {% include 'components/sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="lg:ml-80">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm border-b border-gray-200 px-4 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Mobile menu button -->
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+
+                <!-- Page Title -->
+                <div class="flex-1 text-center lg:text-left">
+                    <h1 class="text-xl lg:text-2xl font-semibold text-gray-800">{% block page_title %}Dashboard{% endblock %}</h1>
+                    {% block page_subtitle %}
+                    <p class="text-sm text-gray-600 mt-1">{% block page_description %}Your comprehensive auto repair management system{% endblock %}</p>
+                    {% endblock %}
+                </div>
+
+                <!-- Top Right Actions -->
+                <div class="flex items-center space-x-4">
+                    {% block top_actions %}
+                    <span class="hidden md:block text-sm text-gray-600">{{ request.user.get_full_name }}</span>
+                    {% endblock %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="p-4 lg:p-8 bg-gray-100 min-h-screen">
+            {% block dashboard_content %}
+            <!-- Default dashboard content will go here -->
+            {% endblock %}
+        </main>
+    </div>
+</div>
+
+<!-- Sidebar JavaScript -->
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (window.innerWidth < 1024) { // lg breakpoint
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    }
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const toggleBtn = event.target.closest('button[onclick="toggleSidebar()"]');
+
+    if (!sidebar.contains(event.target) && !toggleBtn && window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+});
+
+// Initialize sidebar state
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    if (window.innerWidth < 1024) {
+        sidebar.classList.add('-translate-x-full');
+    }
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+{% endblock %}

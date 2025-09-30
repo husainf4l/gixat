@@ -1,48 +1,29 @@
-{% extends 'base.html' %}
+{% extends 'dashboard_layout.html' %}
 
 {% block title %}Dashboard - Gixat Auto Repair{% endblock %}
 
-{% block navbar %}{% endblock %}
+{% block page_title %}Welcome to Gixat Dashboard{% endblock %}
+{% block page_description %}Your comprehensive auto repair management system{% endblock %}
 
-{% block content %}
-<div class="min-h-screen bg-gray-100">
+{% block top_actions %}
+<div class="flex items-center space-x-4">
+    <a href="{% url 'new_client_request' %}" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 lg:px-4">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span class="hidden lg:inline">New Request</span>
+    </a>
+    <a href="{% url 'new_session' %}" class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200 lg:px-4">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+        <span class="hidden lg:inline">New Service</span>
+    </a>
+</div>
+{% endblock %}
 
-    <!-- Main Content -->
-    <div class="">
-        <!-- Top Bar -->
-        <header class="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg">
-            <div class="px-4 lg:px-8 py-6">
-                <div class="flex items-center justify-between">
-                    <!-- Mobile menu button -->
-                    <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-md text-blue-200 hover:text-white hover:bg-blue-800">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-
-                    <div class="flex-1 text-center lg:text-left">
-                        <h1 class="text-2xl lg:text-3xl font-bold text-white">Welcome to Gixat Dashboard</h1>
-                        <p class="text-blue-100 text-sm mt-1">Your comprehensive auto repair management system</p>
-                    </div>
-
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right hidden md:block">
-                            <p class="text-white font-medium">{{ request.user.get_full_name }}</p>
-                            <p class="text-blue-200 text-xs">Auto Repair Manager</p>
-                        </div>
-                        <form method="post" action="{% url 'logout' %}" class="inline">
-                            {% csrf_token %}
-                            <button type="submit" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-200 backdrop-blur">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Dashboard Content -->
-        <main class="p-4 lg:p-8 bg-gray-100 min-h-screen">
+{% block dashboard_content %}
             <!-- Header Actions -->
             <div class="mb-8 bg-white rounded-lg shadow-sm p-6">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -882,39 +863,4 @@
                 </div>
             </div>
 
-        </main>
-    </div>
-</div>
-
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-
-    if (window.innerWidth < 1024) { // lg breakpoint
-        sidebar.classList.toggle('-translate-x-full');
-        overlay.classList.toggle('hidden');
-    }
-}
-
-// Close sidebar when clicking outside on mobile
-document.addEventListener('click', function(event) {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const toggleBtn = event.target.closest('button[onclick="toggleSidebar()"]');
-
-    if (!sidebar.contains(event.target) && !toggleBtn && window.innerWidth < 1024) {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-    }
-});
-
-// Initialize sidebar state
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebar = document.getElementById('sidebar');
-    if (window.innerWidth < 1024) {
-        sidebar.classList.add('-translate-x-full');
-    }
-});
-</script>
 {% endblock %}
