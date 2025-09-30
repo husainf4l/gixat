@@ -79,12 +79,30 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <!-- Action Buttons -->
                     <div class="flex justify-between items-center mb-6">
-                        <a href="{% url 'appointments' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                            ← Back to Appointments
+                        <a href="{% url 'repair_sessions' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            ← Back to Sessions
                         </a>
-                        <a href="{% url 'edit_session' session.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                            Edit Session
-                        </a>
+                        <div class="flex space-x-2">
+                            {% if session.status == 'scheduled' %}
+                            <a href="{% url 'start_session' session.id %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                Start Session
+                            </a>
+                            {% elif session.status == 'in_progress' %}
+                            <a href="{% url 'update_session_status' session.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                Update Status
+                            </a>
+                            <a href="{% url 'complete_session' session.id %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                Complete Session
+                            </a>
+                            {% elif session.status == 'completed' %}
+                            <a href="{% url 'generate_invoice' session.id %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                Generate Invoice
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'edit_session' session.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                Edit Session
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Session Information -->

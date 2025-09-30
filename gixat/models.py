@@ -87,7 +87,7 @@ class Car(models.Model):
     year = models.PositiveIntegerField()
     color = models.CharField(max_length=30, blank=True)
     license_plate = models.CharField(max_length=20, unique=True)
-    vin = models.CharField(max_length=17, unique=True, blank=True)
+    vin = models.CharField(max_length=17, unique=True, blank=True, null=True)
     engine_number = models.CharField(max_length=50, blank=True)
     fuel_type = models.CharField(max_length=20, choices=FUEL_TYPE_CHOICES, default='petrol')
     mileage = models.PositiveIntegerField(default=0, help_text="Current mileage in kilometers")
@@ -122,6 +122,7 @@ class Session(models.Model):
     technician = models.ForeignKey(UserProfile, on_delete=models.CASCADE, limit_choices_to={'role__in': ['technician', 'manager']})
     session_number = models.CharField(max_length=50, unique=True)
     scheduled_date = models.DateTimeField()
+    expected_end_date = models.DateTimeField(null=True, blank=True)
     actual_start_time = models.DateTimeField(null=True, blank=True)
     actual_end_time = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
@@ -129,6 +130,7 @@ class Session(models.Model):
     notes = models.TextField(blank=True, help_text="Session notes and updates")
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     actual_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    job_type = models.CharField(max_length=50, blank=True, help_text="Type of job (engine_repair, brake_service, etc.)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -253,6 +255,31 @@ class Inventory(models.Model):
 
     class Meta:
         ordering = ['name']
+
+
+class InventoryTransaction(models.Model):
+    TRANSACTION_TYPES = [
+        ('stock_in', 'Stock In'),
+        ('stock_out', 'Stock Out'),
+        ('adjustment', 'Adjustment'),
+        ('usage', 'Usage in Session'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    inventory_item = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='transactions')
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, null=True, blank=True, related_name='inventory_transactions')
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.transaction_type} - {self.inventory_item.name} ({self.quantity})"
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class Inspection(models.Model):

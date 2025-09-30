@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Organization, UserProfile, Client, Car, Session, JobCard
+from .models import Organization, UserProfile, Client, Car, Session, JobCard, Inventory, InventoryTransaction
 
 
 @admin.register(Organization)
@@ -62,3 +62,25 @@ class JobCardAdmin(admin.ModelAdmin):
     def assigned_technician_name(self, obj):
         return obj.assigned_technician.user.get_full_name()
     assigned_technician_name.short_description = 'Assigned Technician'
+
+
+@admin.register(Inventory)
+class InventoryAdmin(admin.ModelAdmin):
+    list_display = ['part_number', 'name', 'category', 'quantity', 'min_quantity', 'unit_price', 'is_low_stock', 'is_active']
+    list_filter = ['category', 'organization', 'is_active', 'created_at']
+    search_fields = ['part_number', 'name', 'description', 'supplier']
+    list_editable = ['quantity', 'min_quantity', 'unit_price', 'is_active']
+    
+    def is_low_stock(self, obj):
+        return obj.is_low_stock
+    is_low_stock.boolean = True
+    is_low_stock.short_description = 'Low Stock'
+
+
+@admin.register(InventoryTransaction)
+class InventoryTransactionAdmin(admin.ModelAdmin):
+    list_display = ['inventory_item', 'transaction_type', 'quantity', 'unit_price', 'session', 'created_by', 'created_at']
+    list_filter = ['transaction_type', 'organization', 'created_at']
+    search_fields = ['inventory_item__name', 'inventory_item__part_number', 'session__session_number', 'notes']
+    readonly_fields = ['created_at']
+    date_hierarchy = 'created_at'

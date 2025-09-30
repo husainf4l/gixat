@@ -49,10 +49,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'gixat.middleware.SecurityHeadersMiddleware',
+    'gixat.middleware.RateLimitMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'gixat.middleware.AuditLoggingMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -96,12 +99,37 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': env.int('PASSWORD_MIN_LENGTH', default=8),
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+    {
+        'NAME': 'gixat.validators.CustomPasswordValidator',
+        'OPTIONS': {
+            'min_length': env.int('PASSWORD_MIN_LENGTH', default=8),
+            'require_uppercase': env.bool('PASSWORD_REQUIRE_UPPERCASE', default=True),
+            'require_lowercase': env.bool('PASSWORD_REQUIRE_LOWERCASE', default=True),
+            'require_digit': env.bool('PASSWORD_REQUIRE_DIGIT', default=True),
+            'require_special': env.bool('PASSWORD_REQUIRE_SPECIAL', default=True),
+        }
+    },
+    {
+        'NAME': 'gixat.validators.NoCommonPatternsValidator',
+    },
+    {
+        'NAME': 'gixat.validators.NoPersonalInfoValidator',
+    },
+    {
+        'NAME': 'gixat.validators.NoRepeatingCharactersValidator',
+        'OPTIONS': {
+            'max_repeating': env.int('PASSWORD_MAX_REPEATING', default=3),
+        }
     },
 ]
 
@@ -121,15 +149,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_URL = env('STATIC_URL', default='/static/')
+STATIC_ROOT = env.path('STATIC_ROOT', default=BASE_DIR / 'staticfiles')
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
 # Media files (User uploaded files)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = env('MEDIA_URL', default='/media/')
+MEDIA_ROOT = env.path('MEDIA_ROOT', default=BASE_DIR / 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -140,10 +168,115 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
-# Security settings for HTTPS
+# Security settings
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=not DEBUG)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', default=not DEBUG)
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=not DEBUG)
+SECURE_BROWSER_XSS_FILTER = env.bool('SECURE_BROWSER_XSS_FILTER', default=True)
+SECURE_CONTENT_TYPE_NOSNIFF = env.bool('SECURE_CONTENT_TYPE_NOSNIFF', default=True)
+SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=0 if DEBUG else 31536000)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=not DEBUG)
+SECURE_HSTS_PRELOAD = env.bool('SECURE_HSTS_PRELOAD', default=not DEBUG)
+
+# Session Configuration
+SESSION_COOKIE_AGE = env.int('SESSION_COOKIE_AGE', default=86400)  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = env.bool('SESSION_EXPIRE_AT_BROWSER_CLOSE', default=True)
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# CSRF Protection
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+
+# Email Configuration
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = env('EMAIL_HOST', default='localhost')
+EMAIL_PORT = env.int('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@gixat.com')
+
+# Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': env('LOG_FILE', default=BASE_DIR / 'logs' / 'django.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': env('LOG_LEVEL', default='INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': env('LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+        'gixat': {
+            'handlers': ['console', 'file'],
+            'level': env('LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+    },
+}
+
+# File Upload Security
+FILE_UPLOAD_MAX_MEMORY_SIZE = env.int('FILE_UPLOAD_MAX_MEMORY_SIZE', default=5242880)  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = env.int('DATA_UPLOAD_MAX_MEMORY_SIZE', default=5242880)  # 5MB
+FILE_UPLOAD_PERMISSIONS = 0o644
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': env('CACHE_URL', default='redis://127.0.0.1:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True,  # Don't fail if Redis is down
+        },
+        'KEY_PREFIX': 'gixat',
+        'TIMEOUT': 300,  # 5 minutes default
+    }
+}
+
+# Use Redis for sessions if available
+if not DEBUG:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+
+# Rate Limiting Configuration
+RATE_LIMIT_ENABLE = env.bool('RATE_LIMIT_ENABLE', default=True)
+RATE_LIMIT_PER_MINUTE = env.int('RATE_LIMIT_PER_MINUTE', default=60)
+RATE_LIMIT_PER_HOUR = env.int('RATE_LIMIT_PER_HOUR', default=1000)
+MAX_LOGIN_ATTEMPTS = env.int('MAX_LOGIN_ATTEMPTS', default=5)
+LOGIN_LOCKOUT_DURATION = env.int('LOGIN_LOCKOUT_DURATION', default=300)  # 5 minutes
+
+# Password Complexity Settings
+PASSWORD_MIN_LENGTH = env.int('PASSWORD_MIN_LENGTH', default=8)
+PASSWORD_REQUIRE_UPPERCASE = env.bool('PASSWORD_REQUIRE_UPPERCASE', default=True)
+PASSWORD_REQUIRE_LOWERCASE = env.bool('PASSWORD_REQUIRE_LOWERCASE', default=True)
+PASSWORD_REQUIRE_DIGIT = env.bool('PASSWORD_REQUIRE_DIGIT', default=True)
+PASSWORD_REQUIRE_SPECIAL = env.bool('PASSWORD_REQUIRE_SPECIAL', default=True)
+PASSWORD_MAX_REPEATING = env.int('PASSWORD_MAX_REPEATING', default=3)
