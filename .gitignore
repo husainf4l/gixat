@@ -221,6 +221,7 @@ logs
 # Django static files
 staticfiles/
 static/
+!static/images/
 
 # Media files
 media/

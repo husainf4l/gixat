@@ -23,6 +23,7 @@
                             <a href="{% url 'home' %}" class="hover:bg-[#1565a0] px-3 py-2 rounded-md text-sm font-medium">Home</a>
                             <a href="{% url 'about' %}" class="hover:bg-[#1565a0] px-3 py-2 rounded-md text-sm font-medium">About</a>
                             {% if user.is_authenticated %}
+                                <a href="{% url 'new_client_request' %}" class="bg-[#0f4a7b] hover:bg-[#0a3a61] px-3 py-2 rounded-md text-sm font-medium">New Client Request</a>
                                 <span class="text-white px-3 py-2 text-sm">Welcome, {{ user.get_full_name }}!</span>
                                 <form method="post" action="{% url 'logout' %}" class="inline">
                                     {% csrf_token %}
@@ -94,6 +95,7 @@
                     <a href="{% url 'home' %}" class="block hover:bg-[#1565a0] px-3 py-2 rounded-md text-base font-medium">Home</a>
                     <a href="{% url 'about' %}" class="block hover:bg-[#1565a0] px-3 py-2 rounded-md text-base font-medium">About</a>
                     {% if user.is_authenticated %}
+                        <a href="{% url 'new_client_request' %}" class="block bg-[#0f4a7b] hover:bg-[#0a3a61] px-3 py-2 rounded-md text-base font-medium">New Client Request</a>
                         <span class="block text-white px-3 py-2 text-base">Welcome, {{ user.get_full_name }}!</span>
                         <form method="post" action="{% url 'logout' %}" class="px-3 py-2">
                             {% csrf_token %}

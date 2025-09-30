@@ -339,6 +339,11 @@ class ClientRequestForm(forms.ModelForm):
             self.fields['existing_car'].queryset = Car.objects.filter(
                 organization=self.organization, is_active=True
             )
+        
+        # Set default scheduled date to today
+        from django.utils import timezone
+        if not self.instance.pk:  # Only for new instances
+            self.fields['scheduled_date'].initial = timezone.now().replace(hour=9, minute=0, second=0, microsecond=0)
 
 
 class InspectionForm(forms.ModelForm):

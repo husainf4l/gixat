@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">{{ title }}</h1>
+            <p class="mt-2 text-gray-600">Fill out the form below to {{ submit_text|lower }}</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="px-6 py-8">
+                <form method="post" enctype="multipart/form-data" class="space-y-8">
+                    {% csrf_token %}
+
+                    <!-- Client Information Section -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Client Information</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Existing Client Selection -->
+                            <div class="md:col-span-2">
+                                <label for="{{ form.existing_client.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Existing Client (Optional)
+                                </label>
+                                {{ form.existing_client }}
+                                {% if form.existing_client.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.existing_client.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- New Client Fields -->
+                            <div>
+                                <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    First Name *
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Last Name *
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Email
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Number
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Information Section -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Vehicle Information</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Existing Car Selection -->
+                            <div class="md:col-span-2">
+                                <label for="{{ form.existing_car.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Existing Vehicle (Optional)
+                                </label>
+                                {{ form.existing_car }}
+                                {% if form.existing_car.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.existing_car.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- New Car Fields -->
+                            <div>
+                                <label for="{{ form.make.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Make *
+                                </label>
+                                {{ form.make }}
+                                {% if form.make.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.make.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.model.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Model *
+                                </label>
+                                {{ form.model }}
+                                {% if form.model.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.model.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.year.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Year *
+                                </label>
+                                {{ form.year }}
+                                {% if form.year.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.year.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.license_plate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    License Plate *
+                                </label>
+                                {{ form.license_plate }}
+                                {% if form.license_plate.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.license_plate.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Request Section -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Service Request Details</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.scheduled_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Scheduled Date *
+                                </label>
+                                {{ form.scheduled_date }}
+                                {% if form.scheduled_date.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.scheduled_date.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.estimated_cost.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Estimated Cost
+                                </label>
+                                {{ form.estimated_cost }}
+                                {% if form.estimated_cost.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.estimated_cost.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Work Description *
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <a href="{% url 'dashboard' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                            {{ submit_text }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format datetime-local input to show current date/time if empty
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduledDateInput = document.getElementById('{{ form.scheduled_date.id_for_label }}');
+    if (scheduledDateInput && !scheduledDateInput.value) {
+        // Set to current date/time if not already set
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        scheduledDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+});
+</script>
+{% endblock %}
