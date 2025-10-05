@@ -2,51 +2,29 @@
 
 {% block title %}Dashboard - Gixat Auto Repair{% endblock %}
 
-{% block page_title %}Welcome to Gixat Dashboard{% endblock %}
-{% block page_description %}Your comprehensive auto repair management system{% endblock %}
+{% block page_subtitle %}
+<h1 class="text-xl lg:text-2xl font-semibold text-gray-800">Dashboard Overview</h1>
+<p class="text-sm text-gray-600 mt-1">Monitor and manage your auto repair operations</p>
+{% endblock %}
 
 {% block top_actions %}
-<div class="flex items-center space-x-4">
-    <a href="{% url 'new_client_request' %}" class="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 lg:px-4">
+<div class="flex flex-col sm:flex-row gap-3">
+    <a href="{% url 'new_client_request' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
-        <span class="hidden lg:inline">New Request</span>
+        New Client Request
     </a>
-    <a href="{% url 'new_session' %}" class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200 lg:px-4">
+    <a href="{% url 'new_session' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
         </svg>
-        <span class="hidden lg:inline">New Service</span>
+        New Service
     </a>
 </div>
 {% endblock %}
 
 {% block dashboard_content %}
-            <!-- Header Actions -->
-            <div class="mb-8 bg-white rounded-lg shadow-sm p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
-                        <p class="mt-1 text-sm text-gray-600">Monitor and manage your auto repair operations</p>
-                    </div>
-                    <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
-                        <a href="{% url 'new_client_request' %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                            </svg>
-                            New Client Request
-                        </a>
-                        <a href="{% url 'new_session' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                            New Service
-                        </a>
-                    </div>
-                </div>
-            </div>
 
             <!-- Quick Actions Section -->
             <div class="bg-white rounded-lg shadow-sm mb-8">

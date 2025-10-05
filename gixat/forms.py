@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Organization, UserProfile, Client, Car, Session, Inspection, Inventory
+from .models import Organization, UserProfile, Client, Car, Session, Inspection, Inventory, Service
 
 
 class CustomLoginForm(AuthenticationForm):
@@ -845,3 +845,222 @@ class SystemSettingsForm(forms.Form):
             'class': 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded'
         })
     )
+
+
+class ServiceForm(forms.ModelForm):
+    class Meta:
+        model = Service
+        fields = ['name', 'description', 'category', 'pricing_type', 'labor_cost', 'parts_cost', 'total_price', 'estimated_time', 'recommended_for']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'e.g., Oil Change & Filter'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'rows': 3,
+                'placeholder': 'Brief description of the service...'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+            }, choices=[
+                ('', 'Select Category'),
+                ('maintenance', 'Maintenance'),
+                ('electrical', 'Electrical'),
+                ('bodywork', 'Bodywork'),
+                ('engine', 'Engine'),
+                ('brakes', 'Brakes'),
+                ('suspension', 'Suspension'),
+                ('diagnostic', 'Diagnostic'),
+            ]),
+            'pricing_type': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'onchange': 'togglePricingFields(this)'
+            }),
+            'labor_cost': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'step': '0.01',
+                'placeholder': '0.00'
+            }),
+            'parts_cost': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'step': '0.01',
+                'placeholder': '0.00'
+            }),
+            'total_price': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'step': '0.01',
+                'placeholder': '0.00'
+            }),
+            'estimated_time': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'e.g., 30-45 minutes'
+            }),
+            'recommended_for': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'e.g., All vehicles, Sedans, SUVs...'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.organization = kwargs.pop('organization', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        service = super().save(commit=False)
+        if self.organization:
+            service.organization = self.organization
+        service.service_type = 'service'
+        if commit:
+            service.save()
+        return service
+
+
+class PackageForm(forms.ModelForm):
+    included_services = forms.ModelMultipleChoiceField(
+        queryset=Service.objects.none(),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+            'size': '6'
+        }),
+        required=False
+    )
+
+    class Meta:
+        model = Service
+        fields = ['name', 'description', 'total_price', 'discount_percentage', 'estimated_time', 'valid_from', 'valid_until']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'placeholder': 'e.g., Complete Maintenance Package'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'rows': 3,
+                'placeholder': 'Package description...'
+            }),
+            'total_price': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'step': '0.01',
+                'placeholder': '140.00'
+            }),
+            'discount_percentage': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'step': '1',
+                'min': '0',
+                'max': '100',
+                'placeholder': '15'
+            }),
+            'estimated_time': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'placeholder': 'e.g., 2-3 hours'
+            }),
+            'valid_from': forms.DateInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'type': 'date'
+            }),
+            'valid_until': forms.DateInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                'type': 'date'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.organization = kwargs.pop('organization', None)
+        super().__init__(*args, **kwargs)
+        if self.organization:
+            self.fields['included_services'].queryset = Service.objects.filter(
+                organization=self.organization, 
+                service_type='service',
+                is_active=True
+            )
+
+    def save(self, commit=True):
+        package = super().save(commit=False)
+        if self.organization:
+            package.organization = self.organization
+        package.service_type = 'package'
+        if commit:
+            package.save()
+            if self.cleaned_data.get('included_services'):
+                package.included_services.set(self.cleaned_data['included_services'])
+        return package
+
+
+class DiscountForm(forms.ModelForm):
+    applicable_to = forms.ChoiceField(
+        choices=[
+            ('all', 'All Services & Packages'),
+            ('categories', 'Specific Categories'),
+            ('services', 'Specific Services'),
+        ],
+        widget=forms.RadioSelect(attrs={
+            'class': 'space-y-3'
+        }),
+        initial='all'
+    )
+    
+    customer_eligibility = forms.MultipleChoiceField(
+        choices=[
+            ('first_time', 'First-time customers only'),
+            ('returning', 'Returning customers only'),
+            ('limit_one', 'Limit one per customer'),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'space-y-2'
+        }),
+        required=False
+    )
+
+    class Meta:
+        model = Service
+        fields = ['name', 'description', 'discount_type', 'discount_value', 'min_purchase_amount', 'valid_from', 'valid_until', 'is_active']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500',
+                'placeholder': 'e.g., First-Time Customer'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500',
+                'rows': 2,
+                'placeholder': 'Brief description of the offer...'
+            }),
+            'discount_type': forms.Select(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500',
+                'onchange': 'toggleDiscountType(this)'
+            }),
+            'discount_value': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 pr-8',
+                'step': '0.01',
+                'placeholder': '20'
+            }),
+            'min_purchase_amount': forms.NumberInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500',
+                'step': '0.01',
+                'placeholder': '100.00'
+            }),
+            'valid_from': forms.DateInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500',
+                'type': 'date'
+            }),
+            'valid_until': forms.DateInput(attrs={
+                'class': 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500',
+                'type': 'date'
+            }),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.organization = kwargs.pop('organization', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        discount = super().save(commit=False)
+        if self.organization:
+            discount.organization = self.organization
+        discount.service_type = 'discount'
+        if commit:
+            discount.save()
+        return discount

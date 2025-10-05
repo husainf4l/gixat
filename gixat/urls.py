@@ -1,6 +1,7 @@
 from django.urls import path
-from django.contrib.auth.views import LogoutView
+from django.contrib.auth.views import LogoutView, LoginView
 from . import views
+from .forms import CustomLoginForm
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -12,6 +13,11 @@ urlpatterns = [
     path('services/completed/', views.services_completed, name='services_completed'),
     path('inventory/', views.inventory, name='inventory'),
     path('reports/', views.reports, name='reports'),
+    path('reports/expenses-profit/', views.expenses_profit_report, name='expenses_profit_report'),
+    path('reports/parts-usage/', views.parts_usage_report, name='parts_usage_report'),
+    path('reports/vehicle-history/', views.vehicle_history_report, name='vehicle_history_report'),
+    path('reports/pending-payments/', views.pending_payments_report, name='pending_payments_report'),
+    path('reports/inventory-valuation/', views.inventory_valuation_report, name='inventory_valuation_report'),
     path('repair-sessions/', views.repair_sessions, name='repair_sessions'),
     path('new-client-request/', views.new_client_request, name='new_client_request'),
     path('settings/', views.settings, name='settings'),
@@ -26,7 +32,11 @@ urlpatterns = [
     path('export-reports/excel/', views.export_reports_excel, name='export_reports_excel'),
     path('export-reports/pdf/', views.export_reports_pdf, name='export_reports_pdf'),
     path('accounts/profile/', views.dashboard, name='profile'),  # Redirect profile to dashboard
-    path('login/', views.CustomLoginView.as_view(), name='login'),
+    path('login/', LoginView.as_view(
+        template_name='login.html',
+        authentication_form=CustomLoginForm,
+        redirect_authenticated_user=True
+    ), name='login'),
     path('get-started/', views.signup_choice_view, name='signup_choice'),
     path('register-organization/', views.register_organization_view, name='register_organization'),
     path('signup/', views.signup_view, name='signup'),
@@ -37,4 +47,11 @@ urlpatterns = [
     path('session/<int:session_id>/update-status/', views.update_session_status, name='update_session_status'),
     path('session/<int:session_id>/complete/', views.complete_session, name='complete_session'),
     path('session/<int:session_id>/generate-invoice/', views.generate_invoice, name='generate_invoice'),
+    path('create-service/', views.create_service, name='create_service'),
+    path('create-package/', views.create_package, name='create_package'),
+    path('create-inspection-template/', views.create_inspection_template, name='create_inspection_template'),
+    path('inspection/<int:inspection_id>/pdf/', views.generate_inspection_pdf, name='generate_inspection_pdf'),
+    path('inspection/<int:inspection_id>/item/<int:item_id>/update/', views.update_inspection_item, name='update_inspection_item'),
+    path('inspection/<int:inspection_id>/signature/', views.save_inspection_signature, name='save_inspection_signature'),
+    path('inspection/<int:inspection_id>/link-session/', views.link_inspection_to_session, name='link_inspection_to_session'),
 ]

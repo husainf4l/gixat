@@ -218,6 +218,26 @@ class JobCard(models.Model):
         ordering = ['-created_at']
 
 
+# class Supplier(models.Model):
+#     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+#     name = models.CharField(max_length=200)
+#     contact_person = models.CharField(max_length=100, blank=True)
+#     phone = models.CharField(max_length=20, blank=True)
+#     email = models.EmailField(blank=True)
+#     address = models.TextField(blank=True)
+#     payment_terms = models.CharField(max_length=100, blank=True, help_text="Payment terms (e.g., Net 30, COD)")
+#     is_active = models.BooleanField(default=True)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return f"{self.name} - {self.organization.name}"
+
+#     class Meta:
+#         ordering = ['name']
+#         unique_together = ['organization', 'name']
+
+
 class Inventory(models.Model):
     CATEGORY_CHOICES = [
         ('engine', 'Engine Parts'),
@@ -305,6 +325,17 @@ class Inspection(models.Model):
     estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     client_approved = models.BooleanField(null=True, blank=True)
     client_notes = models.TextField(blank=True)
+
+    # Template and session linking
+    template = models.ForeignKey('InspectionTemplate', on_delete=models.SET_NULL, null=True, blank=True)
+    linked_session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True, related_name='inspections')
+
+    # Digital signature
+    client_signature = models.TextField(blank=True, help_text="Base64 encoded signature image")
+    client_signature_date = models.DateTimeField(null=True, blank=True)
+    inspector_signature = models.TextField(blank=True, help_text="Base64 encoded signature image")
+    inspector_signature_date = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -345,8 +376,33 @@ class InspectionItem(models.Model):
     needs_repair = models.BooleanField(default=False)
     estimated_repair_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+    # Photo and video attachments
+    before_photos = models.JSONField(default=list, blank=True, help_text="List of before photo URLs")
+    after_photos = models.JSONField(default=list, blank=True, help_text="List of after photo URLs")
+    videos = models.JSONField(default=list, blank=True, help_text="List of video URLs")
+
     def __str__(self):
         return f"{self.component} - {self.condition}"
+
+
+class InspectionTemplate(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=50, blank=True, help_text="Template category (pre-service, post-repair, annual, etc.)")
+    is_active = models.BooleanField(default=True)
+
+    # Template items
+    template_items = models.JSONField(default=list, help_text="List of template checklist items")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.organization.name}"
+
+    class Meta:
+        ordering = ['-created_at']
 
 
 class Notification(models.Model):
@@ -370,6 +426,72 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.user.username}"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class Service(models.Model):
+    SERVICE_TYPES = [
+        ('service', 'Individual Service'),
+        ('package', 'Service Package'),
+        ('discount', 'Discount Offer'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    service_type = models.CharField(max_length=20, choices=SERVICE_TYPES, default='service')
+    description = models.TextField(blank=True)
+    category = models.CharField(max_length=50, blank=True, help_text="Service category (maintenance, electrical, etc.)")
+    
+    # Pricing
+    pricing_type = models.CharField(max_length=20, choices=[
+        ('fixed', 'Fixed Price'),
+        ('labor-parts', 'Labor + Parts'),
+    ], default='fixed')
+    labor_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    parts_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
+    # Package specific fields
+    included_services = models.ManyToManyField('self', blank=True, symmetrical=False, related_name='packages')
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    
+    # Discount specific fields
+    discount_type = models.CharField(max_length=20, choices=[
+        ('percentage', 'Percentage'),
+        ('fixed', 'Fixed Amount'),
+    ], blank=True)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    min_purchase_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    valid_from = models.DateField(null=True, blank=True)
+    valid_until = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    # Common fields
+    estimated_time = models.CharField(max_length=50, blank=True, help_text="Estimated time (e.g., 30-45 minutes)")
+    recommended_for = models.CharField(max_length=200, blank=True, help_text="Recommended vehicle types")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.organization.name}"
+
+    @property
+    def display_price(self):
+        if self.service_type == 'discount':
+            if self.discount_type == 'percentage':
+                return f"{self.discount_value}% off"
+            else:
+                return f"${self.discount_value} off"
+        elif self.service_type == 'package':
+            return f"${self.total_price}"
+        else:
+            if self.pricing_type == 'fixed':
+                return f"${self.total_price}"
+            else:
+                return f"${self.labor_cost + self.parts_cost}"
 
     class Meta:
         ordering = ['-created_at']

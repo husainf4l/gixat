@@ -5,29 +5,12 @@
 <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:shadow-none">
     <div class="flex flex-col h-full">
         <!-- Sidebar Header -->
-        <div class="relative flex items-center justify-between p-6 overflow-hidden">
-            <!-- Animated background -->
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800"></div>
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtMy4zMTQgMi42ODYtNiA2LTZzNiAyLjY4NiA2IDYtMi42ODYgNi02IDYtNi0yLjY4Ni02LTZ6bS0yMCAwYzAtMy4zMTQgMi42ODYtNiA2LTZzNiAyLjY4NiA2IDYtMi42ODYgNi02IDYtNi0yLjY4Ni02LTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
-
-            <div class="relative flex items-center justify-center flex-1">
-                <div class="group">
-                    <!-- Glassmorphism container -->
-                    <div class="relative backdrop-blur-xl bg-white/10 p-5 rounded-3xl border border-white/20 shadow-2xl hover:shadow-blue-500/50 transition-all duration-500 hover:scale-110">
-                        <!-- Inner glow -->
-                        <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/20 to-transparent opacity-50"></div>
-
-                        <!-- Logo -->
-                        <img src="{% load static %}{% static 'images/gixat-logo.png' %}" alt="Gixat Logo" class="relative w-16 h-16 brightness-0 invert drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:drop-shadow-[0_0_25px_rgba(255,255,255,0.8)] transition-all duration-500">
-
-                        <!-- Floating particles effect -->
-                        <div class="absolute -top-1 -right-1 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
-                        <div class="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-300 rounded-full animate-pulse delay-75"></div>
-                    </div>
-                </div>
+        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <div class="flex items-center justify-center flex-1">
+                <h1 class="text-3xl font-bold text-black">GIXAT</h1>
             </div>
 
-            <button onclick="toggleSidebar()" class="relative lg:hidden p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-200">
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

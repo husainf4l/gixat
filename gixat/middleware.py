@@ -23,6 +23,8 @@ class RateLimitMiddleware:
         self.rate_limit_enabled = getattr(settings, 'RATE_LIMIT_ENABLE', True)
         self.rate_limit_per_minute = getattr(settings, 'RATE_LIMIT_PER_MINUTE', 60)
         self.rate_limit_per_hour = getattr(settings, 'RATE_LIMIT_PER_HOUR', 1000)
+        # Django 5.x requires async_mode attribute
+        self.async_mode = False
     
     def __call__(self, request):
         # Check rate limits before processing request
@@ -34,20 +36,6 @@ class RateLimitMiddleware:
         
         response = self.get_response(request)
         return response
-        
-    def process_request(self, request):
-        if not self.rate_limit_enabled:
-            return None
-            
-        # Get client IP
-        client_ip = self.get_client_ip(request)
-        
-        # Check rate limits
-        if self.is_rate_limited(client_ip):
-            logger.warning(f"Rate limit exceeded for IP: {client_ip}")
-            return HttpResponse("Rate limit exceeded. Please try again later.", status=429)
-        
-        return None
     
     def get_client_ip(self, request):
         """Get the client's IP address"""
@@ -60,25 +48,30 @@ class RateLimitMiddleware:
     
     def is_rate_limited(self, client_ip):
         """Check if the client IP has exceeded rate limits"""
-        now = int(time.time())
-        minute_key = f"rate_limit:{client_ip}:minute:{now // 60}"
-        hour_key = f"rate_limit:{client_ip}:hour:{now // 3600}"
-        
-        # Check minute limit
-        minute_count = cache.get(minute_key, 0)
-        if minute_count >= self.rate_limit_per_minute:
-            return True
-        
-        # Check hour limit
-        hour_count = cache.get(hour_key, 0)
-        if hour_count >= self.rate_limit_per_hour:
-            return True
-        
-        # Increment counters
-        cache.set(minute_key, minute_count + 1, timeout=60)
-        cache.set(hour_key, hour_count + 1, timeout=3600)
-        
-        return False
+        try:
+            now = int(time.time())
+            minute_key = f"rate_limit:{client_ip}:minute:{now // 60}"
+            hour_key = f"rate_limit:{client_ip}:hour:{now // 3600}"
+            
+            # Check minute limit
+            minute_count = cache.get(minute_key, 0) or 0
+            if minute_count >= self.rate_limit_per_minute:
+                return True
+            
+            # Check hour limit
+            hour_count = cache.get(hour_key, 0) or 0
+            if hour_count >= self.rate_limit_per_hour:
+                return True
+            
+            # Increment counters
+            cache.set(minute_key, minute_count + 1, timeout=60)
+            cache.set(hour_key, hour_count + 1, timeout=3600)
+            
+            return False
+        except Exception as e:
+            # If cache fails, allow the request but log the error
+            logger.warning(f"Cache error in rate limiting: {e}")
+            return False
 
 
 class LoginAttemptMiddleware:
@@ -90,6 +83,8 @@ class LoginAttemptMiddleware:
         self.get_response = get_response
         self.max_attempts = getattr(settings, 'MAX_LOGIN_ATTEMPTS', 5)
         self.lockout_duration = getattr(settings, 'LOGIN_LOCKOUT_DURATION', 300)  # 5 minutes
+        # Django 5.x requires async_mode attribute
+        self.async_mode = False
     
     def __call__(self, request):
         response = self.get_response(request)
@@ -97,34 +92,47 @@ class LoginAttemptMiddleware:
     
     def is_login_locked(self, identifier):
         """Check if login is locked for the identifier (IP or username)"""
-        lockout_key = f"login_lockout:{identifier}"
-        attempts_key = f"login_attempts:{identifier}"
-        
-        # Check if currently locked out
-        if cache.get(lockout_key):
-            return True
-        
-        # Check attempt count
-        attempts = cache.get(attempts_key, 0)
-        if attempts >= self.max_attempts:
-            # Lock out the identifier
-            cache.set(lockout_key, True, timeout=self.lockout_duration)
-            cache.delete(attempts_key)
-            logger.warning(f"Login locked for {identifier} due to too many failed attempts")
-            return True
-        
-        return False
+        try:
+            lockout_key = f"login_lockout:{identifier}"
+            attempts_key = f"login_attempts:{identifier}"
+            
+            # Check if currently locked out
+            if cache.get(lockout_key):
+                return True
+            
+            # Check attempt count
+            attempts = cache.get(attempts_key, 0) or 0
+            if attempts >= self.max_attempts:
+                # Lock out the identifier
+                cache.set(lockout_key, True, timeout=self.lockout_duration)
+                cache.delete(attempts_key)
+                logger.warning(f"Login locked for {identifier} due to too many failed attempts")
+                return True
+            
+            return False
+        except Exception as e:
+            # If cache fails, allow login but log the error
+            logger.warning(f"Cache error in login attempt checking: {e}")
+            return False
     
     def record_failed_attempt(self, identifier):
         """Record a failed login attempt"""
-        attempts_key = f"login_attempts:{identifier}"
-        attempts = cache.get(attempts_key, 0)
-        cache.set(attempts_key, attempts + 1, timeout=self.lockout_duration)
+        try:
+            attempts_key = f"login_attempts:{identifier}"
+            attempts = cache.get(attempts_key, 0) or 0
+            cache.set(attempts_key, attempts + 1, timeout=self.lockout_duration)
+        except Exception as e:
+            # If cache fails, log the error but don't block
+            logger.warning(f"Cache error in recording failed attempt: {e}")
     
     def clear_failed_attempts(self, identifier):
         """Clear failed attempts on successful login"""
-        attempts_key = f"login_attempts:{identifier}"
-        cache.delete(attempts_key)
+        try:
+            attempts_key = f"login_attempts:{identifier}"
+            cache.delete(attempts_key)
+        except Exception as e:
+            # If cache fails, log the error but continue
+            logger.warning(f"Cache error in clearing failed attempts: {e}")
 
 
 class SecurityHeadersMiddleware:
@@ -134,6 +142,8 @@ class SecurityHeadersMiddleware:
     
     def __init__(self, get_response):
         self.get_response = get_response
+        # Django 5.x requires async_mode attribute
+        self.async_mode = False
     
     def __call__(self, request):
         response = self.get_response(request)
@@ -180,16 +190,18 @@ class AuditLoggingMiddleware:
     
     def __init__(self, get_response):
         self.get_response = get_response
+        # Django 5.x requires async_mode attribute
+        self.async_mode = False
     
     def __call__(self, request):
-        # Log before processing
-        self.process_request(request)
+        # Log security-relevant operations before processing
+        self.log_security_event(request)
         response = self.get_response(request)
-        # Log after processing
-        self.process_response(request, response)
+        # Log after processing if needed
         return response
     
-    def process_request(self, request):
+    def log_security_event(self, request):
+        """Log security-relevant events"""
         # Log sensitive operations
         if request.method in ['POST', 'PUT', 'DELETE', 'PATCH']:
             sensitive_paths = [
@@ -212,12 +224,6 @@ class AuditLoggingMiddleware:
                     f"User: {username}, "
                     f"IP: {client_ip}"
                 )
-        
-        return None
-    
-    def process_response(self, request, response):
-        """Process response for additional logging if needed"""
-        return response
     
     def get_client_ip(self, request):
         """Get the client's IP address"""

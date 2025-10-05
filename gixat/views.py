@@ -7,10 +7,10 @@ from django.db import transaction
 from django.db.models import Count, Sum, Q, F, Avg
 from django.utils import timezone
 from datetime import timedelta
-from .forms import CustomLoginForm, CustomSignupForm, OrganizationRegistrationForm, AdminUserCreationForm, ClientRequestForm, InspectionForm, VehicleForm, InventoryItemForm, SessionForm, ProfileForm, OrganizationForm, PasswordChangeForm, NotificationPreferencesForm, SystemSettingsForm
-from .models import Organization, UserProfile, Client, Car, Session, JobCard, Inventory, InventoryTransaction, Inspection, Notification
+from .forms import CustomLoginForm, CustomSignupForm, OrganizationRegistrationForm, AdminUserCreationForm, ClientRequestForm, InspectionForm, VehicleForm, InventoryItemForm, SessionForm, ProfileForm, OrganizationForm, PasswordChangeForm, NotificationPreferencesForm, SystemSettingsForm, ServiceForm, PackageForm, DiscountForm
+from .models import Organization, UserProfile, Client, Car, Session, JobCard, Inventory, InventoryTransaction, Inspection, Notification, Service
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -231,43 +231,38 @@ def services(request):
         messages.error(request, 'User profile not found. Please contact administrator.')
         return redirect('home')
     
-    # Get all job cards/services
-    job_cards = JobCard.objects.filter(
-        session__organization=organization
-    ).select_related('session', 'session__car', 'session__car__client', 'assigned_technician__user').order_by('-created_at')
+    # Get all services, packages, and discounts for the organization
+    services = Service.objects.filter(
+        organization=organization,
+        is_active=True
+    ).order_by('-created_at')
     
-    # Filter by status if provided
-    status_filter = request.GET.get('status')
-    if status_filter:
-        job_cards = job_cards.filter(status=status_filter)
+    # Filter by type if provided
+    service_type_filter = request.GET.get('type')
+    if service_type_filter:
+        services = services.filter(service_type=service_type_filter)
+    
+    # Filter by category if provided
+    category_filter = request.GET.get('category')
+    if category_filter:
+        services = services.filter(category=category_filter)
     
     # Calculate statistics
-    total_services = job_cards.count()
-    pending_services = job_cards.filter(status='pending').count()
-    in_progress_services = job_cards.filter(status='in_progress').count()
-    completed_services = job_cards.filter(status='completed').count()
+    total_services = services.filter(service_type='service').count()
+    total_packages = services.filter(service_type='package').count()
+    total_discounts = services.filter(service_type='discount').count()
     
-    # Calculate total revenue from completed services
-    total_revenue = job_cards.filter(status='completed').aggregate(
-        total=Sum(F('labor_cost') + F('parts_cost'))
-    )['total'] or 0
-    
-    # Get recent activity (last 7 days)
-    from datetime import datetime, timedelta
-    from django.utils import timezone
-    
-    recent_date = timezone.now() - timedelta(days=7)
-    recent_services = job_cards.filter(created_at__gte=recent_date).count()
+    # Get unique categories
+    categories = services.values_list('category', flat=True).distinct().exclude(category__isnull=True).exclude(category='')
     
     context = {
-        'job_cards': job_cards,
-        'status_filter': status_filter,
+        'services': services,
+        'service_type_filter': service_type_filter,
+        'category_filter': category_filter,
         'total_services': total_services,
-        'pending_services': pending_services,
-        'in_progress_services': in_progress_services,
-        'completed_services': completed_services,
-        'total_revenue': total_revenue,
-        'recent_services': recent_services,
+        'total_packages': total_packages,
+        'total_discounts': total_discounts,
+        'categories': categories,
     }
     
     return render(request, 'services.html', context)
@@ -946,7 +941,7 @@ def new_session(request):
                         title=request.POST[f'job_title_{job_card_count}'],
                         description=request.POST[f'job_description_{job_card_count}'],
                         priority=request.POST[f'job_priority_{job_card_count}'],
-                        estimated_hours=request.POST.get(f'job_estimated_hours_{job_card_count}') or 0,
+                        estimated_hours=request.POST.get(f'job_labor_cost_{job_card_count}') or 0,
                         labor_cost=request.POST.get(f'job_labor_cost_{job_card_count}') or 0,
                         status=request.POST[f'job_status_{job_card_count}'],
                         assigned_technician=session.technician
@@ -1831,11 +1826,437 @@ def export_reports_excel(request):
             ws.column_dimensions[column_letter].width = adjusted_width
     
     # Create response
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="gixat_reports_{today}.xlsx"'
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="gixat_reports_{today}.pdf"'
     
-    wb.save(response)
+    # Build PDF
+    doc.build(elements)
+    
     return response
+
+
+def expenses_profit_report(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get current date and time
+    now = timezone.now()
+    today = now.date()
+    this_month = today.replace(day=1)
+    this_year = today.replace(month=1, day=1)
+    
+    # Revenue calculations
+    revenue_today = Session.objects.filter(
+        organization=organization,
+        status='completed',
+        actual_end_time__date=today
+    ).aggregate(total=Sum('actual_cost'))['total'] or 0
+    
+    revenue_this_month = Session.objects.filter(
+        organization=organization,
+        status='completed',
+        actual_end_time__date__gte=this_month
+    ).aggregate(total=Sum('actual_cost'))['total'] or 0
+    
+    revenue_this_year = Session.objects.filter(
+        organization=organization,
+        status='completed',
+        actual_end_time__date__gte=this_year
+    ).aggregate(total=Sum('actual_cost'))['total'] or 0
+    
+    # Expense calculations (parts costs)
+    expenses_today = JobCard.objects.filter(
+        session__organization=organization,
+        session__status='completed',
+        session__actual_end_time__date=today
+    ).aggregate(total=Sum('parts_cost'))['total'] or 0
+    
+    expenses_this_month = JobCard.objects.filter(
+        session__organization=organization,
+        session__status='completed',
+        session__actual_end_time__date__gte=this_month
+    ).aggregate(total=Sum('parts_cost'))['total'] or 0
+    
+    expenses_this_year = JobCard.objects.filter(
+        session__organization=organization,
+        session__status='completed',
+        session__actual_end_time__date__gte=this_year
+    ).aggregate(total=Sum('parts_cost'))['total'] or 0
+    
+    # Profit calculations
+    profit_today = revenue_today - expenses_today
+    profit_this_month = revenue_this_month - expenses_this_month
+    profit_this_year = revenue_this_year - expenses_this_year
+    
+    # Monthly profit trend (last 12 months)
+    monthly_profit = []
+    for i in range(11, -1, -1):
+        month_start = (now - timedelta(days=30*i)).replace(day=1)
+        month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+        
+        month_revenue = Session.objects.filter(
+            organization=organization,
+            status='completed',
+            actual_end_time__date__gte=month_start,
+            actual_end_time__date__lte=month_end
+        ).aggregate(total=Sum('actual_cost'))['total'] or 0
+        
+        month_expenses = JobCard.objects.filter(
+            session__organization=organization,
+            session__status='completed',
+            session__actual_end_time__date__gte=month_start,
+            session__actual_end_time__date__lte=month_end
+        ).aggregate(total=Sum('parts_cost'))['total'] or 0
+        
+        month_profit = month_revenue - month_expenses
+        
+        monthly_profit.append({
+            'month': month_start.strftime('%B %Y'),
+            'revenue': month_revenue,
+            'expenses': month_expenses,
+            'profit': month_profit
+        })
+    
+    context = {
+        'revenue_today': revenue_today,
+        'revenue_this_month': revenue_this_month,
+        'revenue_this_year': revenue_this_year,
+        'expenses_today': expenses_today,
+        'expenses_this_month': expenses_this_month,
+        'expenses_this_year': expenses_this_year,
+        'profit_today': profit_today,
+        'profit_this_month': profit_this_month,
+        'profit_this_year': profit_this_year,
+        'monthly_profit': monthly_profit,
+    }
+    
+    return render(request, 'expenses_profit_report.html', context)
+
+
+def parts_usage_report(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get date filter
+    date_filter = request.GET.get('date_filter', 'month')
+    now = timezone.now()
+    today = now.date()
+    
+    if date_filter == 'week':
+        start_date = today - timedelta(days=today.weekday())
+    elif date_filter == 'month':
+        start_date = today.replace(day=1)
+    elif date_filter == 'year':
+        start_date = today.replace(month=1, day=1)
+    else:
+        start_date = None
+    
+    # Parts usage from inventory transactions
+    parts_usage = InventoryTransaction.objects.filter(
+        organization=organization,
+        transaction_type='usage'
+    )
+    
+    if start_date:
+        parts_usage = parts_usage.filter(created_at__date__gte=start_date)
+    
+    parts_usage = parts_usage.values(
+        'inventory_item__name',
+        'inventory_item__part_number',
+        'inventory_item__category'
+    ).annotate(
+        total_used=Sum('quantity'),
+        total_cost=Sum(F('quantity') * F('unit_price')),
+        usage_count=Count('id')
+    ).order_by('-total_used')
+    
+    # Top used parts
+    top_parts = parts_usage[:20]
+    
+    # Parts usage by category
+    category_usage = InventoryTransaction.objects.filter(
+        organization=organization,
+        transaction_type='usage'
+    )
+    
+    if start_date:
+        category_usage = category_usage.filter(created_at__date__gte=start_date)
+    
+    category_usage = category_usage.values('inventory_item__category').annotate(
+        total_used=Sum('quantity'),
+        total_cost=Sum(F('quantity') * F('unit_price')),
+        unique_parts=Count('inventory_item', distinct=True)
+    ).order_by('-total_used')
+    
+    # Recent parts usage
+    recent_usage = InventoryTransaction.objects.filter(
+        organization=organization,
+        transaction_type='usage'
+    ).select_related('inventory_item', 'session', 'created_by').order_by('-created_at')[:50]
+    
+    context = {
+        'parts_usage': parts_usage,
+        'top_parts': top_parts,
+        'category_usage': category_usage,
+        'recent_usage': recent_usage,
+        'date_filter': date_filter,
+    }
+    
+    return render(request, 'parts_usage_report.html', context)
+
+
+def vehicle_history_report(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get vehicle filter
+    vehicle_id = request.GET.get('vehicle')
+    selected_vehicle = None
+    
+    if vehicle_id:
+        try:
+            selected_vehicle = Car.objects.get(id=vehicle_id, organization=organization)
+        except Car.DoesNotExist:
+            selected_vehicle = None
+    
+    # Get all vehicles for dropdown
+    vehicles = Car.objects.filter(organization=organization).order_by('make', 'model', 'license_plate')
+    
+    # Vehicle history
+    vehicle_history = []
+    if selected_vehicle:
+        # Get all sessions for this vehicle
+        sessions = Session.objects.filter(
+            organization=organization,
+            car=selected_vehicle
+        ).select_related('technician__user').order_by('-scheduled_date')
+        
+        # Get all inspections for this vehicle
+        inspections = Inspection.objects.filter(
+            organization=organization,
+            car=selected_vehicle
+        ).select_related('inspector__user').order_by('-scheduled_date')
+        
+        # Combine sessions and inspections into history
+        for session in sessions:
+            vehicle_history.append({
+                'type': 'session',
+                'date': session.scheduled_date,
+                'title': f"Session {session.session_number}",
+                'description': session.description or 'No description',
+                'status': session.get_status_display(),
+                'technician': f"{session.technician.user.first_name} {session.technician.user.last_name}" if session.technician else 'Unassigned',
+                'cost': session.actual_cost or session.estimated_cost,
+                'object': session
+            })
+        
+        for inspection in inspections:
+            vehicle_history.append({
+                'type': 'inspection',
+                'date': inspection.scheduled_date,
+                'title': f"Inspection {inspection.inspection_number}",
+                'description': inspection.overall_condition or 'No description',
+                'status': inspection.get_status_display(),
+                'technician': f"{inspection.inspector.user.first_name} {inspection.inspector.user.last_name}",
+                'cost': inspection.estimated_cost,
+                'object': inspection
+            })
+        
+        # Sort by date (most recent first)
+        vehicle_history.sort(key=lambda x: x['date'], reverse=True)
+    
+    # Vehicle summary stats
+    vehicle_stats = {}
+    if selected_vehicle:
+        total_sessions = Session.objects.filter(
+            organization=organization,
+            car=selected_vehicle
+        ).count()
+        
+        completed_sessions = Session.objects.filter(
+            organization=organization,
+            car=selected_vehicle,
+            status='completed'
+        ).count()
+        
+        total_spent = Session.objects.filter(
+            organization=organization,
+            car=selected_vehicle,
+            status='completed'
+        ).aggregate(total=Sum('actual_cost'))['total'] or 0
+        
+        last_service = Session.objects.filter(
+            organization=organization,
+            car=selected_vehicle,
+            status='completed'
+        ).order_by('-actual_end_time').first()
+        
+        vehicle_stats = {
+            'total_sessions': total_sessions,
+            'completed_sessions': completed_sessions,
+            'total_spent': total_spent,
+            'last_service_date': last_service.actual_end_time if last_service else None,
+        }
+    
+    context = {
+        'vehicles': vehicles,
+        'selected_vehicle': selected_vehicle,
+        'vehicle_history': vehicle_history,
+        'vehicle_stats': vehicle_stats,
+    }
+    
+    return render(request, 'vehicle_history_report.html', context)
+
+
+def pending_payments_report(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get completed sessions that might be unpaid
+    # Since there's no payment status field, we'll show completed sessions
+    # In a real system, you'd have a payment status field
+    pending_sessions = Session.objects.filter(
+        organization=organization,
+        status='completed'
+    ).select_related('car', 'car__client', 'technician__user').order_by('-actual_end_time')
+    
+    # Calculate total pending amount
+    total_pending = pending_sessions.aggregate(
+        total=Sum('actual_cost')
+    )['total'] or 0
+    
+    # Group by client
+    client_pending = pending_sessions.values(
+        'car__client__first_name',
+        'car__client__last_name',
+        'car__client__email',
+        'car__client__phone'
+    ).annotate(
+        session_count=Count('id'),
+        total_amount=Sum('actual_cost'),
+        last_session=Max('actual_end_time')
+    ).order_by('-total_amount')
+    
+    # Overdue payments (sessions older than 30 days)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    overdue_sessions = pending_sessions.filter(
+        actual_end_time__lt=thirty_days_ago
+    )
+    
+    total_overdue = overdue_sessions.aggregate(
+        total=Sum('actual_cost')
+    )['total'] or 0
+    
+    context = {
+        'pending_sessions': pending_sessions,
+        'total_pending': total_pending,
+        'client_pending': client_pending,
+        'overdue_sessions': overdue_sessions,
+        'total_overdue': total_overdue,
+    }
+    
+    return render(request, 'pending_payments_report.html', context)
+
+
+def inventory_valuation_report(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get all inventory items
+    inventory_items = Inventory.objects.filter(
+        organization=organization,
+        is_active=True
+    ).order_by('category', 'name')
+    
+    # Calculate total valuation
+    total_valuation = inventory_items.aggregate(
+        total=Sum(F('quantity') * F('unit_price'))
+    )['total'] or 0
+    
+    # Valuation by category
+    category_valuation = inventory_items.values('category').annotate(
+        item_count=Count('id'),
+        total_quantity=Sum('quantity'),
+        total_value=Sum(F('quantity') * F('unit_price')),
+        avg_unit_price=Avg('unit_price')
+    ).order_by('-total_value')
+    
+    # Low stock items (below minimum)
+    low_stock_items = inventory_items.filter(
+        quantity__lte=F('min_quantity')
+    )
+    
+    low_stock_valuation = low_stock_items.aggregate(
+        total=Sum(F('quantity') * F('unit_price'))
+    )['total'] or 0
+    
+    # Top value items
+    top_value_items = inventory_items.annotate(
+        total_value=F('quantity') * F('unit_price')
+    ).order_by('-total_value')[:20]
+    
+    # Inventory turnover (usage vs stock)
+    # This is a simplified calculation - in reality you'd need more complex logic
+    recent_usage = InventoryTransaction.objects.filter(
+        organization=organization,
+        transaction_type='usage',
+        created_at__gte=timezone.now() - timedelta(days=30)
+    ).aggregate(
+        total_used=Sum('quantity')
+    )['total_used'] or 0
+    
+    avg_inventory = inventory_items.aggregate(
+        avg_qty=Avg('quantity')
+    )['avg_qty'] or 0
+    
+    inventory_turnover = (recent_usage / avg_inventory) if avg_inventory > 0 else 0
+    
+    context = {
+        'inventory_items': inventory_items,
+        'total_valuation': total_valuation,
+        'category_valuation': category_valuation,
+        'low_stock_items': low_stock_items,
+        'low_stock_valuation': low_stock_valuation,
+        'top_value_items': top_value_items,
+        'inventory_turnover': inventory_turnover,
+    }
+    
+    return render(request, 'inventory_valuation_report.html', context)
 
 
 def export_reports_pdf(request):
@@ -2074,14 +2495,381 @@ def export_reports_pdf(request):
     return response
 
 
-class CustomLoginView(LoginView):
-    template_name = 'login.html'
-    form_class = CustomLoginForm
+def create_service(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Authentication required'})
     
-    def get_success_url(self):
-        return reverse_lazy('dashboard')
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
     
-    def form_valid(self, form):
-        messages.success(self.request, f'Welcome back, {form.get_user().get_full_name()}!')
-        return super().form_valid(form)
+    if request.method == 'POST':
+        form = ServiceForm(request.POST, organization=organization)
+        if form.is_valid():
+            service = form.save()
+            return JsonResponse({
+                'success': True, 
+                'message': f'Service "{service.name}" created successfully!',
+                'service_id': service.id
+            })
+        else:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Please correct the errors below.',
+                'errors': form.errors
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def create_package(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Authentication required'})
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+    
+    if request.method == 'POST':
+        form = PackageForm(request.POST, organization=organization)
+        if form.is_valid():
+            package = form.save()
+            return JsonResponse({
+                'success': True, 
+                'message': f'Package "{package.name}" created successfully!',
+                'package_id': package.id
+            })
+        else:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Please correct the errors below.',
+                'errors': form.errors
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def create_inspection_template(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Authentication required'})
+
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+
+    if request.method == 'POST':
+        from .models import InspectionTemplate
+        import json
+
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        category = request.POST.get('category', '')
+        template_items = request.POST.get('template_items', '[]')
+
+        try:
+            template_items = json.loads(template_items)
+        except:
+            return JsonResponse({'success': False, 'message': 'Invalid template items format'})
+
+        if not name:
+            return JsonResponse({'success': False, 'message': 'Template name is required'})
+
+        template = InspectionTemplate.objects.create(
+            organization=organization,
+            name=name,
+            description=description,
+            category=category,
+            template_items=template_items
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Template "{template.name}" created successfully!',
+            'template_id': template.id
+        })
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def generate_inspection_pdf(request, inspection_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return redirect('home')
+
+    try:
+        inspection = Inspection.objects.get(id=inspection_id, organization=organization)
+    except Inspection.DoesNotExist:
+        messages.error(request, 'Inspection not found.')
+        return redirect('inspections')
+
+    # Create PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="inspection_{inspection.inspection_number}.pdf"'
+
+    # Create PDF document
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    elements = []
+
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=1  # Center alignment
+    )
+
+    subtitle_style = ParagraphStyle(
+        'CustomSubtitle',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=20,
+    )
+
+    normal_style = styles['Normal']
+
+    # Title
+    elements.append(Paragraph(f"Vehicle Inspection Report", title_style))
+    elements.append(Paragraph(f"Inspection #{inspection.inspection_number}", subtitle_style))
+    elements.append(Spacer(1, 20))
+
+    # Inspection Details
+    elements.append(Paragraph("Inspection Details", subtitle_style))
+
+    details_data = [
+        ['Field', 'Value'],
+        ['Vehicle', f"{inspection.car.make} {inspection.car.model}"],
+        ['License Plate', inspection.car.license_plate],
+        ['Client', inspection.car.client.full_name],
+        ['Inspector', f"{inspection.inspector.user.first_name} {inspection.inspector.user.last_name}"],
+        ['Scheduled Date', inspection.scheduled_date.strftime('%Y-%m-%d %H:%M')],
+        ['Status', inspection.get_status_display()],
+    ]
+
+    if inspection.actual_start_time:
+        details_data.append(['Started', inspection.actual_start_time.strftime('%Y-%m-%d %H:%M')])
+    if inspection.actual_end_time:
+        details_data.append(['Completed', inspection.actual_end_time.strftime('%Y-%m-%d %H:%M')])
+
+    details_table = Table(details_data)
+    details_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+
+    elements.append(details_table)
+    elements.append(Spacer(1, 20))
+
+    # Checklist Items
+    elements.append(Paragraph("Inspection Checklist", subtitle_style))
+
+    checklist_data = [['Component', 'Condition', 'Notes', 'Repair Needed', 'Estimated Cost']]
+    for item in inspection.items.all():
+        checklist_data.append([
+            item.component,
+            item.get_condition_display(),
+            item.notes or '',
+            'Yes' if item.needs_repair else 'No',
+            f"${item.estimated_repair_cost:.2f}" if item.estimated_repair_cost else ''
+        ])
+
+    checklist_table = Table(checklist_data)
+    checklist_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+
+    elements.append(checklist_table)
+    elements.append(Spacer(1, 20))
+
+    # Overall Assessment
+    if inspection.overall_condition or inspection.recommendations:
+        elements.append(Paragraph("Overall Assessment", subtitle_style))
+
+        if inspection.overall_condition:
+            elements.append(Paragraph(f"<b>Overall Condition:</b> {inspection.overall_condition}", normal_style))
+
+        if inspection.recommendations:
+            elements.append(Paragraph(f"<b>Recommendations:</b> {inspection.recommendations}", normal_style))
+
+        if inspection.estimated_cost:
+            elements.append(Paragraph(f"<b>Estimated Repair Cost:</b> ${inspection.estimated_cost:.2f}", normal_style))
+
+        elements.append(Spacer(1, 20))
+
+    # Signatures
+    elements.append(Paragraph("Signatures", subtitle_style))
+
+    signature_data = [
+        ['Party', 'Signature', 'Date'],
+        ['Inspector', f"{inspection.inspector.user.first_name} {inspection.inspector.user.last_name}", inspection.inspector_signature_date.strftime('%Y-%m-%d') if inspection.inspector_signature_date else ''],
+        ['Client', inspection.car.client.full_name, inspection.client_signature_date.strftime('%Y-%m-%d') if inspection.client_signature_date else '']
+    ]
+
+    signature_table = Table(signature_data)
+    signature_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+
+    elements.append(signature_table)
+    elements.append(Spacer(1, 20))
+
+    # Footer
+    elements.append(Paragraph(f"Generated on: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Italic']))
+    elements.append(Paragraph(f"Organization: {organization.name}", styles['Italic']))
+
+    # Build PDF
+    doc.build(elements)
+
+    return response
+
+
+def update_inspection_item(request, inspection_id, item_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Authentication required'})
+
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+
+    try:
+        inspection = Inspection.objects.get(id=inspection_id, organization=organization)
+        item = InspectionItem.objects.get(id=item_id, inspection=inspection)
+    except (Inspection.DoesNotExist, InspectionItem.DoesNotExist):
+        return JsonResponse({'success': False, 'message': 'Inspection or item not found'})
+
+    if request.method == 'POST':
+        condition = request.POST.get('condition')
+        notes = request.POST.get('notes', '')
+        needs_repair = request.POST.get('needs_repair') == 'true'
+        estimated_cost = request.POST.get('estimated_cost')
+
+        item.condition = condition
+        item.notes = notes
+        item.needs_repair = needs_repair
+        if estimated_cost:
+            try:
+                item.estimated_repair_cost = float(estimated_cost)
+            except ValueError:
+                pass
+
+        item.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Item "{item.component}" updated successfully!'
+        })
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def save_inspection_signature(request, inspection_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Authentication required'})
+
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+
+    try:
+        inspection = Inspection.objects.get(id=inspection_id, organization=organization)
+    except Inspection.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Inspection not found'})
+
+    if request.method == 'POST':
+        signature_type = request.POST.get('signature_type')  # 'inspector' or 'client'
+        signature_data = request.POST.get('signature_data')
+
+        if signature_type == 'inspector':
+            inspection.inspector_signature = signature_data
+            inspection.inspector_signature_date = timezone.now()
+        elif signature_type == 'client':
+            inspection.client_signature = signature_data
+            inspection.client_signature_date = timezone.now()
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid signature type'})
+
+        inspection.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': f'{signature_type.title()} signature saved successfully!'
+        })
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def link_inspection_to_session(request, inspection_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'message': 'Authentication required'})
+
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'User profile not found'})
+
+    try:
+        inspection = Inspection.objects.get(id=inspection_id, organization=organization)
+    except Inspection.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Inspection not found'})
+
+    if request.method == 'POST':
+        session_id = request.POST.get('session_id')
+
+        if session_id:
+            try:
+                session = Session.objects.get(id=session_id, organization=organization)
+                inspection.linked_session = session
+                inspection.save()
+
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Inspection linked to session #{session.session_number} successfully!'
+                })
+            except Session.DoesNotExist:
+                return JsonResponse({'success': False, 'message': 'Session not found'})
+        else:
+            inspection.linked_session = None
+            inspection.save()
+            return JsonResponse({
+                'success': True,
+                'message': 'Inspection unlinked from session successfully!'
+            })
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
