@@ -222,6 +222,7 @@ logs
 staticfiles/
 static/
 !static/images/
+!static/videos/
 
 # Media files
 media/
