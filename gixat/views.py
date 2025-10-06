@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.db import transaction
 from django.db.models import Count, Sum, Q, F, Avg
 from django.utils import timezone
 from datetime import timedelta
-from .forms import CustomLoginForm, CustomSignupForm, OrganizationRegistrationForm, AdminUserCreationForm, ClientRequestForm, InspectionForm, VehicleForm, InventoryItemForm, SessionForm, ProfileForm, OrganizationForm, PasswordChangeForm, NotificationPreferencesForm, SystemSettingsForm, ServiceForm, PackageForm, DiscountForm
-from .models import Organization, UserProfile, Client, Car, Session, JobCard, Inventory, InventoryTransaction, Inspection, Notification, Service
+from .forms import CustomLoginForm, CustomSignupForm, OrganizationRegistrationForm, AdminUserCreationForm, ClientRequestForm, InspectionForm, VehicleForm, InventoryItemForm, SessionForm, ProfileForm, OrganizationForm, PasswordChangeForm, NotificationPreferencesForm, SystemSettingsForm, ServiceForm, PackageForm, DiscountForm, PasswordResetForm, SetPasswordForm
+from .models import Organization, UserProfile, Client, Car, Session, JobCard, Inventory, InventoryTransaction, Inspection, Notification, Service, Shift, StaffAttendance, PerformanceTracking, StaffSalary, InternalNotes
 import csv
 from django.http import HttpResponse, JsonResponse
 from reportlab.lib import colors
@@ -18,6 +19,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from django.contrib.auth.forms import PasswordResetForm as DjangoPasswordResetForm, SetPasswordForm as DjangoSetPasswordForm
 
 
 def home(request):
@@ -152,6 +154,24 @@ def dashboard(request):
         completed_jobs=Count('session', filter=Q(session__status='completed'))
     ).order_by('-completed_jobs')[:5]
     
+    # Staff Management Data
+    staff_list = UserProfile.objects.filter(
+        organization=organization,
+        role__in=['technician', 'manager']
+    ).select_related('user').order_by('user__first_name')
+    
+    recent_attendance = StaffAttendance.objects.filter(
+        staff__organization=organization
+    ).select_related('staff__user').order_by('-clock_in')[:10]
+    
+    performance_data = PerformanceTracking.objects.filter(
+        staff__organization=organization
+    ).select_related('staff__user').order_by('-period_end')[:10]
+    
+    recent_notes = InternalNotes.objects.filter(
+        staff__organization=organization
+    ).select_related('staff__user', 'author__user').order_by('-created_at')[:10]
+    
     context = {
         # KPIs
         'cars_in_garage': cars_in_garage,
@@ -186,6 +206,12 @@ def dashboard(request):
         'cars_processed_this_month': cars_processed_this_month,
         'services_breakdown': services_breakdown,
         'staff_productivity': staff_productivity,
+        
+        # Staff Management
+        'staff_list': staff_list,
+        'recent_attendance': recent_attendance,
+        'performance_data': performance_data,
+        'recent_notes': recent_notes,
     }
     
     return render(request, 'dashboard.html', context)
@@ -687,6 +713,28 @@ def signup_view(request):
     return render(request, 'signup.html', {'form': form})
 
 
+class CustomPasswordResetView(PasswordResetView):
+    form_class = PasswordResetForm
+    template_name = 'password_reset.html'
+    email_template_name = 'password_reset_email.html'
+    subject_template_name = 'password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = SetPasswordForm
+    template_name = 'password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'password_reset_complete.html'
+
+
 def settings(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -954,7 +1002,7 @@ def new_session(request):
                     part_name = request.POST[f'part_name_{part_count}']
                     if not part_name.strip():  # Skip empty part names
                         continue
-                        
+                    
                     quantity = int(request.POST.get(f'part_quantity_{part_count}', 0))
                     unit_cost = float(request.POST.get(f'part_cost_{part_count}') or 0)
                     
@@ -2030,6 +2078,8 @@ def vehicle_history_report(request):
         messages.error(request, 'User profile not found. Please contact administrator.')
         return redirect('home')
     
+
+    
     # Get vehicle filter
     vehicle_id = request.GET.get('vehicle')
     selected_vehicle = None
@@ -2342,7 +2392,7 @@ def export_reports_pdf(request):
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('GRID', (0, 0), (-1, -1), 1, colors.black)
@@ -2872,4 +2922,336 @@ def link_inspection_to_session(request, inspection_id):
             })
 
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+
+def staff_management(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get all staff members
+    staff_list = UserProfile.objects.filter(
+        organization=organization,
+        role__in=['technician', 'manager', 'admin']
+    ).select_related('user').order_by('user__first_name', 'user__last_name')
+    
+    # Get recent attendance records (last 30 days)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    recent_attendance = StaffAttendance.objects.filter(
+        staff__organization=organization,
+        date__gte=thirty_days_ago
+    ).select_related('staff__user').order_by('-date')[:20]
+    
+    # Get performance tracking data
+    performance_data = PerformanceTracking.objects.filter(
+        staff__organization=organization
+    ).select_related('staff__user').order_by('-period_end')[:20]
+    
+    # Get recent internal notes
+    recent_notes = InternalNotes.objects.filter(
+        staff__organization=organization
+    ).select_related('staff__user', 'author__user').order_by('-created_at')[:20]
+    
+    # Get current shifts
+    current_shifts = Shift.objects.filter(
+        staff__organization=organization,
+        start_time__lte=timezone.now(),
+        end_time__gte=timezone.now()
+    ).select_related('staff__user').order_by('start_time')
+    
+    # Get upcoming shifts (next 7 days)
+    seven_days_from_now = timezone.now() + timedelta(days=7)
+    upcoming_shifts = Shift.objects.filter(
+        staff__organization=organization,
+        start_time__gte=timezone.now(),
+        start_time__lte=seven_days_from_now
+    ).select_related('staff__user').order_by('start_time')[:10]
+    
+    # Calculate salary summaries for current month
+    current_month = timezone.now().replace(day=1)
+    next_month = (current_month + timedelta(days=32)).replace(day=1)
+    
+    salary_summaries = StaffSalary.objects.filter(
+        staff__organization=organization,
+        period_start__gte=current_month,
+        period_start__lt=next_month
+    ).select_related('staff__user')
+    
+    # Calculate attendance statistics
+    total_staff = staff_list.count()
+    active_today = StaffAttendance.objects.filter(
+        staff__organization=organization,
+        date=timezone.now().date(),
+        clock_in__isnull=False
+    ).count()
+    
+    # Get staff productivity metrics
+    staff_productivity = UserProfile.objects.filter(
+        organization=organization,
+        role__in=['technician', 'manager']
+    ).annotate(
+        sessions_this_month=Count('session', filter=Q(
+            session__status='completed',
+            session__actual_end_time__month=timezone.now().month,
+            session__actual_end_time__year=timezone.now().year
+        )),
+        revenue_this_month=Sum('session__actual_cost', filter=Q(
+            session__status='completed',
+            session__actual_end_time__month=timezone.now().month,
+            session__actual_end_time__year=timezone.now().year
+        )),
+    ).order_by('-sessions_this_month')
+    
+    # Calculate average session value in Python since Django doesn't support F division
+    for staff in staff_productivity:
+        if staff.sessions_this_month > 0 and staff.revenue_this_month:
+            staff.avg_session_value = staff.revenue_this_month / staff.sessions_this_month
+        else:
+            staff.avg_session_value = 0
+    
+    context = {
+        'staff_list': staff_list,
+        'recent_attendance': recent_attendance,
+        'performance_data': performance_data,
+        'recent_notes': recent_notes,
+        'current_shifts': current_shifts,
+        'upcoming_shifts': upcoming_shifts,
+        'salary_summaries': salary_summaries,
+        'total_staff': total_staff,
+        'active_today': active_today,
+        'staff_productivity': staff_productivity,
+        'page_title': 'Staff Management',
+    }
+    
+    return render(request, 'staff_management.html', context)
+
+
+@login_required
+def add_staff(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Handle staff creation form
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            UserProfile.objects.create(
+                user=user,
+                organization=organization,
+                role=request.POST.get('role', 'technician'),
+                phone=request.POST.get('phone', ''),
+                employee_id=request.POST.get('employee_id', ''),
+                hire_date=request.POST.get('hire_date') or None,
+                date_of_birth=request.POST.get('date_of_birth') or None,
+                address=request.POST.get('address', ''),
+                city=request.POST.get('city', ''),
+                state=request.POST.get('state', ''),
+                zip_code=request.POST.get('zip_code', ''),
+                country=request.POST.get('country', 'USA'),
+                emergency_contact_name=request.POST.get('emergency_contact_name', ''),
+                emergency_contact_phone=request.POST.get('emergency_contact_phone', ''),
+                emergency_contact_relationship=request.POST.get('emergency_contact_relationship', ''),
+                department=request.POST.get('department', ''),
+                job_title=request.POST.get('job_title', ''),
+                employment_type=request.POST.get('employment_type', 'full_time'),
+                hourly_rate=request.POST.get('hourly_rate') or None,
+                annual_salary=request.POST.get('annual_salary') or None,
+                commission_rate=request.POST.get('commission_rate') or None,
+                preferred_shift=request.POST.get('preferred_shift', 'flexible'),
+                work_days=request.POST.get('work_days', ''),
+                availability_notes=request.POST.get('availability_notes', ''),
+                skills=request.POST.get('skills', ''),
+                experience_years=request.POST.get('experience_years') or None,
+                qualifications=request.POST.get('qualifications', ''),
+                ssn=request.POST.get('ssn', ''),
+                drivers_license=request.POST.get('drivers_license', ''),
+                bank_account_number=request.POST.get('bank_account_number', ''),
+                bank_routing_number=request.POST.get('bank_routing_number', ''),
+            )
+            messages.success(request, f'Staff member {user.get_full_name()} added successfully.')
+            return redirect('staff_management')
+    else:
+        form = UserCreationForm()
+    
+    context = {
+        'form': form,
+        'page_title': 'Add New Staff',
+    }
+    return render(request, 'add_staff.html', context)
+
+
+@login_required
+def clock_in_out(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get today's attendance record for current user
+    today = timezone.now().date()
+    attendance, created = StaffAttendance.objects.get_or_create(
+        staff=user_profile,
+        date=today,
+        defaults={'organization': organization}
+    )
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        now = timezone.now()
+        
+        if action == 'clock_in' and not attendance.clock_in:
+            attendance.clock_in = now
+            attendance.status = 'present'
+            messages.success(request, 'Successfully clocked in.')
+        elif action == 'clock_out' and attendance.clock_in and not attendance.clock_out:
+            attendance.clock_out = now
+            attendance.status = 'present'
+            messages.success(request, 'Successfully clocked out.')
+        elif action == 'break_start' and attendance.clock_in and not attendance.break_start:
+            attendance.break_start = now
+            messages.success(request, 'Break started.')
+        elif action == 'break_end' and attendance.break_start and not attendance.break_end:
+            attendance.break_end = now
+            messages.success(request, 'Break ended.')
+        
+        attendance.save()
+        return redirect('staff_management')
+    
+    context = {
+        'attendance': attendance,
+        'page_title': 'Clock In/Out',
+    }
+    return render(request, 'clock_in_out.html', context)
+
+
+@login_required
+def manage_shifts(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get all shifts for the organization
+    shifts = Shift.objects.filter(organization=organization).order_by('-date', 'start_time')
+    
+    context = {
+        'shifts': shifts,
+        'page_title': 'Manage Shifts',
+    }
+    return render(request, 'manage_shifts.html', context)
+
+
+@login_required
+def process_payroll(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    # Get current month's salary data
+    current_month = timezone.now().replace(day=1)
+    next_month = (current_month + timedelta(days=32)).replace(day=1)
+    
+    salaries = StaffSalary.objects.filter(
+        staff__organization=organization,
+        period_start__gte=current_month,
+        period_start__lt=next_month
+    ).select_related('staff__user')
+    
+    if request.method == 'POST':
+        # Process payroll for selected staff
+        selected_staff = request.POST.getlist('selected_staff')
+        for staff_id in selected_staff:
+            try:
+                salary = StaffSalary.objects.get(
+                    staff_id=staff_id,
+                    period_start__gte=current_month,
+                    period_start__lt=next_month
+                )
+                salary.is_paid = True
+                salary.payment_date = timezone.now().date()
+                salary.save()
+            except StaffSalary.DoesNotExist:
+                continue
+        
+        messages.success(request, 'Payroll processed successfully.')
+        return redirect('staff_management')
+    
+    context = {
+        'salaries': salaries,
+        'page_title': 'Process Payroll',
+    }
+    return render(request, 'process_payroll.html', context)
+
+
+@login_required
+def add_note(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        organization = user_profile.organization
+    except UserProfile.DoesNotExist:
+        messages.error(request, 'User profile not found. Please contact administrator.')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        note_type = request.POST.get('note_type')
+        staff_id = request.POST.get('staff')
+        
+        try:
+            staff_member = UserProfile.objects.get(id=staff_id, organization=organization)
+            InternalNotes.objects.create(
+                staff=staff_member,
+                author=user_profile,
+                title=title,
+                content=content,
+                note_type=note_type,
+                organization=organization
+            )
+            messages.success(request, 'Note added successfully.')
+            return redirect('staff_management')
+        except UserProfile.DoesNotExist:
+            messages.error(request, 'Selected staff member not found.')
+    
+    # Get all staff for the dropdown
+    staff_list = UserProfile.objects.filter(organization=organization)
+    
+    context = {
+        'staff_list': staff_list,
+        'page_title': 'Add Note',
+    }
+    return render(request, 'add_note.html', context)
 

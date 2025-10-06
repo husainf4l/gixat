@@ -28,7 +28,10 @@ class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('admin', 'Administrator'),
         ('manager', 'Manager'),
+        ('mechanic', 'Mechanic'),
         ('technician', 'Technician'),
+        ('inspector', 'Inspector'),
+        ('cashier', 'Cashier'),
         ('receptionist', 'Receptionist'),
     ]
     
@@ -41,9 +44,77 @@ class UserProfile(models.Model):
     email_notifications = models.BooleanField(default=True)
     sms_notifications = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    
+    # Additional comprehensive staff information
+    date_of_birth = models.DateField(null=True, blank=True)
+    address = models.TextField(blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=100, blank=True)
+    zip_code = models.CharField(max_length=20, blank=True)
+    country = models.CharField(max_length=100, blank=True, default='USA')
+    
+    # Emergency contact information
+    emergency_contact_name = models.CharField(max_length=100, blank=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True)
+    emergency_contact_relationship = models.CharField(max_length=50, blank=True)
+    
+    # Employment details
+    department = models.CharField(max_length=100, blank=True)
+    job_title = models.CharField(max_length=100, blank=True)
+    employment_type = models.CharField(max_length=20, choices=[
+        ('full_time', 'Full Time'),
+        ('part_time', 'Part Time'),
+        ('contract', 'Contract'),
+        ('temporary', 'Temporary'),
+    ], default='full_time')
+    
+    # Salary and compensation
+    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    annual_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Commission percentage")
+    
+    # Work schedule preferences
+    preferred_shift = models.CharField(max_length=20, choices=[
+        ('morning', 'Morning'),
+        ('afternoon', 'Afternoon'),
+        ('evening', 'Evening'),
+        ('night', 'Night'),
+        ('flexible', 'Flexible'),
+    ], default='flexible')
+    work_days = models.CharField(max_length=100, blank=True, help_text="Preferred working days (e.g., Mon-Fri)")
+    availability_notes = models.TextField(blank=True)
+    
+    # Skills and qualifications
+    skills = models.TextField(blank=True, help_text="Technical skills and certifications")
+    experience_years = models.PositiveIntegerField(null=True, blank=True)
+    qualifications = models.TextField(blank=True, help_text="Education and certifications")
+    
+    # Additional personal information
+    ssn = models.CharField(max_length=11, blank=True, help_text="Social Security Number (XXX-XX-XXXX)")
+    drivers_license = models.CharField(max_length=50, blank=True)
+    bank_account_number = models.CharField(max_length=50, blank=True)
+    bank_routing_number = models.CharField(max_length=50, blank=True)
+    
+    # System fields
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.organization.name}"
+
+    @property
+    def full_address(self):
+        """Return formatted full address"""
+        parts = [self.address, self.city, self.state, self.zip_code, self.country]
+        return ', '.join(filter(None, parts))
+
+    @property
+    def age(self):
+        """Calculate age from date of birth"""
+        if self.date_of_birth:
+            today = timezone.now().date()
+            return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
+        return None
 
     class Meta:
         ordering = ['user__first_name', 'user__last_name']
@@ -492,6 +563,161 @@ class Service(models.Model):
                 return f"${self.total_price}"
             else:
                 return f"${self.labor_cost + self.parts_cost}"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class Shift(models.Model):
+    SHIFT_TYPE_CHOICES = [
+        ('morning', 'Morning'),
+        ('afternoon', 'Afternoon'),
+        ('evening', 'Evening'),
+        ('night', 'Night'),
+        ('custom', 'Custom'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    staff = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    shift_type = models.CharField(max_length=20, choices=SHIFT_TYPE_CHOICES, default='morning')
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.staff.user.get_full_name()} - {self.date} ({self.shift_type})"
+
+    class Meta:
+        ordering = ['-date', 'start_time']
+        unique_together = ['staff', 'date', 'start_time']
+
+
+class StaffAttendance(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    staff = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    date = models.DateField()
+    clock_in = models.DateTimeField(null=True, blank=True)
+    clock_out = models.DateTimeField(null=True, blank=True)
+    break_start = models.DateTimeField(null=True, blank=True)
+    break_end = models.DateTimeField(null=True, blank=True)
+    total_hours = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=[
+        ('present', 'Present'),
+        ('absent', 'Absent'),
+        ('late', 'Late'),
+        ('half_day', 'Half Day'),
+    ], default='present')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.staff.user.get_full_name()} - {self.date}"
+
+    @property
+    def worked_hours(self):
+        if self.clock_in and self.clock_out:
+            total_time = self.clock_out - self.clock_in
+            if self.break_start and self.break_end:
+                break_time = self.break_end - self.break_start
+                total_time -= break_time
+            return total_time.total_seconds() / 3600  # hours
+        return 0
+
+    def save(self, *args, **kwargs):
+        self.total_hours = self.worked_hours
+        super().save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-date']
+        unique_together = ['staff', 'date']
+
+
+class PerformanceTracking(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    staff = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    period_start = models.DateField()
+    period_end = models.DateField()
+    jobs_completed = models.PositiveIntegerField(default=0)
+    total_time_spent = models.DecimalField(max_digits=8, decimal_places=2, default=0, help_text="Total hours spent")
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True)
+    customer_feedback_count = models.PositiveIntegerField(default=0)
+    efficiency_score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.staff.user.get_full_name()} - {self.period_start} to {self.period_end}"
+
+    class Meta:
+        ordering = ['-period_end']
+        unique_together = ['staff', 'period_start', 'period_end']
+
+
+class StaffSalary(models.Model):
+    PAYMENT_TYPE_CHOICES = [
+        ('salary', 'Fixed Salary'),
+        ('commission', 'Commission Based'),
+        ('hourly', 'Hourly Rate'),
+        ('mixed', 'Mixed'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    staff = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES, default='salary')
+    base_salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    commission_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    commission_on = models.CharField(max_length=50, blank=True, help_text="What commission is based on (e.g., service revenue)")
+    period_start = models.DateField()
+    period_end = models.DateField()
+    total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    deductions = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    net_pay = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    is_paid = models.BooleanField(default=False)
+    payment_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.staff.user.get_full_name()} - {self.period_start} to {self.period_end}"
+
+    def calculate_net_pay(self):
+        self.net_pay = self.total_earnings - self.deductions
+        return self.net_pay
+
+    class Meta:
+        ordering = ['-period_end']
+        unique_together = ['staff', 'period_start', 'period_end']
+
+
+class InternalNotes(models.Model):
+    NOTE_TYPE_CHOICES = [
+        ('feedback', 'Feedback'),
+        ('warning', 'Warning'),
+        ('praise', 'Praise'),
+        ('improvement', 'Improvement Suggestion'),
+        ('general', 'General Note'),
+    ]
+
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    staff = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='notes_received')
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='notes_given')
+    note_type = models.CharField(max_length=20, choices=NOTE_TYPE_CHOICES, default='general')
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    is_private = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.note_type} for {self.staff.user.get_full_name()} by {self.author.user.get_full_name()}"
 
     class Meta:
         ordering = ['-created_at']
