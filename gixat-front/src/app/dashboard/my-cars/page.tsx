@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { storage } from "@/lib/storage";
 import { graphqlRequest } from "@/lib/graphql-client";
+import { User } from "@/lib/auth.types";
 import DashboardLayout from "@/components/DashboardLayout";
 import EmptyState from "@/components/EmptyState";
 import { GET_CLIENT_CARS_QUERY } from "@/lib/dashboard.queries";
@@ -20,33 +22,41 @@ interface Car {
 }
 
 export default function MyCarsFPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        const token = storage.getAccessToken();
-        if (!token) return;
+    const storedUser = storage.getUser();
+    const token = storage.getAccessToken();
+    
+    if (!storedUser || !token) {
+      router.push("/auth/login");
+      return;
+    }
+    
+    setUser(storedUser);
+    fetchCars(token);
+  }, [router]);
 
-        const response = await graphqlRequest<{ carsByClient: Car[] }>(
-          GET_CLIENT_CARS_QUERY,
-          undefined,
-          token
-        );
+  const fetchCars = async (token: string) => {
+    try {
+      const response = await graphqlRequest<{ carsByClient: Car[] }>(
+        GET_CLIENT_CARS_QUERY,
+        undefined,
+        token
+      );
 
-        if (response.data?.carsByClient) {
-          setCars(response.data.carsByClient);
-        }
-      } catch (error) {
-        console.error("Error fetching cars:", error);
-      } finally {
-        setLoading(false);
+      if (response.data?.carsByClient) {
+        setCars(response.data.carsByClient);
       }
-    };
-
-    fetchCars();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching cars:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -65,8 +75,32 @@ export default function MyCarsFPage() {
     return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   };
 
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl text-gray-700">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      userRole="client"
+      userType={user.type}
+      userName={user.name}
+      onLogout={handleLogout}
+      title="My Cars"
+      subtitle="View and manage your vehicles"
+    >
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

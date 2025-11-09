@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { storage } from "@/lib/storage";
 import { graphqlRequest } from "@/lib/graphql-client";
+import { User } from "@/lib/auth.types";
 import DashboardLayout from "@/components/DashboardLayout";
 import EmptyState from "@/components/EmptyState";
 import { TableHeader, TablePagination } from "@/components/Table";
@@ -39,6 +41,8 @@ interface OfferStats {
 }
 
 export default function OffersPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [stats, setStats] = useState<OfferStats>({});
   const [loading, setLoading] = useState(true);
@@ -48,54 +52,76 @@ export default function OffersPage() {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = storage.getAccessToken();
-        const user = storage.getUser();
-        
-        if (!token || !user) return;
+    const storedUser = storage.getUser();
+    const token = storage.getAccessToken();
+    
+    if (!storedUser || !token) {
+      router.push("/auth/login");
+      return;
+    }
+    
+    setUser(storedUser);
+    fetchData(token);
+  }, [router]);
 
-        // Fetch offers
-        const response = await graphqlRequest<{ offers: Offer[] }>(
-          GET_BUSINESS_OFFERS_QUERY,
-          { businessId: user.id || user.businessId },
-          token
-        );
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
 
-        if (response.data?.offers) {
-          let filtered = response.data.offers;
+  const fetchData = async (token: string) => {
+    try {
+      const user = storage.getUser();
+      
+      if (!token || !user) return;
 
-          if (filters.status) {
-            filtered = filtered.filter((offer) => offer.status === filters.status);
-          }
-          if (filters.search) {
-            filtered = filtered.filter((offer) =>
-              offer.offerNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
-              offer.title.toLowerCase().includes(filters.search.toLowerCase())
-            );
-          }
+      // Fetch offers
+      const response = await graphqlRequest<{ offers: Offer[] }>(
+        GET_BUSINESS_OFFERS_QUERY,
+        { businessId: user.id || user.businessId },
+        token
+      );
 
-          setOffers(filtered);
+      if (response.data?.offers) {
+        let filtered = response.data.offers;
+
+        if (filters.status) {
+          filtered = filtered.filter((offer) => offer.status === filters.status);
+        }
+        if (filters.search) {
+          filtered = filtered.filter((offer) =>
+            offer.offerNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
+            offer.title.toLowerCase().includes(filters.search.toLowerCase())
+          );
         }
 
-        // Fetch statistics
-        const statsResponse = await graphqlRequest<{ offerStatistics: OfferStats }>(
-          GET_OFFER_STATISTICS_QUERY,
-          { businessId: user.id || user.businessId },
-          token
-        );
-
-        if (statsResponse.data?.offerStatistics) {
-          setStats(statsResponse.data.offerStatistics);
-        }
-      } catch (error) {
-        console.error("Error fetching offers:", error);
-      } finally {
-        setLoading(false);
+        setOffers(filtered);
       }
-    };
 
-    fetchData();
+      // Fetch statistics
+      const statsResponse = await graphqlRequest<{ offerStatistics: OfferStats }>(
+        GET_OFFER_STATISTICS_QUERY,
+        { businessId: user.id || user.businessId },
+        token
+      );
+
+      if (statsResponse.data?.offerStatistics) {
+        setStats(statsResponse.data.offerStatistics);
+      }
+    } catch (error) {
+      console.error("Error fetching offers:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      const token = storage.getAccessToken();
+      if (token) {
+        fetchData(token);
+      }
+    }
   }, [filters]);
 
   const getStatusColor = (status: string, isExpired?: boolean) => {
@@ -127,8 +153,27 @@ export default function OffersPage() {
     return daysUntilExpiry <= 3 && daysUntilExpiry > 0;
   };
 
+  if (loading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl text-gray-700">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      userRole="owner"
+      userType={user.type}
+      userName={user.name}
+      onLogout={handleLogout}
+      title="Quotes & Offers"
+      subtitle="Manage repair quotes"
+    >
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

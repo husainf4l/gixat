@@ -30,6 +30,7 @@ export default function ClientsPage() {
   const [pageLoading, setPageLoading] = useState(true);
   const [clients, setClients] = useState<Client[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [businessId, setBusinessId] = useState<string>("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -52,12 +53,49 @@ export default function ClientsPage() {
       return;
     }
 
-    setUser(storedUser);
-    setPageLoading(false);
-
-    // Fetch clients from GraphQL
-    fetchClients(accessToken, storedUser);
+    // Check if BUSINESS user has garage set up
+    if (storedUser.type === "BUSINESS") {
+      checkGarageAndFetch(accessToken, storedUser);
+    } else {
+      setUser(storedUser);
+      setBusinessId(storedUser.id || "1");
+      setPageLoading(false);
+      fetchClients(accessToken, storedUser);
+    }
   }, [router]);
+
+  const checkGarageAndFetch = async (token: string, currentUser: User) => {
+    try {
+      // Check if user has a garage
+      const garageResponse = await graphqlRequest<{ 
+        garages: Array<{ id: string }> 
+      }>(
+        `query {
+          garages {
+            id
+          }
+        }`,
+        {},
+        token
+      );
+
+      if (!garageResponse.data?.garages || garageResponse.data.garages.length === 0) {
+        // No garage, redirect to setup
+        router.push("/setup-garage");
+        return;
+      }
+
+      // Has garage, proceed
+      setUser(currentUser);
+      setBusinessId(currentUser.id || "1");
+      setPageLoading(false);
+      fetchClients(token, currentUser);
+    } catch (error) {
+      console.error("Error checking garage:", error);
+      // If error checking garage, redirect to setup
+      router.push("/setup-garage");
+    }
+  };
 
   const fetchClients = async (token: string, currentUser: User) => {
     try {
@@ -132,7 +170,10 @@ export default function ClientsPage() {
         return;
       }
 
-      const businessId = user?.id || "1";
+      if (!businessId) {
+        alert("Business ID not found. Please refresh and try again.");
+        return;
+      }
 
       // Create client via GraphQL mutation
       const response = await graphqlRequest<{ createClient: Client }>(
@@ -165,7 +206,7 @@ export default function ClientsPage() {
             zipCode: formData.zipCode || null,
             dateOfBirth: formData.dateOfBirth || null,
             notes: formData.notes || null,
-            businessId,
+            businessId: businessId,
           },
         },
         token
@@ -175,6 +216,9 @@ export default function ClientsPage() {
         const newClient = response.data.createClient;
         setClients((prev) => [newClient, ...prev]);
         alert("Client created successfully!");
+      } else if (response.errors) {
+        console.error("Error creating client:", response.errors);
+        alert(`Error: ${response.errors[0]?.message || "Failed to create client"}`);
       }
       
       // Reset form
