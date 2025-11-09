@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { graphqlRequest } from "@/lib/graphql-client";
 import { storage } from "@/lib/storage";
 import AddCarToClient from "./AddCarToClient";
@@ -34,6 +35,7 @@ export default function ClientDetails({
   clientPhone,
   onClose,
 }: ClientDetailsProps) {
+  const router = useRouter();
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddCar, setShowAddCar] = useState(false);
@@ -111,14 +113,22 @@ export default function ClientDetails({
             <h2 className="text-2xl font-bold text-gray-900">{clientName}</h2>
             <p className="text-gray-600 mt-1">Client Details</p>
           </div>
-          {onClose && (
+          <div className="flex items-center gap-2">
             <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
+              onClick={() => router.push(`/dashboard/clients/${clientId}/repair-sessions`)}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium text-sm"
             >
-              ✕
+              📋 View All Repair Sessions
             </button>
-          )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

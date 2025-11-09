@@ -541,3 +541,34 @@ export const UPDATE_REPAIR_SESSION_STATUS_MUTATION = `
     }
   }
 `;
+
+/**
+ * GET CLIENT REPAIR SESSIONS QUERY
+ * Fetches all repair sessions for a specific client
+ * Works by fetching all cars for the client, then getting repair sessions
+ */
+export const GET_CLIENT_REPAIR_SESSIONS_QUERY_NEW = `
+  query GetClientRepairSessions($clientId: ID!) {
+    carsByClient(clientId: $clientId) {
+      id
+      licensePlate
+      make
+      model
+      year
+    }
+    repairSessions(limit: 100) {
+      id
+      sessionNumber
+      customerRequest
+      problemDescription
+      status
+      priority
+      carId
+      createdAt
+      updatedAt
+      displayName
+      isCompleted
+      daysInProgress
+    }
+  }
+`;
