@@ -470,3 +470,74 @@ export const CREATE_REPAIR_SESSION_MUTATION = `
     }
   }
 `;
+
+/**
+ * GET ALL REPAIR SESSIONS QUERY
+ * Fetches all repair sessions for a business with pagination
+ */
+export const GET_ALL_REPAIR_SESSIONS_QUERY = `
+  query GetAllRepairSessions($businessId: ID!, $limit: Int, $offset: Int) {
+    repairSessions(businessId: $businessId, limit: $limit, offset: $offset) {
+      id
+      sessionNumber
+      customerRequest
+      problemDescription
+      status
+      priority
+      carId
+      businessId
+      createdAt
+      updatedAt
+      displayName
+      isCompleted
+      daysInProgress
+    }
+  }
+`;
+
+/**
+ * GET REPAIR SESSION DETAIL QUERY
+ * Fetches a single repair session with full details
+ */
+export const GET_REPAIR_SESSION_DETAIL_QUERY = `
+  query GetRepairSessionDetail($id: ID!, $businessId: ID) {
+    repairSession(id: $id, businessId: $businessId) {
+      id
+      sessionNumber
+      customerRequest
+      problemDescription
+      status
+      priority
+      carId
+      businessId
+      createdAt
+      updatedAt
+      displayName
+      isCompleted
+      daysInProgress
+      estimatedCost
+      actualCost
+      customerNotes
+      internalNotes
+      assignedTechnicianId
+      createdById
+      isActive
+    }
+  }
+`;
+
+/**
+ * UPDATE REPAIR SESSION STATUS MUTATION
+ * Updates the status and notes of a repair session
+ */
+export const UPDATE_REPAIR_SESSION_STATUS_MUTATION = `
+  mutation UpdateRepairSessionStatus($id: ID!, $input: UpdateRepairSessionStatusInput!, $businessId: ID) {
+    updateRepairSessionStatus(id: $id, input: $input, businessId: $businessId) {
+      id
+      sessionNumber
+      status
+      customerRequest
+      displayName
+    }
+  }
+`;
