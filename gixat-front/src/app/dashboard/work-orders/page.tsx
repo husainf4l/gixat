@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { storage } from "@/lib/storage";
+import { User } from "@/lib/auth.types";
 import { graphqlRequest } from "@/lib/graphql-client";
 import DashboardLayout from "@/components/DashboardLayout";
 import EmptyState from "@/components/EmptyState";
 import { TableHeader, TablePagination } from "@/components/Table";
-import { GET_BUSINESS_JOB_CARDS_QUERY } from "@/lib/dashboard.queries";
 
 interface JobCard {
   id: string;
-  jobNumber: string;
   title: string;
   status: string;
   priority?: string;
@@ -27,6 +27,9 @@ interface JobCard {
 }
 
 export default function WorkOrdersPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
   const [jobCards, setJobCards] = useState<JobCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -35,15 +38,56 @@ export default function WorkOrdersPage() {
     search: "",
   });
 
+  // Authentication check - runs on mount
   useEffect(() => {
+    const storedUser = storage.getUser();
+    const accessToken = storage.getAccessToken();
+
+    if (!storedUser || !accessToken) {
+      router.push("/auth/login");
+      return;
+    }
+
+    setUser(storedUser);
+    setPageLoading(false);
+  }, [router]);
+
+  // Fetch job cards - always called, depends on auth state
+  useEffect(() => {
+    if (pageLoading || !user) {
+      return;
+    }
+
     const fetchJobCards = async () => {
       try {
         const token = storage.getAccessToken();
-        if (!token) return;
+        
+        if (!token) {
+          console.warn("Missing token");
+          return;
+        }
 
+        // Use simpler query without parameters
         const response = await graphqlRequest<{ jobCards: JobCard[] }>(
-          GET_BUSINESS_JOB_CARDS_QUERY,
-          undefined,
+          `query {
+            jobCards {
+              id
+              title
+              status
+              priority
+              plannedStartDate
+              plannedEndDate
+              actualStartDate
+              actualEndDate
+              estimatedHours
+              actualHours
+              progress
+              isOverdue
+              daysRemaining
+              createdAt
+            }
+          }`,
+          {},
           token
         );
 
@@ -59,7 +103,6 @@ export default function WorkOrdersPage() {
           }
           if (filters.search) {
             filtered = filtered.filter((card) =>
-              card.jobNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
               card.title.toLowerCase().includes(filters.search.toLowerCase())
             );
           }
@@ -68,13 +111,32 @@ export default function WorkOrdersPage() {
         }
       } catch (error) {
         console.error("Error fetching job cards:", error);
+        // Set empty state on error instead of crashing
+        setJobCards([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchJobCards();
-  }, [filters]);
+  }, [filters, pageLoading, user]);
+
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
+
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-xl text-gray-700">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -96,13 +158,20 @@ export default function WorkOrdersPage() {
   };
 
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      userRole="owner"
+      userType={user.type}
+      userName={user.name}
+      onLogout={handleLogout}
+      title="Work Orders"
+      subtitle="Manage job cards and work assignments"
+    >
       <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Work Orders / Job Cards</h1>
-            <p className="text-gray-600 mt-2">Manage {jobCards.length} job card(s)</p>
+            <p className="text-gray-600 mt-2">{jobCards.length > 0 ? `${jobCards.length} job card(s)` : "Manage job cards and work assignments"}</p>
           </div>
           <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
             ➕ Create Job Card
@@ -161,12 +230,11 @@ export default function WorkOrdersPage() {
           ) : (
             <>
               <table className="w-full">
-                <TableHeader columns={["Job #", "Title", "Status", "Priority", "Hours", "Progress"]} />
+                <TableHeader columns={["Title", "Status", "Priority", "Hours", "Progress", "Overdue"]} />
                 <tbody className="divide-y divide-gray-200">
                   {jobCards.map((card) => (
                     <tr key={card.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{card.jobNumber}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{card.title}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{card.title}</td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(card.status)}`}>
                           {card.status}
@@ -185,6 +253,15 @@ export default function WorkOrdersPage() {
                             style={{ width: `${card.progress || 0}%` }}
                           />
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {card.isOverdue ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Overdue
+                          </span>
+                        ) : (
+                          <span className="text-gray-600">{card.daysRemaining || 0} days left</span>
+                        )}
                       </td>
                     </tr>
                   ))}
