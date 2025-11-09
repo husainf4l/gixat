@@ -56,7 +56,7 @@ const PRIORITY_COLORS: Record<string, string> = {
 export default function ClientRepairSessionsPage() {
   const router = useRouter();
   const params = useParams();
-  const clientId = params.clientId as string;
+  const clientId = params.id as string;
 
   const [user, setUser] = useState<any>(null);
   const [clientName, setClientName] = useState("");
