@@ -1,17 +1,46 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
+import { useRouter } from "next/navigation";
+import { storage } from "@/lib/storage";
 
 export default function ProfilePage() {
-  return (
-    <DashboardLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600 mt-2">View and edit your profile information</p>
-        </div>
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const token = storage.getAccessToken();
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+    
+    const userData = storage.getUser();
+    setUser(userData);
+    setLoading(false);
+  }, [router]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
+
+  return (
+    <DashboardLayout
+      userName={user?.firstName || "User"}
+      userRole={user?.role || "CLIENT"}
+      userType={user?.userType || "CLIENT"}
+      onLogout={handleLogout}
+      title="My Profile"
+      subtitle="View and edit your profile information"
+    >
+      <div className="p-6 space-y-6">
         {/* Profile Card */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="flex items-start gap-6 mb-6">

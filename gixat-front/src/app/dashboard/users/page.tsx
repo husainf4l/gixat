@@ -1,24 +1,43 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import EmptyState from "@/components/EmptyState";
 import { TableHeader, TableSkeleton, TablePagination } from "@/components/Table";
+import { storage } from "@/lib/storage";
 
 export default function UsersPage() {
-  return (
-    <DashboardLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Users Management</h1>
-            <p className="text-gray-600 mt-2">Manage all system users and their permissions</p>
-          </div>
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-            ➕ Add User
-          </button>
-        </div>
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
 
+  useEffect(() => {
+    const token = storage.getAccessToken();
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+    const userData = storage.getUser();
+    setUser(userData);
+  }, [router]);
+
+  if (!user) return null;
+
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
+
+  return (
+    <DashboardLayout
+      userName={user?.firstName || "User"}
+      userRole={user?.role || "CLIENT"}
+      userType={user?.userType || "CLIENT"}
+      onLogout={handleLogout}
+      title="Users Management"
+      subtitle="Manage all system users and their permissions"
+    >
+      <div className="p-6 space-y-6">
         {/* Filters */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

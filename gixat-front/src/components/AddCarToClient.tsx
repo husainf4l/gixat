@@ -118,7 +118,6 @@ export default function AddCarToClient({
             insuranceExpiryDate
             notes
             clientId
-            businessId
             createdAt
           }
         }`,
@@ -140,7 +139,6 @@ export default function AddCarToClient({
             insuranceExpiryDate: formData.insuranceExpiryDate || null,
             notes: formData.notes || null,
             clientId: clientId,
-            businessId: user.id || user.businessId,
           },
         },
         token

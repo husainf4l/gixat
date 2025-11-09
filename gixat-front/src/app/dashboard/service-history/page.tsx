@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { storage } from "@/lib/storage";
 import { graphqlRequest } from "@/lib/graphql-client";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -30,6 +31,8 @@ interface Car {
 }
 
 export default function ServiceHistoryPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [sessions, setSessions] = useState<RepairSession[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +43,18 @@ export default function ServiceHistoryPage() {
   });
 
   useEffect(() => {
+    const token = storage.getAccessToken();
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+    const userData = storage.getUser();
+    setUser(userData);
+  }, [router]);
+
+  useEffect(() => {
+    if (!user) return;
+
     const fetchData = async () => {
       try {
         const token = storage.getAccessToken();
@@ -96,17 +111,23 @@ export default function ServiceHistoryPage() {
     return new Date(date).toLocaleDateString();
   };
 
-  return (
-    <DashboardLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Service History</h1>
-          <p className="text-gray-600 mt-2">
-            {sessions.length > 0 ? `${sessions.length} service record(s)` : "View all service records and maintenance history of your cars"}
-          </p>
-        </div>
+  if (!user) return null;
 
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
+
+  return (
+    <DashboardLayout
+      userName={user?.firstName || "User"}
+      userRole={user?.role || "CLIENT"}
+      userType={user?.userType || "CLIENT"}
+      onLogout={handleLogout}
+      title="Service History"
+      subtitle="View all service records and maintenance history of your cars"
+    >
+      <div className="p-6 space-y-6">
         {/* Filters */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -1,17 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
+import { storage } from "@/lib/storage";
 
 export default function SettingsPage() {
-  return (
-    <DashboardLayout>
-      <div className="p-6 space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-2">Manage your account and system settings</p>
-        </div>
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
 
+  useEffect(() => {
+    const token = storage.getAccessToken();
+    if (!token) {
+      router.push("/auth/login");
+      return;
+    }
+    const userData = storage.getUser();
+    setUser(userData);
+  }, [router]);
+
+  if (!user) return null;
+
+  const handleLogout = () => {
+    storage.clearAuth();
+    router.push("/auth/login");
+  };
+
+  return (
+    <DashboardLayout
+      userName={user?.firstName || "User"}
+      userRole={user?.role || "CLIENT"}
+      userType={user?.userType || "CLIENT"}
+      onLogout={handleLogout}
+      title="Settings"
+      subtitle="Manage your account and system settings"
+    >
+      <div className="p-6 space-y-6">
         {/* Settings Tabs */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="border-b border-gray-200">
