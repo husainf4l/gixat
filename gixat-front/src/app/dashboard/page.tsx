@@ -64,12 +64,6 @@ export default function BusinessDashboardPage() {
       title="Business Dashboard"
       subtitle={`Welcome back, ${user.name}`}
     >
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Overview</h1>
-        <p className="text-gray-600 text-sm sm:text-base">Monitor your business performance and key metrics</p>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <div className="bg-white rounded-lg shadow-sm p-5 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
