@@ -1,4 +1,4 @@
-const GRAPHQL_ENDPOINT = "/api/graphql";
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "https://www.gixat.com/api/graphql";
 
 export interface GraphQLResponse<T> {
   data?: T;
