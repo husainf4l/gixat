@@ -14,22 +14,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard/home", icon: "📊", roles: ["admin", "owner", "client"] },
   { label: "Users", href: "/dashboard/users", icon: "👥", roles: ["admin"] },
   { label: "Garages", href: "/dashboard/garages", icon: "🏢", roles: ["admin"] },
-  { label: "Cars in Garage", href: "/dashboard/cars", icon: "🚗", roles: ["owner"] },
-  { label: "Work Orders", href: "/dashboard/work-orders", icon: "📋", roles: ["owner"] },
-  { label: "Appointments", href: "/dashboard/appointments", icon: "📅", roles: ["owner"] },
-  { label: "Inspections", href: "/dashboard/inspections", icon: "🔍", roles: ["owner"] },
-  { label: "Quotes & Offers", href: "/dashboard/offers", icon: "💰", roles: ["owner"] },
-  { label: "Inventory", href: "/dashboard/inventory", icon: "📦", roles: ["owner"] },
-  { label: "Employees", href: "/dashboard/employees", icon: "👨‍💼", roles: ["owner"] },
-  { label: "Financial", href: "/dashboard/financial", icon: "💳", roles: ["owner"] },
-  { label: "Notifications", href: "/dashboard/notifications", icon: "🔔", roles: ["admin", "owner"] },
+  { label: "Clients", href: "/dashboard/clients", icon: "👨‍💼", roles: ["admin", "owner"] },
   { label: "My Cars", href: "/dashboard/my-cars", icon: "🚗", roles: ["client"] },
   { label: "Service History", href: "/dashboard/service-history", icon: "📜", roles: ["client"] },
   { label: "Reminders", href: "/dashboard/reminders", icon: "⏰", roles: ["client"] },
-  { label: "Settings", href: "/dashboard/settings", icon: "⚙️", roles: ["admin", "owner", "client"] },
   { label: "System Logs", href: "/dashboard/logs", icon: "📝", roles: ["admin"] },
   { label: "Profile", href: "/dashboard/profile", icon: "👤", roles: ["client"] },
 ];

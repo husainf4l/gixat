@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         {
-          source: "/api/graphql",
-          destination: "http://192.168.1.214:4006/api/graphql",
+          source: "/api/:path*",
+          destination: "https://www.gixat.com/api/:path*",
         },
       ],
     };

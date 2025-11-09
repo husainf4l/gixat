@@ -18,15 +18,15 @@ export async function graphqlRequest<T>(
   };
 
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    // Add Bearer prefix if token doesn't already have it
+    headers["Authorization"] = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
   }
 
   console.log("GraphQL Request Debug:", {
     endpoint: GRAPHQL_ENDPOINT,
     hasToken: !!token,
     tokenPreview: token ? `${token.substring(0, 20)}...` : "NO_TOKEN",
-    queryLength: query.length,
-    query: query,
+    authHeader: headers["Authorization"] ? `${headers["Authorization"].substring(0, 30)}...` : "NONE",
     variables,
   });
 
