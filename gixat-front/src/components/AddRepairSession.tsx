@@ -87,7 +87,10 @@ export default function AddRepairSession({
             customerRequest: formData.customerRequest,
             priority: formData.priority,
             problemDescription: formData.problemDescription || null,
-            expectedDeliveryDate: formData.expectedDeliveryDate || null,
+            // Convert date from YYYY-MM-DD to ISO 8601 DateTime format
+            expectedDeliveryDate: formData.expectedDeliveryDate 
+              ? `${formData.expectedDeliveryDate}T00:00:00Z` 
+              : null,
             customerNotes: formData.customerNotes || null,
             carId: carId,
             businessId: user.id || user.businessId,
