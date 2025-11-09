@@ -56,17 +56,17 @@ export default function WorkOrdersPage() {
           return;
         }
 
-        // Fetch job cards - use simple query without parameters
+        // Fetch job cards - requires filter argument
         const response = await graphqlRequest<{ jobCards: JobCard[] }>(
-          `query {
-            jobCards {
+          `query($filter: JobCardFilterInput) {
+            jobCards(filter: $filter) {
               id
               title
               status
               createdAt
             }
           }`,
-          {},
+          { filter: {} },
           token
         );
 

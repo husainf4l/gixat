@@ -63,17 +63,17 @@ export default function InspectionsPage() {
         
         if (!token) return;
 
-        // Fetch inspections - use simple query without parameters
+        // Fetch inspections - requires filter argument
         const response = await graphqlRequest<{ inspections: Inspection[] }>(
-          `query {
-            inspections {
+          `query($filter: InspectionFilterInput) {
+            inspections(filter: $filter) {
               id
               type
               title
               createdAt
             }
           }`,
-          {},
+          { filter: {} },
           token
         );
 
