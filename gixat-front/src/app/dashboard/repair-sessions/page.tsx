@@ -1,11 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { storage } from "@/lib/storage";
 import { graphqlRequest } from "@/lib/graphql-client";
-import { GET_ALL_REPAIR_SESSIONS_QUERY } from "@/lib/dashboard.queries";
+import { GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY } from "@/lib/dashboard.queries";
+
+interface Car {
+  id: string;
+  licensePlate: string;
+  make: string;
+  model: string;
+  year: number;
+  clientId: string;
+}
+
+interface Client {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
 
 interface RepairSession {
   id: string;
@@ -21,6 +38,8 @@ interface RepairSession {
   displayName: string;
   isCompleted: boolean;
   daysInProgress?: number;
+  estimatedCost?: number;
+  actualCost?: number;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -51,10 +70,13 @@ export default function RepairSessionsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [sessions, setSessions] = useState<RepairSession[]>([]);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [filterPriority, setFilterPriority] = useState("ALL");
+  const [filterClient, setFilterClient] = useState("ALL");
 
   useEffect(() => {
     const token = storage.getAccessToken();
@@ -69,11 +91,12 @@ export default function RepairSessionsPage() {
 
   useEffect(() => {
     if (!user) return;
-    fetchSessions();
-  }, [user, filterStatus, filterPriority]);
+    fetchSessionsWithDetails();
+  }, [user]);
 
-  const fetchSessions = async () => {
+  const fetchSessionsWithDetails = async () => {
     try {
+      setLoading(true);
       const token = storage.getAccessToken();
       if (!token) return;
 
@@ -83,32 +106,55 @@ export default function RepairSessionsPage() {
         return;
       }
 
-      const response = await graphqlRequest<{ repairSessions: RepairSession[] }>(
-        GET_ALL_REPAIR_SESSIONS_QUERY,
-        {
-          businessId,
-          limit: 100,
-          offset: 0,
-        },
-        token
-      );
+      const response = await graphqlRequest<{
+        repairSessions: RepairSession[];
+        carsByBusiness: Car[];
+        clientsByBusiness: Client[];
+      }>(GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY, { businessId }, token);
 
-      let data = response.data?.repairSessions || [];
-
-      // Apply filters
-      if (filterStatus !== "ALL") {
-        data = data.filter((s) => s.status === filterStatus);
-      }
-      if (filterPriority !== "ALL") {
-        data = data.filter((s) => s.priority === filterPriority);
+      if (response.data) {
+        setSessions(response.data.repairSessions || []);
+        setCars(response.data.carsByBusiness || []);
+        setClients(response.data.clientsByBusiness || []);
       }
 
-      setSessions(data);
+      if (response.errors) {
+        setError(response.errors[0]?.message || "Failed to load sessions");
+      }
     } catch (err) {
       console.error("Error fetching repair sessions:", err);
       setError("Failed to load repair sessions");
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Helper function to get client name for a session
+  const getClientForSession = (session: RepairSession): Client | undefined => {
+    const car = cars.find((c) => c.id === session.carId);
+    if (!car) return undefined;
+    return clients.find((c) => c.id === car.clientId);
+  };
+
+  // Compute filtered sessions
+  const filteredSessions = useMemo(() => {
+    let filtered = sessions;
+
+    if (filterStatus !== "ALL") {
+      filtered = filtered.filter((s) => s.status === filterStatus);
+    }
+    if (filterPriority !== "ALL") {
+      filtered = filtered.filter((s) => s.priority === filterPriority);
+    }
+    if (filterClient !== "ALL") {
+      filtered = filtered.filter((s) => {
+        const client = getClientForSession(s);
+        return client?.id === filterClient;
+      });
+    }
+
+    return filtered;
+  }, [sessions, filterStatus, filterPriority, filterClient, cars, clients]);
 
   const handleLogout = () => {
     storage.clearAuth();
@@ -133,7 +179,24 @@ export default function RepairSessionsPage() {
       <div className="p-6 space-y-6">
         {/* Filters */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Filter by Client
+              </label>
+              <select
+                value={filterClient}
+                onChange={(e) => setFilterClient(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="ALL">All Clients</option>
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.firstName} {client.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Filter by Status
@@ -221,10 +284,24 @@ export default function RepairSessionsPage() {
             <div className="p-8 text-center">
               <p className="text-gray-600 mb-3">No repair sessions found</p>
               <p className="text-sm text-gray-500">
-                {filterStatus !== "ALL" || filterPriority !== "ALL"
+                {filterStatus !== "ALL" || filterPriority !== "ALL" || filterClient !== "ALL"
                   ? "Try adjusting your filters"
                   : "Sessions will appear here when you create them"}
               </p>
+            </div>
+          ) : filteredSessions.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-gray-600 mb-3">No sessions match your filters</p>
+              <button
+                onClick={() => {
+                  setFilterStatus("ALL");
+                  setFilterPriority("ALL");
+                  setFilterClient("ALL");
+                }}
+                className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition text-sm font-medium"
+              >
+                Clear Filters
+              </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -233,6 +310,12 @@ export default function RepairSessionsPage() {
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Session #
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                      Client
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                      Vehicle
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Request
@@ -247,7 +330,7 @@ export default function RepairSessionsPage() {
                       Created
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                      Days In Progress
+                      Days
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                       Action
@@ -255,51 +338,62 @@ export default function RepairSessionsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {sessions.map((session) => (
-                    <tr key={session.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                        {session.sessionNumber}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        <div className="max-w-xs truncate">{session.customerRequest}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                            STATUS_COLORS[session.status] || "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {session.status.replace(/_/g, " ")}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                            PRIORITY_COLORS[session.priority] || "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {session.priority}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {new Date(session.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {session.daysInProgress
-                          ? Math.floor(session.daysInProgress)
-                          : "0"}{" "}
-                        days
-                      </td>
-                      <td className="px-6 py-4">
-                        <button
-                          onClick={() => handleViewDetails(session.id)}
-                          className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs font-medium hover:bg-blue-100 transition"
-                        >
-                          View Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredSessions.map((session) => {
+                    const car = cars.find((c) => c.id === session.carId);
+                    const client = car ? clients.find((c) => c.id === car.clientId) : undefined;
+                    return (
+                      <tr key={session.id} className="hover:bg-gray-50 transition">
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                          {session.sessionNumber}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          <div className="font-medium text-gray-900">
+                            {client ? `${client.firstName} ${client.lastName}` : "Unknown"}
+                          </div>
+                          <div className="text-xs text-gray-500">{client?.email}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {car ? `${car.make} ${car.model}` : "Unknown"}
+                          <div className="text-xs text-gray-500">{car?.licensePlate}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          <div className="max-w-xs truncate">{session.customerRequest}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                              STATUS_COLORS[session.status] || "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {session.status.replace(/_/g, " ")}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                              PRIORITY_COLORS[session.priority] || "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {session.priority}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {new Date(session.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {session.daysInProgress ? Math.floor(session.daysInProgress) : "0"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() => handleViewDetails(session.id)}
+                            className="px-3 py-1 bg-blue-50 text-blue-600 rounded text-xs font-medium hover:bg-blue-100 transition"
+                          >
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

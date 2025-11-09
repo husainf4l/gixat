@@ -572,3 +572,45 @@ export const GET_CLIENT_REPAIR_SESSIONS_QUERY_NEW = `
     }
   }
 `;
+
+/**
+ * GET REPAIR SESSIONS WITH CAR AND CLIENT INFO
+ * Fetches repair sessions with related car details
+ * Note: We'll fetch cars separately and join on frontend to get client info
+ */
+export const GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY = `
+  query GetRepairSessionsWithDetails($businessId: ID!) {
+    repairSessions(businessId: $businessId, limit: 100) {
+      id
+      sessionNumber
+      customerRequest
+      problemDescription
+      status
+      priority
+      carId
+      businessId
+      createdAt
+      updatedAt
+      displayName
+      isCompleted
+      daysInProgress
+      estimatedCost
+      actualCost
+    }
+    carsByBusiness(businessId: $businessId) {
+      id
+      licensePlate
+      make
+      model
+      year
+      clientId
+    }
+    clientsByBusiness(businessId: $businessId) {
+      id
+      firstName
+      lastName
+      email
+      phone
+    }
+  }
+`;
