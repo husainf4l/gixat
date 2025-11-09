@@ -1,0 +1,1307 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Business {
+  id: ID!
+  name: String!
+  description: String
+  logo: String
+  phone: String
+  email: String
+  address: String
+  website: String
+  licenseNumber: String
+  taxId: String
+  servicesOffered: String
+  workingHours: String
+  maxCapacity: Float
+  ownerId: ID!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Permission {
+  id: ID!
+  name: String!
+  description: String
+  resource: PermissionResource!
+  action: PermissionAction!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Available resources for permissions"""
+enum PermissionResource {
+  USERS
+  ROLES
+  PRODUCTS
+  ORDERS
+  INVOICES
+  SETTINGS
+  REPORTS
+}
+
+"""Available permission actions"""
+enum PermissionAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  MANAGE
+}
+
+type Role {
+  id: ID!
+  name: String!
+  description: String
+  businessId: ID!
+  isActive: Boolean!
+  isDefault: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  type: UserType!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""The type of user account"""
+enum UserType {
+  BUSINESS
+  CLIENT
+  SYSTEM
+}
+
+type LoginResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+  expiresIn: String!
+}
+
+type RegisterResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+  expiresIn: String!
+}
+
+type RefreshTokenResponse {
+  accessToken: String!
+  expiresIn: String!
+}
+
+type S3UploadResponse {
+  url: String!
+  key: String!
+  bucket: String
+}
+
+type S3PresignedUrlResponse {
+  url: String!
+  expiresIn: Float!
+}
+
+type S3ObjectInfo {
+  key: String!
+  size: Int!
+  lastModified: String!
+}
+
+type S3HealthCheckDetails {
+  objectCount: Int!
+  sampleObjects: [S3ObjectInfo!]!
+  error: String
+}
+
+type S3HealthCheckResponse {
+  status: String!
+  message: String!
+  bucket: String
+  region: String
+  timestamp: String!
+  details: S3HealthCheckDetails
+}
+
+type CustomerCommunicationLog {
+  id: ID!
+  type: CommunicationType!
+  direction: CommunicationDirection!
+  subject: String!
+  message: String!
+  fromAddress: String
+  toAddress: String
+  isRead: Boolean!
+  isDelivered: Boolean!
+  deliveredAt: DateTime
+  deliveryError: String
+  relatedEntityType: String
+  relatedEntityId: Float
+  metadata: String
+  customerId: ID!
+  createdById: ID
+  createdAt: DateTime!
+}
+
+enum CommunicationType {
+  EMAIL
+  SMS
+  PHONE
+  WHATSAPP
+  IN_PERSON
+  SYSTEM
+}
+
+enum CommunicationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+type CustomerPreference {
+  id: ID!
+  category: String!
+  key: String!
+  value: String!
+  description: String
+  isActive: Boolean!
+  customerId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Customer {
+  id: ID!
+  customerNumber: String!
+  firstName: String!
+  lastName: String
+  email: String!
+  phone: String!
+  alternativePhone: String
+  dateOfBirth: DateTime
+  customerType: CustomerType!
+  status: CustomerStatus!
+  address: String
+  city: String
+  state: String
+  postalCode: String
+  country: String
+  companyName: String
+  taxId: String
+  registrationNumber: String
+  preferredContactMethod: PreferredContactMethod!
+  whatsappNumber: String
+  emailNotifications: Boolean!
+  smsNotifications: Boolean!
+  marketingConsent: Boolean!
+  loyaltyPoints: Float!
+  totalSpent: Float!
+  visitCount: Float!
+  lastVisitDate: DateTime
+  averageRating: Float
+  totalReviews: Float!
+  notes: String
+  tags: [String!]!
+  insuranceProvider: String
+  insurancePolicyNumber: String
+  insuranceExpiryDate: DateTime
+  emergencyContactName: String
+  emergencyContactPhone: String
+  businessId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  fullName: String!
+  displayName: String!
+  isVip: Boolean!
+  daysSinceLastVisit: Float!
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+  INSURANCE
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+  VIP
+}
+
+enum PreferredContactMethod {
+  EMAIL
+  SMS
+  PHONE
+  WHATSAPP
+}
+
+type Car {
+  id: ID!
+  make: CarMake!
+  model: String!
+  year: Int!
+  licensePlate: String!
+  vin: String
+  color: CarColor!
+  fuelType: FuelType!
+  transmission: TransmissionType!
+  engineSize: Float
+  mileage: Int
+  registrationDate: DateTime
+  insuranceCompany: String
+  insurancePolicyNumber: String
+  insuranceExpiryDate: DateTime
+  notes: String
+  status: CarStatus!
+  clientId: ID!
+  businessId: ID!
+  customerId: ID
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  displayName: String!
+}
+
+"""Car manufacturer/make"""
+enum CarMake {
+  TOYOTA
+  HONDA
+  FORD
+  CHEVROLET
+  NISSAN
+  BMW
+  MERCEDES
+  AUDI
+  VOLKSWAGEN
+  HYUNDAI
+  KIA
+  MAZDA
+  SUBARU
+  LEXUS
+  ACURA
+  INFINITI
+  CADILLAC
+  BUICK
+  GMC
+  JEEP
+  DODGE
+  CHRYSLER
+  RAM
+  LINCOLN
+  VOLVO
+  JAGUAR
+  LAND_ROVER
+  PORSCHE
+  TESLA
+  OTHER
+}
+
+"""Color of the car"""
+enum CarColor {
+  BLACK
+  WHITE
+  SILVER
+  GRAY
+  RED
+  BLUE
+  GREEN
+  YELLOW
+  ORANGE
+  BROWN
+  PURPLE
+  GOLD
+  BEIGE
+  OTHER
+}
+
+"""Type of fuel the car uses"""
+enum FuelType {
+  GASOLINE
+  DIESEL
+  HYBRID
+  ELECTRIC
+  PLUG_IN_HYBRID
+  CNG
+  LPG
+}
+
+"""Type of transmission"""
+enum TransmissionType {
+  MANUAL
+  AUTOMATIC
+  CVT
+  SEMI_AUTOMATIC
+}
+
+"""Current status of the car"""
+enum CarStatus {
+  ACTIVE
+  IN_SERVICE
+  INACTIVE
+  SOLD
+  SCRAPPED
+}
+
+type Client {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  dateOfBirth: DateTime
+  notes: String
+  businessId: ID!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  fullName: String!
+}
+
+type Part {
+  id: ID!
+  name: String!
+  partNumber: String!
+  description: String
+  brand: String
+  quantity: Float!
+  unitPrice: Float!
+  totalPrice: Float!
+  supplier: String
+  supplierPartNumber: String
+  status: PartStatus!
+  orderedDate: DateTime
+  expectedDeliveryDate: DateTime
+  actualDeliveryDate: DateTime
+  installedDate: DateTime
+  warrantyPeriod: String
+  warrantyExpiryDate: DateTime
+  notes: String
+  jobTaskId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  isDelayed: Boolean!
+  deliveryStatus: String
+}
+
+"""Status of parts in the repair process"""
+enum PartStatus {
+  AVAILABLE
+  ORDERED
+  BACK_ORDER
+  INSTALLED
+  RETURNED
+}
+
+type JobTask {
+  id: ID!
+  title: String!
+  description: String
+  division: WorkDivision!
+  status: JobStatus!
+  orderIndex: Int!
+  estimatedHours: Float!
+  actualHours: Float
+  startedAt: DateTime
+  completedAt: DateTime
+  workNotes: String
+  issues: String
+  requiresApproval: Boolean!
+  isApproved: Boolean!
+  jobCardId: ID!
+  assignedTechnicianId: ID!
+  approvedById: ID
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  duration: Float
+  isOverdue: Boolean!
+}
+
+"""Division/department handling the work"""
+enum WorkDivision {
+  ENGINE
+  TRANSMISSION
+  BRAKES
+  ELECTRICAL
+  BODYWORK
+  INTERIOR
+  SUSPENSION
+  AC_HEATING
+  EXHAUST
+  WHEELS_TIRES
+  DIAGNOSTIC
+  GENERAL
+}
+
+"""Status of individual job tasks"""
+enum JobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+type JobCard {
+  id: ID!
+  jobNumber: String!
+  title: String!
+  description: String
+  status: JobStatus!
+  plannedStartDate: DateTime!
+  plannedEndDate: DateTime!
+  actualStartDate: DateTime
+  actualEndDate: DateTime
+  estimatedHours: Float!
+  actualHours: Float
+  workInstructions: String
+  completionNotes: String
+  qualityCheckNotes: String
+  qualityApproved: Boolean!
+  qualityApprovedAt: DateTime
+  repairSessionId: ID!
+  assignedTechnicianId: ID!
+  createdById: ID!
+  qualityApprovedById: ID
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  progress: Float!
+  isOverdue: Boolean!
+  daysRemaining: Float
+}
+
+type Media {
+  id: ID!
+  filename: String!
+  originalName: String!
+  filePath: String!
+  type: MediaType!
+  mimeType: String!
+  size: Float!
+  description: String
+  tags: String
+  repairSessionId: ID
+  inspectionId: ID
+  jobCardId: ID
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  url: String!
+  sizeInMB: Float!
+}
+
+"""Type of media file"""
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+type Inspection {
+  id: ID!
+  type: InspectionType!
+  title: String!
+  findings: String
+  recommendations: String
+  mileageAtInspection: Int
+  technicalNotes: String
+  passed: Boolean!
+  requiresFollowUp: Boolean!
+  inspectionDate: DateTime
+  repairSessionId: ID!
+  inspectorId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  summary: String!
+}
+
+"""Type of inspection being performed"""
+enum InspectionType {
+  INITIAL
+  TEST_DRIVE
+  QUALITY_CHECK
+  FINAL
+}
+
+type OfferItem {
+  id: ID!
+  description: String!
+  division: WorkDivision!
+  laborHours: Float!
+  laborRate: Float!
+  laborCost: Float!
+  partName: String
+  partNumber: String
+  quantity: Float!
+  unitPrice: Float!
+  partsCost: Float!
+  totalCost: Float!
+  notes: String
+  offerId: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Offer {
+  id: ID!
+  offerNumber: String!
+  title: String!
+  description: String
+  laborCost: Float!
+  partsCost: Float!
+  totalCost: Float!
+  discountPercentage: Float
+  discountAmount: Float
+  finalAmount: Float!
+  validUntil: DateTime!
+  approvedAt: DateTime
+  rejectedAt: DateTime
+  rejectionReason: String
+  customerNotes: String
+  terms: String
+  isApproved: Boolean!
+  isRejected: Boolean!
+  repairSessionId: ID!
+  createdById: ID!
+  approvedById: ID
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  status: String!
+  isExpired: Boolean!
+}
+
+type RepairSession {
+  id: ID!
+  sessionNumber: String!
+  customerRequest: String!
+  problemDescription: String
+  status: RepairSessionStatus!
+  priority: RepairPriority!
+  expectedDeliveryDate: DateTime
+  actualDeliveryDate: DateTime
+  estimatedCost: Float
+  actualCost: Float
+  customerNotes: String
+  internalNotes: String
+  carId: ID!
+  businessId: ID!
+  assignedTechnicianId: ID
+  createdById: ID!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  displayName: String!
+  isCompleted: Boolean!
+  daysInProgress: Float
+}
+
+"""Status of the repair session workflow"""
+enum RepairSessionStatus {
+  CUSTOMER_REQUEST
+  INITIAL_INSPECTION
+  TEST_DRIVE_INSPECTION
+  OFFER_PREPARATION
+  OFFER_SENT
+  OFFER_APPROVED
+  OFFER_REJECTED
+  JOB_CARD_CREATED
+  REPAIR_IN_PROGRESS
+  QUALITY_CHECK
+  FINAL_INSPECTION
+  READY_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+"""Priority level of the repair"""
+enum RepairPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+type ClientStats {
+  totalClients: Int!
+  activeClients: Int!
+  clientsWithCars: Int!
+  totalCars: Int!
+}
+
+type CarStats {
+  totalCars: Int!
+  activeCars: Int!
+  inServiceCars: Int!
+  carsByMake: [MakeCount!]!
+  carsByStatus: [StatusCount!]!
+}
+
+type MakeCount {
+  make: String!
+  count: Int!
+}
+
+type StatusCount {
+  status: String!
+  count: Int!
+}
+
+type Notification {
+  id: ID!
+  type: NotificationType!
+  template: NotificationTemplate!
+  status: NotificationStatus!
+  recipient: String!
+  subject: String!
+  content: String!
+  relatedEntityType: String
+  relatedEntityId: ID
+  businessId: ID!
+  metadata: String
+  sentAt: DateTime
+  deliveredAt: DateTime
+  errorMessage: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum NotificationType {
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationTemplate {
+  REPAIR_STATUS_UPDATE
+  OFFER_READY
+  READY_FOR_PICKUP
+  APPOINTMENT_REMINDER
+  INSURANCE_EXPIRY
+  WELCOME_MESSAGE
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+type Appointment {
+  id: ID!
+  appointmentNumber: String!
+  status: AppointmentStatus!
+  type: AppointmentType!
+  priority: AppointmentPriority!
+  title: String!
+  description: String
+  scheduledDate: DateTime!
+  scheduledTime: String!
+  estimatedDuration: Float!
+  actualStartTime: DateTime
+  actualEndTime: DateTime
+  clientId: ID!
+  carId: ID
+  businessId: ID!
+  assignedTechnicianId: ID
+  createdById: ID!
+  customerNotes: String
+  internalNotes: String
+  completionNotes: String
+  reminderSent: Boolean
+  confirmedAt: DateTime
+  cancelledAt: DateTime
+  cancellationReason: String
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  displayName: String!
+  isUpcoming: Boolean!
+  isOverdue: Boolean!
+  actualDuration: Float!
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentType {
+  INSPECTION
+  REPAIR
+  MAINTENANCE
+  CONSULTATION
+  PICKUP_DELIVERY
+}
+
+enum AppointmentPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+type Query {
+  users: [User!]!
+  businesses: [Business!]!
+  business(id: Int!): Business
+  myGarages: [Business!]!
+  garageCapacity(id: ID!): String!
+  garageStatistics(id: ID!): String!
+  roles: [Role!]!
+  role(id: Int!): Role
+  rolesByBusiness(businessId: Int!): [Role!]!
+  permissions: [Permission!]!
+  permission(id: Int!): Permission
+  me: User!
+  validateToken: String!
+  clients(businessId: ID): [Client!]!
+  client(id: ID!): Client
+  clientsByBusiness(businessId: ID!): [Client!]!
+  searchClients(businessId: ID!, searchTerm: String!): [Client!]!
+  clientStats(businessId: ID!): ClientStats!
+  cars(businessId: ID): [Car!]!
+  car(id: ID!): Car
+  carsByClient(clientId: ID!): [Car!]!
+  carsByBusiness(businessId: ID!): [Car!]!
+  searchCars(businessId: ID!, searchTerm: String!): [Car!]!
+  carsWithExpiringInsurance(businessId: ID!, days: Int! = 30): [Car!]!
+  carStats(businessId: ID!): CarStats!
+  repairSessions(businessId: ID!, limit: Int, offset: Int): [RepairSession!]!
+  repairSession(id: ID!, businessId: ID!): RepairSession!
+  repairSessionStatistics(businessId: ID!): String!
+  inspections(repairSessionId: ID!, businessId: ID!): [Inspection!]!
+  inspection(id: ID!, businessId: ID!): Inspection!
+  inspectionsByType(repairSessionId: ID!, type: InspectionType!, businessId: ID!): [Inspection!]!
+  inspectionStatistics(businessId: ID!): String!
+  offers(businessId: ID!): [Offer!]!
+  offer(id: ID!, businessId: ID!): Offer!
+  offerStatistics(businessId: ID!): String!
+  jobCards(businessId: ID!): [JobCard!]!
+  jobCard(id: ID!, businessId: ID!): JobCard!
+  jobCardStatistics(businessId: ID!): String!
+  awsHealthCheck: String!
+  isS3Url(url: String!): Boolean!
+
+  """
+  Check S3 connection health and bucket access. Returns bucket info and sample objects.
+  """
+  s3HealthCheck: S3HealthCheckResponse!
+  notifications(filter: NotificationFilterInput!): [Notification!]!
+  notificationStats(businessId: ID!): String!
+  appointments(filter: AppointmentFilterInput!): [Appointment!]!
+  appointment(id: ID!, businessId: ID!): Appointment!
+  checkAvailability(input: AvailabilityCheckInput!): Boolean!
+  availableTimeSlots(date: String!, businessId: ID!, technicianId: ID): [String!]!
+  todaysAppointments(businessId: ID!): [Appointment!]!
+  upcomingAppointments(businessId: ID!, days: ID! = 7): [Appointment!]!
+  overdueAppointments(businessId: ID!): [Appointment!]!
+  appointmentStatistics(businessId: ID!): String!
+  customers(filter: CustomerFilterInput, sort: CustomerSortInput, limit: Int, offset: Int): [Customer!]!
+  customer(id: ID!): Customer!
+  getCustomerPreferences(customerId: ID!, category: String): [CustomerPreference!]!
+  getCustomerCommunicationLogs(customerId: ID!, limit: Int, offset: Int): [CustomerCommunicationLog!]!
+}
+
+input NotificationFilterInput {
+  type: NotificationType
+  template: NotificationTemplate
+  recipient: String
+  businessId: ID!
+}
+
+input AppointmentFilterInput {
+  status: AppointmentStatus
+  type: AppointmentType
+  clientId: ID
+  assignedTechnicianId: ID
+  dateFrom: String
+  dateTo: String
+  businessId: ID!
+  includeInactive: Boolean = false
+}
+
+input AvailabilityCheckInput {
+  date: String!
+  startTime: String!
+  duration: Float!
+  businessId: ID!
+  technicianId: ID
+}
+
+input CustomerFilterInput {
+  search: String
+  customerType: CustomerType
+  status: CustomerStatus
+  city: String
+  state: String
+  isVip: Boolean
+  minTotalSpent: Float
+  maxTotalSpent: Float
+  minVisitCount: Float
+  tags: [String!]
+}
+
+input CustomerSortInput {
+  field: String
+  order: String
+}
+
+type Mutation {
+  createGarage(input: CreateBusinessInput!): Business!
+  updateGarage(id: ID!, input: UpdateBusinessInput!): Business!
+  updateGarageSettings(id: ID!, settings: GarageSettingsInput!): Business!
+  register(input: RegisterInput!): RegisterResponse!
+  login(input: LoginInput!): LoginResponse!
+  refreshToken(refreshToken: String!): RefreshTokenResponse!
+  createClient(input: CreateClientInput!): Client!
+  updateClient(id: ID!, input: UpdateClientInput!): Client
+  deleteClient(id: ID!): Boolean!
+  createCar(input: CreateCarInput!): Car!
+  updateCar(id: ID!, input: UpdateCarInput!): Car
+  updateCarStatus(id: ID!, status: CarStatus!): Car
+  deleteCar(id: ID!): Boolean!
+  createRepairSession(input: CreateRepairSessionInput!): RepairSession!
+  updateRepairSessionStatus(id: ID!, input: UpdateRepairSessionStatusInput!, businessId: ID!): RepairSession!
+  createInspection(input: CreateInspectionInput!, businessId: ID!): Inspection!
+  updateInspection(id: ID!, businessId: ID!, findings: String, recommendations: String, passed: Boolean): Inspection!
+  addInspectionMedia(inspectionId: ID!, base64File: String!, filename: String!, mimetype: String!, businessId: ID!): Media!
+  createOffer(input: CreateOfferInput!, businessId: ID!): Offer!
+  addOfferItem(offerId: ID!, input: CreateOfferItemInput!, businessId: ID!): OfferItem!
+  approveOffer(id: ID!, businessId: ID!): Offer!
+  rejectOffer(id: ID!, businessId: ID!, reason: String): Offer!
+  createJobCard(input: CreateJobCardInput!, businessId: ID!): JobCard!
+  createJobTask(input: CreateJobTaskInput!, businessId: ID!): JobTask!
+  createPart(input: CreatePartInput!, businessId: ID!): Part!
+  updateJobTaskStatus(taskId: ID!, input: UpdateJobTaskStatusInput!, businessId: ID!): JobTask!
+  updatePartStatus(partId: ID!, input: UpdatePartStatusInput!, businessId: ID!): Part!
+
+  """
+  Upload a file to S3 using base64 encoding. The file should be sent as a base64-encoded string along with filename and mimetype.
+  """
+  uploadFileToS3(
+    """Base64 encoded file content"""
+    base64File: String!
+
+    """Original filename with extension"""
+    filename: String!
+
+    """File MIME type (e.g., application/pdf, image/jpeg)"""
+    mimetype: String!
+
+    """Optional S3 folder path"""
+    folder: String
+  ): S3UploadResponse!
+
+  """
+  Upload inspection media (images/videos) to S3 for car inspections. Files are stored in inspections/business-{id}/inspection-{id}/ folder.
+  """
+  uploadInspectionMedia(
+    """Base64 encoded file content"""
+    base64File: String!
+
+    """Original filename with extension"""
+    filename: String!
+
+    """File MIME type"""
+    mimetype: String!
+
+    """Inspection ID for organizing media"""
+    inspectionId: Float!
+
+    """Business ID for organizing media"""
+    businessId: Float!
+  ): S3UploadResponse!
+
+  """
+  Upload business logo to S3. Files are stored in business-logos/business-{id}/ folder.
+  """
+  uploadBusinessLogo(
+    """Base64 encoded file content"""
+    base64File: String!
+
+    """Original filename with extension"""
+    filename: String!
+
+    """File MIME type"""
+    mimetype: String!
+
+    """Business ID for organizing logos"""
+    businessId: Float!
+  ): S3UploadResponse!
+  generateS3PresignedUrl(input: GeneratePresignedUrlInput!): S3PresignedUrlResponse!
+  deleteFileFromS3(s3Url: String!): Boolean!
+  createNotification(input: CreateNotificationInput!): Notification!
+  sendBulkNotifications(input: SendBulkNotificationInput!): [Notification!]!
+  sendNotification(notificationId: ID!): Boolean!
+  sendRepairStatusUpdate(repairSessionId: ID!, businessId: ID!, recipient: String!, statusMessage: String!, type: NotificationType! = EMAIL): Notification!
+  sendOfferNotification(offerId: ID!, businessId: ID!, recipient: String!, offerDetails: String!, type: NotificationType! = EMAIL): Notification!
+  sendReadyForPickupNotification(repairSessionId: ID!, businessId: ID!, recipient: String!, pickupMessage: String!, type: NotificationType! = EMAIL): Notification!
+  createAppointment(input: CreateAppointmentInput!): Appointment!
+  updateAppointment(id: ID!, input: UpdateAppointmentInput!, businessId: ID!): Appointment!
+  updateAppointmentStatus(id: ID!, input: UpdateAppointmentStatusInput!, businessId: ID!): Appointment!
+  deleteAppointment(id: ID!, businessId: ID!): Boolean!
+  createCustomer(createCustomerInput: CreateCustomerInput!): Customer!
+  updateCustomer(id: ID!, updateCustomerInput: UpdateCustomerInput!): Customer!
+  removeCustomer(id: ID!): Boolean!
+  addLoyaltyPoints(customerId: ID!, points: Int!, reason: String!, relatedEntityType: String, relatedEntityId: ID): Customer!
+  redeemLoyaltyPoints(customerId: ID!, points: Int!, reason: String!): Customer!
+  setCustomerPreference(customerId: ID!, category: String!, key: String!, value: String!, description: String): CustomerPreference!
+  updateCustomerVisitStats(customerId: ID!, totalAmount: Int): Boolean!
+}
+
+input CreateBusinessInput {
+  name: String!
+  description: String
+  phone: String
+  email: String
+  address: String
+  website: String
+  licenseNumber: String
+  taxId: String
+  servicesOffered: String
+  workingHours: String
+  maxCapacity: Int = 10
+}
+
+input UpdateBusinessInput {
+  name: String
+  description: String
+  phone: String
+  email: String
+  address: String
+  website: String
+  licenseNumber: String
+  taxId: String
+  servicesOffered: String
+  workingHours: String
+  maxCapacity: Int
+}
+
+input GarageSettingsInput {
+  maxCapacity: Int
+  workingHours: String
+  servicesOffered: String
+  licenseNumber: String
+  taxId: String
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  name: String!
+  type: UserType! = CLIENT
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateClientInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  dateOfBirth: String
+  notes: String
+  businessId: ID!
+}
+
+input UpdateClientInput {
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  dateOfBirth: String
+  notes: String
+  isActive: Boolean
+}
+
+input CreateCarInput {
+  make: CarMake!
+  model: String!
+  year: Int!
+  licensePlate: String!
+  vin: String
+  color: CarColor!
+  fuelType: FuelType!
+  transmission: TransmissionType!
+  engineSize: Float
+  mileage: Int
+  registrationDate: String
+  insuranceCompany: String
+  insurancePolicyNumber: String
+  insuranceExpiryDate: String
+  notes: String
+  clientId: ID!
+  businessId: ID!
+}
+
+input UpdateCarInput {
+  make: CarMake
+  model: String
+  year: Int
+  licensePlate: String
+  vin: String
+  color: CarColor
+  fuelType: FuelType
+  transmission: TransmissionType
+  engineSize: Float
+  mileage: Int
+  registrationDate: String
+  insuranceCompany: String
+  insurancePolicyNumber: String
+  insuranceExpiryDate: String
+  notes: String
+  status: CarStatus
+  isActive: Boolean
+}
+
+input CreateRepairSessionInput {
+  customerRequest: String!
+  problemDescription: String
+  priority: RepairPriority! = NORMAL
+  expectedDeliveryDate: String
+  carId: ID!
+  businessId: ID!
+  customerNotes: String
+}
+
+input UpdateRepairSessionStatusInput {
+  status: RepairSessionStatus!
+  notes: String
+}
+
+input CreateInspectionInput {
+  type: InspectionType!
+  title: String!
+  findings: String
+  recommendations: String
+  mileageAtInspection: Int
+  technicalNotes: String
+  passed: Boolean!
+  repairSessionId: ID!
+  inspectorId: ID!
+}
+
+input CreateOfferInput {
+  title: String!
+  description: String
+  laborCost: Float!
+  partsCost: Float!
+  discountPercentage: Float
+  validUntil: String!
+  terms: String
+  repairSessionId: ID!
+}
+
+input CreateOfferItemInput {
+  description: String!
+  division: WorkDivision!
+  laborHours: Float!
+  laborRate: Float!
+  partName: String
+  partNumber: String
+  quantity: Int! = 1
+  unitPrice: Float! = 0
+  notes: String
+}
+
+input CreateJobCardInput {
+  title: String!
+  description: String
+  plannedStartDate: String!
+  plannedEndDate: String!
+  estimatedHours: Float!
+  workInstructions: String
+  repairSessionId: ID!
+  assignedTechnicianId: ID!
+}
+
+input CreateJobTaskInput {
+  title: String!
+  description: String
+  division: WorkDivision!
+  orderIndex: Int! = 1
+  estimatedHours: Float!
+  requiresApproval: Boolean! = false
+  jobCardId: ID!
+  assignedTechnicianId: ID!
+}
+
+input CreatePartInput {
+  name: String!
+  partNumber: String!
+  description: String
+  brand: String
+  quantity: Int! = 1
+  unitPrice: Float!
+  supplier: String
+  expectedDeliveryDate: String
+  warrantyPeriod: String
+  jobTaskId: ID!
+}
+
+input UpdateJobTaskStatusInput {
+  status: JobStatus!
+  actualHours: Float
+  workNotes: String
+  issues: String
+}
+
+input UpdatePartStatusInput {
+  status: PartStatus!
+  actualDeliveryDate: String
+  installedDate: String
+}
+
+input GeneratePresignedUrlInput {
+  s3Url: String!
+  expiresIn: Float
+}
+
+input CreateNotificationInput {
+  type: NotificationType!
+  template: NotificationTemplate!
+  recipient: String!
+  subject: String!
+  content: String!
+  relatedEntityType: String
+  relatedEntityId: ID
+  businessId: ID!
+  metadata: String
+}
+
+input SendBulkNotificationInput {
+  type: NotificationType!
+  template: NotificationTemplate!
+  recipients: [String!]!
+  subject: String!
+  content: String!
+  businessId: ID!
+  metadata: String
+}
+
+input CreateAppointmentInput {
+  type: AppointmentType!
+  priority: AppointmentPriority! = NORMAL
+  title: String!
+  description: String
+  scheduledDate: String!
+  scheduledTime: String!
+  estimatedDuration: Float! = 60
+  clientId: ID!
+  carId: ID
+  businessId: ID!
+  assignedTechnicianId: ID
+  customerNotes: String
+  internalNotes: String
+}
+
+input UpdateAppointmentInput {
+  type: AppointmentType
+  priority: AppointmentPriority
+  title: String
+  description: String
+  scheduledDate: String
+  scheduledTime: String
+  estimatedDuration: Float
+  assignedTechnicianId: ID
+  customerNotes: String
+  internalNotes: String
+  completionNotes: String
+}
+
+input UpdateAppointmentStatusInput {
+  status: AppointmentStatus!
+  notes: String
+  cancellationReason: String
+}
+
+input CreateCustomerInput {
+  firstName: String!
+  lastName: String
+  email: String!
+  phone: String!
+  alternativePhone: String
+  dateOfBirth: String
+  customerType: CustomerType
+  address: String
+  city: String
+  state: String
+  postalCode: String
+  country: String
+  companyName: String
+  taxId: String
+  registrationNumber: String
+  preferredContactMethod: PreferredContactMethod
+  whatsappNumber: String
+  emailNotifications: Boolean
+  smsNotifications: Boolean
+  marketingConsent: Boolean
+  notes: String
+  tags: [String!]
+  insuranceProvider: String
+  insurancePolicyNumber: String
+  insuranceExpiryDate: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+}
+
+input UpdateCustomerInput {
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  alternativePhone: String
+  dateOfBirth: String
+  status: CustomerStatus
+  address: String
+  city: String
+  state: String
+  postalCode: String
+  country: String
+  companyName: String
+  taxId: String
+  registrationNumber: String
+  preferredContactMethod: PreferredContactMethod
+  whatsappNumber: String
+  emailNotifications: Boolean
+  smsNotifications: Boolean
+  marketingConsent: Boolean
+  notes: String
+  tags: [String!]
+  insuranceProvider: String
+  insurancePolicyNumber: String
+  insuranceExpiryDate: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+}

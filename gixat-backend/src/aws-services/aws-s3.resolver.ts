@@ -1,0 +1,147 @@
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { AwsS3Service } from './aws-s3.service';
+import { S3UploadResponse, S3PresignedUrlResponse, S3HealthCheckResponse } from './aws-s3.dto';
+import { GeneratePresignedUrlInput } from './aws-s3.input';
+
+/**
+ * BEST PRACTICE FOR APOLLO SERVER 5:
+ * Use base64 encoding instead of multipart uploads.
+ * 
+ * Why? Apollo Server 4+ removed built-in file upload support.
+ * Base64 encoding is:
+ * - Simpler and more reliable
+ * - Works with all GraphQL implementations
+ * - No multipart complexity
+ * - Industry standard for modern GraphQL APIs
+ */
+
+@Resolver()
+export class AwsS3Resolver {
+  constructor(private readonly awsS3Service: AwsS3Service) {}
+
+  @Mutation(() => S3UploadResponse, {
+    description: 'Upload a file to S3 using base64 encoding. The file should be sent as a base64-encoded string along with filename and mimetype.'
+  })
+  async uploadFileToS3(
+    @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
+    @Args('filename', { description: 'Original filename with extension' }) filename: string,
+    @Args('mimetype', { description: 'File MIME type (e.g., application/pdf, image/jpeg)' }) _mimetype: string,
+    @Args('folder', { nullable: true, description: 'Optional S3 folder path' }) folder?: string,
+  ): Promise<S3UploadResponse> {
+    try {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(base64File, 'base64');
+      
+      // Upload to S3
+      const url = await this.awsS3Service.uploadFile(buffer, filename, folder);
+      const key = this.awsS3Service.extractKeyFromUrl(url);
+
+      return {
+        url,
+        key,
+        bucket: process.env.AWS_BUCKET_NAME,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`File upload failed: ${errorMessage}`);
+    }
+  }
+
+  @Mutation(() => S3UploadResponse, {
+    description: 'Upload inspection media (images/videos) to S3 for car inspections. Files are stored in inspections/business-{id}/inspection-{id}/ folder.'
+  })
+  async uploadInspectionMedia(
+    @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
+    @Args('filename', { description: 'Original filename with extension' }) filename: string,
+    @Args('mimetype', { description: 'File MIME type' }) _mimetype: string,
+    @Args('inspectionId', { description: 'Inspection ID for organizing media' }) inspectionId: number,
+    @Args('businessId', { description: 'Business ID for organizing media' }) businessId: number,
+  ): Promise<S3UploadResponse> {
+    try {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(base64File, 'base64');
+      
+      // Upload to S3
+      const url = await this.awsS3Service.uploadInspectionMedia(buffer, filename, inspectionId, businessId);
+      const key = this.awsS3Service.extractKeyFromUrl(url);
+
+      return {
+        url,
+        key,
+        bucket: process.env.AWS_BUCKET_NAME,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Inspection media upload failed: ${errorMessage}`);
+    }
+  }
+
+  @Mutation(() => S3UploadResponse, {
+    description: 'Upload business logo to S3. Files are stored in business-logos/business-{id}/ folder.'
+  })
+  async uploadBusinessLogo(
+    @Args('base64File', { description: 'Base64 encoded file content' }) base64File: string,
+    @Args('filename', { description: 'Original filename with extension' }) filename: string,
+    @Args('mimetype', { description: 'File MIME type' }) _mimetype: string,
+    @Args('businessId', { description: 'Business ID for organizing logos' }) businessId: number,
+  ): Promise<S3UploadResponse> {
+    try {
+      // Decode base64 to buffer
+      const buffer = Buffer.from(base64File, 'base64');
+      
+      // Upload to S3
+      const url = await this.awsS3Service.uploadBusinessLogo(buffer, filename, businessId);
+      const key = this.awsS3Service.extractKeyFromUrl(url);
+
+      return {
+        url,
+        key,
+        bucket: process.env.AWS_BUCKET_NAME,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Business logo upload failed: ${errorMessage}`);
+    }
+  }
+
+  @Mutation(() => S3PresignedUrlResponse)
+  async generateS3PresignedUrl(
+    @Args('input') input: GeneratePresignedUrlInput,
+  ): Promise<S3PresignedUrlResponse> {
+    const url = await this.awsS3Service.generatePresignedUrl(
+      input.s3Url,
+      input.expiresIn,
+    );
+
+    return {
+      url,
+      expiresIn: input.expiresIn || 3600,
+    };
+  }
+
+  @Mutation(() => Boolean)
+  async deleteFileFromS3(@Args('s3Url') s3Url: string): Promise<boolean> {
+    await this.awsS3Service.deleteFile(s3Url);
+    return true;
+  }
+
+  @Query(() => Boolean)
+  async isS3Url(@Args('url') url: string): Promise<boolean> {
+    return this.awsS3Service.isS3Url(url);
+  }
+
+  @Query(() => S3HealthCheckResponse, {
+    description: 'Check S3 connection health and bucket access. Returns bucket info and sample objects.'
+  })
+  async s3HealthCheck(): Promise<S3HealthCheckResponse> {
+    const result = await this.awsS3Service.healthCheck();
+    return {
+      status: result.status,
+      message: result.message,
+      bucket: result.bucket || undefined,
+      region: result.region || undefined,
+      timestamp: result.timestamp,
+      details: result.details,
+    };
+  }
+}
