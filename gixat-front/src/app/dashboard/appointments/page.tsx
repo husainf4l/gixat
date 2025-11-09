@@ -70,7 +70,7 @@ export default function AppointmentsPage() {
 
         // Fetch appointments - requires filter argument
         const response = await graphqlRequest<{ appointments: Appointment[] }>(
-          `query($filter: AppointmentFilterInput) {
+          `query($filter: AppointmentFilterInput!) {
             appointments(filter: $filter) {
               id
               appointmentNumber

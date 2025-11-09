@@ -65,7 +65,7 @@ export default function InspectionsPage() {
 
         // Fetch inspections - requires filter argument
         const response = await graphqlRequest<{ inspections: Inspection[] }>(
-          `query($filter: InspectionFilterInput) {
+          `query($filter: InspectionFilterInput!) {
             inspections(filter: $filter) {
               id
               type
