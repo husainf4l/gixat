@@ -14,13 +14,8 @@ interface Inspection {
   type: string;
   title: string;
   findings?: string;
-  recommendations?: string;
   passed: boolean;
-  requiresFollowUp?: boolean;
   inspectionDate?: string;
-  mileageAtInspection?: number;
-  summary?: string;
-  repairSessionId?: string;
 }
 
 interface InspectionStats {
@@ -70,23 +65,20 @@ export default function InspectionsPage() {
         
         if (!token) return;
 
-        // Fetch inspections - simplified query without parameters
+        // Fetch inspections with businessId parameter (using user id or default "1")
+        const businessId = user.id || "1";
         const response = await graphqlRequest<{ inspections: Inspection[] }>(
-          `query {
-            inspections {
+          `query($businessId: ID!) {
+            inspections(businessId: $businessId) {
               id
               type
               title
               findings
-              recommendations
               passed
-              requiresFollowUp
               inspectionDate
-              mileageAtInspection
-              summary
             }
           }`,
-          {},
+          { businessId },
           token
         );
 
@@ -100,7 +92,6 @@ export default function InspectionsPage() {
             filtered = filtered.filter((insp) => {
               if (filters.status === "PASSED") return insp.passed;
               if (filters.status === "FAILED") return !insp.passed;
-              if (filters.status === "FOLLOW_UP") return insp.requiresFollowUp;
               return true;
             });
           }
@@ -113,12 +104,12 @@ export default function InspectionsPage() {
           setInspections(filtered);
         }
 
-        // Set default stats - backend query not working reliably
+        // Set default stats - calculated from inspections
         setStats({
           total: response.data?.inspections?.length || 0,
           passed: response.data?.inspections?.filter(i => i.passed).length || 0,
-          failed: response.data?.inspections?.filter(i => !i.passed && !i.requiresFollowUp).length || 0,
-          requiresFollowUp: response.data?.inspections?.filter(i => i.requiresFollowUp).length || 0,
+          failed: response.data?.inspections?.filter(i => !i.passed).length || 0,
+          requiresFollowUp: 0,
           averageFindingsPerInspection: 0,
         });
       } catch (error) {
@@ -157,14 +148,12 @@ export default function InspectionsPage() {
     return null;
   }
 
-  const getStatusColor = (passed: boolean, requiresFollowUp?: boolean) => {
-    if (requiresFollowUp) return "bg-yellow-100 text-yellow-800";
+  const getStatusColor = (passed: boolean) => {
     if (passed) return "bg-green-100 text-green-800";
     return "bg-red-100 text-red-800";
   };
 
-  const getStatusText = (passed: boolean, requiresFollowUp?: boolean) => {
-    if (requiresFollowUp) return "Follow-up Required";
+  const getStatusText = (passed: boolean) => {
     if (passed) return "Passed";
     return "Failed";
   };
@@ -275,23 +264,17 @@ export default function InspectionsPage() {
           ) : (
             <>
               <table className="w-full">
-                <TableHeader columns={["Type", "Title", "Date", "Mileage", "Status", "Follow-up", "Findings"]} />
+                <TableHeader columns={["Type", "Title", "Date", "Status", "Findings"]} />
                 <tbody className="divide-y divide-gray-200">
                   {inspections.map((insp) => (
                     <tr key={insp.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">{insp.type}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{insp.title}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDate(insp.inspectionDate)}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {insp.mileageAtInspection ? `${insp.mileageAtInspection.toLocaleString()} km` : "N/A"}
-                      </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(insp.passed, insp.requiresFollowUp)}`}>
-                          {getStatusText(insp.passed, insp.requiresFollowUp)}
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(insp.passed)}`}>
+                          {getStatusText(insp.passed)}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-center">
-                        {insp.requiresFollowUp ? "⚠️ Yes" : "✓ No"}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
                         {insp.findings || "No findings"}
