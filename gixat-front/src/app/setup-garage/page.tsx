@@ -16,11 +16,12 @@ export default function SetupGaragePage() {
     email: "",
     phone: "",
     address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    openingTime: "09:00",
-    closingTime: "18:00",
+    website: "",
+    licenseNumber: "",
+    taxId: "",
+    servicesOffered: "",
+    workingHours: "",
+    maxCapacity: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -65,9 +66,9 @@ export default function SetupGaragePage() {
         return;
       }
 
-      // Create garage via GraphQL mutation
+      // Create garage via GraphQL mutation using CreateBusinessInput
       const response = await graphqlRequest<{ createGarage: { id: string } }>(
-        `mutation($input: CreateGarageInput!) {
+        `mutation($input: CreateBusinessInput!) {
           createGarage(input: $input) {
             id
             name
@@ -75,25 +76,27 @@ export default function SetupGaragePage() {
             email
             phone
             address
-            city
-            state
-            zipCode
-            openingTime
-            closingTime
+            website
+            licenseNumber
+            taxId
+            servicesOffered
+            workingHours
+            maxCapacity
           }
         }`,
         {
           input: {
             name: formData.name,
             description: formData.description || null,
-            email: formData.email,
-            phone: formData.phone,
+            email: formData.email || null,
+            phone: formData.phone || null,
             address: formData.address || null,
-            city: formData.city || null,
-            state: formData.state || null,
-            zipCode: formData.zipCode || null,
-            openingTime: formData.openingTime || "09:00",
-            closingTime: formData.closingTime || "18:00",
+            website: formData.website || null,
+            licenseNumber: formData.licenseNumber || null,
+            taxId: formData.taxId || null,
+            servicesOffered: formData.servicesOffered || null,
+            workingHours: formData.workingHours || null,
+            maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity) : null,
           },
         },
         token
@@ -208,68 +211,84 @@ export default function SetupGaragePage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City
+                  Website
+                </label>
+                <input
+                  type="url"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  placeholder="https://www.example.com"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  License Number
                 </label>
                 <input
                   type="text"
-                  name="city"
-                  value={formData.city}
+                  name="licenseNumber"
+                  value={formData.licenseNumber}
                   onChange={handleInputChange}
-                  placeholder="New York"
+                  placeholder="Your License Number"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State
+                  Tax ID
                 </label>
                 <input
                   type="text"
-                  name="state"
-                  value={formData.state}
+                  name="taxId"
+                  value={formData.taxId}
                   onChange={handleInputChange}
-                  placeholder="NY"
+                  placeholder="Your Tax ID"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Zip Code
+                  Services Offered
                 </label>
                 <input
                   type="text"
-                  name="zipCode"
-                  value={formData.zipCode}
+                  name="servicesOffered"
+                  value={formData.servicesOffered}
                   onChange={handleInputChange}
-                  placeholder="10001"
+                  placeholder="E.g., Oil Change, Tire Replacement, etc."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Opening Time
+                  Working Hours
                 </label>
                 <input
-                  type="time"
-                  name="openingTime"
-                  value={formData.openingTime}
+                  type="text"
+                  name="workingHours"
+                  value={formData.workingHours}
                   onChange={handleInputChange}
+                  placeholder="E.g., 09:00 - 18:00"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Closing Time
+                  Max Capacity
                 </label>
                 <input
-                  type="time"
-                  name="closingTime"
-                  value={formData.closingTime}
+                  type="number"
+                  name="maxCapacity"
+                  value={formData.maxCapacity}
                   onChange={handleInputChange}
+                  placeholder="Maximum number of vehicles"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
