@@ -65,11 +65,10 @@ export default function InspectionsPage() {
         
         if (!token) return;
 
-        // Fetch inspections with businessId parameter (using user id or default "1")
-        const businessId = user.id || "1";
+        // Fetch inspections - use simple query without parameters
         const response = await graphqlRequest<{ inspections: Inspection[] }>(
-          `query($businessId: ID!) {
-            inspections(businessId: $businessId) {
+          `query {
+            inspections {
               id
               type
               title
@@ -78,7 +77,7 @@ export default function InspectionsPage() {
               inspectionDate
             }
           }`,
-          { businessId },
+          {},
           token
         );
 

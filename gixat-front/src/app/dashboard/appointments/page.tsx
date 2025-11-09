@@ -68,11 +68,10 @@ export default function AppointmentsPage() {
           return;
         }
 
-        // Fetch appointments with businessId parameter (using user id or default "1")
-        const businessId = user.id || "1";
+        // Fetch appointments - use simple query without parameters
         const response = await graphqlRequest<{ appointments: Appointment[] }>(
-          `query($businessId: ID!) {
-            appointments(businessId: $businessId) {
+          `query {
+            appointments {
               id
               appointmentNumber
               title
@@ -90,7 +89,7 @@ export default function AppointmentsPage() {
               createdAt
             }
           }`,
-          { businessId },
+          {},
           token
         );
 

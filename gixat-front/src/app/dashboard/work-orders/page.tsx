@@ -65,11 +65,10 @@ export default function WorkOrdersPage() {
           return;
         }
 
-        // Fetch job cards with businessId parameter (using user id or default "1")
-        const businessId = user.id || "1";
+        // Fetch job cards - use simple query without parameters
         const response = await graphqlRequest<{ jobCards: JobCard[] }>(
-          `query($businessId: ID!) {
-            jobCards(businessId: $businessId) {
+          `query {
+            jobCards {
               id
               title
               status
@@ -85,7 +84,7 @@ export default function WorkOrdersPage() {
               createdAt
             }
           }`,
-          { businessId },
+          {},
           token
         );
 

@@ -61,7 +61,7 @@ export default function CarsPage() {
 
         const response = await graphqlRequest<{ carsByBusiness: Car[] }>(
           GET_BUSINESS_CARS_QUERY,
-          { businessId: user.id || "1" },
+          {},
           token
         );
 
