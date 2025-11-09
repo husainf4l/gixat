@@ -100,16 +100,19 @@ export default function RepairSessionDetailPage() {
   const fetchSessionDetail = async () => {
     try {
       const token = storage.getAccessToken();
-      if (!token) return;
+      if (!token) {
+        console.error("No token found in storage");
+        setError("No authentication token. Please login again.");
+        setLoading(false);
+        return;
+      }
 
-      const businessId = user.id || user.businessId;
-      console.log("Fetching repair session with:", { sessionId, businessId, userId: user.id });
+      console.log("Token found, fetching repair session:", { sessionId, tokenLength: token.length });
 
       const response = await graphqlRequest<{ repairSession: RepairSessionDetail }>(
         GET_REPAIR_SESSION_DETAIL_QUERY,
         {
           id: sessionId,
-          businessId,
         },
         token
       );
@@ -123,7 +126,14 @@ export default function RepairSessionDetailPage() {
         setNotes(sessionData.internalNotes || "");
       } else if (response.errors) {
         console.error("GraphQL Errors:", response.errors);
-        setError(response.errors[0]?.message || "Failed to load session");
+        const errorMsg = response.errors[0]?.message || "Failed to load session";
+        
+        // If Unauthorized, suggest re-login
+        if (errorMsg === "Unauthorized") {
+          setError("Session expired. Please log out and log in again.");
+        } else {
+          setError(errorMsg);
+        }
       } else {
         console.error("No data and no errors in response:", response);
         setError("Repair session not found");
@@ -150,8 +160,6 @@ export default function RepairSessionDetailPage() {
         return;
       }
 
-      const businessId = user.id || user.businessId;
-
       const response = await graphqlRequest<{ updateRepairSessionStatus: any }>(
         UPDATE_REPAIR_SESSION_STATUS_MUTATION,
         {
@@ -160,7 +168,6 @@ export default function RepairSessionDetailPage() {
             status: newStatus,
             notes: notes || null,
           },
-          businessId,
         },
         token
       );

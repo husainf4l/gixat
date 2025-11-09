@@ -100,22 +100,16 @@ export default function RepairSessionsPage() {
       const token = storage.getAccessToken();
       if (!token) return;
 
-      const businessId = user.id || user.businessId;
-      if (!businessId) {
-        setError("Business ID not found");
-        return;
-      }
-
       const response = await graphqlRequest<{
         repairSessions: RepairSession[];
-        carsByBusiness: Car[];
-        clientsByBusiness: Client[];
-      }>(GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY, { businessId }, token);
+        cars: Car[];
+        clients: Client[];
+      }>(GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY, {}, token);
 
       if (response.data) {
         setSessions(response.data.repairSessions || []);
-        setCars(response.data.carsByBusiness || []);
-        setClients(response.data.clientsByBusiness || []);
+        setCars(response.data.cars || []);
+        setClients(response.data.clients || []);
       }
 
       if (response.errors) {

@@ -462,7 +462,6 @@ export const CREATE_REPAIR_SESSION_MUTATION = `
       problemDescription
       status
       priority
-      expectedDeliveryDate
       carId
       businessId
       createdAt
@@ -500,8 +499,8 @@ export const GET_ALL_REPAIR_SESSIONS_QUERY = `
  * Fetches a single repair session with full details
  */
 export const GET_REPAIR_SESSION_DETAIL_QUERY = `
-  query GetRepairSessionDetail($id: ID!, $businessId: ID) {
-    repairSession(id: $id, businessId: $businessId) {
+  query GetRepairSessionDetail($id: ID!) {
+    repairSession(id: $id) {
       id
       sessionNumber
       customerRequest
@@ -531,8 +530,8 @@ export const GET_REPAIR_SESSION_DETAIL_QUERY = `
  * Updates the status and notes of a repair session
  */
 export const UPDATE_REPAIR_SESSION_STATUS_MUTATION = `
-  mutation UpdateRepairSessionStatus($id: ID!, $input: UpdateRepairSessionStatusInput!, $businessId: ID) {
-    updateRepairSessionStatus(id: $id, input: $input, businessId: $businessId) {
+  mutation UpdateRepairSessionStatus($id: ID!, $input: UpdateRepairSessionStatusInput!) {
+    updateRepairSessionStatus(id: $id, input: $input) {
       id
       sessionNumber
       status
@@ -579,8 +578,8 @@ export const GET_CLIENT_REPAIR_SESSIONS_QUERY_NEW = `
  * Note: We'll fetch cars separately and join on frontend to get client info
  */
 export const GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY = `
-  query GetRepairSessionsWithDetails($businessId: ID!) {
-    repairSessions(businessId: $businessId, limit: 100) {
+  query GetRepairSessionsWithDetails {
+    repairSessions(limit: 100) {
       id
       sessionNumber
       customerRequest
@@ -597,7 +596,7 @@ export const GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY = `
       estimatedCost
       actualCost
     }
-    carsByBusiness(businessId: $businessId) {
+    cars {
       id
       licensePlate
       make
@@ -605,7 +604,7 @@ export const GET_REPAIR_SESSIONS_WITH_DETAILS_QUERY = `
       year
       clientId
     }
-    clientsByBusiness(businessId: $businessId) {
+    clients {
       id
       firstName
       lastName
