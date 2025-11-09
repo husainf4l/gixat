@@ -103,6 +103,7 @@ export default function RepairSessionDetailPage() {
       if (!token) return;
 
       const businessId = user.id || user.businessId;
+      console.log("Fetching repair session with:", { sessionId, businessId, userId: user.id });
 
       const response = await graphqlRequest<{ repairSession: RepairSessionDetail }>(
         GET_REPAIR_SESSION_DETAIL_QUERY,
@@ -112,6 +113,8 @@ export default function RepairSessionDetailPage() {
         },
         token
       );
+      
+      console.log("Response from repairSession query:", response);
 
       if (response.data?.repairSession) {
         const sessionData = response.data.repairSession;
@@ -119,7 +122,11 @@ export default function RepairSessionDetailPage() {
         setNewStatus(sessionData.status);
         setNotes(sessionData.internalNotes || "");
       } else if (response.errors) {
+        console.error("GraphQL Errors:", response.errors);
         setError(response.errors[0]?.message || "Failed to load session");
+      } else {
+        console.error("No data and no errors in response:", response);
+        setError("Repair session not found");
       }
     } catch (err) {
       console.error("Error fetching session:", err);

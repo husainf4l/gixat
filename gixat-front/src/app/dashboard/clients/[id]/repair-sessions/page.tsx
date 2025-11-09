@@ -150,10 +150,14 @@ export default function ClientRepairSessionsPage() {
       );
 
       let allSessions = sessionsResponse.data?.repairSessions || [];
+      console.log("Fetched sessions:", allSessions.length, "Total cars:", clientCars.length);
 
       // Filter to only sessions for this client's cars
       const clientCarIds = clientCars.map((c) => c.id);
+      console.log("Client car IDs:", clientCarIds);
+      
       const clientSessions = allSessions.filter((s) => clientCarIds.includes(s.carId));
+      console.log("Filtered client sessions:", clientSessions.length);
 
       setSessions(clientSessions);
     } catch (err) {
