@@ -7,7 +7,6 @@ import { graphqlRequest } from "@/lib/graphql-client";
 import { User } from "@/lib/auth.types";
 import DashboardLayout from "@/components/DashboardLayout";
 import EmptyState from "@/components/EmptyState";
-import ClientDetails from "@/components/ClientDetails";
 
 interface Client {
   id: string;
@@ -33,8 +32,6 @@ export default function ClientsPage() {
   const [showForm, setShowForm] = useState(false);
   const [businessId, setBusinessId] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [showClientDetails, setShowClientDetails] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -468,10 +465,7 @@ export default function ClientsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <button
-                        onClick={() => {
-                          setSelectedClient(client);
-                          setShowClientDetails(true);
-                        }}
+                        onClick={() => router.push(`/dashboard/clients/${client.id}`)}
                         className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition font-medium text-xs"
                       >
                         View Details
@@ -481,26 +475,6 @@ export default function ClientsPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-
-        {/* Client Details Modal */}
-        {showClientDetails && selectedClient && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <ClientDetails
-                  clientId={selectedClient.id}
-                  clientName={`${selectedClient.firstName} ${selectedClient.lastName}`}
-                  clientEmail={selectedClient.email}
-                  clientPhone={selectedClient.phone}
-                  onClose={() => {
-                    setShowClientDetails(false);
-                    setSelectedClient(null);
-                  }}
-                />
-              </div>
-            </div>
           </div>
         )}
       </div>
