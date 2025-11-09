@@ -65,6 +65,22 @@ export default function AddRepairSession({
         return;
       }
 
+      // Build input object, only include expectedDeliveryDate if provided
+      const input: any = {
+        customerRequest: formData.customerRequest,
+        priority: formData.priority,
+        problemDescription: formData.problemDescription || null,
+        customerNotes: formData.customerNotes || null,
+        carId: carId,
+        businessId: user.id || user.businessId,
+        // IMPORTANT: Only add expectedDeliveryDate if provided, as DateTime scalar is optional
+        ...(formData.expectedDeliveryDate && {
+          expectedDeliveryDate: `${formData.expectedDeliveryDate}T00:00:00Z`,
+        }),
+      };
+
+      console.log("Creating repair session with input:", JSON.stringify(input, null, 2));
+
       // Create repair session via GraphQL mutation
       const response = await graphqlRequest<{ createRepairSession: any }>(
         `mutation($input: CreateRepairSessionInput!) {
@@ -82,20 +98,7 @@ export default function AddRepairSession({
             displayName
           }
         }`,
-        {
-          input: {
-            customerRequest: formData.customerRequest,
-            priority: formData.priority,
-            problemDescription: formData.problemDescription || null,
-            // Convert date from YYYY-MM-DD to ISO 8601 DateTime format
-            expectedDeliveryDate: formData.expectedDeliveryDate 
-              ? `${formData.expectedDeliveryDate}T00:00:00Z` 
-              : null,
-            customerNotes: formData.customerNotes || null,
-            carId: carId,
-            businessId: user.id || user.businessId,
-          },
-        },
+        { input },
         token
       );
 
