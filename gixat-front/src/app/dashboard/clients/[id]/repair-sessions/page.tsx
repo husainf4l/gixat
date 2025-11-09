@@ -127,10 +127,11 @@ export default function ClientRepairSessionsPage() {
       const clientCars = carsResponse.data?.carsByClient || [];
       setCars(clientCars);
 
-      // Fetch ALL repair sessions (we'll filter by carId on the frontend)
+      // Fetch ALL repair sessions for this business (we'll filter by carId on the frontend)
+      const businessId = user?.id || user?.businessId;
       const sessionsResponse = await graphqlRequest<{ repairSessions: RepairSession[] }>(
-        `query {
-          repairSessions(limit: 100) {
+        `query($businessId: ID!) {
+          repairSessions(businessId: $businessId, limit: 100) {
             id
             sessionNumber
             customerRequest
@@ -145,7 +146,7 @@ export default function ClientRepairSessionsPage() {
             daysInProgress
           }
         }`,
-        {},
+        { businessId },
         token
       );
 
