@@ -62,8 +62,7 @@ export default function ClientsPage() {
   const fetchClients = async (token: string, currentUser: User) => {
     try {
       if (!token) {
-        console.warn("No token available, loading mock data");
-        loadMockClients();
+        console.warn("No token available");
         return;
       }
 
@@ -96,96 +95,18 @@ export default function ClientsPage() {
         console.log("Successfully fetched clients:", response.data.clients.length);
         setClients(response.data.clients);
       } else {
-        console.log("No clients found or query returned empty, loading mock data");
-        // Load mock data if no clients found or query doesn't exist
-        loadMockClients();
+        console.log("No clients found");
+        setClients([]);
       }
     } catch (error) {
       console.error("Error fetching clients:", error);
-      // Load mock data on error
-      loadMockClients();
+      setClients([]);
     }
   };
 
   const loadMockClients = () => {
-    const mockClients: Client[] = [
-      {
-        id: "1",
-        firstName: "John",
-        lastName: "Smith",
-        email: "john.smith@example.com",
-        phone: "+1 (555) 123-4567",
-        address: "123 Main Street",
-        city: "New York",
-        state: "NY",
-        zipCode: "10001",
-        dateOfBirth: "1985-03-15",
-        notes: "Regular customer",
-        businessId: "1",
-        createdAt: new Date("2024-01-15").toISOString(),
-      },
-      {
-        id: "2",
-        firstName: "Sarah",
-        lastName: "Johnson",
-        email: "sarah.johnson@example.com",
-        phone: "+1 (555) 234-5678",
-        address: "456 Oak Avenue",
-        city: "Los Angeles",
-        state: "CA",
-        zipCode: "90001",
-        dateOfBirth: "1990-07-22",
-        notes: "VIP customer",
-        businessId: "1",
-        createdAt: new Date("2024-02-20").toISOString(),
-      },
-      {
-        id: "3",
-        firstName: "Michael",
-        lastName: "Chen",
-        email: "michael.chen@example.com",
-        phone: "+1 (555) 345-6789",
-        address: "789 Pine Road",
-        city: "Chicago",
-        state: "IL",
-        zipCode: "60601",
-        dateOfBirth: "1988-11-10",
-        notes: "Referred by John Smith",
-        businessId: "1",
-        createdAt: new Date("2024-03-10").toISOString(),
-      },
-      {
-        id: "4",
-        firstName: "Emily",
-        lastName: "Davis",
-        email: "emily.davis@example.com",
-        phone: "+1 (555) 456-7890",
-        address: "321 Elm Street",
-        city: "Houston",
-        state: "TX",
-        zipCode: "77001",
-        dateOfBirth: "1992-05-18",
-        notes: "New customer",
-        businessId: "1",
-        createdAt: new Date("2024-03-25").toISOString(),
-      },
-      {
-        id: "5",
-        firstName: "Robert",
-        lastName: "Wilson",
-        email: "robert.wilson@example.com",
-        phone: "+1 (555) 567-8901",
-        address: "654 Maple Drive",
-        city: "Phoenix",
-        state: "AZ",
-        zipCode: "85001",
-        dateOfBirth: "1980-09-30",
-        notes: "Corporate account",
-        businessId: "1",
-        createdAt: new Date("2024-04-05").toISOString(),
-      },
-    ];
-    setClients(mockClients);
+    // Mock data removed - only using GraphQL queries
+    setClients([]);
   };
 
   const handleLogout = () => {
