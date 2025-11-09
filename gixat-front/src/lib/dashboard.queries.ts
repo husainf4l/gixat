@@ -448,3 +448,25 @@ export const GET_NOTIFICATION_STATS_QUERY = `
     }
   }
 `;
+
+/**
+ * CREATE REPAIR SESSION MUTATION
+ * Creates a new repair session for a car
+ */
+export const CREATE_REPAIR_SESSION_MUTATION = `
+  mutation($input: CreateRepairSessionInput!) {
+    createRepairSession(input: $input) {
+      id
+      sessionNumber
+      customerRequest
+      problemDescription
+      status
+      priority
+      expectedDeliveryDate
+      carId
+      businessId
+      createdAt
+      displayName
+    }
+  }
+`;

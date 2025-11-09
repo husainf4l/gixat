@@ -66,6 +66,12 @@ export default function SetupGaragePage() {
         return;
       }
 
+      console.log("Setup Garage - Token debug:", {
+        hasToken: !!token,
+        tokenLength: token?.length,
+        tokenStart: token?.substring(0, 30),
+      });
+
       // Create garage via GraphQL mutation using CreateBusinessInput
       const response = await graphqlRequest<{ createGarage: { id: string } }>(
         `mutation($input: CreateBusinessInput!) {
@@ -104,11 +110,18 @@ export default function SetupGaragePage() {
 
       if (response.data?.createGarage) {
         // Garage created successfully, redirect to dashboard
+        console.log("Garage created successfully:", response.data.createGarage);
         router.push("/dashboard");
       } else if (response.errors) {
         // Check if mutation doesn't exist, redirect anyway
-        console.warn("Garage mutation not available, proceeding to dashboard");
-        router.push("/dashboard");
+        console.warn("Garage mutation error or not available, error details:", response.errors[0]?.message);
+        if (response.errors[0]?.message === "Unauthorized") {
+          setError("Your session has expired. Please login again.");
+          setTimeout(() => router.push("/auth/login"), 2000);
+        } else {
+          // For other errors, still proceed
+          router.push("/dashboard");
+        }
       }
     } catch (err) {
       console.error("Error creating garage:", err);

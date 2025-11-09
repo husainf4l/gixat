@@ -58,8 +58,13 @@ export default function LoginPage() {
             if (garageResponse.data?.myGarages && garageResponse.data.myGarages.length > 0) {
               // Garage exists, go to dashboard
               router.push("/dashboard");
+            } else if (garageResponse.errors && garageResponse.errors[0]?.message === "Unauthorized") {
+              // Token is unauthorized, redirect back to login
+              storage.clearAuth();
+              setError("Session expired. Please login again.");
+              return;
             } else {
-              // No garage, go to setup
+              // No garage or error, go to setup
               router.push("/setup-garage");
             }
           } catch (err) {

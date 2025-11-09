@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { graphqlRequest } from "@/lib/graphql-client";
 import { storage } from "@/lib/storage";
 import AddCarToClient from "./AddCarToClient";
+import AddRepairSession from "./AddRepairSession";
 
 interface Car {
   id: string;
@@ -36,6 +37,8 @@ export default function ClientDetails({
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddCar, setShowAddCar] = useState(false);
+  const [showRepairSession, setShowRepairSession] = useState(false);
+  const [selectedCarForRepair, setSelectedCarForRepair] = useState<Car | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -89,6 +92,16 @@ export default function ClientDetails({
     setShowAddCar(false);
   };
 
+  const handleOpenRepairSession = (car: Car) => {
+    setSelectedCarForRepair(car);
+    setShowRepairSession(true);
+  };
+
+  const handleCloseRepairSession = () => {
+    setShowRepairSession(false);
+    setSelectedCarForRepair(null);
+  };
+
   return (
     <div className="space-y-6">
       {/* Client Info Header */}
@@ -127,6 +140,18 @@ export default function ClientDetails({
           clientName={clientName}
           onCarAdded={handleCarAdded}
           onClose={() => setShowAddCar(false)}
+        />
+      )}
+
+      {/* Add Repair Session Form */}
+      {showRepairSession && selectedCarForRepair && (
+        <AddRepairSession
+          carId={selectedCarForRepair.id}
+          carName={`${selectedCarForRepair.make} ${selectedCarForRepair.model} (${selectedCarForRepair.licensePlate})`}
+          onSessionAdded={() => {
+            handleCloseRepairSession();
+          }}
+          onClose={handleCloseRepairSession}
         />
       )}
 
@@ -209,10 +234,16 @@ export default function ClientDetails({
                     </span>
                   )}
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col gap-2">
                   <p className="text-xs text-gray-500">
                     Added {car.createdAt ? new Date(car.createdAt).toLocaleDateString() : "N/A"}
                   </p>
+                  <button
+                    onClick={() => handleOpenRepairSession(car)}
+                    className="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition"
+                  >
+                    🔧 Repair Session
+                  </button>
                 </div>
               </div>
             ))}
