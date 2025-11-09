@@ -43,10 +43,10 @@ export default function LoginPage() {
           // For BUSINESS users, check if they have a garage setup
           try {
             const garageResponse = await graphqlRequest<{ 
-              garages: Array<{ id: string; name: string }> 
+              myGarages: Array<{ id: string; name: string }> 
             }>(
               `query {
-                garages {
+                myGarages {
                   id
                   name
                 }
@@ -55,7 +55,7 @@ export default function LoginPage() {
               accessToken
             );
 
-            if (garageResponse.data?.garages && garageResponse.data.garages.length > 0) {
+            if (garageResponse.data?.myGarages && garageResponse.data.myGarages.length > 0) {
               // Garage exists, go to dashboard
               router.push("/dashboard");
             } else {

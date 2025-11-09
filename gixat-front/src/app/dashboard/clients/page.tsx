@@ -31,6 +31,7 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [businessId, setBusinessId] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -45,6 +46,9 @@ export default function ClientsPage() {
   });
 
   useEffect(() => {
+    // Only run once on component mount
+    if (isInitialized) return;
+
     const storedUser = storage.getUser();
     const accessToken = storage.getAccessToken();
 
@@ -52,6 +56,8 @@ export default function ClientsPage() {
       router.push("/auth/login");
       return;
     }
+
+    setIsInitialized(true);
 
     // Check if BUSINESS user has garage set up
     if (storedUser.type === "BUSINESS") {
@@ -62,16 +68,16 @@ export default function ClientsPage() {
       setPageLoading(false);
       fetchClients(accessToken, storedUser);
     }
-  }, [router]);
+  }, [router, isInitialized]);
 
   const checkGarageAndFetch = async (token: string, currentUser: User) => {
     try {
       // Check if user has a garage
       const garageResponse = await graphqlRequest<{ 
-        garages: Array<{ id: string }> 
+        myGarages: Array<{ id: string }> 
       }>(
         `query {
-          garages {
+          myGarages {
             id
           }
         }`,
@@ -79,7 +85,7 @@ export default function ClientsPage() {
         token
       );
 
-      if (!garageResponse.data?.garages || garageResponse.data.garages.length === 0) {
+      if (!garageResponse.data?.myGarages || garageResponse.data.myGarages.length === 0) {
         // No garage, redirect to setup
         router.push("/setup-garage");
         return;
