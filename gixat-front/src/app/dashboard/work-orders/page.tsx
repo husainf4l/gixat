@@ -13,15 +13,6 @@ interface JobCard {
   id: string;
   title: string;
   status: string;
-  plannedStartDate?: string;
-  plannedEndDate?: string;
-  actualStartDate?: string;
-  actualEndDate?: string;
-  estimatedHours?: number;
-  actualHours?: number;
-  progress?: number;
-  isOverdue?: boolean;
-  daysRemaining?: number;
   createdAt?: string;
 }
 
@@ -72,15 +63,6 @@ export default function WorkOrdersPage() {
               id
               title
               status
-              plannedStartDate
-              plannedEndDate
-              actualStartDate
-              actualEndDate
-              estimatedHours
-              actualHours
-              progress
-              isOverdue
-              daysRemaining
               createdAt
             }
           }`,
@@ -205,7 +187,7 @@ export default function WorkOrdersPage() {
           ) : (
             <>
               <table className="w-full">
-                <TableHeader columns={["Title", "Status", "Hours", "Progress", "Overdue"]} />
+                <TableHeader columns={["Title", "Status", "Created"]} />
                 <tbody className="divide-y divide-gray-200">
                   {jobCards.map((card) => (
                     <tr key={card.id} className="hover:bg-gray-50">
@@ -216,24 +198,7 @@ export default function WorkOrdersPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {card.actualHours || 0}/{card.estimatedHours || 0}h
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div
-                            className="bg-blue-600 h-2 rounded-full"
-                            style={{ width: `${card.progress || 0}%` }}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {card.isOverdue ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            Overdue
-                          </span>
-                        ) : (
-                          <span className="text-gray-600">{card.daysRemaining || 0} days left</span>
-                        )}
+                        {card.createdAt ? new Date(card.createdAt).toLocaleDateString() : "N/A"}
                       </td>
                     </tr>
                   ))}

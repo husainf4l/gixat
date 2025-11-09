@@ -13,9 +13,7 @@ interface Inspection {
   id: string;
   type: string;
   title: string;
-  findings?: string;
-  passed: boolean;
-  inspectionDate?: string;
+  createdAt?: string;
 }
 
 interface InspectionStats {
@@ -72,9 +70,7 @@ export default function InspectionsPage() {
               id
               type
               title
-              findings
-              passed
-              inspectionDate
+              createdAt
             }
           }`,
           {},
@@ -86,13 +82,6 @@ export default function InspectionsPage() {
 
           if (filters.type) {
             filtered = filtered.filter((insp) => insp.type === filters.type);
-          }
-          if (filters.status) {
-            filtered = filtered.filter((insp) => {
-              if (filters.status === "PASSED") return insp.passed;
-              if (filters.status === "FAILED") return !insp.passed;
-              return true;
-            });
           }
           if (filters.search) {
             filtered = filtered.filter((insp) =>
@@ -106,8 +95,8 @@ export default function InspectionsPage() {
         // Set default stats - calculated from inspections
         setStats({
           total: response.data?.inspections?.length || 0,
-          passed: response.data?.inspections?.filter(i => i.passed).length || 0,
-          failed: response.data?.inspections?.filter(i => !i.passed).length || 0,
+          passed: 0,
+          failed: 0,
           requiresFollowUp: 0,
           averageFindingsPerInspection: 0,
         });
@@ -160,9 +149,7 @@ export default function InspectionsPage() {
   const formatDate = (date?: string) => {
     if (!date) return "N/A";
     return new Date(date).toLocaleDateString();
-  };
-
-  return (
+  };  return (
     <DashboardLayout
       userRole="owner"
       userType={user.type}
@@ -263,20 +250,14 @@ export default function InspectionsPage() {
           ) : (
             <>
               <table className="w-full">
-                <TableHeader columns={["Type", "Title", "Date", "Status", "Findings"]} />
+                <TableHeader columns={["Type", "Title", "Created"]} />
                 <tbody className="divide-y divide-gray-200">
                   {inspections.map((insp) => (
                     <tr key={insp.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">{insp.type}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{insp.title}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">{formatDate(insp.inspectionDate)}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(insp.passed)}`}>
-                          {getStatusText(insp.passed)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                        {insp.findings || "No findings"}
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {insp.createdAt ? new Date(insp.createdAt).toLocaleDateString() : "N/A"}
                       </td>
                     </tr>
                   ))}

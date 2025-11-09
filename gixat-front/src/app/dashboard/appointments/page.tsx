@@ -76,16 +76,8 @@ export default function AppointmentsPage() {
               appointmentNumber
               title
               status
-              type
-              priority
               scheduledDate
               scheduledTime
-              estimatedDuration
-              actualStartTime
-              actualEndTime
-              isUpcoming
-              isOverdue
-              reminderSent
               createdAt
             }
           }`,

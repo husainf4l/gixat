@@ -22,9 +22,11 @@ export async function graphqlRequest<T>(
   }
 
   console.log("GraphQL Request Debug:", {
+    endpoint: GRAPHQL_ENDPOINT,
     hasToken: !!token,
     tokenPreview: token ? `${token.substring(0, 20)}...` : "NO_TOKEN",
-    query: query.substring(0, 100),
+    queryLength: query.length,
+    query: query,
     variables,
   });
 
@@ -48,10 +50,12 @@ export async function graphqlRequest<T>(
     });
 
     if (!response.ok) {
+      const errorMessage = data.errors?.[0]?.message || data.errors?.[0] || "Unknown error";
       console.error("GraphQL HTTP Error:", {
         status: response.status,
         statusText: response.statusText,
         body: data,
+        errorMessage,
       });
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -59,9 +63,11 @@ export async function graphqlRequest<T>(
     if (data.errors) {
       console.error("GraphQL Errors:", data.errors);
       data.errors.forEach((err: any) => {
+        console.error("  - Full Error:", JSON.stringify(err, null, 2));
         console.error("  - Message:", err.message);
         console.error("  - Path:", err.path);
         console.error("  - Locations:", err.locations);
+        console.error("  - Extensions:", err.extensions);
       });
     }
 
