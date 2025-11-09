@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function About() {
   return (
@@ -25,10 +26,10 @@ export default function About() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24">
             {/* Left Column - Text Content */}
             <div>
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8">About GIXAT</h1>
+              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-8">About <span style={{ color: '#1b75bb' }}>GIXAT</span></h1>
               
               <p className="text-base text-gray-700 leading-relaxed mb-6">
-                <span style={{ color: '#1b75bb' }} className="font-semibold">GIXAT</span> is an automotive workshop management platform designed to centralize and streamline daily operations. It brings work orders, service history, inventory control, team coordination, and financial tracking into one unified system, helping workshops operate with clarity and efficiency.
+                <span className="text-gray-900 font-semibold">GIXAT</span> is an automotive workshop management platform designed to centralize and streamline daily operations. It brings work orders, service history, inventory control, team coordination, and financial tracking into one unified system, helping workshops operate with clarity and efficiency.
               </p>
 
               <p className="text-base text-gray-700 leading-relaxed mb-8">
@@ -184,7 +185,7 @@ export default function About() {
         </div>
       </section>
 
-
+      <Footer />
     </div>
   );
 }

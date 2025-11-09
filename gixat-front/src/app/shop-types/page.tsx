@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function ShopTypes() {
   const shopTypes = [
@@ -234,6 +235,8 @@ export default function ShopTypes() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

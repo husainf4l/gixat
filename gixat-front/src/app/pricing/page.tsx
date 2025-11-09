@@ -1,142 +1,150 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function Pricing() {
+  const plans = [
+    {
+      title: "Starter",
+      description: "For small workshops starting their digital workflow.",
+      features: [
+        "Job Cards & Work Orders",
+        "Basic Vehicle Service History",
+        "Simple Inventory Tracking",
+        "One Branch Only",
+        "Email Support"
+      ],
+      button: "Get Started",
+      highlighted: false
+    },
+    {
+      title: "Pro",
+      description: "For growing workshops that need stronger control and reporting.",
+      features: [
+        "Full Work Order Management",
+        "Complete Vehicle History Records",
+        "Advanced Inventory & Supplier Tracking",
+        "Analytics & Performance Reports",
+        "Multi-Staff Access & Roles",
+        "Priority Support"
+      ],
+      button: "Upgrade",
+      highlighted: true
+    },
+    {
+      title: "Enterprise",
+      description: "For large workshops or multi-branch operations.",
+      features: [
+        "Multi-Branch & Multi-Location Support",
+        "Centralized Reporting",
+        "Custom Roles & Permissions",
+        "API & System Integrations",
+        "Dedicated Success Manager",
+        "Custom Deployment Options"
+      ],
+      button: "Contact Sales",
+      highlighted: false
+    }
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-50 to-white">
+      {/* Pricing Section */}
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6">
-              Simple, Transparent <span style={{ color: '#1b75bb' }}>Pricing</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Choose the perfect plan for your workshop. Scale up as you grow. No hidden fees.
+          {/* Section Header */}
+          <div className="text-center mb-20">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Pricing Plans for <span style={{ color: '#1b75bb' }}>GIXAT</span></h1>
+            <p className="text-base text-gray-600 max-w-2xl mx-auto">
+              Choose the right plan for your workshop. Scale up as you grow.
             </p>
           </div>
-        </div>
-      </section>
 
-      {/* Pricing Cards */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Starter */}
-            <div className="p-10 bg-white border border-gray-200 rounded-2xl hover:shadow-lg transition-all">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
-              <p className="text-gray-600 mb-8">Perfect for small workshops just getting started</p>
-              
-              <div className="mb-8">
-                <div className="text-5xl font-black text-gray-900">
-                  $99<span className="text-xl text-gray-600">/month</span>
+          {/* Pricing Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            {plans.map((plan, idx) => (
+              <div
+                key={idx}
+                className={`flex flex-col h-full rounded-lg border transition-all ${
+                  plan.highlighted
+                    ? "border-blue-300 shadow-sm bg-white"
+                    : "border-gray-200 shadow-sm bg-white hover:shadow-md"
+                }`}
+                style={{ borderWidth: "1px" }}
+              >
+                {/* Card Header */}
+                <div className="p-6 border-b border-gray-100">
+                  <h3 className="text-base font-semibold text-gray-900 mb-2">
+                    {plan.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {plan.description}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Billed annually: $990/year</p>
-              </div>
 
-              <button className="w-full py-3 px-6 border border-gray-300 rounded-lg text-gray-900 font-semibold hover:bg-gray-50 transition-colors mb-8">
-                Get Started
-              </button>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-900">What's included:</h4>
-                {[
-                  "Up to 5 users",
-                  "Work order management",
-                  "Customer database",
-                  "Basic reporting",
-                  "Mobile app access",
-                  "Email support"
-                ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-green-600 font-bold">✓</span>
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pro - Most Popular */}
-            <div className="relative p-10 bg-white border border-blue-300 rounded-2xl ring-1 ring-blue-100 shadow-lg">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <span className="inline-block px-4 py-1 bg-blue-600 rounded-full text-sm font-bold text-white">Most Popular</span>
-              </div>
-
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Pro</h3>
-              <p className="text-gray-600 mb-8">For growing workshops with multiple technicians</p>
-              
-              <div className="mb-8">
-                <div className="text-5xl font-black text-gray-900">
-                  $299<span className="text-xl text-gray-600">/month</span>
+                {/* Features */}
+                <div className="flex-grow p-6">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <svg
+                          className="w-4 h-4 mt-0.5 flex-shrink-0"
+                          style={{ color: "#1b75bb" }}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        <span className="text-sm text-gray-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Billed annually: $2,990/year (Save $588)</p>
-              </div>
 
-              <button className="w-full py-3 px-6 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-8">
-                Start Free Trial
-              </button>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-900">Everything in Starter, plus:</h4>
-                {[
-                  "Up to 25 users",
-                  "Inventory management",
-                  "Advanced analytics",
-                  "API access",
-                  "Customer portal",
-                  "Phone support",
-                  "Online appointment scheduling",
-                  "Multi-location support"
-                ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-blue-600 font-bold">✓</span>
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Enterprise */}
-            <div className="p-10 bg-white border border-gray-200 rounded-2xl hover:shadow-lg transition-all">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-              <p className="text-gray-600 mb-8">For large organizations with advanced needs</p>
-              
-              <div className="mb-8">
-                <div className="text-5xl font-black text-gray-900">
-                  Custom<span className="text-xl text-gray-600 block">pricing</span>
+                {/* Button */}
+                <div className="p-6 border-t border-gray-100">
+                  <button
+                    className={`w-full py-2 px-4 rounded text-sm font-medium transition-colors ${
+                      plan.highlighted
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "border border-gray-300 text-gray-900 hover:bg-gray-50"
+                    }`}
+                    style={
+                      plan.highlighted
+                        ? { backgroundColor: "#1b75bb" }
+                        : {}
+                    }
+                  >
+                    {plan.button}
+                  </button>
                 </div>
-                <p className="text-sm text-gray-600 mt-2">Contact us for a tailored quote</p>
               </div>
+            ))}
+          </div>
 
-              <button className="w-full py-3 px-6 border border-gray-300 rounded-lg text-gray-900 font-semibold hover:bg-gray-50 transition-colors mb-8">
-                Contact Sales
-              </button>
-
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-900">Everything in Pro, plus:</h4>
-                {[
-                  "Unlimited users",
-                  "Unlimited locations",
-                  "Custom integrations",
-                  "Advanced security",
-                  "Dedicated account manager",
-                  "Priority support",
-                  "Custom reporting",
-                  "SLA guarantee"
-                ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-gray-600 font-bold">✓</span>
-                    <span className="text-gray-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* Footer CTA */}
+          <div className="text-center pt-8 border-t border-gray-100">
+            <p className="text-sm text-gray-600 mb-4">
+              Need help choosing a plan? We're here to guide you.
+            </p>
+            <Link
+              href="/contact-us"
+              className="inline-block text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              style={{ color: "#1b75bb" }}
+            >
+              Talk to Us →
+            </Link>
           </div>
         </div>
       </section>
-
       {/* Feature Comparison */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto px-8">
@@ -233,6 +241,8 @@ export default function Pricing() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function ContactUs() {
   return (
@@ -224,6 +225,8 @@ export default function ContactUs() {
           </Link>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
