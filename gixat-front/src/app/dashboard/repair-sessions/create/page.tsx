@@ -71,23 +71,33 @@ export default function CreateRepairSessionPage() {
         return;
       }
 
-      const businessId = user.id || user.businessId;
-      console.log("Fetching with businessId:", businessId, "user.id:", user.id);
+      console.log("Starting to fetch clients and cars...");
 
-      // Fetch both in a combined query for better performance
-      const response = await graphqlRequest<{
-        clientsByBusiness: Client[];
-        carsByBusiness: Car[];
+      // Try fetching all clients first (like the clients page does)
+      const clientsResponse = await graphqlRequest<{
+        clients: Client[];
       }>(
-        `query($businessId: ID!) {
-          clientsByBusiness(businessId: $businessId) {
+        `query {
+          clients {
             id
             firstName
             lastName
             email
             phone
           }
-          carsByBusiness(businessId: $businessId) {
+        }`,
+        {},
+        token
+      );
+
+      console.log("All clients response:", clientsResponse);
+
+      // Try fetching all cars (without filter)
+      const carsResponse = await graphqlRequest<{
+        cars: Car[];
+      }>(
+        `query {
+          cars {
             id
             licensePlate
             make
@@ -96,28 +106,34 @@ export default function CreateRepairSessionPage() {
             clientId
           }
         }`,
-        { businessId },
+        {},
         token
       );
 
-      console.log("Combined response:", response);
+      console.log("All cars response:", carsResponse);
 
-      if (response.errors && response.errors.length > 0) {
-        const errorMsg = response.errors.map((e) => e.message).join(", ");
-        console.error("GraphQL errors:", errorMsg);
-        setError("Failed to load data: " + errorMsg);
+      if (clientsResponse.errors && clientsResponse.errors.length > 0) {
+        const errorMsg = clientsResponse.errors.map((e) => e.message).join(", ");
+        console.error("Clients GraphQL errors:", errorMsg);
+        setError("Failed to load clients: " + errorMsg);
         return;
       }
 
-      if (response.data?.clientsByBusiness) {
-        console.log("Setting clients:", response.data.clientsByBusiness.length, response.data.clientsByBusiness);
-        setClients(response.data.clientsByBusiness);
+      if (carsResponse.errors && carsResponse.errors.length > 0) {
+        const errorMsg = carsResponse.errors.map((e) => e.message).join(", ");
+        console.error("Cars GraphQL errors:", errorMsg);
+        setError("Failed to load vehicles: " + errorMsg);
+        return;
       }
 
-      if (response.data?.carsByBusiness) {
-        console.log("Setting cars:", response.data.carsByBusiness.length, response.data.carsByBusiness);
-        setCars(response.data.carsByBusiness);
-      }
+      const allClients = clientsResponse.data?.clients || [];
+      const allCars = carsResponse.data?.cars || [];
+
+      console.log("Setting clients:", allClients.length, allClients);
+      console.log("Setting cars:", allCars.length, allCars);
+
+      setClients(allClients);
+      setCars(allCars);
     } catch (err) {
       console.error("Error fetching data:", err);
       setError("Exception: " + String(err));
