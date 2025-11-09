@@ -40,13 +40,13 @@ export default function LoginPage() {
 
         // Redirect based on user type
         if (user.type === "BUSINESS") {
-          // For BUSINESS users, check if they have a business setup
+          // For BUSINESS users, check if they have a garage setup
           try {
-            const businessResponse = await graphqlRequest<{ 
-              businesses: Array<{ id: string; name: string }> 
+            const garageResponse = await graphqlRequest<{ 
+              garages: Array<{ id: string; name: string }> 
             }>(
               `query {
-                businesses {
+                garages {
                   id
                   name
                 }
@@ -55,17 +55,17 @@ export default function LoginPage() {
               accessToken
             );
 
-            if (businessResponse.data?.businesses && businessResponse.data.businesses.length > 0) {
-              // Business exists, go to dashboard
+            if (garageResponse.data?.garages && garageResponse.data.garages.length > 0) {
+              // Garage exists, go to dashboard
               router.push("/dashboard");
             } else {
-              // No business, go to setup
-              router.push("/setup-business");
+              // No garage, go to setup
+              router.push("/setup-garage");
             }
           } catch (err) {
-            console.error("Error checking business:", err);
-            // Default to setup business on error
-            router.push("/setup-business");
+            console.error("Error checking garage:", err);
+            // Default to setup garage on error
+            router.push("/setup-garage");
           }
         } else if (user.type === "CLIENT") {
           router.push("/user-dashboard");

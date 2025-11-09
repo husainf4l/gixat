@@ -70,33 +70,8 @@ export default function SignupPage() {
 
         // Redirect based on user type
         if (user.type === "BUSINESS") {
-          // For BUSINESS users, check if they have a business setup
-          try {
-            const businessResponse = await graphqlRequest<{ 
-              businesses: Array<{ id: string; name: string }> 
-            }>(
-              `query {
-                businesses {
-                  id
-                  name
-                }
-              }`,
-              {},
-              accessToken
-            );
-
-            if (businessResponse.data?.businesses && businessResponse.data.businesses.length > 0) {
-              // Business exists, go to dashboard
-              router.push("/dashboard");
-            } else {
-              // No business, go to setup
-              router.push("/setup-business");
-            }
-          } catch (err) {
-            console.error("Error checking business:", err);
-            // Default to setup business on error
-            router.push("/setup-business");
-          }
+          // For BUSINESS users, redirect to setup garage first
+          router.push("/setup-garage");
         } else {
           // For CLIENT type, go to user dashboard
           router.push("/user-dashboard");
