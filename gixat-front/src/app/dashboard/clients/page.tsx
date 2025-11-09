@@ -10,8 +10,16 @@ import EmptyState from "@/components/EmptyState";
 
 interface Client {
   id: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   phone: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  dateOfBirth?: string;
+  notes?: string;
   businessId?: string;
   createdAt: string;
 }
@@ -23,8 +31,16 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    dateOfBirth: "",
+    notes: "",
   });
 
   useEffect(() => {
@@ -58,8 +74,16 @@ export default function ClientsPage() {
         `query {
           clients {
             id
+            firstName
+            lastName
             email
             phone
+            address
+            city
+            state
+            zipCode
+            dateOfBirth
+            notes
             businessId
             createdAt
           }
@@ -87,36 +111,76 @@ export default function ClientsPage() {
     const mockClients: Client[] = [
       {
         id: "1",
+        firstName: "John",
+        lastName: "Smith",
         email: "john.smith@example.com",
         phone: "+1 (555) 123-4567",
+        address: "123 Main Street",
+        city: "New York",
+        state: "NY",
+        zipCode: "10001",
+        dateOfBirth: "1985-03-15",
+        notes: "Regular customer",
         businessId: "1",
         createdAt: new Date("2024-01-15").toISOString(),
       },
       {
         id: "2",
+        firstName: "Sarah",
+        lastName: "Johnson",
         email: "sarah.johnson@example.com",
         phone: "+1 (555) 234-5678",
+        address: "456 Oak Avenue",
+        city: "Los Angeles",
+        state: "CA",
+        zipCode: "90001",
+        dateOfBirth: "1990-07-22",
+        notes: "VIP customer",
         businessId: "1",
         createdAt: new Date("2024-02-20").toISOString(),
       },
       {
         id: "3",
+        firstName: "Michael",
+        lastName: "Chen",
         email: "michael.chen@example.com",
         phone: "+1 (555) 345-6789",
+        address: "789 Pine Road",
+        city: "Chicago",
+        state: "IL",
+        zipCode: "60601",
+        dateOfBirth: "1988-11-10",
+        notes: "Referred by John Smith",
         businessId: "1",
         createdAt: new Date("2024-03-10").toISOString(),
       },
       {
         id: "4",
+        firstName: "Emily",
+        lastName: "Davis",
         email: "emily.davis@example.com",
         phone: "+1 (555) 456-7890",
+        address: "321 Elm Street",
+        city: "Houston",
+        state: "TX",
+        zipCode: "77001",
+        dateOfBirth: "1992-05-18",
+        notes: "New customer",
         businessId: "1",
         createdAt: new Date("2024-03-25").toISOString(),
       },
       {
         id: "5",
+        firstName: "Robert",
+        lastName: "Wilson",
         email: "robert.wilson@example.com",
         phone: "+1 (555) 567-8901",
+        address: "654 Maple Drive",
+        city: "Phoenix",
+        state: "AZ",
+        zipCode: "85001",
+        dateOfBirth: "1980-09-30",
+        notes: "Corporate account",
         businessId: "1",
         createdAt: new Date("2024-04-05").toISOString(),
       },
@@ -129,7 +193,7 @@ export default function ClientsPage() {
     router.push("/auth/login");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -147,23 +211,65 @@ export default function ClientsPage() {
         return;
       }
 
-      // Create client via GraphQL mutation - use GraphQL fields
-      const newClient: Client = {
-        id: Date.now().toString(),
-        email: formData.email,
-        phone: formData.phone,
-        businessId: user?.id || "1",
-        createdAt: new Date().toISOString(),
-      };
+      const businessId = user?.id || "1";
 
-      // Add to local state
-      setClients((prev) => [newClient, ...prev]);
+      // Create client via GraphQL mutation
+      const response = await graphqlRequest<{ createClient: Client }>(
+        `mutation($input: CreateClientInput!) {
+          createClient(input: $input) {
+            id
+            firstName
+            lastName
+            email
+            phone
+            address
+            city
+            state
+            zipCode
+            dateOfBirth
+            notes
+            businessId
+            createdAt
+          }
+        }`,
+        {
+          input: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address || null,
+            city: formData.city || null,
+            state: formData.state || null,
+            zipCode: formData.zipCode || null,
+            dateOfBirth: formData.dateOfBirth || null,
+            notes: formData.notes || null,
+            businessId,
+          },
+        },
+        token
+      );
+
+      if (response.data?.createClient) {
+        const newClient = response.data.createClient;
+        setClients((prev) => [newClient, ...prev]);
+        alert("Client created successfully!");
+      }
+      
+      // Reset form
       setFormData({
+        firstName: "",
+        lastName: "",
         email: "",
         phone: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        dateOfBirth: "",
+        notes: "",
       });
       setShowForm(false);
-      alert("Client created successfully!");
     } catch (error) {
       console.error("Error creating client:", error);
       alert("Error creating client. Please try again.");
@@ -214,6 +320,30 @@ export default function ClientsPage() {
             <form onSubmit={handleCreateClient} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="John"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    required
+                    placeholder="Smith"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                   <input
                     type="email"
@@ -221,7 +351,7 @@ export default function ClientsPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    placeholder="client@example.com"
+                    placeholder="john@example.com"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -234,6 +364,71 @@ export default function ClientsPage() {
                     onChange={handleInputChange}
                     required
                     placeholder="+1 (555) 000-0000"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    placeholder="123 Main Street"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    placeholder="New York"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    placeholder="NY"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+                  <input
+                    type="text"
+                    name="zipCode"
+                    value={formData.zipCode}
+                    onChange={handleInputChange}
+                    placeholder="10001"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleInputChange}
+                    placeholder="Any additional notes..."
+                    rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -269,22 +464,30 @@ export default function ClientsPage() {
             />
           </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Name</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Email</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Phone</th>
-                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Business ID</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">City</th>
+                  <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Date of Birth</th>
                   <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {clients.map((client) => (
                   <tr key={client.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{client.email}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {client.firstName} {client.lastName}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{client.email}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">{client.phone}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{client.businessId}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{client.city || "N/A"}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {client.dateOfBirth ? new Date(client.dateOfBirth).toLocaleDateString() : "N/A"}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {new Date(client.createdAt).toLocaleDateString()}
                     </td>
