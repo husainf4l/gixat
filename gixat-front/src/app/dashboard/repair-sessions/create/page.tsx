@@ -68,6 +68,7 @@ export default function CreateRepairSessionPage() {
       if (!token) return;
 
       const businessId = user.id || user.businessId;
+      console.log("Fetching with businessId:", businessId);
 
       // Fetch clients
       const clientsResponse = await graphqlRequest<{ clientsByBusiness: Client[] }>(
@@ -83,6 +84,8 @@ export default function CreateRepairSessionPage() {
         { businessId },
         token
       );
+
+      console.log("Clients response:", clientsResponse);
 
       // Fetch cars
       const carsResponse = await graphqlRequest<{ carsByBusiness: Car[] }>(
@@ -100,16 +103,26 @@ export default function CreateRepairSessionPage() {
         token
       );
 
+      console.log("Cars response:", carsResponse);
+
       if (clientsResponse.data?.clientsByBusiness) {
+        console.log("Setting clients:", clientsResponse.data.clientsByBusiness.length);
         setClients(clientsResponse.data.clientsByBusiness);
+      } else if (clientsResponse.errors) {
+        console.error("Clients error:", clientsResponse.errors);
+        setError("Failed to load clients: " + clientsResponse.errors[0]?.message);
       }
 
       if (carsResponse.data?.carsByBusiness) {
+        console.log("Setting cars:", carsResponse.data.carsByBusiness.length);
         setCars(carsResponse.data.carsByBusiness);
+      } else if (carsResponse.errors) {
+        console.error("Cars error:", carsResponse.errors);
+        setError("Failed to load vehicles: " + carsResponse.errors[0]?.message);
       }
     } catch (err) {
       console.error("Error fetching data:", err);
-      setError("Failed to load clients and vehicles");
+      setError("Failed to load clients and vehicles: " + String(err));
     } finally {
       setLoading(false);
     }
@@ -230,8 +243,17 @@ export default function CreateRepairSessionPage() {
         title="Create Repair Session"
         subtitle="Loading..."
       >
-        <div className="p-6 text-center">
-          <p className="text-gray-600">Loading form data...</p>
+        <div className="p-6 space-y-4">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Loading form data...</p>
+            <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+          </div>
+          {error && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+              <p className="font-medium mb-1">Error loading data:</p>
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
         </div>
       </DashboardLayout>
     );
@@ -266,6 +288,32 @@ export default function CreateRepairSessionPage() {
             {success}
           </div>
         )}
+
+        {/* Debug Info */}
+        {clients.length === 0 && !loading && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+            <p className="font-medium mb-1">⚠️ No clients found</p>
+            <p className="text-sm">Please create clients first before creating repair sessions.</p>
+            <button
+              onClick={() => router.push("/dashboard/clients")}
+              className="mt-2 px-4 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700"
+            >
+              Go to Clients
+            </button>
+          </div>
+        )}
+
+        {clients.length > 0 && cars.length === 0 && !loading && (
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+            <p className="font-medium mb-1">⚠️ No vehicles found</p>
+            <p className="text-sm">Please add vehicles to your clients before creating repair sessions.</p>
+          </div>
+        )}
+
+        {/* Show loaded counts for debugging */}
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+          ℹ️ Loaded: {clients.length} client{clients.length !== 1 ? 's' : ''}, {cars.length} vehicle{cars.length !== 1 ? 's' : ''}
+        </div>
 
         {/* Main Form Container */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-6">
