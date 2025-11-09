@@ -13,7 +13,6 @@ interface JobCard {
   id: string;
   title: string;
   status: string;
-  priority?: string;
   plannedStartDate?: string;
   plannedEndDate?: string;
   actualStartDate?: string;
@@ -34,7 +33,6 @@ export default function WorkOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     status: "",
-    priority: "",
     search: "",
   });
 
@@ -67,14 +65,14 @@ export default function WorkOrdersPage() {
           return;
         }
 
-        // Use simpler query without parameters
+        // Fetch job cards with businessId parameter (using user id or default "1")
+        const businessId = user.id || "1";
         const response = await graphqlRequest<{ jobCards: JobCard[] }>(
-          `query {
-            jobCards {
+          `query($businessId: ID!) {
+            jobCards(businessId: $businessId) {
               id
               title
               status
-              priority
               plannedStartDate
               plannedEndDate
               actualStartDate
@@ -87,7 +85,7 @@ export default function WorkOrdersPage() {
               createdAt
             }
           }`,
-          {},
+          { businessId },
           token
         );
 
@@ -97,9 +95,6 @@ export default function WorkOrdersPage() {
           // Apply filters
           if (filters.status) {
             filtered = filtered.filter((card) => card.status === filters.status);
-          }
-          if (filters.priority) {
-            filtered = filtered.filter((card) => card.priority === filters.priority);
           }
           if (filters.search) {
             filtered = filtered.filter((card) =>
@@ -148,15 +143,6 @@ export default function WorkOrdersPage() {
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
-  const getPriorityColor = (priority?: string) => {
-    const colors: Record<string, string> = {
-      LOW: "text-green-600",
-      MEDIUM: "text-yellow-600",
-      HIGH: "text-red-600",
-    };
-    return colors[priority || "MEDIUM"] || "text-gray-600";
-  };
-
   return (
     <DashboardLayout
       userRole="owner"
@@ -180,10 +166,10 @@ export default function WorkOrdersPage() {
 
         {/* Filters */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
-              placeholder="Search by job ID or title..."
+              placeholder="Search by job title..."
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -198,16 +184,6 @@ export default function WorkOrdersPage() {
               <option value="IN_PROGRESS">In Progress</option>
               <option value="COMPLETED">Completed</option>
               <option value="CANCELLED">Cancelled</option>
-            </select>
-            <select
-              value={filters.priority}
-              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Priorities</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
             </select>
             <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
               🔍 Search
@@ -230,7 +206,7 @@ export default function WorkOrdersPage() {
           ) : (
             <>
               <table className="w-full">
-                <TableHeader columns={["Title", "Status", "Priority", "Hours", "Progress", "Overdue"]} />
+                <TableHeader columns={["Title", "Status", "Hours", "Progress", "Overdue"]} />
                 <tbody className="divide-y divide-gray-200">
                   {jobCards.map((card) => (
                     <tr key={card.id} className="hover:bg-gray-50">
@@ -239,9 +215,6 @@ export default function WorkOrdersPage() {
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(card.status)}`}>
                           {card.status}
                         </span>
-                      </td>
-                      <td className={`px-6 py-4 text-sm font-medium ${getPriorityColor(card.priority)}`}>
-                        {card.priority || "MEDIUM"}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {card.actualHours || 0}/{card.estimatedHours || 0}h
