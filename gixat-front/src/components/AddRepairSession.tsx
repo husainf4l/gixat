@@ -91,7 +91,6 @@ export default function AddRepairSession({
             problemDescription
             status
             priority
-            expectedDeliveryDate
             carId
             businessId
             createdAt
