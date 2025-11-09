@@ -177,6 +177,17 @@ export default function RepairSessionsPage() {
       subtitle="Manage all repair and maintenance sessions"
     >
       <div className="p-6 space-y-6">
+        {/* Create Session Button */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-gray-900">Repair Sessions</h2>
+          <button
+            onClick={() => router.push("/dashboard/repair-sessions/create")}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+          >
+            + Create Repair Session
+          </button>
+        </div>
+
         {/* Filters */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
