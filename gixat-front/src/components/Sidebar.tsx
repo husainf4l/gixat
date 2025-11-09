@@ -17,6 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Users", href: "/dashboard/users", icon: "👥", roles: ["admin"] },
   { label: "Garages", href: "/dashboard/garages", icon: "🏢", roles: ["admin"] },
   { label: "Clients", href: "/dashboard/clients", icon: "👨‍💼", roles: ["admin", "owner"] },
+  { label: "Repair Sessions", href: "/dashboard/repair-sessions", icon: "🔧", roles: ["admin", "owner"] },
   { label: "My Cars", href: "/dashboard/my-cars", icon: "🚗", roles: ["client"] },
   { label: "Service History", href: "/dashboard/service-history", icon: "📜", roles: ["client"] },
   { label: "Reminders", href: "/dashboard/reminders", icon: "⏰", roles: ["client"] },
