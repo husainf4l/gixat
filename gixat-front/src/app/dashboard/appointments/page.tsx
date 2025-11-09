@@ -68,7 +68,8 @@ export default function AppointmentsPage() {
           return;
         }
 
-        // Fetch appointments - requires filter argument
+        // Fetch appointments - requires filter with businessId
+        const businessId = user.id || "1";
         const response = await graphqlRequest<{ appointments: Appointment[] }>(
           `query($filter: AppointmentFilterInput!) {
             appointments(filter: $filter) {
@@ -81,7 +82,7 @@ export default function AppointmentsPage() {
               createdAt
             }
           }`,
-          { filter: {} },
+          { filter: { businessId } },
           token
         );
 

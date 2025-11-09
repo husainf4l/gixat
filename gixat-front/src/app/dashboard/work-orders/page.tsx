@@ -56,7 +56,8 @@ export default function WorkOrdersPage() {
           return;
         }
 
-        // Fetch job cards - requires filter argument
+        // Fetch job cards - requires filter with businessId
+        const businessId = user.id || "1";
         const response = await graphqlRequest<{ jobCards: JobCard[] }>(
           `query($filter: JobCardFilterInput!) {
             jobCards(filter: $filter) {
@@ -66,7 +67,7 @@ export default function WorkOrdersPage() {
               createdAt
             }
           }`,
-          { filter: {} },
+          { filter: { businessId } },
           token
         );
 

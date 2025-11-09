@@ -63,7 +63,8 @@ export default function InspectionsPage() {
         
         if (!token) return;
 
-        // Fetch inspections - requires filter argument
+        // Fetch inspections - requires filter with businessId
+        const businessId = user.id || "1";
         const response = await graphqlRequest<{ inspections: Inspection[] }>(
           `query($filter: InspectionFilterInput!) {
             inspections(filter: $filter) {
@@ -73,7 +74,7 @@ export default function InspectionsPage() {
               createdAt
             }
           }`,
-          { filter: {} },
+          { filter: { businessId } },
           token
         );
 

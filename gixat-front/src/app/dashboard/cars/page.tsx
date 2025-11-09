@@ -59,9 +59,10 @@ export default function CarsPage() {
         const token = storage.getAccessToken();
         if (!token) return;
 
+        const businessId = user.id || "1";
         const response = await graphqlRequest<{ carsByBusiness: Car[] }>(
           GET_BUSINESS_CARS_QUERY,
-          {},
+          { businessId },
           token
         );
 
