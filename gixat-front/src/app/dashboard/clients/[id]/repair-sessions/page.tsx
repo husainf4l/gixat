@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { storage } from "@/lib/storage";
@@ -61,11 +61,26 @@ export default function ClientRepairSessionsPage() {
   const [user, setUser] = useState<any>(null);
   const [clientName, setClientName] = useState("");
   const [cars, setCars] = useState<Car[]>([]);
-  const [sessions, setSessions] = useState<RepairSession[]>([]);
+  const [allSessions, setAllSessions] = useState<RepairSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [filterCar, setFilterCar] = useState("ALL");
   const [filterStatus, setFilterStatus] = useState("ALL");
+
+  // Compute filtered sessions without modifying state
+  const displayedSessions = useMemo(() => {
+    let filtered = allSessions;
+
+    if (filterCar !== "ALL") {
+      filtered = filtered.filter((s) => s.carId === filterCar);
+    }
+
+    if (filterStatus !== "ALL") {
+      filtered = filtered.filter((s) => s.status === filterStatus);
+    }
+
+    return filtered;
+  }, [allSessions, filterCar, filterStatus]);
 
   useEffect(() => {
     const token = storage.getAccessToken();
@@ -81,10 +96,6 @@ export default function ClientRepairSessionsPage() {
     if (!user) return;
     fetchClientData();
   }, [user]);
-
-  useEffect(() => {
-    filterSessions();
-  }, [filterCar, filterStatus, sessions]);
 
   const fetchClientData = async () => {
     try {
@@ -160,27 +171,13 @@ export default function ClientRepairSessionsPage() {
       const clientSessions = allSessions.filter((s) => clientCarIds.includes(s.carId));
       console.log("Filtered client sessions:", clientSessions.length);
 
-      setSessions(clientSessions);
+      setAllSessions(clientSessions);
     } catch (err) {
       console.error("Error fetching client data:", err);
       setError("Failed to load client repair sessions");
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterSessions = () => {
-    let filtered = sessions;
-
-    if (filterCar !== "ALL") {
-      filtered = filtered.filter((s) => s.carId === filterCar);
-    }
-
-    if (filterStatus !== "ALL") {
-      filtered = filtered.filter((s) => s.status === filterStatus);
-    }
-
-    setSessions(filtered);
   };
 
   const handleLogout = () => {
@@ -224,7 +221,7 @@ export default function ClientRepairSessionsPage() {
               <p className="text-sm text-gray-600">{cars.length} vehicle(s) registered</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-blue-600">{sessions.length}</p>
+              <p className="text-2xl font-bold text-blue-600">{displayedSessions.length}</p>
               <p className="text-sm text-gray-600">repair sessions</p>
             </div>
           </div>
@@ -284,7 +281,7 @@ export default function ClientRepairSessionsPage() {
             <div className="p-8 text-center">
               <p className="text-gray-600">Loading repair sessions...</p>
             </div>
-          ) : sessions.length === 0 ? (
+          ) : displayedSessions.length === 0 ? (
             <div className="p-8 text-center">
               <p className="text-gray-600 mb-3">No repair sessions found</p>
               <p className="text-sm text-gray-500">
@@ -320,7 +317,7 @@ export default function ClientRepairSessionsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {sessions.map((session) => {
+                  {displayedSessions.map((session) => {
                     const car = cars.find((c) => c.id === session.carId);
                     return (
                       <tr key={session.id} className="hover:bg-gray-50 transition">
