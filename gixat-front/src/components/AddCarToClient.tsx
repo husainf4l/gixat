@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { graphqlRequest } from "@/lib/graphql-client";
 import { storage } from "@/lib/storage";
+import { User } from "@/lib/auth.types";
 
 interface AddCarToClientProps {
   clientId: string;
@@ -17,9 +18,32 @@ interface CarFormData {
   model: string;
   year: string;
   color: string;
+  fuelType: string;
+  transmission: string;
+  engineSize: string;
   mileage: string;
   vin: string;
+  registrationDate: string;
+  insuranceCompany: string;
+  insurancePolicyNumber: string;
+  insuranceExpiryDate: string;
+  notes: string;
 }
+
+const CAR_MAKES = [
+  "TOYOTA", "HONDA", "FORD", "CHEVROLET", "NISSAN", "BMW", "MERCEDES", "AUDI",
+  "VOLKSWAGEN", "HYUNDAI", "KIA", "MAZDA", "SUBARU", "LEXUS", "ACURA", "INFINITI",
+  "CADILLAC", "BUICK", "GMC", "JEEP", "DODGE", "CHRYSLER", "RAM", "LINCOLN",
+  "VOLVO", "JAGUAR", "LAND_ROVER", "PORSCHE", "TESLA", "OTHER"
+];
+
+const CAR_COLORS = [
+  "BLACK", "WHITE", "SILVER", "GRAY", "RED", "BLUE", "GREEN", "YELLOW",
+  "ORANGE", "BROWN", "PURPLE", "GOLD", "BEIGE", "OTHER"
+];
+
+const FUEL_TYPES = ["GASOLINE", "DIESEL", "HYBRID", "ELECTRIC", "PLUG_IN_HYBRID", "CNG", "LPG"];
+const TRANSMISSIONS = ["MANUAL", "AUTOMATIC", "CVT", "SEMI_AUTOMATIC"];
 
 export default function AddCarToClient({
   clientId,
@@ -31,15 +55,23 @@ export default function AddCarToClient({
   const [error, setError] = useState("");
   const [formData, setFormData] = useState<CarFormData>({
     licensePlate: "",
-    make: "",
+    make: "TOYOTA",
     model: "",
     year: new Date().getFullYear().toString(),
-    color: "",
+    color: "WHITE",
+    fuelType: "GASOLINE",
+    transmission: "AUTOMATIC",
+    engineSize: "",
     mileage: "0",
     vin: "",
+    registrationDate: "",
+    insuranceCompany: "",
+    insurancePolicyNumber: "",
+    insuranceExpiryDate: "",
+    notes: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -59,6 +91,12 @@ export default function AddCarToClient({
         return;
       }
 
+      const user = storage.getUser();
+      if (!user) {
+        setError("User information not found.");
+        return;
+      }
+
       // Create car via GraphQL mutation
       const response = await graphqlRequest<{ createCar: any }>(
         `mutation($input: CreateCarInput!) {
@@ -69,9 +107,18 @@ export default function AddCarToClient({
             model
             year
             color
+            fuelType
+            transmission
+            engineSize
             mileage
             vin
+            registrationDate
+            insuranceCompany
+            insurancePolicyNumber
+            insuranceExpiryDate
+            notes
             clientId
+            businessId
             createdAt
           }
         }`,
@@ -81,10 +128,19 @@ export default function AddCarToClient({
             make: formData.make,
             model: formData.model,
             year: parseInt(formData.year),
-            color: formData.color || null,
+            color: formData.color,
+            fuelType: formData.fuelType,
+            transmission: formData.transmission,
+            engineSize: formData.engineSize ? parseFloat(formData.engineSize) : null,
             mileage: formData.mileage ? parseInt(formData.mileage) : 0,
             vin: formData.vin || null,
+            registrationDate: formData.registrationDate || null,
+            insuranceCompany: formData.insuranceCompany || null,
+            insurancePolicyNumber: formData.insurancePolicyNumber || null,
+            insuranceExpiryDate: formData.insuranceExpiryDate || null,
+            notes: formData.notes || null,
             clientId: clientId,
+            businessId: user.id || user.businessId,
           },
         },
         token
@@ -98,12 +154,20 @@ export default function AddCarToClient({
         // Reset form
         setFormData({
           licensePlate: "",
-          make: "",
+          make: "TOYOTA",
           model: "",
           year: new Date().getFullYear().toString(),
-          color: "",
+          color: "WHITE",
+          fuelType: "GASOLINE",
+          transmission: "AUTOMATIC",
+          engineSize: "",
           mileage: "0",
           vin: "",
+          registrationDate: "",
+          insuranceCompany: "",
+          insurancePolicyNumber: "",
+          insuranceExpiryDate: "",
+          notes: "",
         });
         alert("Car added successfully!");
         if (onClose) {
@@ -150,6 +214,7 @@ export default function AddCarToClient({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* License Plate */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               License Plate *
@@ -165,21 +230,27 @@ export default function AddCarToClient({
             />
           </div>
 
+          {/* Make */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Make *
             </label>
-            <input
-              type="text"
+            <select
               name="make"
               value={formData.make}
               onChange={handleInputChange}
               required
-              placeholder="Toyota"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            >
+              {CAR_MAKES.map((make) => (
+                <option key={make} value={make}>
+                  {make}
+                </option>
+              ))}
+            </select>
           </div>
 
+          {/* Model */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Model *
@@ -195,6 +266,7 @@ export default function AddCarToClient({
             />
           </div>
 
+          {/* Year */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Year *
@@ -212,20 +284,83 @@ export default function AddCarToClient({
             />
           </div>
 
+          {/* Color */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Color
+              Color *
             </label>
-            <input
-              type="text"
+            <select
               name="color"
               value={formData.color}
               onChange={handleInputChange}
-              placeholder="White"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {CAR_COLORS.map((color) => (
+                <option key={color} value={color}>
+                  {color}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Fuel Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fuel Type *
+            </label>
+            <select
+              name="fuelType"
+              value={formData.fuelType}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {FUEL_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Transmission */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Transmission *
+            </label>
+            <select
+              name="transmission"
+              value={formData.transmission}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {TRANSMISSIONS.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Engine Size */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Engine Size (L)
+            </label>
+            <input
+              type="number"
+              step="0.1"
+              name="engineSize"
+              value={formData.engineSize}
+              onChange={handleInputChange}
+              placeholder="2.0"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
+          {/* Mileage */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Mileage (km)
@@ -241,7 +376,8 @@ export default function AddCarToClient({
             />
           </div>
 
-          <div className="md:col-span-2">
+          {/* VIN */}
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               VIN (Vehicle Identification Number)
             </label>
@@ -251,6 +387,79 @@ export default function AddCarToClient({
               value={formData.vin}
               onChange={handleInputChange}
               placeholder="1HGBH41JXMN109186"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Registration Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Registration Date
+            </label>
+            <input
+              type="date"
+              name="registrationDate"
+              value={formData.registrationDate}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Insurance Company */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Insurance Company
+            </label>
+            <input
+              type="text"
+              name="insuranceCompany"
+              value={formData.insuranceCompany}
+              onChange={handleInputChange}
+              placeholder="Company Name"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Insurance Policy Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Insurance Policy Number
+            </label>
+            <input
+              type="text"
+              name="insurancePolicyNumber"
+              value={formData.insurancePolicyNumber}
+              onChange={handleInputChange}
+              placeholder="POL-12345"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Insurance Expiry Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Insurance Expiry Date
+            </label>
+            <input
+              type="date"
+              name="insuranceExpiryDate"
+              value={formData.insuranceExpiryDate}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Notes */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Notes
+            </label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleInputChange}
+              placeholder="Any additional notes about the vehicle..."
+              rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
