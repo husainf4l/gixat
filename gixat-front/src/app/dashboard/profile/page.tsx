@@ -109,15 +109,17 @@ export default function ProfilePage() {
     setLoading(true);
 
     try {
-      // Call the updateProfile mutation
+      // Call the updateProfile mutation with input object
       graphqlRequest(
         UPDATE_PROFILE_MUTATION,
         {
-          name: formData.name,
-          phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
+          input: {
+            name: formData.name,
+            phone: formData.phone || null,
+            address: formData.address || null,
+            city: formData.city || null,
+            state: formData.state || null,
+          },
         },
         token
       ).then((response: any) => {

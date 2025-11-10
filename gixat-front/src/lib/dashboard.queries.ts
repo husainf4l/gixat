@@ -16,8 +16,8 @@ export const GET_ME_QUERY = `
 `;
 
 export const UPDATE_PROFILE_MUTATION = `
-  mutation UpdateProfile($name: String, $phone: String, $address: String, $city: String, $state: String) {
-    updateProfile(name: $name, phone: $phone, address: $address, city: $city, state: $state) {
+  mutation UpdateProfile($input: UpdateUserInput!) {
+    updateProfile(input: $input) {
       id
       email
       type
