@@ -229,9 +229,10 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* General Settings */}
-          {activeTab === "general" && (
-            <div className="p-6 space-y-6">
+          {/* Tab Content Container */}
+          <div className="p-6 space-y-6">
+            {activeTab === "general" && (
+              <>
               {/* Account Info Section */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
@@ -365,12 +366,11 @@ export default function SettingsPage() {
                 ✕ Cancel
               </button>
             </div>
-            </div>
-          )}
+              </>
+            )}
 
-          {/* Notifications Settings */}
-          {activeTab === "notifications" && (
-            <div className="p-6 space-y-6">
+            {activeTab === "notifications" && (
+              <>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
                 <div className="space-y-4">
@@ -424,12 +424,11 @@ export default function SettingsPage() {
                   💾 Save Preferences
                 </button>
               </div>
-            </div>
-          )}
+              </>
+            )}
 
-          {/* Security Settings */}
-          {activeTab === "security" && (
-            <div className="p-6 space-y-6">
+            {activeTab === "security" && (
+              <>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
                 <div className="space-y-4 max-w-md">
@@ -477,8 +476,9 @@ export default function SettingsPage() {
                   🔒 Update Password
                 </button>
               </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </DashboardLayout>
