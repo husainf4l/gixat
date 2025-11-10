@@ -159,6 +159,10 @@ export default function SettingsPage() {
   };
 
   const handleSaveSecurity = () => {
+    if (!securityData.currentPassword) {
+      alert("Please enter your current password");
+      return;
+    }
     if (!securityData.newPassword || !securityData.confirmPassword) {
       alert("Please fill in all password fields");
       return;
@@ -167,12 +171,34 @@ export default function SettingsPage() {
       alert("New passwords do not match!");
       return;
     }
-    alert("Password updated successfully! (Simulated - in production this would call the backend)");
-    setSecurityData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+    if (securityData.newPassword.length < 6) {
+      alert("New password must be at least 6 characters long");
+      return;
+    }
+
+    // In a real app, this would call the backend to change the password
+    // For now, we'll just show success and clear the form
+    try {
+      const updatedUser = {
+        ...user,
+        // Store the hashed password (in production, this should be done on the server)
+        passwordHash: btoa(securityData.newPassword), // Simple base64 encoding (NOT SECURE - for demo only)
+      };
+      storage.setUser(updatedUser);
+      setUser(updatedUser);
+      
+      alert("✅ Password updated successfully!");
+      
+      // Clear the form
+      setSecurityData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      console.error("Error updating password:", error);
+      alert("❌ Failed to update password. Please try again.");
+    }
   };
 
   if (!user) return null;
