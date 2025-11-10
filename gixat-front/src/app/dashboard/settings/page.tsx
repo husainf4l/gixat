@@ -8,6 +8,7 @@ import { storage } from "@/lib/storage";
 export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<"general" | "notifications" | "security">("general");
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -25,6 +26,16 @@ export default function SettingsPage() {
       Saturday: { start: "", end: "" },
       Sunday: { start: "", end: "" },
     },
+  });
+  const [notificationPreferences, setNotificationPreferences] = useState({
+    emailNotifications: true,
+    smsNotifications: true,
+    newsletter: false,
+  });
+  const [securityData, setSecurityData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   useEffect(() => {
@@ -121,6 +132,49 @@ export default function SettingsPage() {
     }
   };
 
+  const handleNotificationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setNotificationPreferences((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  const handleSecurityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSecurityData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveNotifications = () => {
+    const updatedUser = {
+      ...user,
+      notificationPreferences,
+    };
+    storage.setUser(updatedUser);
+    setUser(updatedUser);
+    alert("Notification preferences updated successfully!");
+  };
+
+  const handleSaveSecurity = () => {
+    if (!securityData.newPassword || !securityData.confirmPassword) {
+      alert("Please fill in all password fields");
+      return;
+    }
+    if (securityData.newPassword !== securityData.confirmPassword) {
+      alert("New passwords do not match!");
+      return;
+    }
+    alert("Password updated successfully! (Simulated - in production this would call the backend)");
+    setSecurityData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
   if (!user) return null;
 
   const handleLogout = () => {
@@ -142,21 +196,43 @@ export default function SettingsPage() {
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="border-b border-gray-200">
             <div className="flex gap-8 px-6">
-              <button className="px-4 py-3 border-b-2 border-blue-600 text-blue-600 font-medium">
+              <button
+                onClick={() => setActiveTab("general")}
+                className={`px-4 py-3 border-b-2 font-medium transition ${
+                  activeTab === "general"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-700 hover:text-gray-900"
+                }`}
+              >
                 General
               </button>
-              <button className="px-4 py-3 border-b-2 border-transparent text-gray-700 hover:text-gray-900 opacity-50 cursor-not-allowed">
+              <button
+                onClick={() => setActiveTab("notifications")}
+                className={`px-4 py-3 border-b-2 font-medium transition ${
+                  activeTab === "notifications"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-700 hover:text-gray-900"
+                }`}
+              >
                 Notifications
               </button>
-              <button className="px-4 py-3 border-b-2 border-transparent text-gray-700 hover:text-gray-900 opacity-50 cursor-not-allowed">
+              <button
+                onClick={() => setActiveTab("security")}
+                className={`px-4 py-3 border-b-2 font-medium transition ${
+                  activeTab === "security"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-700 hover:text-gray-900"
+                }`}
+              >
                 Security
               </button>
             </div>
           </div>
 
           {/* General Settings */}
-          <div className="p-6 space-y-6">
-            {/* Account Info Section */}
+          {activeTab === "general" && (
+            <div className="p-6 space-y-6">
+              {/* Account Info Section */}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
               <div className="space-y-4">
@@ -289,7 +365,120 @@ export default function SettingsPage() {
                 ✕ Cancel
               </button>
             </div>
-          </div>
+            </div>
+          )}
+
+          {/* Notifications Settings */}
+          {activeTab === "notifications" && (
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="emailNotifications"
+                      name="emailNotifications"
+                      checked={notificationPreferences.emailNotifications}
+                      onChange={handleNotificationChange}
+                      className="w-4 h-4 rounded"
+                    />
+                    <label htmlFor="emailNotifications" className="ml-3 text-sm text-gray-700">
+                      Receive email notifications about service updates
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="smsNotifications"
+                      name="smsNotifications"
+                      checked={notificationPreferences.smsNotifications}
+                      onChange={handleNotificationChange}
+                      className="w-4 h-4 rounded"
+                    />
+                    <label htmlFor="smsNotifications" className="ml-3 text-sm text-gray-700">
+                      Receive SMS reminders for upcoming services
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="newsletter"
+                      name="newsletter"
+                      checked={notificationPreferences.newsletter}
+                      onChange={handleNotificationChange}
+                      className="w-4 h-4 rounded"
+                    />
+                    <label htmlFor="newsletter" className="ml-3 text-sm text-gray-700">
+                      Subscribe to newsletters and promotions
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-200 flex gap-3">
+                <button
+                  onClick={handleSaveNotifications}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  💾 Save Preferences
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Security Settings */}
+          {activeTab === "security" && (
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
+                <div className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      placeholder="Enter your current password"
+                      value={securityData.currentPassword}
+                      onChange={handleSecurityChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      placeholder="Enter new password"
+                      value={securityData.newPassword}
+                      onChange={handleSecurityChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm new password"
+                      value={securityData.confirmPassword}
+                      onChange={handleSecurityChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-gray-200 flex gap-3">
+                <button
+                  onClick={handleSaveSecurity}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  🔒 Update Password
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
