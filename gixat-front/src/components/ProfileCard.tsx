@@ -18,13 +18,18 @@ interface ProfileCardProps {
 export default function ProfileCard({ isCollapsed }: ProfileCardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const token = storage.getAccessToken();
         if (!token) {
           setLoading(false);
+          setError("Not authenticated");
           return;
         }
 
@@ -32,15 +37,23 @@ export default function ProfileCard({ isCollapsed }: ProfileCardProps) {
 
         if ((response as any).data?.me) {
           setUser((response as any).data.me);
+        } else if ((response as any).errors) {
+          const errorMsg = (response as any).errors[0]?.message || "Failed to fetch user";
+          setError(errorMsg);
+          console.warn("Error fetching user:", errorMsg);
         }
       } catch (error) {
         console.error("Error fetching user:", error);
+        setError("Error fetching profile");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    // Only fetch on client side
+    if (typeof window !== "undefined") {
+      fetchUser();
+    }
   }, []);
 
   if (loading) {
@@ -52,7 +65,7 @@ export default function ProfileCard({ isCollapsed }: ProfileCardProps) {
     );
   }
 
-  if (!user) {
+  if (error || !user) {
     return null;
   }
 

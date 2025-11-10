@@ -121,6 +121,12 @@ export async function graphqlRequest<T>(
         body: data,
         errorMessage,
       });
+      
+      // Return error data instead of throwing, to handle 400s gracefully
+      if (response.status === 400 && data.errors) {
+        return data;
+      }
+      
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
