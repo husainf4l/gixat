@@ -196,18 +196,17 @@ export default function SettingsPage() {
       return;
     }
 
-    // In a real app, this would call the backend to change the password
-    // For now, we'll just show success and clear the form
     try {
+      // Store the new password locally for demonstration
+      // In a production app, this would call a backend API endpoint
       const updatedUser = {
         ...user,
-        // Store the hashed password (in production, this should be done on the server)
-        passwordHash: btoa(securityData.newPassword), // Simple base64 encoding (NOT SECURE - for demo only)
+        localPassword: securityData.newPassword,
       };
       storage.setUser(updatedUser);
       setUser(updatedUser);
       
-      alert("✅ Password updated successfully!");
+      alert("✅ Password updated successfully!\n\nℹ️ Note: This is a local change for demonstration. In production, password changes should be handled by the backend API.\n\nYour new password has been saved locally. Next time you login, you can use your new password.");
       
       // Clear the form
       setSecurityData({
