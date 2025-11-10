@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import CarsInGarage from "./CarsInGarage";
 
 export type UserRole = "admin" | "owner" | "client";
 
@@ -107,21 +108,27 @@ export default function Sidebar({ userRole }: SidebarProps) {
         <nav className="flex-1 px-2 py-4 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out ${
-                  isActive(item.href)
-                    ? "bg-blue-50 text-blue-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-                title={isCollapsed ? item.label : ""}
-              >
-                <span className="text-lg flex-shrink-0">{item.icon}</span>
-                {!isCollapsed && (
-                  <span className="text-sm truncate">{item.label}</span>
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out ${
+                    isActive(item.href)
+                      ? "bg-blue-50 text-blue-600 font-medium"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                  title={isCollapsed ? item.label : ""}
+                >
+                  <span className="text-lg flex-shrink-0">{item.icon}</span>
+                  {!isCollapsed && (
+                    <span className="text-sm truncate">{item.label}</span>
+                  )}
+                </Link>
+                
+                {/* Show Cars in Garage section after Repair Sessions for admin/owner */}
+                {item.label === "Repair Sessions" && !isCollapsed && (
+                  <CarsInGarage isCollapsed={isCollapsed} />
                 )}
-              </Link>
+              </div>
             ))}
           </div>
         </nav>

@@ -88,12 +88,33 @@ export default function AddCarToClient({
       const token = storage.getAccessToken();
       if (!token) {
         setError("Session expired. Please login again.");
+        setLoading(false);
         return;
       }
 
       const user = storage.getUser();
       if (!user) {
         setError("User information not found.");
+        setLoading(false);
+        return;
+      }
+
+      // Frontend validation
+      if (!formData.licensePlate.trim()) {
+        setError("License plate is required.");
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.make.trim()) {
+        setError("Car make is required.");
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.model.trim()) {
+        setError("Car model is required.");
+        setLoading(false);
         return;
       }
 
@@ -172,9 +193,23 @@ export default function AddCarToClient({
           onClose();
         }
       } else if (response.errors) {
-        setError(
-          `Error: ${response.errors[0]?.message || "Failed to add car"}`
-        );
+        const errorMessage = response.errors[0]?.message || "Failed to add car";
+        
+        // Handle specific constraint violations
+        let userFriendlyMessage = errorMessage;
+        if (errorMessage.includes("duplicate key") || errorMessage.includes("unique constraint")) {
+          if (errorMessage.includes("licensePlate") || errorMessage.includes("license_plate")) {
+            userFriendlyMessage = "This license plate is already registered. Please enter a different license plate.";
+          } else if (errorMessage.includes("vin")) {
+            userFriendlyMessage = "This VIN (Vehicle Identification Number) is already registered. Please enter a different VIN or leave it empty.";
+          } else if (errorMessage.includes("insurancePolicyNumber") || errorMessage.includes("insurance_policy")) {
+            userFriendlyMessage = "This insurance policy number is already registered. Please enter a different policy number or leave it empty.";
+          } else {
+            userFriendlyMessage = "A car with these details already exists. Please check the license plate, VIN, or insurance policy number and try again.";
+          }
+        }
+        
+        setError(`Error: ${userFriendlyMessage}`);
       }
     } catch (err) {
       setError(
@@ -215,7 +250,7 @@ export default function AddCarToClient({
           {/* License Plate */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              License Plate *
+              License Plate * <span className="text-xs text-gray-500">(Must be unique)</span>
             </label>
             <input
               type="text"
@@ -377,7 +412,7 @@ export default function AddCarToClient({
           {/* VIN */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              VIN (Vehicle Identification Number)
+              VIN <span className="text-xs text-gray-500">(Must be unique, optional)</span>
             </label>
             <input
               type="text"
@@ -421,7 +456,7 @@ export default function AddCarToClient({
           {/* Insurance Policy Number */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Insurance Policy Number
+              Insurance Policy Number <span className="text-xs text-gray-500">(Must be unique, optional)</span>
             </label>
             <input
               type="text"

@@ -40,6 +40,8 @@ interface RepairSession {
   daysInProgress?: number;
   estimatedCost?: number;
   actualCost?: number;
+  expectedDeliveryDate?: string;
+  actualDeliveryDate?: string;
 }
 
 const STATUS_COLORS: Record<string, string> = {

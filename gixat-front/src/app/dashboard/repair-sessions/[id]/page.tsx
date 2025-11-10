@@ -9,6 +9,8 @@ import {
   GET_REPAIR_SESSION_DETAIL_QUERY,
   UPDATE_REPAIR_SESSION_STATUS_MUTATION,
 } from "@/lib/dashboard.queries";
+import JobCardReportForm from "@/components/repair-session/JobCardReportForm";
+import InspectionForm from "@/components/repair-session/InspectionForm";
 
 interface RepairSessionDetail {
   id: string;
@@ -31,6 +33,8 @@ interface RepairSessionDetail {
   assignedTechnicianId?: string;
   createdById: string;
   isActive: boolean;
+  expectedDeliveryDate?: string;
+  actualDeliveryDate?: string;
 }
 
 const STATUS_OPTIONS = [
@@ -78,6 +82,7 @@ export default function RepairSessionDetailPage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [activeTab, setActiveTab] = useState<"overview" | "job-card" | "inspection">("overview");
 
   const [newStatus, setNewStatus] = useState("");
   const [notes, setNotes] = useState("");
@@ -309,9 +314,9 @@ export default function RepairSessionDetailPage() {
               </div>
             </div>
 
-            {/* Cost Information */}
+            {/* Cost & Delivery Information */}
             <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Cost Information</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Cost & Delivery</h3>
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Estimated Cost</p>
@@ -323,6 +328,22 @@ export default function RepairSessionDetailPage() {
                   <p className="text-sm text-gray-600 mb-1">Actual Cost</p>
                   <p className="font-medium text-gray-900">
                     {session.actualCost ? `$${session.actualCost.toFixed(2)}` : "Not yet"}
+                  </p>
+                </div>
+                <div className="border-t border-gray-200 pt-3 mt-3">
+                  <p className="text-sm text-gray-600 mb-1">Expected Delivery Date</p>
+                  <p className="font-medium text-gray-900">
+                    {session.expectedDeliveryDate
+                      ? new Date(session.expectedDeliveryDate).toLocaleDateString()
+                      : "Not scheduled"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Actual Delivery Date</p>
+                  <p className="font-medium text-gray-900">
+                    {session.actualDeliveryDate
+                      ? new Date(session.actualDeliveryDate).toLocaleDateString()
+                      : "Not delivered yet"}
                   </p>
                 </div>
               </div>
@@ -375,48 +396,120 @@ export default function RepairSessionDetailPage() {
           </div>
         </div>
 
-        {/* Update Status Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Update Session Status</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                New Status
-              </label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status}>
-                    {status.replace(/_/g, " ")}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Internal Notes
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any internal notes about this session..."
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
+        {/* TAB NAVIGATION */}
+        <div className="border-b border-gray-200">
+          <div className="flex gap-4 overflow-x-auto">
             <button
-              onClick={handleUpdateStatus}
-              disabled={updating || newStatus === session.status}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-gray-400"
+              onClick={() => setActiveTab("overview")}
+              className={`px-4 py-3 font-medium whitespace-nowrap border-b-2 transition ${
+                activeTab === "overview"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
             >
-              {updating ? "Updating..." : "Update Status"}
+              📋 Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("job-card")}
+              className={`px-4 py-3 font-medium whitespace-nowrap border-b-2 transition ${
+                activeTab === "job-card"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              📋 Job Card
+            </button>
+            <button
+              onClick={() => setActiveTab("inspection")}
+              className={`px-4 py-3 font-medium whitespace-nowrap border-b-2 transition ${
+                activeTab === "inspection"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              🔍 Inspection
             </button>
           </div>
+        </div>
+
+        {/* TAB CONTENT */}
+        <div className="mt-6">
+          {/* OVERVIEW TAB */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Update Status Section */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Update Session Status</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      New Status
+                    </label>
+                    <select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Internal Notes
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Add any internal notes about this session..."
+                      rows={4}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleUpdateStatus}
+                    disabled={updating || newStatus === session.status}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:bg-gray-400"
+                  >
+                    {updating ? "Updating..." : "Update Status"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TEST DRIVE TAB REMOVED - Not supported by backend */}
+
+          {/* JOB CARD TAB */}
+          {activeTab === "job-card" && (
+            <JobCardReportForm
+              repairSessionId={sessionId}
+              businessId={session.businessId}
+              onSuccess={() => {
+                setSuccess("Job card saved successfully!");
+                setTimeout(() => setSuccess(""), 3000);
+              }}
+            />
+          )}
+
+          {/* INSPECTION TAB */}
+          {activeTab === "inspection" && (
+            <InspectionForm
+              repairSessionId={sessionId}
+              businessId={session.businessId}
+              onSuccess={() => {
+                setSuccess("Inspection saved successfully!");
+                setTimeout(() => setSuccess(""), 3000);
+              }}
+            />
+          )}
+
+          {/* CUSTOMER REQUEST TAB REMOVED - Not supported by backend */}
         </div>
       </div>
     </DashboardLayout>

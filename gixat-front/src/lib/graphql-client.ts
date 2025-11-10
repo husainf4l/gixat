@@ -1,3 +1,5 @@
+import { storage } from "./storage";
+
 const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "https://www.gixat.com/api/graphql";
 
 export interface GraphQLResponse<T> {
@@ -8,10 +10,72 @@ export interface GraphQLResponse<T> {
   }>;
 }
 
+/**
+ * Refresh the access token using the refresh token
+ */
+async function refreshAccessToken(): Promise<string | null> {
+  try {
+    const refreshToken = storage.getRefreshToken();
+    if (!refreshToken) {
+      console.warn("No refresh token available");
+      return null;
+    }
+
+    console.log("Attempting to refresh access token...");
+
+    const response = await fetch(GRAPHQL_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `
+          mutation RefreshToken($refreshToken: String!) {
+            refreshToken(refreshToken: $refreshToken) {
+              accessToken
+              refreshToken
+              user {
+                id
+                email
+              }
+            }
+          }
+        `,
+        variables: { refreshToken },
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.data?.refreshToken?.accessToken) {
+      const newAccessToken = data.data.refreshToken.accessToken;
+      const newRefreshToken = data.data.refreshToken.refreshToken;
+      
+      storage.setAccessToken(newAccessToken);
+      if (newRefreshToken) {
+        storage.setRefreshToken(newRefreshToken);
+      }
+
+      console.log("Access token refreshed successfully");
+      return newAccessToken;
+    }
+    
+    console.error("Token refresh failed:", data.errors?.[0]?.message);
+    // Clear auth on refresh failure
+    storage.clearAuth();
+    return null;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    storage.clearAuth();
+    return null;
+  }
+}
+
 export async function graphqlRequest<T>(
   query: string,
   variables?: Record<string, unknown>,
-  token?: string
+  token?: string,
+  retryCount: number = 0
 ): Promise<GraphQLResponse<T>> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -58,6 +122,20 @@ export async function graphqlRequest<T>(
         errorMessage,
       });
       throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Handle Unauthorized error - try to refresh token and retry
+    if (data.errors && data.errors[0]?.message === "Unauthorized" && retryCount === 0) {
+      console.log("Unauthorized error received, attempting to refresh token...");
+      const newToken = await refreshAccessToken();
+      
+      if (newToken) {
+        console.log("Token refreshed successfully, retrying request...");
+        return graphqlRequest(query, variables, newToken, retryCount + 1);
+      } else {
+        console.error("Token refresh failed, clearing auth and returning error");
+        // Don't retry further, return the error
+      }
     }
 
     if (data.errors) {
