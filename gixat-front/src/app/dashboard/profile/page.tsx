@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useRouter } from "next/navigation";
 import { storage } from "@/lib/storage";
 import { graphqlRequest } from "@/lib/graphql-client";
-import { GET_ME_QUERY } from "@/lib/dashboard.queries";
+import { GET_ME_QUERY, UPDATE_PROFILE_MUTATION } from "@/lib/dashboard.queries";
 
 interface UserProfile {
   id: string;
@@ -100,28 +100,54 @@ export default function ProfilePage() {
       return;
     }
 
+    const token = storage.getAccessToken();
+    if (!token) {
+      alert("❌ Not authenticated. Please login again.");
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      // Update user data with new profile information
-      const updatedUser: UserProfile = {
-        id: user?.id || "",
-        type: user?.type || "CLIENT",
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-      };
-
-      // Save to localStorage
-      storage.setUser(updatedUser);
-      setUser(updatedUser);
-      setIsEditing(false);
-
-      alert("✅ Profile updated successfully!");
+      // Call the updateProfile mutation
+      graphqlRequest(
+        UPDATE_PROFILE_MUTATION,
+        {
+          name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+        },
+        token
+      ).then((response: any) => {
+        if (response.data?.updateProfile) {
+          const updatedUser = response.data.updateProfile;
+          setUser(updatedUser);
+          setFormData({
+            name: updatedUser.name || "",
+            email: updatedUser.email || "",
+            phone: updatedUser.phone || "",
+            address: updatedUser.address || "",
+            city: updatedUser.city || "",
+            state: updatedUser.state || "",
+          });
+          storage.setUser(updatedUser);
+          setIsEditing(false);
+          alert("✅ Profile updated successfully!");
+        } else if (response.errors) {
+          alert(`❌ Error: ${response.errors[0]?.message || "Failed to update profile"}`);
+        }
+      }).catch((error: any) => {
+        console.error("Error updating profile:", error);
+        alert("❌ Failed to save profile. Please try again.");
+      }).finally(() => {
+        setLoading(false);
+      });
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.error("Error in handleSave:", error);
       alert("❌ Failed to save profile. Please try again.");
+      setLoading(false);
     }
   };
 

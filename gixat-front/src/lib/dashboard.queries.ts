@@ -6,6 +6,26 @@ export const GET_ME_QUERY = `
       id
       email
       type
+      name
+      phone
+      address
+      city
+      state
+    }
+  }
+`;
+
+export const UPDATE_PROFILE_MUTATION = `
+  mutation UpdateProfile($name: String, $phone: String, $address: String, $city: String, $state: String) {
+    updateProfile(name: $name, phone: $phone, address: $address, city: $city, state: $state) {
+      id
+      email
+      type
+      name
+      phone
+      address
+      city
+      state
     }
   }
 `;
