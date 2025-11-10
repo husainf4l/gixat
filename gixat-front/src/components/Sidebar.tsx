@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import CarsInGarage from "./CarsInGarage";
+import ProfileCard from "./ProfileCard";
+import SettingsMenu from "./SettingsMenu";
 
 export type UserRole = "admin" | "owner" | "client";
 
@@ -136,14 +138,21 @@ export default function Sidebar({ userRole }: SidebarProps) {
         {/* Divider */}
         <div className="border-t border-gray-200" />
 
-        {/* Profile & Logout Section */}
-        <div className="p-3 space-y-2">
-          {!isCollapsed && (
-            <div className="px-3 py-2 rounded-lg bg-gray-50">
-              <p className="text-xs font-medium text-gray-900">Profile</p>
-              <p className="text-xs text-gray-500 mt-0.5">View Account</p>
-            </div>
-          )}
+        {/* Profile Card - Fetches from GraphQL */}
+        <div className="p-3">
+          <ProfileCard isCollapsed={isCollapsed} />
+        </div>
+
+        {/* Settings Menu */}
+        <div className="px-2 pb-3">
+          <SettingsMenu isCollapsed={isCollapsed} />
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-200" />
+
+        {/* Logout Button */}
+        <div className="p-3">
           <button
             onClick={handleLogout}
             className={`w-full px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200 flex items-center gap-3 ${
