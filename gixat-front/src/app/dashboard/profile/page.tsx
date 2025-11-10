@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(true); // Changed to true by default
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -166,14 +166,6 @@ export default function ProfilePage() {
         <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium"
-              >
-                ✏️ Edit
-              </button>
-            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -252,24 +244,18 @@ export default function ProfilePage() {
           </div>
 
           <div className="mt-6 flex gap-3">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleSave}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  💾 Save Changes
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
-                >
-                  ✕ Cancel
-                </button>
-              </>
-            ) : (
-              <div className="text-sm text-gray-500">Click "Edit" to make changes</div>
-            )}
+            <button
+              onClick={handleSave}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              💾 Save Changes
+            </button>
+            <button
+              onClick={handleCancel}
+              className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
+            >
+              ✕ Cancel
+            </button>
           </div>
         </div>
 
