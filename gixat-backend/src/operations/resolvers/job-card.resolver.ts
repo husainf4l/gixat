@@ -8,6 +8,7 @@ import {
   CreateJobCardInput, 
   CreateJobTaskInput, 
   CreatePartInput,
+  UpdateJobCardInput,
   UpdateJobTaskStatusInput,
   UpdatePartStatusInput
 } from '../dto/repair.input';
@@ -23,10 +24,28 @@ export class JobCardResolver {
   @Mutation(() => JobCard)
   async createJobCard(
     @Args('input') input: CreateJobCardInput,
-    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
     @CurrentUser() user: User,
   ): Promise<JobCard> {
-    return this.jobCardService.createJobCard(input, businessId, user.id);
+    const effectiveBusinessId = businessId || user.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
+    return this.jobCardService.createJobCard(input, effectiveBusinessId, user.id);
+  }
+
+  @Mutation(() => JobCard)
+  async updateJobCard(
+    @Args('id', { type: () => ID }) id: number,
+    @Args('input') input: UpdateJobCardInput,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
+    @CurrentUser() user: User,
+  ): Promise<JobCard> {
+    const effectiveBusinessId = businessId || user.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
+    return this.jobCardService.updateJobCard(id, input, effectiveBusinessId);
   }
 
   @Mutation(() => JobTask)

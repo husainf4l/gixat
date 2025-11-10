@@ -5,6 +5,7 @@ import { graphqlRequest } from "@/lib/graphql-client";
 import { storage } from "@/lib/storage";
 import { CREATE_JOB_CARD_MUTATION } from "@/lib/dashboard.queries";
 import { useEmployeesByBusiness } from "@/lib/hooks/useEmployees";
+import { formatDateForBackend } from "@/lib/date-utils";
 
 interface JobCardReportFormProps {
   repairSessionId: string;
@@ -64,8 +65,8 @@ export default function JobCardReportForm({ repairSessionId, businessId, onSucce
         repairSessionId: repairSessionId,
         title: formData.title,
         description: formData.description,
-        plannedStartDate: formData.plannedStartDate,
-        plannedEndDate: formData.plannedEndDate,
+        plannedStartDate: formatDateForBackend(formData.plannedStartDate),
+        plannedEndDate: formatDateForBackend(formData.plannedEndDate),
         estimatedHours: formData.estimatedHours,
         workInstructions: formData.workInstructions,
         // assignedTechnicianId is required (NON_NULL in schema)

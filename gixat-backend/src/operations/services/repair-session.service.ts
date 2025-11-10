@@ -24,7 +24,7 @@ export class RepairSessionService {
     private userRepository: Repository<User>,
   ) {}
 
-  async create(input: CreateRepairSessionInput, userId: number): Promise<RepairSession> {
+  async create(input: CreateRepairSessionInput, userId: number, businessId: number): Promise<RepairSession> {
     // Validate car exists and belongs to the business
     const car = await this.carRepository.findOne({
       where: { id: input.carId },
@@ -35,13 +35,13 @@ export class RepairSessionService {
       throw new NotFoundException('Car not found');
     }
 
-    if (car.client.business.id !== input.businessId) {
-      throw new ForbiddenException('Car does not belong to this business');
+    if (car.businessId !== businessId) {
+      throw new ForbiddenException('Car does not belong to your garage');
     }
 
     // Validate business exists
     const business = await this.businessRepository.findOne({
-      where: { id: input.businessId },
+      where: { id: businessId },
     });
 
     if (!business) {
@@ -50,11 +50,12 @@ export class RepairSessionService {
 
     const repairSession = this.repairSessionRepository.create({
       ...input,
+      businessId, // Override with user's businessId
       status: RepairSessionStatus.CUSTOMER_REQUEST,
       car,
       business,
       createdBy: { id: userId } as User,
-      sessionNumber: await this.generateSessionNumber(input.businessId),
+      sessionNumber: await this.generateSessionNumber(businessId),
     });
 
     return this.repairSessionRepository.save(repairSession);

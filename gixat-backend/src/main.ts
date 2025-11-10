@@ -11,6 +11,14 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
   
+  // Enable CORS for all origins
+  app.enableCors({
+    origin: true, // Allow all origins
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
+  
   // Set global prefix for all routes
   app.setGlobalPrefix('api');
   

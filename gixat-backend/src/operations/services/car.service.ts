@@ -52,8 +52,8 @@ export class CarService {
     });
   }
 
-  async create(createCarInput: CreateCarInput): Promise<Car> {
-    const { licensePlate, businessId } = createCarInput;
+  async create(createCarInput: CreateCarInput, businessId: number): Promise<Car> {
+    const { licensePlate } = createCarInput;
 
     // Check if car with this license plate already exists in this business
     const existingCar = await this.findByLicensePlate(licensePlate, businessId);
@@ -61,8 +61,11 @@ export class CarService {
       throw new ConflictException('Car with this license plate already exists in this garage');
     }
 
-    // Convert date strings to Date objects
-    const carData: any = { ...createCarInput };
+    // Convert date strings to Date objects and add businessId
+    const carData: any = { 
+      ...createCarInput, 
+      businessId // Override with businessId from user
+    };
     if (carData.registrationDate) {
       carData.registrationDate = new Date(carData.registrationDate);
     }

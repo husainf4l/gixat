@@ -50,9 +50,10 @@ export class CreateClientInput {
   @IsString()
   notes?: string;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
   @IsNumber()
-  businessId: number;
+  businessId?: number;
 }
 
 @InputType()
@@ -186,9 +187,10 @@ export class CreateCarInput {
   @IsNumber()
   clientId: number;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
   @IsNumber()
-  businessId: number;
+  businessId?: number;
 }
 
 @InputType()

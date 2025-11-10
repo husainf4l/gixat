@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'gixat-backend',
       script: 'dist/src/main.js',
-      cwd: '/Users/husain/Desktop/gixat/gixat-backend',
+      cwd: '/home/husain/gixat/gixat-backend',
       instances: 1,
       exec_mode: 'fork',
       watch: false,

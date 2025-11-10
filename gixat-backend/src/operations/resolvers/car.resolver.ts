@@ -104,7 +104,11 @@ export class CarResolver {
     @Args('input') createCarInput: CreateCarInput,
     @CurrentUser() user: User,
   ): Promise<Car> {
-    return this.carService.create(createCarInput);
+    // Get businessId from the authenticated user
+    if (!user.businessId) {
+      throw new Error('User is not associated with any garage/business. Please create or join a garage first.');
+    }
+    return this.carService.create(createCarInput, user.businessId);
   }
 
   @Mutation(() => Car, { nullable: true })

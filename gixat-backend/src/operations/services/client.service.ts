@@ -43,8 +43,8 @@ export class ClientService {
     });
   }
 
-  async create(createClientInput: CreateClientInput): Promise<Client> {
-    const { email, businessId } = createClientInput;
+  async create(createClientInput: CreateClientInput, businessId: number): Promise<Client> {
+    const { email } = createClientInput;
 
     // Check if client already exists in this business
     const existingClient = await this.findByEmail(email, businessId);
@@ -52,8 +52,11 @@ export class ClientService {
       throw new ConflictException('Client with this email already exists in this garage');
     }
 
-    // Convert date strings to Date objects
-    const clientData: any = { ...createClientInput };
+    // Convert date strings to Date objects and add businessId
+    const clientData: any = { 
+      ...createClientInput, 
+      businessId // Override with businessId from user
+    };
     if (clientData.dateOfBirth) {
       clientData.dateOfBirth = new Date(clientData.dateOfBirth);
     }

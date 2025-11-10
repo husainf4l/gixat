@@ -35,10 +35,25 @@ export class BusinessResolver {
     @Args('input') input: CreateBusinessInput,
     @CurrentUser() user: User,
   ): Promise<Business> {
-    return this.businessService.create({ 
-      ...input, 
-      ownerId: user.id 
-    });
+    return this.businessService.create(input, user.id);
+  }
+
+  @Mutation(() => Business, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  async addUserToGarage(
+    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('userId', { type: () => ID }) userId: number,
+  ): Promise<Business | null> {
+    return this.businessService.addUserToBusiness(businessId, userId);
+  }
+
+  @Mutation(() => Business, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  async removeUserFromGarage(
+    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('userId', { type: () => ID }) userId: number,
+  ): Promise<Business | null> {
+    return this.businessService.removeUserFromBusiness(businessId, userId);
   }
 
   @Mutation(() => Business)

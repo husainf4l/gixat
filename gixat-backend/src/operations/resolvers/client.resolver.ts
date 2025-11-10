@@ -51,7 +51,11 @@ export class ClientResolver {
     @Args('input') createClientInput: CreateClientInput,
     @CurrentUser() user: User,
   ): Promise<Client> {
-    return this.clientService.create(createClientInput);
+    // Get businessId from the authenticated user
+    if (!user.businessId) {
+      throw new Error('User is not associated with any garage/business. Please create or join a garage first.');
+    }
+    return this.clientService.create(createClientInput, user.businessId);
   }
 
   @Mutation(() => Client, { nullable: true })

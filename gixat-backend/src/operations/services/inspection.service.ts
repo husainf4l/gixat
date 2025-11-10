@@ -36,11 +36,10 @@ export class InspectionService {
 
     // Validate inspector exists and belongs to business
     const inspector = await this.userRepository.findOne({
-      where: { id: input.inspectorId },
-      relations: ['userBusinesses', 'userBusinesses.business'],
+      where: { id: input.inspectorId, businessId },
     });
 
-    if (!inspector || !inspector.userBusinesses.some(ub => ub.business.id === businessId)) {
+    if (!inspector) {
       throw new ForbiddenException('Inspector not authorized for this business');
     }
 

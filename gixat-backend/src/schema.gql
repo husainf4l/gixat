@@ -74,6 +74,8 @@ type User {
   name: String!
   type: UserType!
   isActive: Boolean!
+  businessId: ID
+  business: Business
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -786,9 +788,9 @@ type Query {
   searchCars(businessId: ID!, searchTerm: String!): [Car!]!
   carsWithExpiringInsurance(businessId: ID!, days: Int! = 30): [Car!]!
   carStats(businessId: ID!): CarStats!
-  repairSessions(businessId: ID!, limit: Int, offset: Int): [RepairSession!]!
-  repairSession(id: ID!, businessId: ID!): RepairSession!
-  repairSessionStatistics(businessId: ID!): String!
+  repairSessions(businessId: ID, limit: Int, offset: Int): [RepairSession!]!
+  repairSession(id: ID!, businessId: ID): RepairSession!
+  repairSessionStatistics(businessId: ID): String!
   inspections(repairSessionId: ID!, businessId: ID!): [Inspection!]!
   inspection(id: ID!, businessId: ID!): Inspection!
   inspectionsByType(repairSessionId: ID!, type: InspectionType!, businessId: ID!): [Inspection!]!
@@ -868,6 +870,8 @@ input CustomerSortInput {
 
 type Mutation {
   createGarage(input: CreateBusinessInput!): Business!
+  addUserToGarage(businessId: ID!, userId: ID!): Business
+  removeUserFromGarage(businessId: ID!, userId: ID!): Business
   updateGarage(id: ID!, input: UpdateBusinessInput!): Business!
   updateGarageSettings(id: ID!, settings: GarageSettingsInput!): Business!
   register(input: RegisterInput!): RegisterResponse!
@@ -881,15 +885,16 @@ type Mutation {
   updateCarStatus(id: ID!, status: CarStatus!): Car
   deleteCar(id: ID!): Boolean!
   createRepairSession(input: CreateRepairSessionInput!): RepairSession!
-  updateRepairSessionStatus(id: ID!, input: UpdateRepairSessionStatusInput!, businessId: ID!): RepairSession!
+  updateRepairSessionStatus(id: ID!, input: UpdateRepairSessionStatusInput!, businessId: ID): RepairSession!
   createInspection(input: CreateInspectionInput!, businessId: ID!): Inspection!
-  updateInspection(id: ID!, businessId: ID!, findings: String, recommendations: String, passed: Boolean): Inspection!
+  updateInspection(id: ID!, input: UpdateInspectionInput!, businessId: ID): Inspection!
   addInspectionMedia(inspectionId: ID!, base64File: String!, filename: String!, mimetype: String!, businessId: ID!): Media!
   createOffer(input: CreateOfferInput!, businessId: ID!): Offer!
   addOfferItem(offerId: ID!, input: CreateOfferItemInput!, businessId: ID!): OfferItem!
   approveOffer(id: ID!, businessId: ID!): Offer!
   rejectOffer(id: ID!, businessId: ID!, reason: String): Offer!
-  createJobCard(input: CreateJobCardInput!, businessId: ID!): JobCard!
+  createJobCard(input: CreateJobCardInput!, businessId: ID): JobCard!
+  updateJobCard(id: ID!, input: UpdateJobCardInput!, businessId: ID): JobCard!
   createJobTask(input: CreateJobTaskInput!, businessId: ID!): JobTask!
   createPart(input: CreatePartInput!, businessId: ID!): Part!
   updateJobTaskStatus(taskId: ID!, input: UpdateJobTaskStatusInput!, businessId: ID!): JobTask!
@@ -1028,7 +1033,7 @@ input CreateClientInput {
   zipCode: String
   dateOfBirth: String
   notes: String
-  businessId: ID!
+  businessId: ID
 }
 
 input UpdateClientInput {
@@ -1062,7 +1067,7 @@ input CreateCarInput {
   insuranceExpiryDate: String
   notes: String
   clientId: ID!
-  businessId: ID!
+  businessId: ID
 }
 
 input UpdateCarInput {
@@ -1091,7 +1096,7 @@ input CreateRepairSessionInput {
   priority: RepairPriority! = NORMAL
   expectedDeliveryDate: String
   carId: ID!
-  businessId: ID!
+  businessId: ID
   customerNotes: String
 }
 
@@ -1110,6 +1115,14 @@ input CreateInspectionInput {
   passed: Boolean!
   repairSessionId: ID!
   inspectorId: ID!
+}
+
+input UpdateInspectionInput {
+  findings: String
+  recommendations: String
+  passed: Boolean
+  mileageAtInspection: Float
+  technicalNotes: String
 }
 
 input CreateOfferInput {
@@ -1144,6 +1157,18 @@ input CreateJobCardInput {
   workInstructions: String
   repairSessionId: ID!
   assignedTechnicianId: ID!
+}
+
+input UpdateJobCardInput {
+  title: String
+  description: String
+  plannedStartDate: String
+  plannedEndDate: String
+  estimatedHours: Float
+  workInstructions: String
+  completionNotes: String
+  qualityCheckNotes: String
+  qualityApproved: Boolean
 }
 
 input CreateJobTaskInput {

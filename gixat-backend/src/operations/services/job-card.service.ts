@@ -43,16 +43,17 @@ export class JobCardService {
 
     // Validate technician exists and belongs to business
     const technician = await this.userRepository.findOne({
-      where: { id: input.assignedTechnicianId },
-      relations: ['userBusinesses', 'userBusinesses.business'],
+      where: { id: input.assignedTechnicianId, businessId },
     });
 
-    if (!technician || !technician.userBusinesses.some(ub => ub.business.id === businessId)) {
+    if (!technician) {
       throw new ForbiddenException('Technician not authorized for this business');
     }
 
     const jobCard = this.jobCardRepository.create({
       ...input,
+      plannedStartDate: new Date(input.plannedStartDate),
+      plannedEndDate: new Date(input.plannedEndDate),
       repairSession,
       assignedTechnician: technician,
       createdBy: { id: createdById } as User,
@@ -75,11 +76,10 @@ export class JobCardService {
 
     // Validate technician exists and belongs to business
     const technician = await this.userRepository.findOne({
-      where: { id: input.assignedTechnicianId },
-      relations: ['userBusinesses', 'userBusinesses.business'],
+      where: { id: input.assignedTechnicianId, businessId },
     });
 
-    if (!technician || !technician.userBusinesses.some(ub => ub.business.id === businessId)) {
+    if (!technician) {
       throw new ForbiddenException('Technician not authorized for this business');
     }
 
@@ -283,5 +283,24 @@ export class JobCardService {
     });
 
     return `JC-${year}-${String(count + 1).padStart(4, '0')}`;
+  }
+
+  async updateJobCard(id: number, input: any, businessId: number): Promise<JobCard> {
+    const jobCard = await this.findJobCard(id, businessId);
+
+    // Convert date strings to Date objects if provided
+    const updateData: any = { ...input };
+    if (updateData.plannedStartDate) {
+      updateData.plannedStartDate = new Date(updateData.plannedStartDate);
+    }
+    if (updateData.plannedEndDate) {
+      updateData.plannedEndDate = new Date(updateData.plannedEndDate);
+    }
+    if (updateData.qualityApproved && !jobCard.qualityApprovedAt) {
+      updateData.qualityApprovedAt = new Date();
+    }
+
+    await this.jobCardRepository.update(id, updateData);
+    return this.findJobCard(id, businessId);
   }
 }

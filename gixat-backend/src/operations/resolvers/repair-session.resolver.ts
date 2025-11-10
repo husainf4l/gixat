@@ -17,42 +17,64 @@ export class RepairSessionResolver {
     @Args('input') input: CreateRepairSessionInput,
     @CurrentUser() user: User,
   ): Promise<RepairSession> {
-    return this.repairSessionService.create(input, user.id);
+    if (!user.businessId) {
+      throw new Error('User is not associated with any garage/business. Please create or join a garage first.');
+    }
+    return this.repairSessionService.create(input, user.id, user.businessId);
   }
 
   @Query(() => [RepairSession])
   async repairSessions(
-    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
     @Args('limit', { type: () => Int, nullable: true }) limit?: number,
     @Args('offset', { type: () => Int, nullable: true }) offset?: number,
+    @CurrentUser() user?: User,
   ): Promise<RepairSession[]> {
+    const effectiveBusinessId = businessId || user?.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
     const options = limit ? { take: limit, skip: offset || 0 } : undefined;
-    return this.repairSessionService.findAll(businessId, options);
+    return this.repairSessionService.findAll(effectiveBusinessId, options);
   }
 
   @Query(() => RepairSession)
   async repairSession(
     @Args('id', { type: () => ID }) id: number,
-    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
+    @CurrentUser() user?: User,
   ): Promise<RepairSession> {
-    return this.repairSessionService.findOne(id, businessId);
+    const effectiveBusinessId = businessId || user?.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
+    return this.repairSessionService.findOne(id, effectiveBusinessId);
   }
 
   @Mutation(() => RepairSession)
   async updateRepairSessionStatus(
     @Args('id', { type: () => ID }) id: number,
     @Args('input') input: UpdateRepairSessionStatusInput,
-    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
     @CurrentUser() user: User,
   ): Promise<RepairSession> {
-    return this.repairSessionService.updateStatus(id, input, businessId, user.id);
+    const effectiveBusinessId = businessId || user.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
+    return this.repairSessionService.updateStatus(id, input, effectiveBusinessId, user.id);
   }
 
   @Query(() => String, { name: 'repairSessionStatistics' })
   async getRepairSessionStatistics(
-    @Args('businessId', { type: () => ID }) businessId: number,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
+    @CurrentUser() user?: User,
   ): Promise<string> {
-    const stats = await this.repairSessionService.getStatistics(businessId);
+    const effectiveBusinessId = businessId || user?.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
+    const stats = await this.repairSessionService.getStatistics(effectiveBusinessId);
     return JSON.stringify(stats);
   }
 }

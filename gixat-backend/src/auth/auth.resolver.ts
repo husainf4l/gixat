@@ -1,5 +1,7 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { LoginInput, RegisterInput } from './dto/auth.input';
 import { AuthResponse, LoginResponse, RegisterResponse, RefreshTokenResponse } from './dto/auth.response';
@@ -9,7 +11,11 @@ import { User } from '../user/user.entity';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
   @Mutation(() => RegisterResponse)
   async register(@Args('input') registerInput: RegisterInput): Promise<AuthResponse> {
@@ -31,7 +37,12 @@ export class AuthResolver {
   @Query(() => User)
   @UseGuards(JwtAuthGuard)
   async me(@CurrentUser() user: User): Promise<User> {
-    return user;
+    // Fetch user with business relationship
+    const userWithBusiness = await this.userRepository.findOne({
+      where: { id: user.id },
+      relations: ['business'],
+    });
+    return userWithBusiness || user;
   }
 
   @Query(() => String)

@@ -34,9 +34,10 @@ export class CreateRepairSessionInput {
   @IsNumber()
   carId: number;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
+  @IsOptional()
   @IsNumber()
-  businessId: number;
+  businessId?: number;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -337,4 +338,80 @@ export class UpdatePartStatusInput {
   @IsOptional()
   @IsDateString()
   installedDate?: string;
+}
+
+@InputType()
+export class UpdateJobCardInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsDateString()
+  plannedStartDate?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsDateString()
+  plannedEndDate?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  estimatedHours?: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  workInstructions?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  completionNotes?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  qualityCheckNotes?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  qualityApproved?: boolean;
+}
+
+@InputType()
+export class UpdateInspectionInput {
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  findings?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  recommendations?: string;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsBoolean()
+  passed?: boolean;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsNumber()
+  mileageAtInspection?: number;
+
+  @Field({ nullable: true })
+  @IsOptional()
+  @IsString()
+  technicalNotes?: string;
 }

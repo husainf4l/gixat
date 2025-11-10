@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { graphqlRequest } from "@/lib/graphql-client";
 import { storage } from "@/lib/storage";
 import { CREATE_INSPECTION_MUTATION } from "@/lib/dashboard.queries";
+import { useEmployeesByBusiness } from "@/lib/hooks/useEmployees";
 
 interface InspectionFormProps {
   repairSessionId: string;
@@ -12,6 +13,7 @@ interface InspectionFormProps {
 }
 
 export default function InspectionForm({ repairSessionId, businessId, onSuccess }: InspectionFormProps) {
+  const { employees, loading: employeesLoading } = useEmployeesByBusiness(businessId);
   const [formData, setFormData] = useState({
     type: "INITIAL",
     title: "",
@@ -22,6 +24,16 @@ export default function InspectionForm({ repairSessionId, businessId, onSuccess 
     mileageAtInspection: 0,
     technicalNotes: "",
   });
+
+  // Auto-populate inspectorId with first available employee
+  useEffect(() => {
+    if (employees.length > 0 && !formData.inspectorId) {
+      setFormData(prev => ({
+        ...prev,
+        inspectorId: employees[0].id,
+      }));
+    }
+  }, [employees]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -140,22 +152,37 @@ export default function InspectionForm({ repairSessionId, businessId, onSuccess 
             required
           >
             <option value="INITIAL">Initial Inspection</option>
-            <option value="PROGRESS">Progress Inspection</option>
+            <option value="TEST_DRIVE">Test Drive Inspection</option>
+            <option value="QUALITY_CHECK">Quality Check</option>
             <option value="FINAL">Final Inspection</option>
-            <option value="QUALITY">Quality Check</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-gray-700">Inspector ID (optional)</label>
-          <input
-            type="text"
-            name="inspectorId"
-            value={formData.inspectorId}
-            onChange={handleChange}
-            placeholder="Enter inspector ID (leave empty to assign later)"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
+          <label className="block text-sm font-medium mb-1 text-gray-700">Inspector (optional)</label>
+          {employeesLoading ? (
+            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-500">
+              Loading inspectors...
+            </div>
+          ) : employees.length > 0 ? (
+            <select
+              name="inspectorId"
+              value={formData.inspectorId}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="">-- Select an inspector --</option>
+              {employees.map((employee) => (
+                <option key={employee.id} value={employee.id}>
+                  {employee.name} ({employee.email}) - {employee.type}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="w-full px-3 py-2 border border-gray-300 rounded-lg text-orange-600">
+              No employees available
+            </div>
+          )}
         </div>
 
         <div>

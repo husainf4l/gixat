@@ -76,6 +76,10 @@ export class Business {
   @JoinColumn({ name: 'ownerId' })
   owner: User;
 
+  // One business (garage) can have many users
+  @OneToMany(() => User, (user) => user.business)
+  users: User[];
+
   @OneToMany(() => UserBusiness, (userBusiness) => userBusiness.business)
   userBusinesses: UserBusiness[];
 

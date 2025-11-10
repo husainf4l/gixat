@@ -3,7 +3,7 @@ import { UseGuards } from '@nestjs/common';
 import { InspectionService } from '../services/inspection.service';
 import { Inspection } from '../entities/inspection.entity';
 import { Media } from '../entities/media.entity';
-import { CreateInspectionInput } from '../dto/repair.input';
+import { CreateInspectionInput, UpdateInspectionInput } from '../dto/repair.input';
 import { InspectionType } from '../enums/repair.enum';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
@@ -51,17 +51,15 @@ export class InspectionResolver {
   @Mutation(() => Inspection)
   async updateInspection(
     @Args('id', { type: () => ID }) id: number,
-    @Args('businessId', { type: () => ID }) businessId: number,
-    @Args('findings', { nullable: true }) findings?: string,
-    @Args('recommendations', { nullable: true }) recommendations?: string,
-    @Args('passed', { type: () => Boolean, nullable: true }) passed?: boolean,
+    @Args('input') input: UpdateInspectionInput,
+    @Args('businessId', { type: () => ID, nullable: true }) businessId: number,
+    @CurrentUser() user?: User,
   ): Promise<Inspection> {
-    const updates: Partial<Inspection> = {};
-    if (findings !== undefined) updates.findings = findings;
-    if (recommendations !== undefined) updates.recommendations = recommendations;
-    if (passed !== undefined) updates.passed = passed;
-    
-    return this.inspectionService.update(id, updates, businessId);
+    const effectiveBusinessId = businessId || user?.businessId;
+    if (!effectiveBusinessId) {
+      throw new Error('Business ID is required');
+    }
+    return this.inspectionService.update(id, input, effectiveBusinessId);
   }
 
   @Mutation(() => Media)
