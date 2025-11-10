@@ -92,6 +92,7 @@ export async function graphqlRequest<T>(
     tokenPreview: token ? `${token.substring(0, 20)}...` : "NO_TOKEN",
     authHeader: headers["Authorization"] ? `${headers["Authorization"].substring(0, 30)}...` : "NONE",
     variables,
+    queryLength: query.length,
   });
 
   try {
@@ -120,6 +121,11 @@ export async function graphqlRequest<T>(
         statusText: response.statusText,
         body: data,
         errorMessage,
+        responseHeaders: {
+          contentType: response.headers.get("content-type"),
+          contentLength: response.headers.get("content-length"),
+        },
+        bodyString: JSON.stringify(data),
       });
       
       // Return error data instead of throwing, to handle 400s gracefully
