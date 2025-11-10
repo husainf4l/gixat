@@ -41,42 +41,42 @@ export default function ProfilePage() {
           return;
         }
 
-        // Try to fetch from GraphQL
-        const response = await graphqlRequest(GET_ME_QUERY, {}, token);
-        
-        if ((response as any).data?.me) {
-          const userData = (response as any).data.me;
-          setUser(userData);
-          setFormData({
-            name: userData.name || "",
-            email: userData.email || "",
-            phone: userData.phone || "",
-            address: userData.address || "",
-            city: userData.city || "",
-            state: userData.state || "",
-          });
-        } else {
-          // Fallback to localStorage
-          const storedUser = storage.getUser();
-          if (storedUser) {
-            setUser(storedUser);
+        // Try to fetch from GraphQL, but don't fail if it doesn't work
+        try {
+          const response = await graphqlRequest(GET_ME_QUERY, {}, token);
+          
+          if ((response as any).data?.me) {
+            const userData = (response as any).data.me;
+            setUser(userData);
             setFormData({
-              name: storedUser.firstName || "",
-              email: storedUser.email || "",
-              phone: storedUser.phone || "",
-              address: storedUser.address || "",
-              city: storedUser.city || "",
-              state: storedUser.state || "",
+              name: userData.name || "",
+              email: userData.email || "",
+              phone: userData.phone || "",
+              address: userData.address || "",
+              city: userData.city || "",
+              state: userData.state || "",
             });
+            return;
           }
+        } catch (graphqlError) {
+          console.warn("GraphQL fetch failed, falling back to localStorage:", graphqlError);
         }
-      } catch (error) {
-        console.error("Error fetching user:", error);
+        
         // Fallback to localStorage
         const storedUser = storage.getUser();
         if (storedUser) {
           setUser(storedUser);
+          setFormData({
+            name: storedUser.firstName || "",
+            email: storedUser.email || "",
+            phone: storedUser.phone || "",
+            address: storedUser.address || "",
+            city: storedUser.city || "",
+            state: storedUser.state || "",
+          });
         }
+      } catch (error) {
+        console.error("Error in fetchUserData:", error);
       } finally {
         setLoading(false);
       }

@@ -115,25 +115,22 @@ export async function graphqlRequest<T>(
     });
 
     if (!response.ok) {
-      const errorMessage = data.errors?.[0]?.message || data.errors?.[0] || "Unknown error";
-      console.error("GraphQL HTTP Error:", {
+      const errorMessage = data?.errors?.[0]?.message || (Array.isArray(data?.errors) ? data.errors[0] : data?.message) || "Unknown error";
+      console.warn("GraphQL HTTP Error Response:", {
         status: response.status,
         statusText: response.statusText,
-        body: data,
         errorMessage,
-        responseHeaders: {
-          contentType: response.headers.get("content-type"),
-          contentLength: response.headers.get("content-length"),
-        },
-        bodyString: JSON.stringify(data),
+        hasErrors: !!data?.errors,
+        dataKeys: data ? Object.keys(data) : [],
       });
       
       // Return error data instead of throwing, to handle 400s gracefully
-      if (response.status === 400 && data.errors) {
+      if (response.status === 400 && data?.errors) {
         return data;
       }
       
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // For other HTTP errors, still return the data if available
+      return data || { errors: [{ message: `HTTP ${response.status}: ${response.statusText}` }] };
     }
 
     // Handle Unauthorized error - try to refresh token and retry
