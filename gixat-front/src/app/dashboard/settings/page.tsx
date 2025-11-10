@@ -94,19 +94,34 @@ export default function SettingsPage() {
   };
 
   const handleSave = () => {
-    const updatedUser = {
-      ...user,
-      firstName: formData.fullName,
-      email: formData.email,
-      phone: formData.phone,
-      garageName: formData.garageName,
-      address: formData.address,
-      city: formData.city,
-      zipCode: formData.zipCode,
-    };
-    storage.setUser(updatedUser);
-    setUser(updatedUser);
-    alert("Settings updated successfully!");
+    // Validate form data
+    if (!formData.fullName || !formData.email) {
+      alert("❌ Please fill in required fields (Full Name and Email)");
+      return;
+    }
+
+    try {
+      // Update user data with new settings
+      const updatedUser = {
+        ...user,
+        firstName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        garageName: formData.garageName,
+        address: formData.address,
+        city: formData.city,
+        zipCode: formData.zipCode,
+      };
+
+      // Save to localStorage
+      storage.setUser(updatedUser);
+      setUser(updatedUser);
+
+      alert("✅ Account information updated successfully!");
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      alert("❌ Failed to save settings. Please try again.");
+    }
   };
 
   const handleCancel = () => {
@@ -149,13 +164,18 @@ export default function SettingsPage() {
   };
 
   const handleSaveNotifications = () => {
-    const updatedUser = {
-      ...user,
-      notificationPreferences,
-    };
-    storage.setUser(updatedUser);
-    setUser(updatedUser);
-    alert("Notification preferences updated successfully!");
+    try {
+      const updatedUser = {
+        ...user,
+        notificationPreferences,
+      };
+      storage.setUser(updatedUser);
+      setUser(updatedUser);
+      alert("✅ Notification preferences updated successfully!");
+    } catch (error) {
+      console.error("Error saving notifications:", error);
+      alert("❌ Failed to save notification preferences. Please try again.");
+    }
   };
 
   const handleSaveSecurity = () => {

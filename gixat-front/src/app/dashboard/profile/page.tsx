@@ -94,16 +94,34 @@ export default function ProfilePage() {
   };
 
   const handleSave = () => {
-    // Save to localStorage for now
-    if (user) {
+    // Validate form data
+    if (!formData.name || !formData.email) {
+      alert("❌ Please fill in required fields (Name and Email)");
+      return;
+    }
+
+    try {
+      // Update user data with new profile information
       const updatedUser: UserProfile = {
-        ...user,
-        ...formData,
+        id: user?.id || "",
+        type: user?.type || "CLIENT",
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
       };
+
+      // Save to localStorage
       storage.setUser(updatedUser);
       setUser(updatedUser);
       setIsEditing(false);
-      alert("Profile updated successfully!");
+
+      alert("✅ Profile updated successfully!");
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("❌ Failed to save profile. Please try again.");
     }
   };
 
