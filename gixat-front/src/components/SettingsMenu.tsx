@@ -8,9 +8,9 @@ interface SettingsMenuProps {
 
 export default function SettingsMenu({ isCollapsed }: SettingsMenuProps) {
   const settings = [
-    { label: "Profile", href: "/dashboard/profile", icon: "👤" },
-    { label: "Settings", href: "/dashboard/settings", icon: "⚙️" },
-    { label: "Notifications", href: "/dashboard/notifications", icon: "🔔" },
+    { label: "Profile", href: "/dashboard/profile", icon: "" },
+    { label: "Settings", href: "/dashboard/settings", icon: "" },
+    { label: "Notifications", href: "/dashboard/notifications", icon: "" },
   ];
 
   if (isCollapsed) {

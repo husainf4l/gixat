@@ -72,17 +72,17 @@ export default function ProfileCard({ isCollapsed }: ProfileCardProps) {
   const getRoleIcon = (type: string) => {
     switch (type) {
       case "ADMIN":
-        return "👨‍💼";
+        return "";
       case "BUSINESS":
-        return "🏢";
+        return "";
       case "OWNER":
-        return "👔";
+        return "";
       case "EMPLOYEE":
-        return "👨‍🔧";
+        return "";
       case "CLIENT":
-        return "👤";
+        return "";
       default:
-        return "👤";
+        return "";
     }
   };
 

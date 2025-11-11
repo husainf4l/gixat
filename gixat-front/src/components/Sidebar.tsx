@@ -17,15 +17,16 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Users", href: "/dashboard/users", icon: "👥", roles: ["admin"] },
-  { label: "Garages", href: "/dashboard/garages", icon: "🏢", roles: ["admin"] },
-  { label: "Clients", href: "/dashboard/clients", icon: "👨‍💼", roles: ["admin", "owner"] },
-  { label: "Repair Sessions", href: "/dashboard/repair-sessions", icon: "🔧", roles: ["admin", "owner"] },
-  { label: "My Cars", href: "/dashboard/my-cars", icon: "🚗", roles: ["client"] },
-  { label: "Service History", href: "/dashboard/service-history", icon: "📜", roles: ["client"] },
-  { label: "Reminders", href: "/dashboard/reminders", icon: "⏰", roles: ["client"] },
-  { label: "System Logs", href: "/dashboard/logs", icon: "📝", roles: ["admin"] },
-  { label: "Profile", href: "/dashboard/profile", icon: "👤", roles: ["client"] },
+  { label: "Users", href: "/dashboard/users", icon: "", roles: ["admin"] },
+  { label: "Garages", href: "/dashboard/garages", icon: "", roles: ["admin"] },
+  { label: "Clients", href: "/dashboard/clients", icon: "", roles: ["admin", "owner"] },
+  { label: "Repair Sessions", href: "/dashboard/repair-sessions", icon: "", roles: ["admin", "owner"] },
+  { label: "Inspections", href: "/dashboard/inspections", icon: "", roles: ["admin", "owner"] },
+  { label: "My Cars", href: "/dashboard/my-cars", icon: "", roles: ["client"] },
+  { label: "Service History", href: "/dashboard/service-history", icon: "", roles: ["client"] },
+  { label: "Reminders", href: "/dashboard/reminders", icon: "", roles: ["client"] },
+  { label: "System Logs", href: "/dashboard/logs", icon: "", roles: ["admin"] },
+  { label: "Profile", href: "/dashboard/profile", icon: "", roles: ["client"] },
 ];
 
 interface SidebarProps {
@@ -120,7 +121,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
                   }`}
                   title={isCollapsed ? item.label : ""}
                 >
-                  <span className="text-lg flex-shrink-0">{item.icon}</span>
+                  {item.icon && <span className="text-lg flex-shrink-0">{item.icon}</span>}
                   {!isCollapsed && (
                     <span className="text-sm truncate">{item.label}</span>
                   )}
@@ -160,7 +161,7 @@ export default function Sidebar({ userRole }: SidebarProps) {
             }`}
             title={isCollapsed ? "Logout" : ""}
           >
-            <span className="text-lg flex-shrink-0">🚪</span>
+            <span className="text-lg flex-shrink-0"></span>
             {!isCollapsed && (
               <span className="text-sm font-medium">Logout</span>
             )}

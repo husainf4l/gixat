@@ -8,7 +8,10 @@ import { graphqlRequest } from "@/lib/graphql-client";
 import DashboardLayout from "@/components/DashboardLayout";
 import EmptyState from "@/components/EmptyState";
 import { TableHeader, TablePagination } from "@/components/Table";
-import { GET_BUSINESS_CARS_QUERY } from "@/lib/dashboard.queries";
+import {
+  GET_CLIENT_CARS_QUERY,
+  GET_CLIENTS_QUERY,
+} from "@/lib/dashboard.queries";
 
 interface Car {
   id: string;
@@ -28,6 +31,7 @@ export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageLoading, setPageLoading] = useState(true);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
   const [filters, setFilters] = useState({
     status: "",
     make: "",
@@ -45,29 +49,44 @@ export default function CarsPage() {
     }
 
     setUser(storedUser);
+    
+    // Check if we need to refetch (after adding a car)
+    if (typeof window !== "undefined") {
+      const shouldRefetch = sessionStorage.getItem("refetchCars");
+      if (shouldRefetch === "true") {
+        console.log("Refetch flag detected, clearing and triggering refetch...");
+        sessionStorage.removeItem("refetchCars");
+        // Add delay to ensure backend has processed
+        setTimeout(() => {
+          setRefetchTrigger((prev) => prev + 1);
+        }, 300);
+      }
+    }
+    
     setPageLoading(false);
   }, [router]);
 
-  // Fetch cars data - always called, depends on auth state
+  // Fetch cars data - always called, depends on auth state and refetch trigger
   useEffect(() => {
     if (pageLoading || !user) {
       return;
     }
 
+    setLoading(true);
     const fetchCars = async () => {
       try {
         const token = storage.getAccessToken();
         if (!token) return;
 
-        const businessId = user.id || "1";
-        const response = await graphqlRequest<{ carsByBusiness: Car[] }>(
-          GET_BUSINESS_CARS_QUERY,
-          { businessId },
+        // Use GET_CLIENT_CARS_QUERY which doesn't require businessId parameter
+        const response = await graphqlRequest<{ cars: Car[] }>(
+          GET_CLIENT_CARS_QUERY,
+          {},
           token
         );
 
-        if (response.data?.carsByBusiness) {
-          let filtered = response.data.carsByBusiness;
+        if (response.data?.cars) {
+          let filtered = response.data.cars;
 
           if (filters.status) {
             filtered = filtered.filter((car) => car.status === filters.status);
@@ -93,11 +112,15 @@ export default function CarsPage() {
     };
 
     fetchCars();
-  }, [filters, pageLoading, user]);
+  }, [filters, pageLoading, user, refetchTrigger]);
 
   const handleLogout = () => {
     storage.clearAuth();
     router.push("/auth/login");
+  };
+
+  const handleAddCar = () => {
+    router.push("/dashboard/cars/add");
   };
 
   if (pageLoading) {
@@ -138,7 +161,10 @@ export default function CarsPage() {
             <h1 className="text-3xl font-bold text-gray-900">Cars in Garage</h1>
             <p className="text-gray-600 mt-2">Manage {cars.length} vehicle(s)</p>
           </div>
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+          <button
+            onClick={handleAddCar}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+          >
             ➕ Add Car
           </button>
         </div>
@@ -185,7 +211,7 @@ export default function CarsPage() {
                 title="No Cars in Garage"
                 description="You haven't added any cars to your garage yet. Click 'Add Car' to register a vehicle."
                 buttonLabel="Add First Car"
-                onButtonClick={() => {}}
+                onButtonClick={handleAddCar}
               />
             </div>
           ) : (

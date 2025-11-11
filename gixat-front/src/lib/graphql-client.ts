@@ -33,7 +33,6 @@ async function refreshAccessToken(): Promise<string | null> {
           mutation RefreshToken($refreshToken: String!) {
             refreshToken(refreshToken: $refreshToken) {
               accessToken
-              refreshToken
               user {
                 id
                 email
@@ -49,12 +48,9 @@ async function refreshAccessToken(): Promise<string | null> {
 
     if (data.data?.refreshToken?.accessToken) {
       const newAccessToken = data.data.refreshToken.accessToken;
-      const newRefreshToken = data.data.refreshToken.refreshToken;
       
       storage.setAccessToken(newAccessToken);
-      if (newRefreshToken) {
-        storage.setRefreshToken(newRefreshToken);
-      }
+      // Note: Backend doesn't provide new refresh token, keeping existing one
 
       console.log("Access token refreshed successfully");
       return newAccessToken;

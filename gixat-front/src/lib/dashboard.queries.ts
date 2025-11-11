@@ -11,6 +11,7 @@ export const GET_ME_QUERY = `
       address
       city
       state
+      businessHours
     }
   }
 `;
@@ -26,6 +27,29 @@ export const UPDATE_PROFILE_MUTATION = `
       address
       city
       state
+      businessHours
+    }
+  }
+`;
+
+/**
+ * CREATE CAR MUTATION
+ * Creates a new car and adds it to the business inventory
+ */
+export const CREATE_CAR_MUTATION = `
+  mutation CreateCar($input: CreateCarInput!) {
+    createCar(input: $input) {
+      id
+      licensePlate
+      make
+      model
+      year
+      vin
+      color
+      status
+      mileage
+      registrationDate
+      insuranceExpiryDate
     }
   }
 `;
@@ -275,6 +299,18 @@ export const GET_CLIENT_CARS_QUERY = `
       status
       insuranceExpiryDate
       mileage
+    }
+  }
+`;
+
+export const GET_CLIENTS_QUERY = `
+  query {
+    clients {
+      id
+      firstName
+      lastName
+      email
+      phone
     }
   }
 `;

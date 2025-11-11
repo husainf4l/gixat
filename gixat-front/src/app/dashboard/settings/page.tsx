@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import { storage } from "@/lib/storage";
+import { graphqlRequest } from "@/lib/graphql-client";
+import { GET_ME_QUERY, UPDATE_PROFILE_MUTATION } from "@/lib/dashboard.queries";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -16,6 +18,7 @@ export default function SettingsPage() {
     garageName: "",
     address: "",
     city: "",
+    state: "",
     zipCode: "",
     businessHours: {
       Monday: { start: "", end: "" },
@@ -38,34 +41,81 @@ export default function SettingsPage() {
     confirmPassword: "",
   });
 
+  const defaultBusinessHours = {
+    Monday: { start: "", end: "" },
+    Tuesday: { start: "", end: "" },
+    Wednesday: { start: "", end: "" },
+    Thursday: { start: "", end: "" },
+    Friday: { start: "", end: "" },
+    Saturday: { start: "", end: "" },
+    Sunday: { start: "", end: "" },
+  };
+
   useEffect(() => {
     const token = storage.getAccessToken();
     if (!token) {
       router.push("/auth/login");
       return;
     }
-    const userData = storage.getUser();
-    setUser(userData);
-    if (userData) {
-      setFormData({
-        fullName: userData.firstName || "",
-        email: userData.email || "",
-        phone: userData.phone || "",
-        garageName: userData.garageName || "",
-        address: userData.address || "",
-        city: userData.city || "",
-        zipCode: userData.zipCode || "",
-        businessHours: {
-          Monday: { start: "", end: "" },
-          Tuesday: { start: "", end: "" },
-          Wednesday: { start: "", end: "" },
-          Thursday: { start: "", end: "" },
-          Friday: { start: "", end: "" },
-          Saturday: { start: "", end: "" },
-          Sunday: { start: "", end: "" },
-        },
+
+    // Fetch from GraphQL to get all profile data including businessHours
+    graphqlRequest(GET_ME_QUERY, {}, token)
+      .then((response: any) => {
+        if (response.data?.me) {
+          const userData = response.data.me;
+          setUser(userData);
+
+          // Map GraphQL businessHours format to form format
+          const businessHours = userData.businessHours
+            ? {
+                Monday: userData.businessHours.monday || { start: "", end: "" },
+                Tuesday: userData.businessHours.tuesday || { start: "", end: "" },
+                Wednesday: userData.businessHours.wednesday || { start: "", end: "" },
+                Thursday: userData.businessHours.thursday || { start: "", end: "" },
+                Friday: userData.businessHours.friday || { start: "", end: "" },
+                Saturday: userData.businessHours.saturday || { start: "", end: "" },
+                Sunday: userData.businessHours.sunday || { start: "", end: "" },
+              }
+            : defaultBusinessHours;
+
+          setFormData((prev) => ({
+            ...prev,
+            fullName: userData.name || "",
+            email: userData.email || "",
+            phone: userData.phone || "",
+            address: userData.address || "",
+            city: userData.city || "",
+            state: userData.state || "",
+            garageName: userData.garageName || "",
+            zipCode: userData.zipCode || "",
+            businessHours,
+          }));
+        } else {
+          // Fallback to localStorage if GraphQL fails
+          const userData = storage.getUser();
+          setUser(userData);
+          if (userData) {
+            setFormData((prev) => ({
+              ...prev,
+              fullName: userData.firstName || "",
+              email: userData.email || "",
+              phone: userData.phone || "",
+              address: userData.address || "",
+              city: userData.city || "",
+              state: userData.state || "",
+              garageName: userData.garageName || "",
+              zipCode: userData.zipCode || "",
+              businessHours: defaultBusinessHours,
+            }));
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching profile:", error);
+        // Fallback to localStorage
+        const userData = storage.getUser();
+        setUser(userData);
       });
-    }
   }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,39 +150,100 @@ export default function SettingsPage() {
       return;
     }
 
+    const token = storage.getAccessToken();
+    if (!token) {
+      alert("❌ Not authenticated. Please login again.");
+      return;
+    }
+
     try {
-      // Update user data with new settings
-      const updatedUser = {
-        ...user,
-        firstName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        garageName: formData.garageName,
-        address: formData.address,
-        city: formData.city,
-        zipCode: formData.zipCode,
+      // Map form businessHours to GraphQL format
+      const businessHoursInput = {
+        monday: formData.businessHours.Monday,
+        tuesday: formData.businessHours.Tuesday,
+        wednesday: formData.businessHours.Wednesday,
+        thursday: formData.businessHours.Thursday,
+        friday: formData.businessHours.Friday,
+        saturday: formData.businessHours.Saturday,
+        sunday: formData.businessHours.Sunday,
       };
 
-      // Save to localStorage
-      storage.setUser(updatedUser);
-      setUser(updatedUser);
+      // Call the updateProfile mutation with input object
+      graphqlRequest(
+        UPDATE_PROFILE_MUTATION,
+        {
+          input: {
+            name: formData.fullName,
+            phone: formData.phone || null,
+            address: formData.address || null,
+            city: formData.city || null,
+            state: formData.state || null,
+            businessHours: businessHoursInput,
+          },
+        },
+        token
+      ).then((response: any) => {
+        if (response.data?.updateProfile) {
+          const updatedUser = response.data.updateProfile;
+          setUser(updatedUser);
 
-      alert("✅ Account information updated successfully!");
+          // Map updated businessHours back to form format
+          const businessHours = updatedUser.businessHours
+            ? {
+                Monday: updatedUser.businessHours.monday || { start: "", end: "" },
+                Tuesday: updatedUser.businessHours.tuesday || { start: "", end: "" },
+                Wednesday: updatedUser.businessHours.wednesday || { start: "", end: "" },
+                Thursday: updatedUser.businessHours.thursday || { start: "", end: "" },
+                Friday: updatedUser.businessHours.friday || { start: "", end: "" },
+                Saturday: updatedUser.businessHours.saturday || { start: "", end: "" },
+                Sunday: updatedUser.businessHours.sunday || { start: "", end: "" },
+              }
+            : formData.businessHours;
+
+          setFormData((prev) => ({
+            ...prev,
+            fullName: updatedUser.name || "",
+            email: updatedUser.email || "",
+            phone: updatedUser.phone || "",
+            address: updatedUser.address || "",
+            city: updatedUser.city || "",
+            state: updatedUser.state || "",
+            garageName: prev.garageName,
+            zipCode: prev.zipCode,
+            businessHours,
+          }));
+          
+          // Store both backend data and local fields
+          const userToStore = {
+            ...updatedUser,
+            garageName: formData.garageName,
+            zipCode: formData.zipCode,
+          };
+          storage.setUser(userToStore);
+          alert("✅ Account information updated successfully!");
+        } else if (response.errors) {
+          alert(`❌ Error: ${response.errors[0]?.message || "Failed to update account"}`);
+        }
+      }).catch((error: any) => {
+        console.error("Error updating account:", error);
+        alert("❌ Failed to save account information. Please try again.");
+      });
     } catch (error) {
-      console.error("Error saving settings:", error);
-      alert("❌ Failed to save settings. Please try again.");
+      console.error("Error in handleSave:", error);
+      alert("❌ Failed to save account information. Please try again.");
     }
   };
 
   const handleCancel = () => {
     if (user) {
       setFormData({
-        fullName: user.firstName || "",
+        fullName: user.firstName || user.name || "",
         email: user.email || "",
         phone: user.phone || "",
         garageName: user.garageName || "",
         address: user.address || "",
         city: user.city || "",
+        state: user.state || "",
         zipCode: user.zipCode || "",
         businessHours: {
           Monday: { start: "", end: "" },
