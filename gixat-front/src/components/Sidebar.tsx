@@ -18,26 +18,26 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   // Admin & Owner Features
-  { label: "Clients", href: "/dashboard/clients", icon: "👥", roles: ["admin", "owner"] },
+  { label: "Clients", href: "/dashboard/clients", icon: "�", roles: ["admin", "owner"] },
   { label: "Cars in Garage", href: "/dashboard/cars", icon: "🚗", roles: ["admin", "owner"] },
-  { label: "Work Orders", href: "/dashboard/repair-sessions", icon: "🧾", roles: ["admin", "owner"] },
+  { label: "Work Orders", href: "/dashboard/repair-sessions", icon: "📋", roles: ["admin", "owner"] },
   { label: "Appointments", href: "/dashboard/appointments", icon: "📅", roles: ["admin", "owner"] },
-  { label: "Inspections", href: "/dashboard/inspections", icon: "🧰", roles: ["admin", "owner"] },
-  { label: "Employees", href: "/dashboard/employees", icon: "👨‍🔧", roles: ["admin", "owner"] },
+  { label: "Inspections", href: "/dashboard/inspections", icon: "✓", roles: ["admin", "owner"] },
+  { label: "Employees", href: "/dashboard/employees", icon: "�", roles: ["admin", "owner"] },
   { label: "Inventory", href: "/dashboard/inventory", icon: "📦", roles: ["admin", "owner"] },
-  { label: "Offers", href: "/dashboard/offers", icon: "💳", roles: ["admin", "owner"] },
-  { label: "Financial", href: "/dashboard/financial", icon: "💰", roles: ["admin", "owner"] },
-  { label: "Notifications", href: "/dashboard/notifications", icon: "🔔", roles: ["admin", "owner"] },
-  { label: "Garages", href: "/dashboard/garages", icon: "🏢", roles: ["admin"] },
+  { label: "Offers", href: "/dashboard/offers", icon: "$", roles: ["admin", "owner"] },
+  { label: "Financial", href: "/dashboard/financial", icon: "$", roles: ["admin", "owner"] },
+  { label: "Notifications", href: "/dashboard/notifications", icon: "!", roles: ["admin", "owner"] },
+  { label: "Garages", href: "/dashboard/garages", icon: "▢", roles: ["admin"] },
   { label: "Users", href: "/dashboard/users", icon: "👤", roles: ["admin"] },
   { label: "System Logs", href: "/dashboard/logs", icon: "📋", roles: ["admin"] },
   
   // Client Features
   { label: "My Cars", href: "/dashboard/my-cars", icon: "🚗", roles: ["client"] },
-  { label: "Service History", href: "/dashboard/service-history", icon: "📚", roles: ["client"] },
+  { label: "Service History", href: "/dashboard/service-history", icon: "�", roles: ["client"] },
   { label: "My Appointments", href: "/dashboard/appointments", icon: "📅", roles: ["client"] },
-  { label: "Reminders", href: "/dashboard/reminders", icon: "⏰", roles: ["client"] },
-  { label: "My Offers", href: "/dashboard/offers", icon: "🏷️", roles: ["client"] },
+  { label: "Reminders", href: "/dashboard/reminders", icon: "🔔", roles: ["client"] },
+  { label: "My Offers", href: "/dashboard/offers", icon: "$", roles: ["client"] },
   { label: "Profile", href: "/dashboard/profile", icon: "👤", roles: ["client"] },
 ];
 

@@ -72,7 +72,7 @@ export default function FinancialPage() {
               <option>All Transactions</option>
             </select>
             <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition opacity-50 cursor-not-allowed">
-              📥 Export Report
+              Export Report
             </button>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function FinancialPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Revenue Trend</h3>
             <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
               <div className="text-center">
-                <p className="text-gray-500 mb-2">📊 Chart Placeholder</p>
+                <p className="text-gray-500 mb-2">Chart Placeholder</p>
                 <p className="text-sm text-gray-400">Revenue trend visualization</p>
               </div>
             </div>
@@ -119,7 +119,7 @@ export default function FinancialPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Expense Breakdown</h3>
             <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
               <div className="text-center">
-                <p className="text-gray-500 mb-2">🥧 Chart Placeholder</p>
+                <p className="text-gray-500 mb-2">Chart Placeholder</p>
                 <p className="text-sm text-gray-400">Expense distribution visualization</p>
               </div>
             </div>

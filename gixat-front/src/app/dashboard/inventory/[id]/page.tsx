@@ -126,7 +126,7 @@ export default function InventoryDetailPage() {
           localStorage.setItem("inventory", JSON.stringify(items));
           setItem(items[index]);
           setIsEditing(false);
-          alert("✅ Inventory item updated successfully!");
+          alert("Inventory item updated successfully!");
         }
       }
     } catch (error) {
@@ -145,7 +145,7 @@ export default function InventoryDetailPage() {
           const items = JSON.parse(savedItems);
           const filtered = items.filter((i: InventoryItem) => i.id !== itemId);
           localStorage.setItem("inventory", JSON.stringify(filtered));
-          alert("✅ Inventory item deleted successfully!");
+          alert("Inventory item deleted successfully!");
           router.push("/dashboard/inventory");
         }
       } catch (error) {

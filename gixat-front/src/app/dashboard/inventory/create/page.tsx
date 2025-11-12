@@ -80,7 +80,7 @@ export default function CreateInventoryPage() {
       localStorage.setItem("inventory", JSON.stringify(items));
 
       // Show success message and redirect
-      alert("✅ Inventory item added successfully!");
+      alert("Inventory item added successfully!");
       router.push("/dashboard/inventory");
     } catch (error) {
       console.error("Error creating inventory item:", error);
@@ -247,7 +247,7 @@ export default function CreateInventoryPage() {
               disabled={loading}
               className="flex-1 px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
             >
-              {loading ? "Adding..." : "📦 Add to Inventory"}
+              {loading ? "Adding..." : "Add to Inventory"}
             </button>
           </div>
         </form>

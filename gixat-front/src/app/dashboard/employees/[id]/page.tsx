@@ -136,7 +136,7 @@ export default function EmployeeDetailPage() {
           localStorage.setItem("employees", JSON.stringify(employees));
           setEmployee(employees[index]);
           setIsEditing(false);
-          alert("✅ Employee updated successfully!");
+          alert("Employee updated successfully!");
         }
       }
     } catch (error) {
@@ -155,7 +155,7 @@ export default function EmployeeDetailPage() {
           const employees = JSON.parse(savedEmployees);
           const filtered = employees.filter((emp: Employee) => emp.id !== employeeId);
           localStorage.setItem("employees", JSON.stringify(filtered));
-          alert("✅ Employee deleted successfully!");
+          alert("Employee deleted successfully!");
           router.push("/dashboard/employees");
         }
       } catch (error) {
@@ -207,13 +207,13 @@ export default function EmployeeDetailPage() {
                   onClick={() => setIsEditing(true)}
                   className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition font-medium border border-gray-200"
                 >
-                  ✏️ Edit
+                  Edit
                 </button>
                 <button
                   onClick={handleDelete}
                   className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 transition font-medium border border-red-200"
                 >
-                  🗑️ Delete
+                  Delete
                 </button>
               </>
             )}
@@ -427,7 +427,7 @@ export default function EmployeeDetailPage() {
                 disabled={saveLoading}
                 className="flex-1 px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
               >
-                {saveLoading ? "Saving..." : "💾 Save Changes"}
+                {saveLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

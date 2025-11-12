@@ -204,7 +204,7 @@ export default function OffersPage() {
             </p>
           </div>
           <button onClick={handleCreateQuote} className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium border border-gray-200">
-            ➕ New Quote
+            New Quote
           </button>
         </div>
 
@@ -219,7 +219,7 @@ export default function OffersPage() {
             <p className="text-3xl font-bold text-green-600">{loading ? "..." : stats.approved || 0}</p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-            <p className="text-gray-600 text-sm font-medium mb-2">Pending ⏳</p>
+            <p className="text-gray-600 text-sm font-medium mb-2">Pending</p>
             <p className="text-3xl font-bold text-yellow-600">{loading ? "..." : stats.pending || 0}</p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -297,7 +297,7 @@ export default function OffersPage() {
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(offer.status, offer.isExpired)}`}>
                           {offer.isExpired ? "Expired" : offer.status}
-                          {isExpiringSoon(offer.validUntil) && !offer.isExpired && " ⚠️"}
+                          {isExpiringSoon(offer.validUntil) && !offer.isExpired && " "}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDate(offer.validUntil)}</td>

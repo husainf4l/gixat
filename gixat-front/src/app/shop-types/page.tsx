@@ -32,7 +32,7 @@ export default function ShopTypes() {
       {/* Independent Auto Repair */}
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">🔧 Independent Auto Repair</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Independent Auto Repair</h2>
           <p className="text-base text-gray-600 mb-6">For local workshops and small repair businesses with 2–10 technicians.</p>
           <p className="text-base text-gray-700 leading-relaxed mb-6">Simple, affordable, and powerful — everything you need to stay organized and deliver exceptional service without the complexity of enterprise systems.</p>
           <div className="mb-8">
@@ -47,7 +47,7 @@ export default function ShopTypes() {
                 "Quick financial summaries — invoices, payments, and cash flow reports."
               ].map((item: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold flex-shrink-0">✅</span>
+                  <span className="text-green-600 font-bold flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -62,7 +62,7 @@ export default function ShopTypes() {
       {/* Multi-Location Repair Network */}
       <section className="py-20 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">🏢 Multi-Location Repair Network</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Multi-Location Repair Network</h2>
           <p className="text-base text-gray-600 mb-6">For regional repair chains and franchise networks.</p>
           <p className="text-base text-gray-700 leading-relaxed mb-6">Centralize control across all your workshops with unified reporting, shared inventory, and customer consistency — while maintaining location-level flexibility.</p>
           <div className="mb-8">
@@ -77,7 +77,7 @@ export default function ShopTypes() {
                 "Brand consistency tools for estimates, invoices, and communications."
               ].map((item: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold flex-shrink-0">✅</span>
+                  <span className="text-green-600 font-bold flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -92,7 +92,7 @@ export default function ShopTypes() {
       {/* Fleet Service Center */}
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">🚚 Fleet Service Center</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Fleet Service Center</h2>
           <p className="text-base text-gray-600 mb-6">For companies managing corporate, government, or logistics vehicle fleets.</p>
           <p className="text-base text-gray-700 leading-relaxed mb-6">Stay in control of every vehicle with automated maintenance, compliance tracking, and predictive insights that reduce downtime and costs.</p>
           <div className="mb-8">
@@ -107,7 +107,7 @@ export default function ShopTypes() {
                 "Advanced cost-per-vehicle analytics and utilization summaries."
               ].map((item: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold flex-shrink-0">✅</span>
+                  <span className="text-green-600 font-bold flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -122,7 +122,7 @@ export default function ShopTypes() {
       {/* Dealership Service Department */}
       <section className="py-20 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">🚘 Dealership Service Department</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Dealership Service Department</h2>
           <p className="text-base text-gray-600 mb-6">For dealerships offering after-sales repair and warranty services.</p>
           <p className="text-base text-gray-700 leading-relaxed mb-6">Seamlessly integrate your service operations with sales and customer relations — and deliver top-tier, brand-aligned service experiences.</p>
           <div className="mb-8">
@@ -137,7 +137,7 @@ export default function ShopTypes() {
                 "Custom dashboards for service advisors and department leads."
               ].map((item: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold flex-shrink-0">✅</span>
+                  <span className="text-green-600 font-bold flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -152,7 +152,7 @@ export default function ShopTypes() {
       {/* Specialty Service Centers */}
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">⚙️ Specialty Service Centers</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Specialty Service Centers</h2>
           <p className="text-base text-gray-600 mb-6">For focused automotive services such as transmission, electrical, or collision repair.</p>
           <p className="text-base text-gray-700 leading-relaxed mb-6">GIXAT adapts to your specialization with flexible templates, vendor tracking, and compliance management tailored to your workflow.</p>
           <div className="mb-8">
@@ -167,7 +167,7 @@ export default function ShopTypes() {
                 "Integration with diagnostic tools and IoT devices (optional)."
               ].map((item: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold flex-shrink-0">✅</span>
+                  <span className="text-green-600 font-bold flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -182,7 +182,7 @@ export default function ShopTypes() {
       {/* Corporate Maintenance Operations */}
       <section className="py-20 bg-gray-50 border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">🏗️ Corporate Maintenance Operations</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Corporate Maintenance Operations</h2>
           <p className="text-base text-gray-600 mb-6">For large enterprises maintaining internal vehicle fleets.</p>
           <p className="text-base text-gray-700 leading-relaxed mb-6">Manage everything in one place — with deep analytics, role-based access, and full compliance visibility.</p>
           <div className="mb-8">
@@ -197,7 +197,7 @@ export default function ShopTypes() {
                 "Custom API access for integrating GIXAT with internal IT infrastructure."
               ].map((item: string, i: number) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className="text-green-600 font-bold flex-shrink-0">✅</span>
+                  <span className="text-green-600 font-bold flex-shrink-0">•</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -212,7 +212,7 @@ export default function ShopTypes() {
       {/* Features Comparison Table */}
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">⚙️ Features by Business Size</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Features by Business Size</h2>
           <p className="text-sm font-medium text-gray-600 mb-8">
             Compare features across different business sizes to find the right fit for your operation.
           </p>

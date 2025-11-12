@@ -162,7 +162,7 @@ export default function OfferDetailPage() {
           localStorage.setItem("offers", JSON.stringify(offers));
           setOffer(offers[index]);
           setIsEditing(false);
-          alert("✅ Quote updated successfully!");
+          alert("Quote updated successfully!");
         }
       }
     } catch (error) {
@@ -181,7 +181,7 @@ export default function OfferDetailPage() {
           const offers = JSON.parse(savedOffers);
           const filtered = offers.filter((o: Offer) => o.id !== offerId);
           localStorage.setItem("offers", JSON.stringify(filtered));
-          alert("✅ Quote deleted successfully!");
+          alert("Quote deleted successfully!");
           router.push("/dashboard/offers");
         }
       } catch (error) {
@@ -240,13 +240,13 @@ export default function OfferDetailPage() {
                   onClick={() => setIsEditing(true)}
                   className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition font-medium border border-gray-200"
                 >
-                  ✏️ Edit
+                  Edit
                 </button>
                 <button
                   onClick={handleDelete}
                   className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 transition font-medium border border-red-200"
                 >
-                  🗑️ Delete
+                  Delete
                 </button>
               </>
             )}
@@ -438,7 +438,7 @@ export default function OfferDetailPage() {
                 disabled={saveLoading}
                 className="flex-1 px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
               >
-                {saveLoading ? "Saving..." : "💾 Save Changes"}
+                {saveLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>

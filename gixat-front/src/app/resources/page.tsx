@@ -6,7 +6,7 @@ export default function Resources() {
   const resourceCards = [
     {
       title: "Documentation",
-      icon: "📚",
+      icon: "📖",
       cta: "Open Docs →",
     },
     {
@@ -16,7 +16,7 @@ export default function Resources() {
     },
     {
       title: "Customer Support",
-      icon: "💬",
+      icon: "💭",
       cta: "Reach Support →",
     },
   ];
