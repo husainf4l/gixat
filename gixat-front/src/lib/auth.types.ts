@@ -17,6 +17,7 @@ export interface RegisterInput {
 export interface LoginInput {
   email: string;
   password: string;
+  phone?: string;
 }
 
 export interface AuthResponse {

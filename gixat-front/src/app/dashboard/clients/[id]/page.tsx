@@ -34,57 +34,7 @@ export default function ClientDetailsPage() {
   const [pageLoading, setPageLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    if (isInitialized) return;
-
-    const storedUser = storage.getUser();
-    const accessToken = storage.getAccessToken();
-
-    if (!storedUser || !accessToken) {
-      router.push("/auth/login");
-      return;
-    }
-
-    setIsInitialized(true);
-
-    // Check if BUSINESS user has garage set up
-    if (storedUser.type === "BUSINESS") {
-      checkGarageAndFetch(accessToken, storedUser);
-    } else {
-      setUser(storedUser);
-      setPageLoading(false);
-      fetchClient(accessToken);
-    }
-  }, [router, isInitialized]);
-
-  const checkGarageAndFetch = async (token: string, currentUser: User) => {
-    try {
-      const garageResponse = await graphqlRequest<{ 
-        myGarages: Array<{ id: string }> 
-      }>(
-        `query {
-          myGarages {
-            id
-          }
-        }`,
-        {},
-        token
-      );
-
-      if (!garageResponse.data?.myGarages || garageResponse.data.myGarages.length === 0) {
-        router.push("/setup-garage");
-        return;
-      }
-
-      setUser(currentUser);
-      setPageLoading(false);
-      fetchClient(token);
-    } catch (error) {
-      console.error("Error checking garage:", error);
-      router.push("/setup-garage");
-    }
-  };
-
+  // Declare functions BEFORE useEffect to avoid temporal dead zone
   const fetchClient = async (token: string) => {
     try {
       const response = await graphqlRequest<{ client: Client }>(
@@ -118,6 +68,57 @@ export default function ClientDetailsPage() {
       console.error("Error fetching client:", error);
     }
   };
+
+  const checkGarageAndFetch = async (token: string, currentUser: User) => {
+    try {
+      const garageResponse = await graphqlRequest<{ 
+        myGarages: Array<{ id: string }> 
+      }>(
+        `query {
+          myGarages {
+            id
+          }
+        }`,
+        {},
+        token
+      );
+
+      if (!garageResponse.data?.myGarages || garageResponse.data.myGarages.length === 0) {
+        router.push("/setup-garage");
+        return;
+      }
+
+      setUser(currentUser);
+      setPageLoading(false);
+      fetchClient(token);
+    } catch (error) {
+      console.error("Error checking garage:", error);
+      router.push("/setup-garage");
+    }
+  };
+
+  useEffect(() => {
+    if (isInitialized) return;
+
+    const storedUser = storage.getUser();
+    const accessToken = storage.getAccessToken();
+
+    if (!storedUser || !accessToken) {
+      router.push("/auth/login");
+      return;
+    }
+
+    setIsInitialized(true);
+
+    // Check if BUSINESS user has garage set up
+    if (storedUser.type === "BUSINESS") {
+      checkGarageAndFetch(accessToken, storedUser);
+    } else {
+      setUser(storedUser);
+      setPageLoading(false);
+      fetchClient(accessToken);
+    }
+  }, [router, isInitialized]);
 
   const handleLogout = () => {
     storage.clearAuth();

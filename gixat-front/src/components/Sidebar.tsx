@@ -17,16 +17,28 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Users", href: "/dashboard/users", icon: "", roles: ["admin"] },
-  { label: "Garages", href: "/dashboard/garages", icon: "", roles: ["admin"] },
-  { label: "Clients", href: "/dashboard/clients", icon: "", roles: ["admin", "owner"] },
-  { label: "Repair Sessions", href: "/dashboard/repair-sessions", icon: "", roles: ["admin", "owner"] },
-  { label: "Inspections", href: "/dashboard/inspections", icon: "", roles: ["admin", "owner"] },
-  { label: "My Cars", href: "/dashboard/my-cars", icon: "", roles: ["client"] },
-  { label: "Service History", href: "/dashboard/service-history", icon: "", roles: ["client"] },
-  { label: "Reminders", href: "/dashboard/reminders", icon: "", roles: ["client"] },
-  { label: "System Logs", href: "/dashboard/logs", icon: "", roles: ["admin"] },
-  { label: "Profile", href: "/dashboard/profile", icon: "", roles: ["client"] },
+  // Admin & Owner Features
+  { label: "Clients", href: "/dashboard/clients", icon: "👥", roles: ["admin", "owner"] },
+  { label: "Cars in Garage", href: "/dashboard/cars", icon: "🚗", roles: ["admin", "owner"] },
+  { label: "Work Orders", href: "/dashboard/repair-sessions", icon: "🧾", roles: ["admin", "owner"] },
+  { label: "Appointments", href: "/dashboard/appointments", icon: "📅", roles: ["admin", "owner"] },
+  { label: "Inspections", href: "/dashboard/inspections", icon: "🧰", roles: ["admin", "owner"] },
+  { label: "Employees", href: "/dashboard/employees", icon: "👨‍🔧", roles: ["admin", "owner"] },
+  { label: "Inventory", href: "/dashboard/inventory", icon: "📦", roles: ["admin", "owner"] },
+  { label: "Offers", href: "/dashboard/offers", icon: "💳", roles: ["admin", "owner"] },
+  { label: "Financial", href: "/dashboard/financial", icon: "💰", roles: ["admin", "owner"] },
+  { label: "Notifications", href: "/dashboard/notifications", icon: "🔔", roles: ["admin", "owner"] },
+  { label: "Garages", href: "/dashboard/garages", icon: "🏢", roles: ["admin"] },
+  { label: "Users", href: "/dashboard/users", icon: "👤", roles: ["admin"] },
+  { label: "System Logs", href: "/dashboard/logs", icon: "📋", roles: ["admin"] },
+  
+  // Client Features
+  { label: "My Cars", href: "/dashboard/my-cars", icon: "🚗", roles: ["client"] },
+  { label: "Service History", href: "/dashboard/service-history", icon: "📚", roles: ["client"] },
+  { label: "My Appointments", href: "/dashboard/appointments", icon: "📅", roles: ["client"] },
+  { label: "Reminders", href: "/dashboard/reminders", icon: "⏰", roles: ["client"] },
+  { label: "My Offers", href: "/dashboard/offers", icon: "🏷️", roles: ["client"] },
+  { label: "Profile", href: "/dashboard/profile", icon: "👤", roles: ["client"] },
 ];
 
 interface SidebarProps {
@@ -109,28 +121,27 @@ export default function Sidebar({ userRole }: SidebarProps) {
 
         {/* Navigation Items */}
         <nav className="flex-1 px-2 py-4 overflow-y-auto">
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {filteredNavItems.map((item) => (
               <div key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ease-out group ${
                     isActive(item.href)
-                      ? "bg-blue-50 text-blue-600 font-medium"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-black text-white font-medium shadow-sm"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                   }`}
                   title={isCollapsed ? item.label : ""}
                 >
-                  {item.icon && <span className="text-lg flex-shrink-0">{item.icon}</span>}
+                  <span className={`text-lg flex-shrink-0 transition-transform group-hover:scale-110 ${
+                    isActive(item.href) ? "scale-110" : ""
+                  }`}>
+                    {item.icon}
+                  </span>
                   {!isCollapsed && (
-                    <span className="text-sm truncate">{item.label}</span>
+                    <span className="text-sm font-500 truncate">{item.label}</span>
                   )}
                 </Link>
-                
-                {/* Show Cars in Garage section after Repair Sessions for admin/owner */}
-                {item.label === "Repair Sessions" && !isCollapsed && (
-                  <CarsInGarage isCollapsed={isCollapsed} />
-                )}
               </div>
             ))}
           </div>

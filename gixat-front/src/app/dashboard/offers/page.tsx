@@ -69,45 +69,65 @@ export default function OffersPage() {
     router.push("/auth/login");
   };
 
+  const handleCreateQuote = () => {
+    router.push("/dashboard/offers/create");
+  };
+
   const fetchData = async (token: string) => {
     try {
       const user = storage.getUser();
       
-      if (!token || !user) return;
+      if (!user) return;
 
-      // Fetch offers
-      const response = await graphqlRequest<{ offers: Offer[] }>(
-        GET_BUSINESS_OFFERS_QUERY,
-        { businessId: user.id || user.businessId },
-        token
-      );
+      // Try to fetch from localStorage first (for development/testing)
+      const savedOffers = localStorage.getItem("offers");
+      let allOffers: Offer[] = [];
 
-      if (response.data?.offers) {
-        let filtered = response.data.offers;
-
-        if (filters.status) {
-          filtered = filtered.filter((offer) => offer.status === filters.status);
-        }
-        if (filters.search) {
-          filtered = filtered.filter((offer) =>
-            offer.offerNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
-            offer.title.toLowerCase().includes(filters.search.toLowerCase())
+      if (savedOffers) {
+        allOffers = JSON.parse(savedOffers);
+      } else {
+        // Try GraphQL as fallback
+        try {
+          const response = await graphqlRequest<{ offers: Offer[] }>(
+            GET_BUSINESS_OFFERS_QUERY,
+            { businessId: user.id || user.businessId },
+            token
           );
+
+          if (response.data?.offers) {
+            allOffers = response.data.offers;
+          }
+        } catch (gqlError) {
+          console.warn("GraphQL fetch failed, using localStorage only:", gqlError);
         }
-
-        setOffers(filtered);
       }
 
-      // Fetch statistics
-      const statsResponse = await graphqlRequest<{ offerStatistics: OfferStats }>(
-        GET_OFFER_STATISTICS_QUERY,
-        { businessId: user.id || user.businessId },
-        token
-      );
+      let filtered = allOffers;
 
-      if (statsResponse.data?.offerStatistics) {
-        setStats(statsResponse.data.offerStatistics);
+      if (filters.status) {
+        filtered = filtered.filter((offer) => offer.status === filters.status);
       }
+      if (filters.search) {
+        filtered = filtered.filter((offer) =>
+          offer.offerNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
+          offer.title.toLowerCase().includes(filters.search.toLowerCase())
+        );
+      }
+
+      setOffers(filtered);
+
+      // Calculate stats from filtered offers
+      const stats: OfferStats = {
+        total: allOffers.length,
+        approved: allOffers.filter(o => o.status === "APPROVED").length,
+        rejected: allOffers.filter(o => o.status === "REJECTED").length,
+        pending: allOffers.filter(o => o.status === "PENDING").length,
+        approvedValue: allOffers
+          .filter(o => o.status === "APPROVED")
+          .reduce((sum, o) => sum + (o.finalAmount || o.totalCost || 0), 0),
+        totalValue: allOffers.reduce((sum, o) => sum + (o.finalAmount || o.totalCost || 0), 0),
+      };
+      setStats(stats);
     } catch (error) {
       console.error("Error fetching offers:", error);
     } finally {
@@ -183,7 +203,7 @@ export default function OffersPage() {
               {offers.length > 0 ? `${offers.length} quote(s)` : "Create and manage repair quotes for customers"}
             </p>
           </div>
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+          <button onClick={handleCreateQuote} className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium border border-gray-200">
             ➕ New Quote
           </button>
         </div>
@@ -235,7 +255,7 @@ export default function OffersPage() {
               <option value="REJECTED">Rejected</option>
               <option value="ACCEPTED">Accepted</option>
             </select>
-            <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition font-medium">
+            <button className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium border border-gray-200">
               🔍 Search
             </button>
           </div>
@@ -250,7 +270,7 @@ export default function OffersPage() {
                 title="No Quotes"
                 description="You haven't created any quotes yet. Click 'New Quote' to generate repair estimates for customers."
                 buttonLabel="Create First Quote"
-                onButtonClick={() => {}}
+                onButtonClick={handleCreateQuote}
               />
             </div>
           ) : (
@@ -259,7 +279,11 @@ export default function OffersPage() {
                 <TableHeader columns={["Quote #", "Title", "Labor", "Parts", "Total", "Status", "Valid Until"]} />
                 <tbody className="divide-y divide-gray-200">
                   {offers.map((offer) => (
-                    <tr key={offer.id} className={`hover:bg-gray-50 ${isExpiringSoon(offer.validUntil) ? "bg-orange-50" : ""}`}>
+                    <tr 
+                      key={offer.id} 
+                      className={`hover:bg-gray-50 cursor-pointer transition ${isExpiringSoon(offer.validUntil) ? "bg-orange-50" : ""}`}
+                      onClick={() => router.push(`/dashboard/offers/${offer.id}`)}
+                    >
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">{offer.offerNumber}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{offer.title}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatCurrency(offer.laborCost)}</td>

@@ -61,49 +61,61 @@ export default function AppointmentsPage() {
 
     const fetchAppointments = async () => {
       try {
-        const token = storage.getAccessToken();
-        
-        if (!token) {
-          console.warn("Missing token");
-          return;
-        }
+        // Try to fetch from localStorage first (for development/testing)
+        const savedAppointments = localStorage.getItem("appointments");
+        let allAppointments: Appointment[] = [];
 
-        // Fetch appointments - requires filter with businessId
-        const businessId = user.id || "1";
-        const response = await graphqlRequest<{ appointments: Appointment[] }>(
-          `query($filter: AppointmentFilterInput!) {
-            appointments(filter: $filter) {
-              id
-              appointmentNumber
-              title
-              status
-              scheduledDate
-              scheduledTime
-              createdAt
+        if (savedAppointments) {
+          allAppointments = JSON.parse(savedAppointments);
+        } else {
+          // Try GraphQL as fallback
+          const token = storage.getAccessToken();
+          
+          if (token) {
+            try {
+              // Fetch appointments - requires filter with businessId
+              const businessId = user.id || "1";
+              const response = await graphqlRequest<{ appointments: Appointment[] }>(
+                `query($filter: AppointmentFilterInput!) {
+                  appointments(filter: $filter) {
+                    id
+                    appointmentNumber
+                    title
+                    status
+                    scheduledDate
+                    scheduledTime
+                    createdAt
+                  }
+                }`,
+                { filter: { businessId } },
+                token
+              );
+
+              if (response.data?.appointments) {
+                allAppointments = response.data.appointments;
+              }
+            } catch (gqlError) {
+              console.warn("GraphQL fetch failed, using localStorage only:", gqlError);
             }
-          }`,
-          { filter: { businessId } },
-          token
-        );
-
-        if (response.data?.appointments) {
-          let filtered = response.data.appointments;
-
-          if (filters.status) {
-            filtered = filtered.filter((apt) => apt.status === filters.status);
           }
-          if (filters.priority) {
-            filtered = filtered.filter((apt) => apt.priority === filters.priority);
-          }
-          if (filters.search) {
-            filtered = filtered.filter((apt) =>
-              apt.appointmentNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
-              apt.title.toLowerCase().includes(filters.search.toLowerCase())
-            );
-          }
-
-          setAppointments(filtered);
         }
+
+        let filtered = allAppointments;
+
+        if (filters.status) {
+          filtered = filtered.filter((apt) => apt.status === filters.status);
+        }
+        if (filters.priority) {
+          filtered = filtered.filter((apt) => apt.priority === filters.priority);
+        }
+        if (filters.search) {
+          filtered = filtered.filter((apt) =>
+            apt.appointmentNumber.toLowerCase().includes(filters.search.toLowerCase()) ||
+            apt.title.toLowerCase().includes(filters.search.toLowerCase())
+          );
+        }
+
+        setAppointments(filtered);
       } catch (error) {
         console.error("Error fetching appointments:", error);
         // Set empty state on error instead of crashing
@@ -119,6 +131,16 @@ export default function AppointmentsPage() {
   const handleLogout = () => {
     storage.clearAuth();
     router.push("/auth/login");
+  };
+
+  const handleCreateAppointment = () => {
+    // Navigate to create appointment page or open modal
+    router.push("/dashboard/appointments/create");
+  };
+
+  const handleSearch = () => {
+    // Trigger search with current filters
+    console.log("Searching with filters:", filters);
   };
 
   if (pageLoading) {
@@ -186,7 +208,10 @@ export default function AppointmentsPage() {
               {appointments.length > 0 ? `${appointments.length} appointment(s)` : "Manage customer appointments and scheduling"}
             </p>
           </div>
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+          <button 
+            onClick={handleCreateAppointment}
+            className="px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium border border-gray-200"
+          >
             ➕ New Appointment
           </button>
         </div>
@@ -253,7 +278,10 @@ export default function AppointmentsPage() {
               <option value="HIGH">High</option>
               <option value="URGENT">Urgent</option>
             </select>
-            <button className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition font-medium">
+            <button 
+              onClick={handleSearch}
+              className="px-4 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium border border-gray-200"
+            >
               🔍 Search
             </button>
           </div>
@@ -268,7 +296,7 @@ export default function AppointmentsPage() {
                 title="No Appointments"
                 description="You haven't scheduled any appointments yet. Click 'New Appointment' to create one."
                 buttonLabel="Create First Appointment"
-                onButtonClick={() => {}}
+                onButtonClick={handleCreateAppointment}
               />
             </div>
           ) : (
@@ -277,7 +305,11 @@ export default function AppointmentsPage() {
                 <TableHeader columns={["Appointment #", "Title", "Date", "Time", "Duration", "Status", "Priority"]} />
                 <tbody className="divide-y divide-gray-200">
                   {appointments.map((apt) => (
-                    <tr key={apt.id} className="hover:bg-gray-50">
+                    <tr 
+                      key={apt.id} 
+                      className="hover:bg-gray-50 cursor-pointer transition"
+                      onClick={() => router.push(`/dashboard/appointments/${apt.id}`)}
+                    >
                       <td className="px-6 py-4 text-sm font-medium text-gray-900">{apt.appointmentNumber}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{apt.title}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">{formatDate(apt.scheduledDate)}</td>

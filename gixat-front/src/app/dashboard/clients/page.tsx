@@ -45,64 +45,7 @@ export default function ClientsPage() {
     notes: "",
   });
 
-  useEffect(() => {
-    // Only run once on component mount
-    if (isInitialized) return;
-
-    const storedUser = storage.getUser();
-    const accessToken = storage.getAccessToken();
-
-    if (!storedUser || !accessToken) {
-      router.push("/auth/login");
-      return;
-    }
-
-    setIsInitialized(true);
-
-    // Check if BUSINESS user has garage set up
-    if (storedUser.type === "BUSINESS") {
-      checkGarageAndFetch(accessToken, storedUser);
-    } else {
-      setUser(storedUser);
-      setBusinessId(storedUser.id || "1");
-      setPageLoading(false);
-      fetchClients(accessToken, storedUser);
-    }
-  }, [router, isInitialized]);
-
-  const checkGarageAndFetch = async (token: string, currentUser: User) => {
-    try {
-      // Check if user has a garage
-      const garageResponse = await graphqlRequest<{ 
-        myGarages: Array<{ id: string }> 
-      }>(
-        `query {
-          myGarages {
-            id
-          }
-        }`,
-        {},
-        token
-      );
-
-      if (!garageResponse.data?.myGarages || garageResponse.data.myGarages.length === 0) {
-        // No garage, redirect to setup
-        router.push("/setup-garage");
-        return;
-      }
-
-      // Has garage, proceed
-      setUser(currentUser);
-      setBusinessId(currentUser.id || "1");
-      setPageLoading(false);
-      fetchClients(token, currentUser);
-    } catch (error) {
-      console.error("Error checking garage:", error);
-      // If error checking garage, redirect to setup
-      router.push("/setup-garage");
-    }
-  };
-
+  // Declare functions BEFORE useEffect to avoid temporal dead zone
   const fetchClients = async (token: string, currentUser: User) => {
     try {
       if (!token) {
@@ -147,6 +90,64 @@ export default function ClientsPage() {
       setClients([]);
     }
   };
+
+  const checkGarageAndFetch = async (token: string, currentUser: User) => {
+    try {
+      // Check if user has a garage
+      const garageResponse = await graphqlRequest<{ 
+        myGarages: Array<{ id: string }> 
+      }>(
+        `query {
+          myGarages {
+            id
+          }
+        }`,
+        {},
+        token
+      );
+
+      if (!garageResponse.data?.myGarages || garageResponse.data.myGarages.length === 0) {
+        // No garage, redirect to setup
+        router.push("/setup-garage");
+        return;
+      }
+
+      // Has garage, proceed
+      setUser(currentUser);
+      setBusinessId(currentUser.id || "1");
+      setPageLoading(false);
+      fetchClients(token, currentUser);
+    } catch (error) {
+      console.error("Error checking garage:", error);
+      // If error checking garage, redirect to setup
+      router.push("/setup-garage");
+    }
+  };
+
+  useEffect(() => {
+    // Only run once on component mount
+    if (isInitialized) return;
+
+    const storedUser = storage.getUser();
+    const accessToken = storage.getAccessToken();
+
+    if (!storedUser || !accessToken) {
+      router.push("/auth/login");
+      return;
+    }
+
+    setIsInitialized(true);
+
+    // Check if BUSINESS user has garage set up
+    if (storedUser.type === "BUSINESS") {
+      checkGarageAndFetch(accessToken, storedUser);
+    } else {
+      setUser(storedUser);
+      setBusinessId(storedUser.id || "1");
+      setPageLoading(false);
+      fetchClients(accessToken, storedUser);
+    }
+  }, [router, isInitialized]);
 
   const loadMockClients = () => {
     // Mock data removed - only using GraphQL queries
