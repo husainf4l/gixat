@@ -91,7 +91,7 @@ export default function SignupPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-start bg-white relative overflow-hidden">
+      <div className="h-[calc(100vh-80px)] flex items-center justify-start bg-white relative overflow-hidden">
         {/* Background gradient (subtle) */}
         <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-white pointer-events-none" />
         
@@ -106,7 +106,7 @@ export default function SignupPage() {
           />
         </div>
         
-        <div className="w-80 relative z-10 px-6 ml-64">
+        <div className="w-80 relative z-10 px-6 ml-[28rem]">
         {/* Header */}
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-600 tracking-tight text-black mb-1.5">
