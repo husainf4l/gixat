@@ -84,7 +84,7 @@ export default function GaragesPage() {
               <tr className="hover:bg-gray-50">
                 <td colSpan={6} className="px-6 py-8">
                   <EmptyState
-                    icon="🏢"
+                    icon=""
                     title="No Garages Yet"
                     description="No garages have been registered yet. Click 'Register Garage' to add a new garage to the system."
                     buttonLabel="Register First Garage"

@@ -178,7 +178,7 @@ export default function WorkOrdersPage() {
           {jobCards.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                icon="📋"
+                icon=""
                 title="No Work Orders"
                 description="You haven't created any work orders yet. Click 'Create Job Card' to start a new repair job."
                 buttonLabel="Create First Job Card"

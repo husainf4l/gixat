@@ -306,7 +306,7 @@ export default function CreateRepairSessionPage() {
         {/* Debug Info */}
         {clients.length === 0 && !loading && (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
-            <p className="font-medium mb-1">⚠️ No clients found</p>
+            <p className="font-medium mb-1"> No clients found</p>
             <p className="text-sm">Please create clients first before creating repair sessions.</p>
             <button
               onClick={() => router.push("/dashboard/clients")}
@@ -319,14 +319,14 @@ export default function CreateRepairSessionPage() {
 
         {clients.length > 0 && cars.length === 0 && !loading && (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
-            <p className="font-medium mb-1">⚠️ No vehicles found</p>
+            <p className="font-medium mb-1"> No vehicles found</p>
             <p className="text-sm">Please add vehicles to your clients before creating repair sessions.</p>
           </div>
         )}
 
         {/* Show loaded counts for debugging */}
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
-          ℹ️ Loaded: {clients.length} client{clients.length !== 1 ? 's' : ''}, {cars.length} vehicle{cars.length !== 1 ? 's' : ''}
+           Loaded: {clients.length} client{clients.length !== 1 ? 's' : ''}, {cars.length} vehicle{cars.length !== 1 ? 's' : ''}
         </div>
 
         {/* Main Form Container */}

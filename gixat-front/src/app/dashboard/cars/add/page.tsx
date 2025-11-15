@@ -209,7 +209,7 @@ export default function AddCarPage() {
     e.preventDefault();
 
     if (!formData.licensePlate || !formData.make || !formData.model || !formData.clientId) {
-      alert("❌ Please fill in required fields (License Plate, Make, Model, and Client)");
+      alert(" Please fill in required fields (License Plate, Make, Model, and Client)");
       return;
     }
 
@@ -218,7 +218,7 @@ export default function AddCarPage() {
     try {
       const token = storage.getAccessToken();
       if (!token) {
-        alert("❌ Not authenticated. Please login again.");
+        alert(" Not authenticated. Please login again.");
         return;
       }
 
@@ -245,7 +245,7 @@ export default function AddCarPage() {
       );
 
       if (response.data?.createCar) {
-        alert("✅ Car added successfully!");
+        alert(" Car added successfully!");
         // Set flag in sessionStorage to trigger refetch on cars page
         sessionStorage.setItem("refetchCars", "true");
         // Small delay to ensure backend has processed the car
@@ -253,11 +253,11 @@ export default function AddCarPage() {
           router.push("/dashboard/cars");
         }, 500);
       } else if (response.errors) {
-        alert(`❌ Error: ${response.errors[0]?.message || "Failed to add car"}`);
+        alert(` Error: ${response.errors[0]?.message || "Failed to add car"}`);
       }
     } catch (error) {
       console.error("Error adding car:", error);
-      alert("❌ Failed to add car. Please try again.");
+      alert(" Failed to add car. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -547,7 +547,7 @@ export default function AddCarPage() {
                 disabled={loading}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition font-medium"
               >
-                {loading ? "Adding..." : "✅ Add Car"}
+                {loading ? "Adding..." : " Add Car"}
               </button>
               <button
                 type="button"

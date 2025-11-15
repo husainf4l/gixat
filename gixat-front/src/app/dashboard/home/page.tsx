@@ -222,7 +222,7 @@ export default function DashboardHome() {
                 onClick={() => router.push("/dashboard/work-orders")}
                 className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition text-left"
               >
-                <h3 className="font-semibold text-gray-900 mb-2">📋 Create Job Card</h3>
+                <h3 className="font-semibold text-gray-900 mb-2"> Create Job Card</h3>
                 <p className="text-sm text-gray-600">Start a new work order</p>
               </button>
             </div>
@@ -261,7 +261,7 @@ export default function DashboardHome() {
               <h2 className="text-lg font-semibold text-gray-900 mb-6">My Cars</h2>
               {stats.cars === 0 ? (
                 <EmptyState
-                  icon="🚗"
+                  icon=""
                   title="No Cars Yet"
                   description="You haven't registered any cars yet. Add your first car to get started."
                   buttonLabel="Add Car"

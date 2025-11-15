@@ -183,46 +183,42 @@ export default function ContactUs() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <a href="/resources" className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all text-center">
-              <div className="text-4xl mb-4">📚</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Documentation</h3>
-              <p className="text-sm text-gray-600">View our help center and guides</p>
+            <a href="/resources" className="p-8 bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-200 hover:border-blue-500 hover:shadow-xl transition-all text-center group">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 group-hover:bg-blue-200 mb-4 transition">
+                <span className="text-2xl font-bold text-blue-600">D</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">Documentation</h3>
+              <p className="text-sm text-gray-600 mb-4">Access comprehensive guides, API docs, and best practices for getting the most out of GIXAT</p>
+              <span className="inline-block text-blue-600 font-semibold text-sm hover:text-blue-700">Learn More →</span>
             </a>
 
-            <a href="#" className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all text-center">
-              <div className="text-4xl mb-4">🎥</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Video Tutorials</h3>
-              <p className="text-sm text-gray-600">Learn with step-by-step videos</p>
+            <a href="#" className="p-8 bg-gradient-to-br from-emerald-50 to-white rounded-lg border border-emerald-200 hover:border-emerald-500 hover:shadow-xl transition-all text-center group">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 group-hover:bg-emerald-200 mb-4 transition">
+                <span className="text-2xl font-bold text-emerald-600">V</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">Video Tutorials</h3>
+              <p className="text-sm text-gray-600 mb-4">Watch step-by-step video guides covering setup, features, and advanced workflows</p>
+              <span className="inline-block text-emerald-600 font-semibold text-sm hover:text-emerald-700">Watch Now →</span>
             </a>
 
-            <a href="#" className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all text-center">
-              <div className="text-4xl mb-4">🎤</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Live Demo</h3>
-              <p className="text-sm text-gray-600">Schedule a product walkthrough</p>
+            <a href="#" className="p-8 bg-gradient-to-br from-purple-50 to-white rounded-lg border border-purple-200 hover:border-purple-500 hover:shadow-xl transition-all text-center group">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-100 group-hover:bg-purple-200 mb-4 transition">
+                <span className="text-2xl font-bold text-purple-600">L</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">Live Demo</h3>
+              <p className="text-sm text-gray-600 mb-4">Schedule a personalized walkthrough with our team to see GIXAT in action</p>
+              <span className="inline-block text-purple-600 font-semibold text-sm hover:text-purple-700">Schedule Now →</span>
             </a>
 
-            <a href="/pricing" className="p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all text-center">
-              <div className="text-4xl mb-4">💰</div>
-              <h3 className="font-semibold text-gray-900 mb-2">Pricing</h3>
-              <p className="text-sm text-gray-600">View all pricing plans</p>
+            <a href="/pricing" className="p-8 bg-gradient-to-br from-orange-50 to-white rounded-lg border border-orange-200 hover:border-orange-500 hover:shadow-xl transition-all text-center group">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 group-hover:bg-orange-200 mb-4 transition">
+                <span className="text-2xl font-bold text-orange-600">P</span>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2 text-lg">Pricing Plans</h3>
+              <p className="text-sm text-gray-600 mb-4">Explore our flexible pricing options and find the perfect plan for your business</p>
+              <span className="inline-block text-orange-600 font-semibold text-sm hover:text-orange-700">View Pricing →</span>
             </a>
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="max-w-4xl mx-auto px-8 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">Let's Get Started!</h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Ready to revolutionize your workshop? Reach out today and let's discuss how GIXAT can help your business grow.
-          </p>
-          <Link
-            href="/auth/signup"
-            className="inline-block px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition text-lg"
-          >
-            Start Free Trial
-          </Link>
         </div>
       </section>
 

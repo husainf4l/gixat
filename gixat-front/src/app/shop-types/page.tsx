@@ -257,22 +257,6 @@ export default function ShopTypes() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-blue-700 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Find Your Perfect Solution</h2>
-          <p className="text-lg text-blue-100 mb-8">
-            No matter your shop type, GIXAT has the right features and pricing for you.
-          </p>
-          <Link
-            href="/pricing"
-            className="inline-block px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition"
-          >
-            View Pricing & Get Started
-          </Link>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );

@@ -2,22 +2,32 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+interface ResourceCard {
+  title: string;
+  icon: string;
+  cta: string;
+  color: "blue" | "emerald" | "purple";
+}
+
 export default function Resources() {
-  const resourceCards = [
+  const resourceCards: ResourceCard[] = [
     {
       title: "Documentation",
-      icon: "📖",
+      icon: "D",
       cta: "Open Docs →",
+      color: "blue",
     },
     {
       title: "Tutorials & Training Videos",
-      icon: "▶",
+      icon: "V",
       cta: "Watch Tutorials →",
+      color: "emerald",
     },
     {
       title: "Customer Support",
-      icon: "💭",
+      icon: "S",
       cta: "Reach Support →",
+      color: "purple",
     },
   ];
 
@@ -63,24 +73,39 @@ export default function Resources() {
 
           {/* Resource Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {resourceCards.map((card, idx) => (
-              <div
-                key={idx}
-                className="p-8 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-              >
-                <div className="text-4xl mb-4">{card.icon}</div>
-                <h3 className="text-base font-semibold text-gray-900 mb-3">
-                  {card.title}
-                </h3>
-                <a
-                  href="#"
-                  className="text-sm font-medium transition-colors"
-                  style={{ color: '#1b75bb' }}
+            {resourceCards.map((card, idx) => {
+              const getColorClasses = (color: string) => {
+                switch(color) {
+                  case "emerald":
+                    return "from-emerald-50 border-emerald-200 hover:border-emerald-500 bg-emerald-100 text-emerald-600";
+                  case "purple":
+                    return "from-purple-50 border-purple-200 hover:border-purple-500 bg-purple-100 text-purple-600";
+                  default:
+                    return "from-blue-50 border-blue-200 hover:border-blue-500 bg-blue-100 text-blue-600";
+                }
+              };
+              const colorClass = getColorClasses(card.color || "blue");
+              return (
+                <div
+                  key={idx}
+                  className={`p-8 bg-gradient-to-br ${colorClass.split(" ").slice(0, 1).join(" ")} border rounded-lg ${colorClass.split(" ").slice(1, -2).join(" ")} hover:shadow-xl transition-all text-center group`}
                 >
-                  {card.cta}
-                </a>
-              </div>
-            ))}
+                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${colorClass.split(" ").slice(-2).join(" ")} group-hover:opacity-90 mb-4 transition font-bold text-2xl`}>
+                    {card.icon}
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-3">
+                    {card.title}
+                  </h3>
+                  <a
+                    href="#"
+                    className="text-sm font-medium transition-colors"
+                    style={{ color: '#1b75bb' }}
+                  >
+                    {card.cta}
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -392,18 +417,44 @@ export default function Resources() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-blue-700 border-t border-gray-100">
-        <div className="max-w-4xl mx-auto px-4 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Get Started with Resources Today</h2>
-          <p className="text-lg text-blue-100 mb-8">
-            Equip your team with the knowledge and tools they need to succeed.
+      {/* Product Updates Section */}
+      <section className="py-20 bg-gray-50 border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 lg:px-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Product Updates & Roadmap</h2>
+          <p className="text-sm font-medium text-gray-600 mb-8">
+            The platform grows as your business grows.
           </p>
+
+          <p className="text-base text-gray-700 leading-relaxed mb-8">
+            We continuously evolve GIXAT based on real workshop feedback. Our roadmap is practical, field-tested, and focused on solving real operational problems.
+          </p>
+
+          <div className="p-6 bg-white rounded-lg border border-gray-200 mb-8">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Updates include:</h3>
+            <ul className="space-y-2">
+              {[
+                "Workflow optimizations",
+                "UI and usability improvements",
+                "Performance upgrades for faster interaction",
+                "New modules based on industry needs (e.g., fleet service mode, bay analytics, technician KPI scoring)",
+              ].map((item, i) => (
+                <li key={i} className="text-sm text-gray-700">
+                  • {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="text-sm text-gray-700 mb-6 italic">
+            Visibility builds trust. You always know what's coming next — no surprise transitions.
+          </p>
+
           <Link
-            href="/auth/signup"
-            className="inline-block px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition"
+            href="#"
+            className="inline-block text-sm font-medium transition-colors"
+            style={{ color: '#1b75bb' }}
           >
-            Start Free Trial
+            View Release Notes →
           </Link>
         </div>
       </section>

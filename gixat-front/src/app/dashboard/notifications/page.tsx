@@ -139,16 +139,16 @@ export default function NotificationsPage() {
 
   const getNotificationIcon = (type: string) => {
     const icons: Record<string, string> = {
-      APPOINTMENT: "📅",
-      REPAIR_SESSION: "🔧",
-      JOB_CARD: "📋",
+      APPOINTMENT: "",
+      REPAIR_SESSION: "",
+      JOB_CARD: "",
       INSPECTION: "🔍",
-      OFFER: "💰",
+      OFFER: "",
       PAYMENT: "💳",
       MESSAGE: "💬",
-      SYSTEM: "⚙️",
+      SYSTEM: "",
     };
-    return icons[type] || "🔔";
+    return icons[type] || "";
   };
 
   const formatDate = (date?: string) => {
@@ -186,7 +186,7 @@ export default function NotificationsPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-            <p className="text-gray-600 text-sm font-medium mb-2">Unread 🔔</p>
+            <p className="text-gray-600 text-sm font-medium mb-2">Unread </p>
             <p className="text-3xl font-bold text-blue-600">{loading ? "..." : stats.unread || 0}</p>
           </div>
           <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -240,7 +240,7 @@ export default function NotificationsPage() {
           {notifications.length === 0 ? (
             <div className="bg-white rounded-lg border border-gray-200 p-8">
               <EmptyState
-                icon="🔔"
+                icon=""
                 title="No Notifications"
                 description="You're all caught up! No new notifications at this time."
               />

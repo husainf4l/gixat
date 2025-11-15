@@ -131,13 +131,13 @@ export default function InspectionForm({ repairSessionId, businessId, onSuccess 
 
       {error && (
         <div className="p-3 bg-red-100 text-red-700 rounded border border-red-200">
-          ⚠️ {error}
+           {error}
         </div>
       )}
 
       {success && (
         <div className="p-3 bg-green-100 text-green-700 rounded border border-green-200">
-          ✅ Inspection saved successfully!
+           Inspection saved successfully!
         </div>
       )}
 

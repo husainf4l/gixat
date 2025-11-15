@@ -126,7 +126,7 @@ export default function AppointmentDetailPage() {
           localStorage.setItem("appointments", JSON.stringify(appointments));
           setAppointment(appointments[index]);
           setIsEditing(false);
-          alert("✅ Appointment updated successfully!");
+          alert(" Appointment updated successfully!");
         }
       }
     } catch (error) {
@@ -145,7 +145,7 @@ export default function AppointmentDetailPage() {
           const appointments = JSON.parse(savedAppointments);
           const filtered = appointments.filter((apt: Appointment) => apt.id !== appointmentId);
           localStorage.setItem("appointments", JSON.stringify(filtered));
-          alert("✅ Appointment deleted successfully!");
+          alert(" Appointment deleted successfully!");
           router.push("/dashboard/appointments");
         }
       } catch (error) {

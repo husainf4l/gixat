@@ -168,7 +168,7 @@ export default function InventoryPage() {
                 <tr>
                   <td colSpan={5} className="px-6 py-8">
                     <EmptyState
-                      icon="📦"
+                      icon=""
                       title="No Parts in Inventory"
                       description="Your inventory is empty. Click 'Add Part' to add spare parts to your inventory."
                       buttonLabel="Add First Part"

@@ -126,19 +126,19 @@ export default function JobCardReportForm({ repairSessionId, businessId, onSucce
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-gradient-to-br from-green-50 to-green-100">
       <div className="flex items-center gap-2">
-        <span className="text-2xl">📋</span>
+        <span className="text-2xl"></span>
         <h3 className="text-lg font-semibold text-gray-900">Job Card</h3>
       </div>
 
       {error && (
         <div className="p-3 bg-red-100 text-red-700 rounded border border-red-200">
-          ⚠️ {error}
+           {error}
         </div>
       )}
 
       {success && (
         <div className="p-3 bg-green-100 text-green-700 rounded border border-green-200">
-          ✅ Job card saved successfully!
+           Job card saved successfully!
         </div>
       )}
 
@@ -229,7 +229,7 @@ export default function JobCardReportForm({ repairSessionId, businessId, onSucce
             </select>
           ) : (
             <div className="w-full px-3 py-2 border border-gray-300 rounded-lg text-red-500 font-medium">
-              ❌ No technicians available - Add employees to this business first
+               No technicians available - Add employees to this business first
             </div>
           )}
         </div>

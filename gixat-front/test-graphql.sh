@@ -12,7 +12,7 @@ echo "========================================"
 echo ""
 
 # Test 1: Introspection Query to get schema
-echo "1️⃣ Testing Schema Introspection..."
+echo " Testing Schema Introspection..."
 echo ""
 
 curl -X POST "$BACKEND_URL" \
@@ -27,7 +27,7 @@ echo "========================================"
 echo ""
 
 # Test 2: Get Queries and Mutations
-echo "2️⃣ Fetching Available Queries and Mutations..."
+echo " Fetching Available Queries and Mutations..."
 echo ""
 
 curl -X POST "$BACKEND_URL" \
@@ -42,7 +42,7 @@ echo "========================================"
 echo ""
 
 # Test 3: Get current user info
-echo "3️⃣ Testing User Query..."
+echo " Testing User Query..."
 echo ""
 
 curl -X POST "$BACKEND_URL" \

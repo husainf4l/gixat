@@ -266,7 +266,7 @@ export default function OffersPage() {
           {offers.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                icon="💰"
+                icon=""
                 title="No Quotes"
                 description="You haven't created any quotes yet. Click 'New Quote' to generate repair estimates for customers."
                 buttonLabel="Create First Quote"

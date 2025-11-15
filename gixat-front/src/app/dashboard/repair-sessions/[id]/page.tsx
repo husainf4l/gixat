@@ -407,7 +407,7 @@ export default function RepairSessionDetailPage() {
                   : "border-transparent text-gray-600 hover:text-gray-900"
               }`}
             >
-              📋 Overview
+               Overview
             </button>
             <button
               onClick={() => setActiveTab("job-card")}
@@ -417,7 +417,7 @@ export default function RepairSessionDetailPage() {
                   : "border-transparent text-gray-600 hover:text-gray-900"
               }`}
             >
-              📋 Job Card
+               Job Card
             </button>
             <button
               onClick={() => setActiveTab("inspection")}

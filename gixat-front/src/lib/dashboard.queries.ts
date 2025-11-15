@@ -8,7 +8,6 @@ export const GET_ME_QUERY = `
       type
       name
       phone
-      address
       city
       state
       businessHours
@@ -24,9 +23,6 @@ export const UPDATE_PROFILE_MUTATION = `
       type
       name
       phone
-      address
-      city
-      state
       businessHours
     }
   }
@@ -87,7 +83,6 @@ export const GET_MY_BUSINESSES_QUERY = `
       name
       email
       phone
-      address
       city
       state
     }
@@ -147,7 +142,6 @@ export const GET_BUSINESS_DETAILS = `
       name
       email
       phone
-      address
       city
       state
       createdAt
@@ -164,7 +158,6 @@ export const GET_MY_GARAGES_QUERY = `
     myGarages {
       id
       name
-      address
       city
       state
       phone
@@ -240,7 +233,6 @@ export const GET_CLIENTS_LIST = `
       lastName
       email
       phone
-      address
       city
     }
   }
@@ -415,7 +407,6 @@ export const GET_BUSINESS_CLIENTS_QUERY = `
       lastName
       email
       phone
-      address
       city
     }
   }
@@ -1054,9 +1045,9 @@ export const UPDATE_PART_STATUS_MUTATION = `
  * - plannedEndDate: DateTime - Change planned end (ISO 8601 format)
  * - estimatedHours: Float - Adjust estimated hours
  * - workInstructions: String - Update work instructions
- * - completionNotes: String - ✅ NOW AVAILABLE - Add completion notes when job is done
- * - qualityCheckNotes: String - ✅ NOW AVAILABLE - Add quality check notes
- * - qualityApproved: Boolean - ✅ NOW AVAILABLE - Mark quality as approved/rejected
+ * - completionNotes: String - NOW AVAILABLE - Add completion notes when job is done
+ * - qualityCheckNotes: String - NOW AVAILABLE - Add quality check notes
+ * - qualityApproved: Boolean - NOW AVAILABLE - Mark quality as approved/rejected
  *
  * Usage:
  * Use this mutation to:

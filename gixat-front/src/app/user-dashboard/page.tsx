@@ -80,7 +80,7 @@ export default function UserDashboardPage() {
                 {statsLoading ? '...' : stats?.totalVehicles || 0}
               </p>
             </div>
-            <div className="text-3xl sm:text-4xl opacity-20">🚗</div>
+            <div className="text-3xl sm:text-4xl opacity-20"></div>
           </div>
           <p className="text-xs text-gray-500 mt-2">All active</p>
         </div>
@@ -92,7 +92,7 @@ export default function UserDashboardPage() {
                 {statsLoading ? '...' : stats?.appointments || 0}
               </p>
             </div>
-            <div className="text-3xl sm:text-4xl opacity-20">📅</div>
+            <div className="text-3xl sm:text-4xl opacity-20"></div>
           </div>
           <p className="text-xs text-gray-500 mt-2">{stats?.pendingAppointments || 0} pending</p>
         </div>
@@ -116,7 +116,7 @@ export default function UserDashboardPage() {
                 {statsLoading ? '...' : stats?.reminders || 0}
               </p>
             </div>
-            <div className="text-3xl sm:text-4xl opacity-20">🔔</div>
+            <div className="text-3xl sm:text-4xl opacity-20"></div>
           </div>
           <p className="text-xs text-gray-500 mt-2">{statsError ? 'Check connection' : 'Updated now'}</p>
         </div>
@@ -126,7 +126,7 @@ export default function UserDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="bg-white rounded-lg shadow-sm p-5 sm:p-6 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all">
           <div className="flex items-start justify-between mb-3">
-            <div className="text-3xl">🚗</div>
+            <div className="text-3xl"></div>
             <span className="text-gray-400 text-xl">→</span>
           </div>
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
@@ -140,7 +140,7 @@ export default function UserDashboardPage() {
 
         <div className="bg-white rounded-lg shadow-sm p-5 sm:p-6 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all">
           <div className="flex items-start justify-between mb-3">
-            <div className="text-3xl">📅</div>
+            <div className="text-3xl"></div>
             <span className="text-gray-400 text-xl">→</span>
           </div>
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
@@ -154,7 +154,7 @@ export default function UserDashboardPage() {
 
         <div className="bg-white rounded-lg shadow-sm p-5 sm:p-6 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all">
           <div className="flex items-start justify-between mb-3">
-            <div className="text-3xl">🔧</div>
+            <div className="text-3xl"></div>
             <span className="text-gray-400 text-xl">→</span>
           </div>
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
@@ -182,7 +182,7 @@ export default function UserDashboardPage() {
 
         <div className="bg-white rounded-lg shadow-sm p-5 sm:p-6 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all">
           <div className="flex items-start justify-between mb-3">
-            <div className="text-3xl">🔔</div>
+            <div className="text-3xl"></div>
             <span className="text-gray-400 text-xl">→</span>
           </div>
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">
@@ -196,7 +196,7 @@ export default function UserDashboardPage() {
 
         <div className="bg-white rounded-lg shadow-sm p-5 sm:p-6 border border-gray-200 hover:shadow-md hover:border-green-300 transition-all">
           <div className="flex items-start justify-between mb-3">
-            <div className="text-3xl">⚙️</div>
+            <div className="text-3xl"></div>
             <span className="text-gray-400 text-xl">→</span>
           </div>
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2">

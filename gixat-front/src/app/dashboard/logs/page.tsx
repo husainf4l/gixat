@@ -85,7 +85,7 @@ export default function SystemLogsPage() {
               <tr className="hover:bg-gray-50">
                 <td colSpan={6} className="px-6 py-8">
                   <EmptyState
-                    icon="📝"
+                    icon=""
                     title="No System Logs"
                     description="System logs will appear here when events are generated."
                   />

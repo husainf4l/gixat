@@ -96,13 +96,13 @@ export default function ProfilePage() {
   const handleSave = () => {
     // Validate form data
     if (!formData.name || !formData.email) {
-      alert("❌ Please fill in required fields (Name and Email)");
+      alert("Please fill in required fields (Name and Email)");
       return;
     }
 
     const token = storage.getAccessToken();
     if (!token) {
-      alert("❌ Not authenticated. Please login again.");
+      alert("Not authenticated. Please login again.");
       return;
     }
 
@@ -116,9 +116,6 @@ export default function ProfilePage() {
           input: {
             name: formData.name,
             phone: formData.phone || null,
-            address: formData.address || null,
-            city: formData.city || null,
-            state: formData.state || null,
           },
         },
         token
@@ -136,19 +133,19 @@ export default function ProfilePage() {
           });
           storage.setUser(updatedUser);
           setIsEditing(false);
-          alert("✅ Profile updated successfully!");
+          alert("Profile updated successfully!");
         } else if (response.errors) {
-          alert(`❌ Error: ${response.errors[0]?.message || "Failed to update profile"}`);
+          alert(`Error: ${response.errors[0]?.message || "Failed to update profile"}`);
         }
       }).catch((error: any) => {
         console.error("Error updating profile:", error);
-        alert("❌ Failed to save profile. Please try again.");
+        alert("Failed to save profile. Please try again.");
       }).finally(() => {
         setLoading(false);
       });
     } catch (error) {
       console.error("Error in handleSave:", error);
-      alert("❌ Failed to save profile. Please try again.");
+      alert("Failed to save profile. Please try again.");
       setLoading(false);
     }
   };
@@ -300,7 +297,7 @@ export default function ProfilePage() {
               onClick={handleCancel}
               className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
             >
-              ✕ Cancel
+               Cancel
             </button>
           </div>
         </div>

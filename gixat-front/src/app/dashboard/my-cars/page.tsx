@@ -134,7 +134,7 @@ export default function MyCarsFPage() {
           ) : cars.length === 0 ? (
             <div className="md:col-span-2 lg:col-span-3">
               <EmptyState
-                icon="🚗"
+                icon=""
                 title="No Cars Yet"
                 description="You haven't registered any cars yet. Click 'Add Car' to add your first vehicle and track its service history."
                 buttonLabel="Register First Car"
@@ -158,16 +158,16 @@ export default function MyCarsFPage() {
 
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
                   <p className="flex items-center gap-2">
-                    <span>🎨</span>
+                    <span></span>
                     <span>{car.color || "Unknown Color"}</span>
                   </p>
                   <p className="flex items-center gap-2">
-                    <span>⏱️</span>
+                    <span></span>
                     <span>{car.mileage ? `${car.mileage.toLocaleString()} km` : "Mileage not recorded"}</span>
                   </p>
                   {isInsuranceExpiringSoon(car.insuranceExpiryDate) && (
                     <p className="flex items-center gap-2 text-orange-600 font-medium">
-                      <span>⚠️</span>
+                      <span></span>
                       <span>Insurance expiring soon</span>
                     </p>
                   )}

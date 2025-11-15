@@ -207,7 +207,7 @@ export default function CarsPage() {
           {cars.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                icon="🚗"
+                icon=""
                 title="No Cars in Garage"
                 description="You haven't added any cars to your garage yet. Click 'Add Car' to register a vehicle."
                 buttonLabel="Add First Car"

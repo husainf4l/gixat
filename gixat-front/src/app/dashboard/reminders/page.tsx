@@ -61,7 +61,7 @@ export default function RemindersPage() {
         {/* Reminders List */}
         <div className="space-y-4">
           <EmptyState
-            icon="🔔"
+            icon=""
             title="No Service Reminders"
             description="You don't have any upcoming service reminders yet. Add a car and set reminders for your maintenance schedule."
             buttonLabel="Set First Reminder"

@@ -146,13 +146,13 @@ export default function SettingsPage() {
   const handleSave = () => {
     // Validate form data
     if (!formData.fullName || !formData.email) {
-      alert("❌ Please fill in required fields (Full Name and Email)");
+      alert("Please fill in required fields (Full Name and Email)");
       return;
     }
 
     const token = storage.getAccessToken();
     if (!token) {
-      alert("❌ Not authenticated. Please login again.");
+      alert("Not authenticated. Please login again.");
       return;
     }
 
@@ -175,9 +175,6 @@ export default function SettingsPage() {
           input: {
             name: formData.fullName,
             phone: formData.phone || null,
-            address: formData.address || null,
-            city: formData.city || null,
-            state: formData.state || null,
             businessHours: businessHoursInput,
           },
         },
@@ -220,17 +217,17 @@ export default function SettingsPage() {
             zipCode: formData.zipCode,
           };
           storage.setUser(userToStore);
-          alert("✅ Account information updated successfully!");
+          alert("Account information updated successfully!");
         } else if (response.errors) {
-          alert(`❌ Error: ${response.errors[0]?.message || "Failed to update account"}`);
+          alert(`Error: ${response.errors[0]?.message || "Failed to update account"}`);
         }
       }).catch((error: any) => {
         console.error("Error updating account:", error);
-        alert("❌ Failed to save account information. Please try again.");
+        alert("Failed to save account information. Please try again.");
       });
     } catch (error) {
       console.error("Error in handleSave:", error);
-      alert("❌ Failed to save account information. Please try again.");
+      alert("Failed to save account information. Please try again.");
     }
   };
 
@@ -282,10 +279,10 @@ export default function SettingsPage() {
       };
       storage.setUser(updatedUser);
       setUser(updatedUser);
-      alert("✅ Notification preferences updated successfully!");
+      alert("Notification preferences updated successfully!");
     } catch (error) {
       console.error("Error saving notifications:", error);
-      alert("❌ Failed to save notification preferences. Please try again.");
+      alert("Failed to save notification preferences. Please try again.");
     }
   };
 
@@ -317,7 +314,7 @@ export default function SettingsPage() {
       storage.setUser(updatedUser);
       setUser(updatedUser);
       
-      alert("✅ Password updated successfully!\n\nℹ️ Note: This is a local change for demonstration. In production, password changes should be handled by the backend API.\n\nYour new password has been saved locally. Next time you login, you can use your new password.");
+      alert("Password updated successfully!\n\nNote: This is a local change for demonstration. In production, password changes should be handled by the backend API.\n\nYour new password has been saved locally. Next time you login, you can use your new password.");
       
       // Clear the form
       setSecurityData({
@@ -327,7 +324,7 @@ export default function SettingsPage() {
       });
     } catch (error) {
       console.error("Error updating password:", error);
-      alert("❌ Failed to update password. Please try again.");
+      alert("Failed to update password. Please try again.");
     }
   };
 
@@ -519,7 +516,7 @@ export default function SettingsPage() {
                 onClick={handleCancel}
                 className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-medium"
               >
-                ✕ Cancel
+                 Cancel
               </button>
             </div>
               </>

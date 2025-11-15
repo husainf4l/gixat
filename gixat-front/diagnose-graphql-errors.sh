@@ -16,9 +16,9 @@ TOKEN_FILE="/tmp/gixat_token.txt"
 echo "🔐 Step 1: Checking for valid authentication token..."
 if [ -f "$TOKEN_FILE" ]; then
     TOKEN=$(cat "$TOKEN_FILE")
-    echo "✅ Token found (from file)"
+    echo " Token found (from file)"
 else
-    echo "⚠️  No stored token found"
+    echo "  No stored token found"
     echo "   Please run: npm run dev and login first"
     echo "   Then copy your token from browser DevTools > Application > localStorage"
     echo "   And save it to: $TOKEN_FILE"
@@ -32,7 +32,7 @@ echo "╚═══════════════════════�
 echo ""
 
 # Test 1: Me Query
-echo "1️⃣  Testing: query { me { id email type } }"
+echo "  Testing: query { me { id email type } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -42,7 +42,7 @@ echo "---"
 echo ""
 
 # Test 2: Businesses Query
-echo "2️⃣  Testing: query { businesses { id name } }"
+echo "  Testing: query { businesses { id name } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -52,7 +52,7 @@ echo "---"
 echo ""
 
 # Test 3: Garages Query
-echo "3️⃣  Testing: query { myGarages { id name } }"
+echo "  Testing: query { myGarages { id name } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -62,7 +62,7 @@ echo "---"
 echo ""
 
 # Test 4: Appointments Query
-echo "4️⃣  Testing: query { appointments { id status } }"
+echo "  Testing: query { appointments { id status } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -72,7 +72,7 @@ echo "---"
 echo ""
 
 # Test 5: Inspections Query
-echo "5️⃣  Testing: query { inspections { id type } }"
+echo "  Testing: query { inspections { id type } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -82,7 +82,7 @@ echo "---"
 echo ""
 
 # Test 6: Employees Query
-echo "6️⃣  Testing: query { employees { id name } }"
+echo "  Testing: query { employees { id name } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -92,7 +92,7 @@ echo "---"
 echo ""
 
 # Test 7: Cars Query
-echo "7️⃣  Testing: query { cars { id licensePlate } }"
+echo "  Testing: query { cars { id licensePlate } }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -109,8 +109,8 @@ echo ""
 # Note: These will likely fail because we don't have a businessId
 # But we want to see what the error message tells us
 
-echo "ℹ️  These queries need a businessId parameter..."
-echo "8️⃣  Testing: query GetDashboardStatistics(\$businessId: ID!) { jobCardStatistics(businessId: \$businessId) }"
+echo "  These queries need a businessId parameter..."
+echo "  Testing: query GetDashboardStatistics(\$businessId: ID!) { jobCardStatistics(businessId: \$businessId) }"
 curl -s -X POST "$ENDPOINT" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer ${TOKEN:-invalid}" \
@@ -126,8 +126,8 @@ echo "╔═══════════════════════�
 echo "║ Analysis                                                       ║"
 echo "╚════════════════════════════════════════════════════════════════╝"
 echo ""
-echo "✅ Queries that return data without errors = WORKING"
-echo "❌ Queries that return errors = NEED TO BE FIXED"
+echo " Queries that return data without errors = WORKING"
+echo " Queries that return errors = NEED TO BE FIXED"
 echo ""
 echo "Common error patterns:"
 echo "  • 'Unauthorized' = Token missing or invalid"

@@ -218,30 +218,6 @@ export default function Pricing() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-blue-700">
-        <div className="max-w-4xl mx-auto px-8 text-center">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">Ready to Grow Your Business?</h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Start your free 14-day trial today. No credit card required. Full access to Pro features.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/signup"
-              className="inline-block px-8 py-3 bg-white text-blue-600 font-bold rounded-lg hover:bg-blue-50 transition text-lg"
-            >
-              Start Free Trial
-            </Link>
-            <Link
-              href="/contact-us"
-              className="inline-block px-8 py-3 border-2 border-white text-white font-bold rounded-lg hover:bg-blue-600 transition text-lg"
-            >
-              Contact Sales
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );

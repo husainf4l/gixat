@@ -100,7 +100,7 @@ export default function CreateQuotePage() {
       localStorage.setItem("offers", JSON.stringify(offers));
 
       // Show success message and redirect
-      alert("✅ Quote created successfully!");
+      alert(" Quote created successfully!");
       router.push("/dashboard/offers");
     } catch (error) {
       console.error("Error creating quote:", error);
@@ -305,7 +305,7 @@ export default function CreateQuotePage() {
               disabled={loading}
               className="flex-1 px-6 py-2 bg-white text-black rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200"
             >
-              {loading ? "Creating..." : "✅ Create Quote"}
+              {loading ? "Creating..." : " Create Quote"}
             </button>
           </div>
         </form>

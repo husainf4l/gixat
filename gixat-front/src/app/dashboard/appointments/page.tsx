@@ -292,7 +292,7 @@ export default function AppointmentsPage() {
           {appointments.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                icon="📅"
+                icon=""
                 title="No Appointments"
                 description="You haven't scheduled any appointments yet. Click 'New Appointment' to create one."
                 buttonLabel="Create First Appointment"
