@@ -1,0 +1,320 @@
+@page "/Setup/Company"
+@model Gixat.Web.Pages.Setup.CompanyModel
+@{
+    ViewData["Title"] = "Setup Your Garage";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gixat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+        }
+        .setup-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        .setup-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 3rem;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #6c757d;
+            position: relative;
+        }
+        .step.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+        .step-line {
+            width: 60px;
+            height: 3px;
+            background: #e9ecef;
+            margin: auto 10px;
+        }
+        .step-line.completed {
+            background: #28a745;
+        }
+        .brand-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .brand-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-setup {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        .btn-setup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .section-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-card">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active">1</div>
+                <div class="step-line"></div>
+                <div class="step">2</div>
+                <div class="step-line"></div>
+                <div class="step">3</div>
+            </div>
+
+            <!-- Brand Icon -->
+            <div class="brand-icon">
+                <i class="bi bi-building-gear"></i>
+            </div>
+
+            <h2 class="text-center mb-2">Setup Your Garage</h2>
+            <p class="text-center text-muted mb-4">Let's get your garage management system ready. Fill in your business details below.</p>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                </div>
+            }
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- Basic Information -->
+                <div class="section-title">
+                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.Name" class="form-label required">Garage Name</label>
+                        <input asp-for="Input.Name" class="form-control" placeholder="e.g., AutoCare Pro" />
+                        <span asp-validation-for="Input.Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.TradeName" class="form-label">Trade Name</label>
+                        <input asp-for="Input.TradeName" class="form-control" placeholder="Optional trade name" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.Email" class="form-label required">Business Email</label>
+                        <input asp-for="Input.Email" class="form-control" type="email" placeholder="garage@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.Phone" class="form-label">Phone Number</label>
+                        <input asp-for="Input.Phone" class="form-control" placeholder="+1 (555) 123-4567" />
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="section-title mt-4">
+                    <i class="bi bi-geo-alt me-2"></i>Location
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Address" class="form-label">Address</label>
+                    <input asp-for="Input.Address" class="form-control" placeholder="Street address" />
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="Input.City" class="form-label">City</label>
+                        <input asp-for="Input.City" class="form-control" placeholder="City" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Input.State" class="form-label">State/Province</label>
+                        <input asp-for="Input.State" class="form-control" placeholder="State" />
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Input.PostalCode" class="form-label">Postal Code</label>
+                        <input asp-for="Input.PostalCode" class="form-control" placeholder="12345" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Country" class="form-label">Country</label>
+                    <select asp-for="Input.Country" class="form-select">
+                        <option value="">Select Country</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="SA">Saudi Arabia</option>
+                        <option value="AE">United Arab Emirates</option>
+                        <option value="KW">Kuwait</option>
+                        <option value="BH">Bahrain</option>
+                        <option value="QA">Qatar</option>
+                        <option value="OM">Oman</option>
+                    </select>
+                </div>
+
+                <!-- Business Details -->
+                <div class="section-title mt-4">
+                    <i class="bi bi-briefcase me-2"></i>Business Details
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.TaxId" class="form-label">Tax ID / VAT Number</label>
+                        <input asp-for="Input.TaxId" class="form-control" placeholder="Tax identification number" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.RegistrationNumber" class="form-label">Business Registration #</label>
+                        <input asp-for="Input.RegistrationNumber" class="form-control" placeholder="Registration number" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.Currency" class="form-label required">Currency</label>
+                        <select asp-for="Input.Currency" class="form-select">
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="SAR">SAR - Saudi Riyal</option>
+                            <option value="AED">AED - UAE Dirham</option>
+                            <option value="KWD">KWD - Kuwaiti Dinar</option>
+                            <option value="BHD">BHD - Bahraini Dinar</option>
+                            <option value="QAR">QAR - Qatari Riyal</option>
+                            <option value="OMR">OMR - Omani Rial</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.TimeZone" class="form-label">Time Zone</label>
+                        <select asp-for="Input.TimeZone" class="form-select">
+                            <option value="UTC">UTC</option>
+                            <option value="America/New_York">Eastern Time (US)</option>
+                            <option value="America/Chicago">Central Time (US)</option>
+                            <option value="America/Denver">Mountain Time (US)</option>
+                            <option value="America/Los_Angeles">Pacific Time (US)</option>
+                            <option value="Europe/London">London</option>
+                            <option value="Europe/Paris">Paris</option>
+                            <option value="Europe/Berlin">Berlin</option>
+                            <option value="Asia/Dubai">Dubai</option>
+                            <option value="Asia/Riyadh">Riyadh</option>
+                            <option value="Asia/Kuwait">Kuwait</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Input.Website" class="form-label">Website</label>
+                    <input asp-for="Input.Website" class="form-control" placeholder="https://www.yourgarage.com" />
+                </div>
+
+                <!-- Main Branch -->
+                <div class="section-title mt-4">
+                    <i class="bi bi-shop me-2"></i>Main Branch
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Input.BranchName" class="form-label required">Branch Name</label>
+                        <input asp-for="Input.BranchName" class="form-control" placeholder="e.g., Main Location" />
+                        <span asp-validation-for="Input.BranchName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Input.ServiceBays" class="form-label">Number of Service Bays</label>
+                        <input asp-for="Input.ServiceBays" type="number" class="form-control" min="1" placeholder="e.g., 5" />
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-setup">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Create My Garage
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    By creating a garage, you agree to our 
+                    <a href="#" class="text-decoration-none">Terms of Service</a> and 
+                    <a href="#" class="text-decoration-none">Privacy Policy</a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

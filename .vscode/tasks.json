@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "watch",
+            "type": "shell",
+            "command": "dotnet",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "src/Gixat.API/Gixat.API.csproj"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "base": "$msCompile",
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*dotnet watch.*",
+                    "endsPattern": "^.*Application started.*"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

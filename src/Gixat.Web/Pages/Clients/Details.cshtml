@@ -1,0 +1,446 @@
+@page "/Clients/{id:guid}"
+@model Gixat.Web.Pages.Clients.DetailsModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = $"{Model.Client.FirstName} {Model.Client.LastName}";
+}
+
+@section Styles {
+<style>
+    .client-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .client-avatar-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 600;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .vip-badge-large {
+        background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.8;
+    }
+
+    .vehicle-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+        position: relative;
+        height: 100%;
+    }
+
+    .vehicle-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .vehicle-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .primary-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .add-vehicle-card {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 16px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-height: 200px;
+        height: 100%;
+    }
+
+    .add-vehicle-card:hover {
+        border-color: #667eea;
+        background: #f0f3ff;
+    }
+
+    .add-vehicle-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: none;
+        padding: 1.5rem 1.5rem 0.5rem;
+    }
+
+    .modal-body {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 10px;
+        border-color: #e0e0e0;
+    }
+
+    .back-link {
+        color: #6c757d;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: #667eea;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-label {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #212529;
+    }
+
+    .section-title {
+        font-weight: 700;
+        color: #1d1d1f;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        color: #667eea;
+    }
+</style>
+}
+
+<a href="/Clients" class="back-link">
+    <i class="bi bi-arrow-left"></i>
+    Back to Clients
+</a>
+
+<!-- Client Header -->
+<div class="client-header">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <div class="client-avatar-large">
+                @Model.Client.FirstName[0]@Model.Client.LastName[0]
+            </div>
+        </div>
+        <div class="col">
+            <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+                <h1 class="mb-0" style="font-weight: 700;">@Model.Client.FirstName @Model.Client.LastName</h1>
+                @if (Model.Client.IsVip)
+                {
+                    <span class="vip-badge-large">
+                        <i class="bi bi-star-fill me-1"></i>VIP
+                    </span>
+                }
+            </div>
+            <div class="d-flex gap-4 flex-wrap" style="opacity: 0.9;">
+                @if (!string.IsNullOrEmpty(Model.Client.Phone))
+                {
+                    <span><i class="bi bi-telephone me-2"></i>@Model.Client.Phone</span>
+                }
+                @if (!string.IsNullOrEmpty(Model.Client.Email))
+                {
+                    <span><i class="bi bi-envelope me-2"></i>@Model.Client.Email</span>
+                }
+            </div>
+        </div>
+        <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+            <div class="d-flex gap-3 flex-wrap">
+                <div class="stat-card">
+                    <div class="stat-value">@Model.Client.TotalVisits</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">$@Model.Client.TotalSpent.ToString("N0")</div>
+                    <div class="stat-label">Total Spent</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@Model.Vehicles.Count()</div>
+                    <div class="stat-label">Vehicles</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vehicles Section -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="section-title mb-0">
+        <i class="bi bi-car-front"></i>Vehicles
+    </h3>
+</div>
+
+<div class="row g-4">
+    @foreach (var vehicle in Model.Vehicles)
+    {
+        <div class="col-md-6 col-xl-4">
+            <div class="vehicle-card">
+                @if (vehicle.IsPrimary)
+                {
+                    <span class="primary-badge">Primary</span>
+                }
+                <div class="d-flex gap-3 mb-3">
+                    <div class="vehicle-icon">
+                        <i class="bi bi-car-front-fill"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h5 class="mb-1 text-truncate" style="font-weight: 600;">@vehicle.Year @vehicle.Make @vehicle.Model</h5>
+                        <span class="text-muted" style="font-size: 0.875rem;">
+                            <i class="bi bi-card-text me-1"></i>@vehicle.LicensePlate
+                        </span>
+                    </div>
+                </div>
+                <div class="info-grid mb-3">
+                    @if (!string.IsNullOrEmpty(vehicle.Color))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Color</span>
+                            <span class="info-value">@vehicle.Color</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(vehicle.EngineType))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Engine</span>
+                            <span class="info-value">@vehicle.EngineType</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(vehicle.Transmission))
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Transmission</span>
+                            <span class="info-value">@vehicle.Transmission</span>
+                        </div>
+                    }
+                    @if (vehicle.Mileage.HasValue)
+                    {
+                        <div class="info-item">
+                            <span class="info-label">Mileage</span>
+                            <span class="info-value">@vehicle.Mileage.Value.ToString("N0") mi</span>
+                        </div>
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(vehicle.Vin))
+                {
+                    <div class="mb-3">
+                        <span class="info-label">VIN</span>
+                        <div class="info-value text-truncate" style="font-size: 0.8rem; font-family: monospace;">@vehicle.Vin</div>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(vehicle.Notes))
+                {
+                    <div class="alert alert-light mb-3 py-2" style="font-size: 0.8rem; border-radius: 8px;">
+                        <i class="bi bi-sticky me-1"></i>@vehicle.Notes
+                    </div>
+                }
+                <div class="d-flex justify-content-end gap-2 mt-auto">
+                    <form method="post" asp-page-handler="DeleteVehicle" asp-route-id="@Model.Client.Id" asp-route-vehicleId="@vehicle.Id" style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this vehicle?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+    <div class="col-md-6 col-xl-4">
+        <div class="add-vehicle-card" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+            <div class="add-vehicle-icon">
+                <i class="bi bi-plus-lg"></i>
+            </div>
+            <span class="text-muted" style="font-weight: 500;">Add New Vehicle</span>
+        </div>
+    </div>
+</div>
+
+<!-- Add Vehicle Modal -->
+<div class="modal fade" id="addVehicleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-weight: 700;">
+                    <i class="bi bi-car-front-fill me-2" style="color: #667eea;"></i>Add New Vehicle
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="AddVehicle" asp-route-id="@Model.Client.Id">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Make <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="NewVehicle.Make" placeholder="e.g., Toyota" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Model <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="NewVehicle.Model" placeholder="e.g., Camry" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Year</label>
+                            <input type="number" class="form-control" asp-for="NewVehicle.Year" placeholder="e.g., 2023" min="1900" max="2030">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">License Plate <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="NewVehicle.LicensePlate" placeholder="e.g., ABC-1234" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Color</label>
+                            <input type="text" class="form-control" asp-for="NewVehicle.Color" placeholder="e.g., Silver">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">VIN (Vehicle Identification Number)</label>
+                            <input type="text" class="form-control" asp-for="NewVehicle.Vin" placeholder="e.g., 1HGBH41JXMN109186" maxlength="17">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Engine Type</label>
+                            <select class="form-select" asp-for="NewVehicle.EngineType">
+                                <option value="">Select...</option>
+                                <option value="Gasoline">Gasoline</option>
+                                <option value="Diesel">Diesel</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="Electric">Electric</option>
+                                <option value="Plug-in Hybrid">Plug-in Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Transmission</label>
+                            <select class="form-select" asp-for="NewVehicle.Transmission">
+                                <option value="">Select...</option>
+                                <option value="Automatic">Automatic</option>
+                                <option value="Manual">Manual</option>
+                                <option value="CVT">CVT</option>
+                                <option value="Semi-Automatic">Semi-Automatic</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mileage</label>
+                            <input type="number" class="form-control" asp-for="NewVehicle.Mileage" placeholder="e.g., 50000" min="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-control" asp-for="NewVehicle.Notes" rows="2" placeholder="Any additional notes about the vehicle..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-2"></i>Add Vehicle
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

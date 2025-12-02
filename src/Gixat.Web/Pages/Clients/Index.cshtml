@@ -1,0 +1,523 @@
+@page "/Clients"
+@model Gixat.Web.Pages.Clients.IndexModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Clients";
+}
+
+@section Styles {
+<style>
+    /* Page Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--apple-dark);
+        letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+        color: var(--apple-gray);
+        font-size: 0.9375rem;
+        margin-top: 4px;
+    }
+
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--apple-blue);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-add:hover {
+        background: var(--apple-blue-hover);
+        color: white;
+        transform: scale(1.02);
+    }
+
+    /* Search Bar */
+    .search-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        max-width: 400px;
+        min-width: 200px;
+        position: relative;
+    }
+
+    .search-input input {
+        width: 100%;
+        padding: 12px 16px 12px 44px;
+        border: 1px solid #d2d2d7;
+        border-radius: 10px;
+        font-size: 0.9375rem;
+        background: white;
+        transition: all 0.2s ease;
+    }
+
+    .search-input input:focus {
+        outline: none;
+        border-color: var(--apple-blue);
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+
+    .search-input i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--apple-gray);
+    }
+
+    .filter-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border: 1px solid #d2d2d7;
+        border-radius: 10px;
+        background: white;
+        color: var(--apple-dark);
+        font-size: 0.9375rem;
+        cursor: pointer;
+    }
+
+    .filter-btn:hover {
+        background: #f5f5f7;
+    }
+
+    /* Clients Card */
+    .clients-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+
+    .clients-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .clients-table th {
+        text-align: left;
+        padding: 16px 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--apple-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .clients-table td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 0.9375rem;
+        color: var(--apple-dark);
+    }
+
+    .clients-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .clients-table tr:hover {
+        background: #fafafa;
+    }
+
+    .client-name {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .client-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .client-info h6 {
+        margin: 0;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--apple-dark);
+    }
+
+    .client-info span {
+        font-size: 0.8125rem;
+        color: var(--apple-gray);
+    }
+
+    .badge-vip {
+        background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        color: white;
+        font-size: 0.6875rem;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    .badge-status.active {
+        background: #e3fcef;
+        color: #00875a;
+    }
+
+    .badge-status.inactive {
+        background: #f4f5f7;
+        color: var(--apple-gray);
+    }
+
+    .badge-status::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--apple-gray);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background: #f5f5f7;
+        color: var(--apple-dark);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #f5f5f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 2rem;
+        color: var(--apple-gray);
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--apple-dark);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--apple-gray);
+        margin-bottom: 24px;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #e5e5e5;
+        padding: 20px 24px;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--apple-dark);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e5e5e5;
+        padding: 16px 24px;
+    }
+
+    .form-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--apple-dark);
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        border: 1px solid #d2d2d7;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 0.9375rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--apple-blue);
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+    }
+
+    .btn-cancel {
+        padding: 10px 20px;
+        border: 1px solid #d2d2d7;
+        border-radius: 10px;
+        background: white;
+        color: var(--apple-dark);
+        font-size: 0.9375rem;
+        cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+        background: #f5f5f7;
+    }
+
+    .btn-save {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 10px;
+        background: var(--apple-blue);
+        color: white;
+        font-size: 0.9375rem;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        background: var(--apple-blue-hover);
+    }
+
+    /* Responsive Table */
+    @@media (max-width: 992px) {
+        .clients-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Clients</h1>
+        <p class="page-subtitle">Manage your garage clients and their vehicles</p>
+    </div>
+    <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addClientModal">
+        <i class="bi bi-plus-lg"></i>
+        Add Client
+    </button>
+</div>
+
+<!-- Search Bar -->
+<div class="search-bar">
+    <div class="search-input">
+        <i class="bi bi-search"></i>
+        <form method="get">
+            <input type="text" name="search" placeholder="Search clients..." value="@Model.SearchTerm" />
+        </form>
+    </div>
+    <button class="filter-btn">
+        <i class="bi bi-funnel"></i>
+        Filters
+    </button>
+</div>
+
+<!-- Clients Table -->
+<div class="clients-card">
+    @if (Model.Clients.Any())
+    {
+        <table class="clients-table">
+            <thead>
+                <tr>
+                    <th>Client</th>
+                    <th>Phone</th>
+                    <th>Vehicles</th>
+                    <th>Total Visits</th>
+                    <th>Total Spent</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var client in Model.Clients)
+                {
+                    <tr>
+                        <td>
+                            <div class="client-name">
+                                <div class="client-avatar">
+                                    @client.FirstName[0]@client.LastName[0]
+                                </div>
+                                <div class="client-info">
+                                    <h6>
+                                        @client.FullName
+                                        @if (client.IsVip)
+                                        {
+                                            <span class="badge-vip">VIP</span>
+                                        }
+                                    </h6>
+                                    <span>@client.Email</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@client.Phone</td>
+                        <td>@client.Vehicles.Count vehicles</td>
+                        <td>@client.TotalVisits</td>
+                        <td>$@client.TotalSpent.ToString("N2")</td>
+                        <td>
+                            <span class="badge-status @(client.IsActive ? "active" : "inactive")">
+                                @(client.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td>
+                            <a href="/Clients/@client.Id" class="action-btn" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <button class="action-btn" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="action-btn" title="More">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <h3>No clients yet</h3>
+            <p>Start by adding your first client to manage their vehicles and services.</p>
+            <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                <i class="bi bi-plus-lg"></i>
+                Add Your First Client
+            </button>
+        </div>
+    }
+</div>
+
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="AddClient">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name *</label>
+                            <input type="text" name="FirstName" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name *</label>
+                            <input type="text" name="LastName" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone *</label>
+                            <input type="tel" name="Phone" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="Email" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <input type="text" name="Address" class="form-control" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">City</label>
+                            <input type="text" name="City" class="form-control" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">State</label>
+                            <input type="text" name="State" class="form-control" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Postal Code</label>
+                            <input type="text" name="PostalCode" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea name="Notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="IsVip" class="form-check-input" id="isVip" />
+                        <label class="form-check-label" for="isVip">Mark as VIP client</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-save">Add Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
