@@ -12,9 +12,11 @@
     <ProjectReference Include="..\Modules\Companies\Gixat.Modules.Companies.csproj" />
     <ProjectReference Include="..\Modules\Users\Gixat.Modules.Users.csproj" />
     <ProjectReference Include="..\Modules\Clients\Gixat.Modules.Clients.csproj" />
+    <ProjectReference Include="..\Modules\Sessions\Gixat.Modules.Sessions.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="dotenv.net" Version="4.0.0" />
     <PackageReference Include="HotChocolate.AspNetCore" Version="15.0.3" />
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.0.3" />
     <PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.0.3" />

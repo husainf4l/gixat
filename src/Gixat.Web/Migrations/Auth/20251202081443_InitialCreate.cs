@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Gixat.Modules.Auth.Data.Migrations
+namespace Gixat.Web.Migrations.Auth
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

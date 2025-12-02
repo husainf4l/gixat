@@ -15,7 +15,7 @@ public static class ClientsModule
         services.AddDbContext<ClientDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(ClientDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly("Gixat.Web")));
 
         // Add services
         services.AddScoped<IClientService, ClientService>();

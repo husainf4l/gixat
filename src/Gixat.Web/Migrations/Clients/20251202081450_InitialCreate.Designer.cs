@@ -9,10 +9,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Gixat.Modules.Clients.Data.Migrations
+namespace Gixat.Web.Migrations.Clients
 {
     [DbContext(typeof(ClientDbContext))]
-    [Migration("20251201220818_InitialCreate")]
+    [Migration("20251202081450_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

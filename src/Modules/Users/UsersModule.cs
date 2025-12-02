@@ -15,7 +15,7 @@ public static class UsersModule
         services.AddDbContext<UserDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(UserDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly("Gixat.Web")));
 
         // Add services
         services.AddScoped<ICompanyUserService, CompanyUserService>();

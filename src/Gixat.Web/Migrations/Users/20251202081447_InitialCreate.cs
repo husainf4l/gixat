@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Gixat.Modules.Users.Data.Migrations
+namespace Gixat.Web.Migrations.Users
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

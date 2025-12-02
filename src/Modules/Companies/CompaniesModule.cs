@@ -15,7 +15,7 @@ public static class CompaniesModule
         services.AddDbContext<CompanyDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(CompanyDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly("Gixat.Web")));
 
         // Register services
         services.AddScoped<ICompanyService, CompanyService>();

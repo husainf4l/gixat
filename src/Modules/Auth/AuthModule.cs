@@ -17,7 +17,7 @@ public static class AuthModule
         services.AddDbContext<AuthDbContext>(options =>
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly(typeof(AuthDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly("Gixat.Web")));
 
         // Add Identity
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

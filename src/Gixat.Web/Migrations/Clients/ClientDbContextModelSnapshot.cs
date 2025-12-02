@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Gixat.Modules.Clients.Data.Migrations
+namespace Gixat.Web.Migrations.Clients
 {
     [DbContext(typeof(ClientDbContext))]
     partial class ClientDbContextModelSnapshot : ModelSnapshot

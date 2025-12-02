@@ -3,20 +3,17 @@ using System;
 using Gixat.Modules.Companies.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Gixat.Modules.Companies.Data.Migrations
+namespace Gixat.Web.Migrations.Companies
 {
     [DbContext(typeof(CompanyDbContext))]
-    [Migration("20251201214107_InitialCreate")]
-    partial class InitialCreate
+    partial class CompanyDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
