@@ -49,10 +49,8 @@ builder.Configuration["Authentication:Google:ClientId"] =
 builder.Configuration["Authentication:Google:ClientSecret"] = 
     Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? builder.Configuration["Authentication:Google:ClientSecret"];
 
-// Add services - include Auth module's Razor Pages
-var authAssembly = typeof(AuthModule).Assembly;
-builder.Services.AddRazorPages()
-    .AddApplicationPart(authAssembly);
+// Add services
+builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 
 // Register unified AppDbContext

@@ -149,6 +149,127 @@
     </div>
 </div>
 
+<!-- Sessions Section -->
+<div class="flex justify-between items-center mb-6 mt-10">
+    <h3 class="text-xl font-bold text-apple-dark flex items-center gap-2">
+        <i class="bi bi-clock-history text-indigo-500"></i>Service History
+    </h3>
+    <span class="text-apple-gray text-sm">@Model.Sessions.Count() session(s)</span>
+</div>
+
+@if (Model.Sessions.Any())
+{
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-100">
+                <tr>
+                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Session</th>
+                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Vehicle</th>
+                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Status</th>
+                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Check-In</th>
+                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Progress</th>
+                    <th class="text-right py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach (var session in Model.Sessions.OrderByDescending(s => s.CheckInAt))
+                {
+                    var statusColor = session.Status switch
+                    {
+                        Gixat.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-blue-100 text-blue-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bg-indigo-100 text-indigo-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Inspection => "bg-cyan-100 text-cyan-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.TestDrive => "bg-orange-100 text-orange-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bg-purple-100 text-purple-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-amber-100 text-amber-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Completed => "bg-green-100 text-green-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-teal-100 text-teal-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-100 text-gray-700",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Cancelled => "bg-red-100 text-red-700",
+                        _ => "bg-gray-100 text-gray-700"
+                    };
+                    var statusIcon = session.Status switch
+                    {
+                        Gixat.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bi-box-arrow-in-right",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bi-chat-left-text",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Inspection => "bi-search",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.TestDrive => "bi-speedometer2",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bi-hourglass-split",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.InProgress => "bi-wrench-adjustable",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Completed => "bi-check-all",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bi-car-front",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Closed => "bi-check-circle",
+                        Gixat.Modules.Sessions.Enums.SessionStatus.Cancelled => "bi-x-circle",
+                        _ => "bi-question-circle"
+                    };
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="py-3 px-4">
+                            <a href="/Sessions/Details/@session.Id" class="font-semibold text-indigo-600 hover:text-indigo-800 no-underline">
+                                @session.SessionNumber
+                            </a>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-2">
+                                <i class="bi bi-car-front text-apple-gray"></i>
+                                <span class="text-sm text-apple-dark">@session.VehicleDisplayName</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(session.VehicleLicensePlate))
+                            {
+                                <div class="text-xs text-apple-gray">@session.VehicleLicensePlate</div>
+                            }
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium @statusColor">
+                                <i class="bi @statusIcon"></i>
+                                @session.Status.ToString().Replace("InProgress", "In Progress").Replace("AwaitingApproval", "Awaiting Approval").Replace("WorkInProgress", "Work In Progress").Replace("QualityCheck", "Quality Check").Replace("ReadyForPickup", "Ready for Pickup")
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-sm text-apple-dark">
+                            <div>@session.CheckInAt.ToString("MMM dd, yyyy")</div>
+                            <div class="text-xs text-apple-gray">@session.CheckInAt.ToString("hh:mm tt")</div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex gap-1">
+                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasCustomerRequest ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Customer Request">
+                                    <i class="bi bi-chat-left-text"></i>
+                                </span>
+                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasInspection ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Inspection">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasTestDrive ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Test Drive">
+                                    <i class="bi bi-speedometer2"></i>
+                                </span>
+                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasJobCard ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Job Card">
+                                    <i class="bi bi-card-checklist"></i>
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <a href="/Sessions/Details/@session.Id" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors no-underline">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-clock-history text-3xl text-gray-400"></i>
+        </div>
+        <h4 class="text-lg font-semibold text-apple-dark mb-2">No Service History</h4>
+        <p class="text-apple-gray text-sm mb-4">This client hasn't had any service sessions yet.</p>
+        @if (Model.Vehicles.Any())
+        {
+            <p class="text-apple-gray text-xs">Click "New Session" on a vehicle above to create the first session.</p>
+        }
+    </div>
+}
+
 <!-- Add Vehicle Modal -->
 <div id="addVehicleModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">

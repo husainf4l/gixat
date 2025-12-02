@@ -1,0 +1,30 @@
+@page "/Auth/Logout"
+@model Gixat.Web.Pages.Auth.LogoutModel
+@{
+    ViewData["Title"] = "Logged Out";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gixat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center">
+    <div class="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md w-full mx-4">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="bi bi-check-lg text-green-600 text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-3">You have been logged out</h2>
+        <p class="text-gray-500 mb-6">Thank you for using Gixat. See you soon!</p>
+        <a href="/Auth/Login" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors no-underline">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Sign In Again
+        </a>
+    </div>
+</body>
+</html>

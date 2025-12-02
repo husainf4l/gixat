@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Gixat.Modules.Auth.Pages;
+namespace Gixat.Web.Pages.Auth;
 
 public class AccessDeniedModel : PageModel
 {

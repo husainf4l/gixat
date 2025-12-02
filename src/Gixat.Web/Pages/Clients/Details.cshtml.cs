@@ -6,6 +6,7 @@ using Gixat.Modules.Clients.Entities;
 using Gixat.Modules.Clients.Interfaces;
 using Gixat.Modules.Sessions.Interfaces;
 using Gixat.Modules.Sessions.DTOs;
+using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Users.Interfaces;
 using Gixat.Modules.Companies.Interfaces;
 
@@ -36,6 +37,8 @@ public class DetailsModel : PageModel
 
     public Client Client { get; set; } = default!;
     public IEnumerable<ClientVehicle> Vehicles { get; set; } = new List<ClientVehicle>();
+    public IEnumerable<SessionDto> Sessions { get; set; } = new List<SessionDto>();
+    public Guid CompanyId { get; set; }
 
     [BindProperty]
     public VehicleInput NewVehicle { get; set; } = new();
@@ -56,6 +59,20 @@ public class DetailsModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToPage("/Auth/Login");
+        }
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+        if (currentCompany == null)
+        {
+            return RedirectToPage("/Setup/Company");
+        }
+        CompanyId = currentCompany.CompanyId;
+
         var client = await _clientService.GetByIdAsync(id);
         if (client == null)
         {
@@ -64,6 +81,7 @@ public class DetailsModel : PageModel
 
         Client = client;
         Vehicles = await _vehicleService.GetByClientIdAsync(id);
+        Sessions = await _sessionService.GetByClientAsync(id, CompanyId);
         return Page();
     }
 

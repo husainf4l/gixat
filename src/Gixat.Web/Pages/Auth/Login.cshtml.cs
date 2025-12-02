@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Gixat.Modules.Auth.DTOs;
 using Gixat.Modules.Auth.Interfaces;
 
-namespace Gixat.Modules.Auth.Pages;
+namespace Gixat.Web.Pages.Auth;
 
 public class LoginModel : PageModel
 {

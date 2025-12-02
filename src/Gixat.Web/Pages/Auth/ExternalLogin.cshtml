@@ -1,5 +1,5 @@
 @page "/Auth/ExternalLogin"
-@model Gixat.Modules.Auth.Pages.ExternalLoginModel
+@model Gixat.Web.Pages.Auth.ExternalLoginModel
 @{
     ViewData["Title"] = "External Login";
     Layout = null;
@@ -18,14 +18,20 @@
     <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3.5 rounded-xl mb-5 text-sm flex items-center gap-2">
-                <i class="bi bi-exclamation-circle"></i>@Model.ErrorMessage
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="bi bi-exclamation-circle text-red-600 text-3xl"></i>
             </div>
-            <a href="/Auth/Login" class="text-blue-600 hover:underline">Return to Login</a>
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3.5 rounded-xl mb-5 text-sm">
+                @Model.ErrorMessage
+            </div>
+            <a href="/Auth/Login" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors no-underline">
+                <i class="bi bi-arrow-left"></i>
+                Return to Login
+            </a>
         }
         else
         {
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
             <p class="text-gray-600">Processing your login...</p>
         }
     </div>

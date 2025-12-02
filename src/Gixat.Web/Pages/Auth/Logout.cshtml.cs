@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Gixat.Modules.Auth.Interfaces;
 
-namespace Gixat.Modules.Auth.Pages;
+namespace Gixat.Web.Pages.Auth;
 
 public class LogoutModel : PageModel
 {
@@ -22,6 +22,6 @@ public class LogoutModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         await _authService.LogoutAsync();
-        return RedirectToPage("/Login");
+        return RedirectToPage("/Auth/Login");
     }
 }

@@ -1,0 +1,82 @@
+@page "/Sessions/{id:guid}/CustomerRequest/Create"
+@model Gixat.Web.Pages.Sessions.CustomerRequest.CreateModel
+@using Gixat.Modules.Sessions.Enums
+@{
+    ViewData["Title"] = "Add Customer Request";
+    Layout = "_AppLayout";
+}
+
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+        <a href="/Sessions/@Model.Session?.Id" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="bi bi-arrow-left text-gray-500"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">Add Customer Request</h1>
+            <p class="text-sm text-gray-500">Session #@Model.Session?.SessionNumber • @Model.Session?.VehicleDisplayName</p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <form method="post">
+            <div class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label asp-for="Input.Title" class="block text-sm font-medium text-gray-700 mb-1.5">Title <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.Title" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" required />
+                    <span asp-validation-for="Input.Title" class="text-red-500 text-xs mt-1"></span>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <label asp-for="Input.Priority" class="block text-sm font-medium text-gray-700 mb-1.5">Priority</label>
+                    <select asp-for="Input.Priority" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-white">
+                        <option value="@Priority.Low">Low</option>
+                        <option value="@Priority.Normal" selected>Normal</option>
+                        <option value="@Priority.High">High</option>
+                        <option value="@Priority.Urgent">Urgent</option>
+                    </select>
+                </div>
+
+                <!-- Customer Concerns -->
+                <div>
+                    <label asp-for="Input.CustomerConcerns" class="block text-sm font-medium text-gray-700 mb-1.5">Customer Concerns</label>
+                    <textarea asp-for="Input.CustomerConcerns" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none" placeholder="What issues is the customer experiencing?"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">Describe the issues or symptoms reported by the customer</p>
+                </div>
+
+                <!-- Requested Services -->
+                <div>
+                    <label asp-for="Input.RequestedServices" class="block text-sm font-medium text-gray-700 mb-1.5">Requested Services</label>
+                    <textarea asp-for="Input.RequestedServices" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none" placeholder="e.g., Oil change, brake inspection, tire rotation..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">List any specific services requested by the customer</p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label asp-for="Input.Description" class="block text-sm font-medium text-gray-700 mb-1.5">Additional Description</label>
+                    <textarea asp-for="Input.Description" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none" placeholder="Any additional details about the request..."></textarea>
+                </div>
+
+                <!-- Internal Notes -->
+                <div>
+                    <label asp-for="Input.Notes" class="block text-sm font-medium text-gray-700 mb-1.5">Internal Notes</label>
+                    <textarea asp-for="Input.Notes" rows="2" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none" placeholder="Notes for internal use only..."></textarea>
+                    <p class="text-xs text-gray-500 mt-1">These notes won't be shown to the customer</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+                <a href="/Sessions/@Model.Session?.Id" class="px-5 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all flex items-center gap-2">
+                    <i class="bi bi-check-lg"></i> Save Customer Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

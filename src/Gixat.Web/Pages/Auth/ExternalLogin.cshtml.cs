@@ -2,10 +2,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 using Gixat.Modules.Auth.Entities;
 
-namespace Gixat.Modules.Auth.Pages;
+namespace Gixat.Web.Pages.Auth;
 
 public class ExternalLoginModel : PageModel
 {
