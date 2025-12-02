@@ -1,0 +1,52 @@
+@page
+@model Gixat.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Gixat - AI-Powered Garage Management";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/css/homepage.css" rel="stylesheet" />
+</head>
+<body>
+    @* Navigation Component *@
+    @await Html.PartialAsync("~/Components/_Navbar.cshtml")
+
+    @* Hero Section Component *@
+    @await Html.PartialAsync("~/Components/_Hero.cshtml")
+
+    @* About Section Component *@
+    @await Html.PartialAsync("~/Components/_About.cshtml")
+
+    @* Values Section Component *@
+    @await Html.PartialAsync("~/Components/_Values.cshtml")
+
+    @* Stats Section Component (Trusted by garages worldwide) *@
+    @await Html.PartialAsync("~/Components/_Stats.cshtml")
+
+    @* Tech Stack Section Component *@
+    @await Html.PartialAsync("~/Components/_TechStack.cshtml")
+
+    @* Testimonials Section Component *@
+    @await Html.PartialAsync("~/Components/_Testimonials.cshtml")
+
+    @* Features Section Component *@
+    @await Html.PartialAsync("~/Components/_Features.cshtml")
+
+    @* Pricing Section Component *@
+    @await Html.PartialAsync("~/Components/_Pricing.cshtml")
+
+    @* Final CTA Section Component *@
+    @await Html.PartialAsync("~/Components/_FinalCTA.cshtml")
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/homepage.js"></script>
+</body>
+</html>

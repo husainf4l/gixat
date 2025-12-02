@@ -1,0 +1,43 @@
+<!-- Final CTA Section -->
+<section class="final-cta-section">
+    <div class="container">
+        <div class="final-cta-content">
+            <h2>Ready to transform your garage?</h2>
+            <p>Join hundreds of garage owners who have already revolutionized their businesses with Gixat.</p>
+            <div class="final-cta-buttons">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/Dashboard" class="btn-primary-apple">
+                        Go to Dashboard
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <a href="/Auth/Register" class="btn-primary-apple">
+                        Start Free Trial Today
+                        <i class="bi bi-rocket-takeoff"></i>
+                    </a>
+                    <a href="#features" class="btn-secondary-apple">
+                        Learn More
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+            </div>
+            <div class="final-cta-features">
+                <div class="cta-feature">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Enterprise-grade security</span>
+                </div>
+                <div class="cta-feature">
+                    <i class="bi bi-headset"></i>
+                    <span>24/7 expert support</span>
+                </div>
+                <div class="cta-feature">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Proven results</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

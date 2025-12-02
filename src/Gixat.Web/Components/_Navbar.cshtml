@@ -1,0 +1,51 @@
+<!-- Navigation -->
+<nav class="navbar navbar-apple navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="/avatars/gixat-logo(3).png" alt="Gixat Logo" style="height: 40px; width: auto;">
+        </a>
+
+        <!-- Main Navigation Items -->
+        <div class="navbar-nav-main">
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="#features">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#pricing">Pricing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#about">About</a>
+                </li>
+            </ul>
+        </div>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Auth Buttons (Right Side) -->
+        <div class="navbar-nav-auth">
+            <ul class="navbar-nav align-items-center">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a class="nav-link btn-nav" href="/Auth/Logout">Logout</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Auth/Login">Sign In</a>
+                    </li>
+                    <li class="nav-item ms-3">
+                        <a class="nav-link btn-nav" href="/Auth/Register">Get Started</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -5,6 +5,8 @@ using Gixat.Web.Data;
 using Gixat.Modules.Auth;
 using Gixat.Modules.Auth.Entities;
 using Gixat.Modules.Clients;
+using Gixat.Modules.Clients.GraphQL.Queries;
+using Gixat.Modules.Clients.GraphQL.Types;
 using Gixat.Modules.Companies;
 using Gixat.Modules.Companies.GraphQL.Queries;
 using Gixat.Modules.Companies.GraphQL.Mutations;
@@ -104,6 +106,12 @@ builder.Services
     .AddType<CompanyUserRoleType>()
     .AddType<UserInvitationType>()
     .AddType<InvitationStatusType>()
+    // Clients Module
+    .AddTypeExtension<ClientQueries>()
+    .AddType<ClientType>()
+    .AddType<ClientVehicleType>()
+    .AddType<ClientStatsType>()
+    .AddType<PlatformStatsType>()
     // Sessions Module
     .AddTypeExtension<SessionQueries>()
     .AddTypeExtension<SessionMutations>()
@@ -131,27 +139,27 @@ builder.Services
 var app = builder.Build();
 
 // Apply migrations only in Development or when APPLY_MIGRATIONS=true
-var applyMigrations = app.Environment.IsDevelopment() || 
-    Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
+// var applyMigrations = app.Environment.IsDevelopment() || 
+//     Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
 
-if (applyMigrations)
-{
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+// if (applyMigrations)
+// {
+//     using var scope = app.Services.CreateScope();
+//     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     
-    logger.LogInformation("Applying database migrations...");
-    await context.Database.MigrateAsync();
-    logger.LogInformation("Database migrations applied successfully.");
-}
+//     logger.LogInformation("Applying database migrations...");
+//     await context.Database.MigrateAsync();
+//     logger.LogInformation("Database migrations applied successfully.");
+// }
 
-// Seed database
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await AuthModule.SeedRolesAsync(services);
-    await AuthModule.SeedAdminUserAsync(services, builder.Configuration);
-}
+// // Seed database
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     await AuthModule.SeedRolesAsync(services);
+//     await AuthModule.SeedAdminUserAsync(services, builder.Configuration);
+// }
 
 // Configure pipeline
 if (!app.Environment.IsDevelopment())

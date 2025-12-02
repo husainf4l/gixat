@@ -1,0 +1,107 @@
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Revolutionize your<br>
+            <span class="gradient-text">garage operations.</span>
+        </h1>
+        
+        <p class="hero-subtitle">
+            The all-in-one platform that transforms how you manage your garage business. From seamless scheduling to intelligent inventory management — everything you need to scale and succeed.
+        </p>
+
+        <div class="hero-features">
+            <div class="hero-feature">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>30-day free trial</span>
+            </div>
+            <div class="hero-feature">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>No setup fees</span>
+            </div>
+            <div class="hero-feature">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>24/7 support</span>
+            </div>
+        </div>
+
+        <div class="hero-cta">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a href="/Dashboard" class="btn-primary-apple">
+                    Go to Dashboard
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            }
+            else
+            {
+                <a href="/Auth/Register" class="btn-primary-apple">
+                    Get Started Free
+                    <i class="bi bi-rocket-takeoff"></i>
+                </a>
+                <a href="#features" class="btn-secondary-apple">
+                    See Features
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            }
+        </div>
+
+        <!-- Hero Visual -->
+        <div class="hero-visual">
+            <!-- Floating Elements -->
+            <div class="floating-element left">
+                <div class="floating-icon purple">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <div class="floating-text">
+                    <strong>Service Complete</strong>
+                    <span>Oil change • BMW X5</span>
+                </div>
+            </div>
+
+            <div class="floating-element right">
+                <div class="floating-icon green">
+                    <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="floating-text">
+                    <strong>$2,450 Revenue</strong>
+                    <span>Today's earnings</span>
+                </div>
+            </div>
+
+            <!-- Dashboard Mockup -->
+            <div class="hero-mockup">
+                <div class="mockup-header">
+                    <div class="mockup-dot red"></div>
+                    <div class="mockup-dot yellow"></div>
+                    <div class="mockup-dot green"></div>
+                </div>
+                <div class="mockup-content">
+                    <div class="mockup-dashboard">
+                        <div class="mockup-card">
+                            <div class="mockup-card-icon blue">
+                                <i class="bi bi-car-front"></i>
+                            </div>
+                            <div class="mockup-card-title">Active Jobs</div>
+                            <div class="mockup-card-value">12</div>
+                        </div>
+                        <div class="mockup-card">
+                            <div class="mockup-card-icon green">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div class="mockup-card-title">Appointments Today</div>
+                            <div class="mockup-card-value">8</div>
+                        </div>
+                        <div class="mockup-card">
+                            <div class="mockup-card-icon orange">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                            <div class="mockup-card-title">Monthly Revenue</div>
+                            <div class="mockup-card-value">$48.5K</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
