@@ -1,0 +1,155 @@
+@page
+@model Gixat.Web.Pages.Sessions.IndexModel
+@{
+    ViewData["Title"] = "Sessions";
+    Layout = "_AppLayout";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h2 class="text-2xl font-semibold text-apple-dark mb-1">Sessions</h2>
+        <p class="text-apple-gray">Manage garage sessions and vehicle check-ins</p>
+    </div>
+    <a href="/Sessions/Create" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
+        <i class="bi bi-plus-lg"></i>New Check-In
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl shadow-sm mb-6">
+    <div class="p-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-4">
+                <div class="flex">
+                    <span class="inline-flex items-center px-3 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
+                        <i class="bi bi-search text-gray-500"></i>
+                    </span>
+                    <input type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" name="SearchTerm" value="@Model.SearchTerm" placeholder="Search sessions...">
+                </div>
+            </div>
+            <div class="md:col-span-3">
+                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white" name="StatusFilter">
+                    <option value="">All Active</option>
+                    <option value="CheckedIn" selected="@(Model.StatusFilter == "CheckedIn")">Checked In</option>
+                    <option value="CustomerRequest" selected="@(Model.StatusFilter == "CustomerRequest")">Customer Request</option>
+                    <option value="Inspection" selected="@(Model.StatusFilter == "Inspection")">Inspection</option>
+                    <option value="TestDrive" selected="@(Model.StatusFilter == "TestDrive")">Test Drive</option>
+                    <option value="InProgress" selected="@(Model.StatusFilter == "InProgress")">In Progress</option>
+                    <option value="Completed" selected="@(Model.StatusFilter == "Completed")">Completed</option>
+                    <option value="ReadyForPickup" selected="@(Model.StatusFilter == "ReadyForPickup")">Ready for Pickup</option>
+                    <option value="Closed" selected="@(Model.StatusFilter == "Closed")">Closed</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-indigo-500 text-indigo-500 rounded-lg hover:bg-indigo-50 transition-colors">
+                    <i class="bi bi-funnel"></i>Filter
+                </button>
+            </div>
+            <div class="md:col-span-2">
+                <a href="/Sessions" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+                    <i class="bi bi-x-lg"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sessions Table -->
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    @if (Model.Sessions.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Session #</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Client</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Vehicle</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Status</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Progress</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Check-In</th>
+                        <th class="text-right py-4 px-6 text-sm font-semibold text-apple-gray">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var session in Model.Sessions)
+                    {
+                        var badgeClass = session.Status switch
+                        {
+                            Gixat.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-cyan-100 text-cyan-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bg-gray-100 text-gray-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.Inspection => "bg-gray-100 text-gray-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.TestDrive => "bg-gray-100 text-gray-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bg-yellow-100 text-yellow-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-indigo-100 text-indigo-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.Completed => "bg-green-100 text-green-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-yellow-100 text-yellow-700",
+                            Gixat.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-800 text-white",
+                            _ => "bg-gray-100 text-gray-700"
+                        };
+                        
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">
+                                <a href="/Sessions/Details/@session.Id" class="font-semibold text-indigo-600 hover:text-indigo-800 no-underline">
+                                    @session.SessionNumber
+                                </a>
+                            </td>
+                            <td class="py-4 px-6">@session.ClientName</td>
+                            <td class="py-4 px-6">
+                                <span>@session.VehicleDisplayName</span>
+                                @if (!string.IsNullOrEmpty(session.VehicleLicensePlate))
+                                {
+                                    <br><span class="text-sm text-apple-gray">@session.VehicleLicensePlate</span>
+                                }
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium @badgeClass">@session.Status</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex gap-1">
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasCustomerRequest ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Customer Request">
+                                        <i class="bi bi-chat-dots"></i>
+                                    </span>
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasInspection ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Inspection">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasTestDrive ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Test Drive">
+                                        <i class="bi bi-car-front"></i>
+                                    </span>
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasJobCard ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Job Card">
+                                        <i class="bi bi-wrench"></i>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span>@session.CheckInAt.ToString("MMM dd, yyyy")</span>
+                                <br><span class="text-sm text-apple-gray">@session.CheckInAt.ToString("HH:mm")</span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="inline-flex gap-1">
+                                    <a href="/Sessions/Details/@session.Id" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="/Sessions/Edit/@session.Id" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-16">
+            <i class="bi bi-inbox text-6xl text-gray-300 mb-4 block"></i>
+            <h4 class="text-xl font-semibold text-apple-dark mb-2">No sessions found</h4>
+            <p class="text-apple-gray mb-6">Get started by creating a new check-in</p>
+            <a href="/Sessions/Create" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
+                <i class="bi bi-plus-lg"></i>New Check-In
+            </a>
+        </div>
+    }
+</div>

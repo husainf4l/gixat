@@ -1,0 +1,116 @@
+@page
+@model Gixat.Web.Pages.Sessions.CreateModel
+@{
+    ViewData["Title"] = "New Check-In";
+    Layout = "_AppLayout";
+}
+
+<div class="max-w-2xl mx-auto">
+    <div class="mb-6">
+        <a href="/Sessions" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+            <i class="bi bi-arrow-left"></i>Back to Sessions
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-indigo-500 text-white px-6 py-4">
+            <h4 class="text-xl font-semibold flex items-center gap-2">
+                <i class="bi bi-car-front"></i>New Vehicle Check-In
+            </h4>
+        </div>
+        <div class="p-6">
+            <form method="post">
+                <div asp-validation-summary="All" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert"></div>
+
+                <!-- Client Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-apple-dark mb-2">Select Client <span class="text-red-500">*</span></label>
+                    <select class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white" asp-for="SelectedClientId" id="clientSelect">
+                        <option value="">-- Select a Client --</option>
+                        @foreach (var client in Model.Clients)
+                        {
+                            <option value="@client.Id">@client.FullName - @client.Phone</option>
+                        }
+                    </select>
+                    <p class="mt-2 text-sm text-apple-gray">
+                        Can't find the client? <a href="/Clients/Create" class="text-indigo-500 hover:text-indigo-600">Add new client</a>
+                    </p>
+                </div>
+
+                <!-- Vehicle Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-apple-dark mb-2">Select Vehicle <span class="text-red-500">*</span></label>
+                    <select class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" asp-for="SelectedVehicleId" id="vehicleSelect" disabled>
+                        <option value="">-- Select a Vehicle --</option>
+                    </select>
+                    <p class="mt-2 text-sm text-apple-gray" id="vehicleHelp">Select a client first to see their vehicles</p>
+                </div>
+
+                <!-- Mileage -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-apple-dark mb-2">Mileage at Check-In</label>
+                    <div class="flex">
+                        <input type="number" class="flex-1 px-4 py-3 text-lg border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" asp-for="MileageIn" placeholder="Enter current mileage">
+                        <span class="inline-flex items-center px-4 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-apple-gray">km</span>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-apple-dark mb-2">Initial Notes</label>
+                    <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" asp-for="Notes" rows="3" placeholder="Any initial observations or customer comments..."></textarea>
+                </div>
+
+                <hr class="my-6 border-gray-200">
+
+                <div class="flex justify-end gap-3">
+                    <a href="/Sessions" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">Cancel</a>
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors text-lg">
+                        <i class="bi bi-check-lg"></i>Create Session
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('clientSelect').addEventListener('change', async function() {
+            const clientId = this.value;
+            const vehicleSelect = document.getElementById('vehicleSelect');
+            const vehicleHelp = document.getElementById('vehicleHelp');
+            
+            vehicleSelect.innerHTML = '<option value="">-- Select a Vehicle --</option>';
+            
+            if (!clientId) {
+                vehicleSelect.disabled = true;
+                vehicleHelp.textContent = 'Select a client first to see their vehicles';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
+                const vehicles = await response.json();
+                
+                if (vehicles.length === 0) {
+                    vehicleSelect.disabled = true;
+                    vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/Details/' + clientId + '" class="text-indigo-500 hover:text-indigo-600">Add a vehicle</a>';
+                } else {
+                    vehicleSelect.disabled = false;
+                    vehicleHelp.textContent = 'Select the vehicle being checked in';
+                    
+                    vehicles.forEach(vehicle => {
+                        const option = document.createElement('option');
+                        option.value = vehicle.id;
+                        option.textContent = vehicle.displayName;
+                        vehicleSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading vehicles:', error);
+                vehicleHelp.textContent = 'Error loading vehicles';
+            }
+        });
+    </script>
+}

@@ -19,6 +19,7 @@ public static class CompaniesModule
 
         // Register services
         services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<IBranchService, BranchService>();
 
         return services;
     }
