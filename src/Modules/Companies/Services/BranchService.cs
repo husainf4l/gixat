@@ -2,28 +2,29 @@ using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Companies.DTOs;
 using Gixat.Modules.Companies.Entities;
 using Gixat.Modules.Companies.Interfaces;
-using Gixat.Modules.Companies.Data;
 
 namespace Gixat.Modules.Companies.Services;
 
 public class BranchService : IBranchService
 {
-    private readonly CompanyDbContext _context;
+    private readonly DbContext _context;
 
-    public BranchService(CompanyDbContext context)
+    public BranchService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<Branch> Branches => _context.Set<Branch>();
+
     public async Task<BranchDto?> GetByIdAsync(Guid id)
     {
-        var branch = await _context.Branches.FindAsync(id);
+        var branch = await Branches.FindAsync(id);
         return branch == null ? null : MapToDto(branch);
     }
 
     public async Task<IEnumerable<BranchDto>> GetByCompanyIdAsync(Guid companyId)
     {
-        var branches = await _context.Branches
+        var branches = await Branches
             .Where(b => b.CompanyId == companyId)
             .OrderBy(b => b.Name)
             .ToListAsync();
@@ -48,7 +49,7 @@ public class BranchService : IBranchService
             IsMainBranch = dto.IsMainBranch
         };
 
-        _context.Branches.Add(branch);
+        Branches.Add(branch);
         await _context.SaveChangesAsync();
 
         return MapToDto(branch);
@@ -56,7 +57,7 @@ public class BranchService : IBranchService
 
     public async Task<BranchDto?> UpdateAsync(Guid id, UpdateBranchDto dto)
     {
-        var branch = await _context.Branches.FindAsync(id);
+        var branch = await Branches.FindAsync(id);
         if (branch == null) return null;
 
         branch.Name = dto.Name;
@@ -78,21 +79,21 @@ public class BranchService : IBranchService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var branch = await _context.Branches.FindAsync(id);
+        var branch = await Branches.FindAsync(id);
         if (branch == null) return false;
 
-        _context.Branches.Remove(branch);
+        Branches.Remove(branch);
         await _context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> SetAsMainBranchAsync(Guid id)
     {
-        var branch = await _context.Branches.FindAsync(id);
+        var branch = await Branches.FindAsync(id);
         if (branch == null) return false;
 
         // Remove main branch flag from other branches
-        var otherBranches = await _context.Branches
+        var otherBranches = await Branches
             .Where(b => b.CompanyId == branch.CompanyId && b.Id != id && b.IsMainBranch)
             .ToListAsync();
 

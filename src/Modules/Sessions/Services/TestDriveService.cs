@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,16 +8,19 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class TestDriveService : ITestDriveService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
 
-    public TestDriveService(SessionDbContext context)
+    public TestDriveService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<TestDrive> TestDrives => _context.Set<TestDrive>();
+    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+
     public async Task<TestDriveDto?> GetByIdAsync(Guid id, Guid companyId)
     {
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.Id == id && t.CompanyId == companyId)
@@ -29,7 +31,7 @@ public class TestDriveService : ITestDriveService
 
     public async Task<TestDriveDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.SessionId == sessionId && t.CompanyId == companyId)
@@ -51,7 +53,7 @@ public class TestDriveService : ITestDriveService
             Status = RequestStatus.Pending
         };
 
-        _context.TestDrives.Add(testDrive);
+        TestDrives.Add(testDrive);
         await _context.SaveChangesAsync();
 
         // Update session status
@@ -62,7 +64,7 @@ public class TestDriveService : ITestDriveService
 
     public async Task<TestDriveDto?> UpdateAsync(Guid id, UpdateTestDriveDto dto, Guid companyId)
     {
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .Include(t => t.MediaItems)
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -98,7 +100,7 @@ public class TestDriveService : ITestDriveService
 
     public async Task<bool> StartTestDriveAsync(Guid id, Guid driverId, int? mileageStart, Guid companyId)
     {
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -116,7 +118,7 @@ public class TestDriveService : ITestDriveService
 
     public async Task<bool> CompleteTestDriveAsync(Guid id, int? mileageEnd, Guid companyId)
     {
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -133,20 +135,20 @@ public class TestDriveService : ITestDriveService
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (testDrive == null) return false;
 
-        _context.TestDrives.Remove(testDrive);
+        TestDrives.Remove(testDrive);
         await _context.SaveChangesAsync();
         return true;
     }
 
     private async Task UpdateSessionStatus(Guid sessionId, SessionStatus status)
     {
-        var session = await _context.GarageSessions.FindAsync(sessionId);
+        var session = await GarageSessions.FindAsync(sessionId);
         if (session != null && session.Status < status)
         {
             session.Status = status;

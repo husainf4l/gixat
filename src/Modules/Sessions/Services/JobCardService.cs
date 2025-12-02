@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -10,16 +9,20 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class JobCardService : IJobCardService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
 
-    public JobCardService(SessionDbContext context)
+    public JobCardService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<JobCard> JobCards => _context.Set<JobCard>();
+    private DbSet<JobCardItem> JobCardItems => _context.Set<JobCardItem>();
+    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+
     public async Task<JobCardDto?> GetByIdAsync(Guid id, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .AsNoTracking()
             .Include(j => j.Items.OrderBy(i => i.SortOrder))
                 .ThenInclude(i => i.MediaItems)
@@ -32,7 +35,7 @@ public class JobCardService : IJobCardService
 
     public async Task<JobCardDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .AsNoTracking()
             .Include(j => j.Items.OrderBy(i => i.SortOrder))
                 .ThenInclude(i => i.MediaItems)
@@ -45,7 +48,7 @@ public class JobCardService : IJobCardService
 
     public async Task<JobCardDto?> GetByJobCardNumberAsync(string jobCardNumber, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .AsNoTracking()
             .Include(j => j.Items.OrderBy(i => i.SortOrder))
             .Include(j => j.MediaItems)
@@ -57,7 +60,7 @@ public class JobCardService : IJobCardService
 
     public async Task<IEnumerable<JobCardDto>> GetAllAsync(Guid companyId, JobCardStatus? status = null)
     {
-        var query = _context.JobCards
+        var query = JobCards
             .AsNoTracking()
             .Include(j => j.Items)
             .Include(j => j.MediaItems)
@@ -93,7 +96,7 @@ public class JobCardService : IJobCardService
             Status = JobCardStatus.Draft
         };
 
-        _context.JobCards.Add(jobCard);
+        JobCards.Add(jobCard);
         await _context.SaveChangesAsync();
 
         return MapToDto(jobCard);
@@ -101,7 +104,7 @@ public class JobCardService : IJobCardService
 
     public async Task<JobCardDto?> UpdateAsync(Guid id, UpdateJobCardDto dto, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .Include(j => j.Items)
             .Include(j => j.MediaItems)
             .Where(j => j.Id == id && j.CompanyId == companyId)
@@ -132,7 +135,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> ApproveAsync(Guid id, Guid approvedById, string? notes, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -151,7 +154,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> AuthorizeAsync(Guid id, string method, string? notes, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -169,7 +172,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> StartWorkAsync(Guid id, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -188,7 +191,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> CompleteWorkAsync(Guid id, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .Include(j => j.Items)
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -209,13 +212,13 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (jobCard == null) return false;
 
-        _context.JobCards.Remove(jobCard);
+        JobCards.Remove(jobCard);
         await _context.SaveChangesAsync();
         return true;
     }
@@ -225,7 +228,7 @@ public class JobCardService : IJobCardService
         var today = DateTime.UtcNow;
         var prefix = $"JOB-{today:yyyyMMdd}-";
 
-        var lastJobCard = await _context.JobCards
+        var lastJobCard = await JobCards
             .Where(j => j.CompanyId == companyId && j.JobCardNumber.StartsWith(prefix))
             .OrderByDescending(j => j.JobCardNumber)
             .FirstOrDefaultAsync();
@@ -262,7 +265,7 @@ public class JobCardService : IJobCardService
             Status = TaskStatus.Pending
         };
 
-        _context.JobCardItems.Add(item);
+        JobCardItems.Add(item);
         await _context.SaveChangesAsync();
 
         return MapItemToDto(item);
@@ -270,7 +273,7 @@ public class JobCardService : IJobCardService
 
     public async Task<JobCardItemDto?> UpdateItemAsync(Guid itemId, UpdateJobCardItemDto dto, Guid companyId)
     {
-        var item = await _context.JobCardItems
+        var item = await JobCardItems
             .Include(i => i.MediaItems)
             .Where(i => i.Id == itemId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -297,7 +300,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> StartItemAsync(Guid itemId, Guid technicianId, Guid companyId)
     {
-        var item = await _context.JobCardItems
+        var item = await JobCardItems
             .Where(i => i.Id == itemId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -314,7 +317,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> CompleteItemAsync(Guid itemId, string? workPerformed, string? technicianNotes, decimal? actualHours, Guid companyId)
     {
-        var item = await _context.JobCardItems
+        var item = await JobCardItems
             .Where(i => i.Id == itemId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -333,7 +336,7 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> QualityCheckItemAsync(Guid itemId, Guid checkedById, string? notes, Guid companyId)
     {
-        var item = await _context.JobCardItems
+        var item = await JobCardItems
             .Where(i => i.Id == itemId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -351,13 +354,13 @@ public class JobCardService : IJobCardService
 
     public async Task<bool> RemoveItemAsync(Guid itemId, Guid companyId)
     {
-        var item = await _context.JobCardItems
+        var item = await JobCardItems
             .Where(i => i.Id == itemId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (item == null) return false;
 
-        _context.JobCardItems.Remove(item);
+        JobCardItems.Remove(item);
         await _context.SaveChangesAsync();
         return true;
     }
@@ -400,7 +403,7 @@ public class JobCardService : IJobCardService
 
     private async Task UpdateSessionStatus(Guid sessionId, SessionStatus status)
     {
-        var session = await _context.GarageSessions.FindAsync(sessionId);
+        var session = await GarageSessions.FindAsync(sessionId);
         if (session != null)
         {
             session.Status = status;

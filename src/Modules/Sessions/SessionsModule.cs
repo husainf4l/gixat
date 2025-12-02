@@ -1,9 +1,7 @@
 using Amazon.S3;
 using Amazon.Extensions.NETCore.Setup;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.Interfaces;
 using Gixat.Modules.Sessions.Services;
 
@@ -11,15 +9,29 @@ namespace Gixat.Modules.Sessions;
 
 public static class SessionsModule
 {
-    public static IServiceCollection AddSessionsModule(this IServiceCollection services, IConfiguration configuration)
+    /// <summary>
+    /// Register only services (no DbContext). Use when AppDbContext is registered centrally.
+    /// </summary>
+    public static IServiceCollection AddSessionsModuleServices(this IServiceCollection services)
     {
-        // Add DbContext
-        services.AddDbContext<SessionDbContext>(options =>
-            options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly("Gixat.Web")));
+        // Register services
+        services.AddScoped<ISessionService, SessionService>();
+        services.AddScoped<ICustomerRequestService, CustomerRequestService>();
+        services.AddScoped<IInspectionService, InspectionService>();
+        services.AddScoped<ITestDriveService, TestDriveService>();
+        services.AddScoped<IJobCardService, JobCardService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IMediaService, MediaService>();
+        services.AddScoped<IAwsS3Service, AwsS3Service>();
 
-        // Add AWS S3 - will be configured when credentials are provided
+        return services;
+    }
+
+    /// <summary>
+    /// Configure AWS S3 services. Call this in Program.cs if AWS is needed.
+    /// </summary>
+    public static IServiceCollection AddAwsS3(this IServiceCollection services, IConfiguration configuration)
+    {
         var awsOptions = configuration.GetAWSOptions();
         if (!string.IsNullOrEmpty(configuration["AWS:AccessKey"]))
         {
@@ -28,11 +40,8 @@ public static class SessionsModule
         }
         else
         {
-            // Register a placeholder for development - replace with real implementation
             services.AddSingleton<IAmazonS3>(sp => 
             {
-                // This will throw if used without proper configuration
-                // In production, ensure AWS credentials are configured
                 var config = new AmazonS3Config
                 {
                     ServiceURL = configuration["AWS:S3:ServiceURL"] ?? "https://s3.amazonaws.com",
@@ -44,17 +53,6 @@ public static class SessionsModule
                     config);
             });
         }
-
-        // Register services
-        services.AddScoped<ISessionService, SessionService>();
-        services.AddScoped<ICustomerRequestService, CustomerRequestService>();
-        services.AddScoped<IInspectionService, InspectionService>();
-        services.AddScoped<ITestDriveService, TestDriveService>();
-        services.AddScoped<IJobCardService, JobCardService>();
-        services.AddScoped<IReportService, ReportService>();
-        services.AddScoped<IMediaService, MediaService>();
-        services.AddScoped<IAwsS3Service, AwsS3Service>();
-
         return services;
     }
 }

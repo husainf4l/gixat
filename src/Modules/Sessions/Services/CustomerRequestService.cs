@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,16 +8,19 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class CustomerRequestService : ICustomerRequestService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
 
-    public CustomerRequestService(SessionDbContext context)
+    public CustomerRequestService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<CustomerRequest> CustomerRequests => _context.Set<CustomerRequest>();
+    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+
     public async Task<CustomerRequestDto?> GetByIdAsync(Guid id, Guid companyId)
     {
-        var request = await _context.CustomerRequests
+        var request = await CustomerRequests
             .AsNoTracking()
             .Include(r => r.MediaItems)
             .Where(r => r.Id == id && r.CompanyId == companyId)
@@ -29,7 +31,7 @@ public class CustomerRequestService : ICustomerRequestService
 
     public async Task<CustomerRequestDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
-        var request = await _context.CustomerRequests
+        var request = await CustomerRequests
             .AsNoTracking()
             .Include(r => r.MediaItems)
             .Where(r => r.SessionId == sessionId && r.CompanyId == companyId)
@@ -53,7 +55,7 @@ public class CustomerRequestService : ICustomerRequestService
             Status = RequestStatus.Pending
         };
 
-        _context.CustomerRequests.Add(request);
+        CustomerRequests.Add(request);
         await _context.SaveChangesAsync();
 
         // Update session status
@@ -64,7 +66,7 @@ public class CustomerRequestService : ICustomerRequestService
 
     public async Task<CustomerRequestDto?> UpdateAsync(Guid id, UpdateCustomerRequestDto dto, Guid companyId)
     {
-        var request = await _context.CustomerRequests
+        var request = await CustomerRequests
             .Include(r => r.MediaItems)
             .Where(r => r.Id == id && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -87,7 +89,7 @@ public class CustomerRequestService : ICustomerRequestService
 
     public async Task<bool> CompleteAsync(Guid id, Guid completedById, Guid companyId)
     {
-        var request = await _context.CustomerRequests
+        var request = await CustomerRequests
             .Where(r => r.Id == id && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -104,20 +106,20 @@ public class CustomerRequestService : ICustomerRequestService
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var request = await _context.CustomerRequests
+        var request = await CustomerRequests
             .Where(r => r.Id == id && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (request == null) return false;
 
-        _context.CustomerRequests.Remove(request);
+        CustomerRequests.Remove(request);
         await _context.SaveChangesAsync();
         return true;
     }
 
     private async Task UpdateSessionStatus(Guid sessionId, SessionStatus status)
     {
-        var session = await _context.GarageSessions.FindAsync(sessionId);
+        var session = await GarageSessions.FindAsync(sessionId);
         if (session != null && session.Status < status)
         {
             session.Status = status;

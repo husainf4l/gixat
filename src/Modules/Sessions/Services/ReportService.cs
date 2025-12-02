@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Interfaces;
 using TaskStatus = Gixat.Modules.Sessions.Enums.TaskStatus;
@@ -8,16 +7,22 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class ReportService : IReportService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
 
-    public ReportService(SessionDbContext context)
+    public ReportService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<Entities.GarageSession> GarageSessions => _context.Set<Entities.GarageSession>();
+    private DbSet<Entities.CustomerRequest> CustomerRequests => _context.Set<Entities.CustomerRequest>();
+    private DbSet<Entities.Inspection> Inspections => _context.Set<Entities.Inspection>();
+    private DbSet<Entities.TestDrive> TestDrives => _context.Set<Entities.TestDrive>();
+    private DbSet<Entities.JobCard> JobCards => _context.Set<Entities.JobCard>();
+
     public async Task<InitialReportDto?> GenerateInitialReportAsync(Guid sessionId, Guid companyId, string generatedBy)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .AsNoTracking()
             .Where(s => s.Id == sessionId && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -25,20 +30,20 @@ public class ReportService : IReportService
         if (session == null) return null;
 
         // Get related data
-        var customerRequest = await _context.CustomerRequests
+        var customerRequest = await CustomerRequests
             .AsNoTracking()
             .Include(r => r.MediaItems)
             .Where(r => r.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .AsNoTracking()
             .Include(i => i.Items)
             .Include(i => i.MediaItems)
             .Where(i => i.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.SessionId == sessionId)
@@ -119,7 +124,7 @@ public class ReportService : IReportService
 
     public async Task<FinalReportDto?> GenerateFinalReportAsync(Guid sessionId, Guid companyId, string generatedBy)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .AsNoTracking()
             .Where(s => s.Id == sessionId && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -127,26 +132,26 @@ public class ReportService : IReportService
         if (session == null) return null;
 
         // Get all related data
-        var customerRequest = await _context.CustomerRequests
+        var customerRequest = await CustomerRequests
             .AsNoTracking()
             .Include(r => r.MediaItems)
             .Where(r => r.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .AsNoTracking()
             .Include(i => i.Items)
             .Include(i => i.MediaItems)
             .Where(i => i.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
-        var testDrive = await _context.TestDrives
+        var testDrive = await TestDrives
             .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
-        var jobCard = await _context.JobCards
+        var jobCard = await JobCards
             .AsNoTracking()
             .Include(j => j.Items)
             .Include(j => j.MediaItems)

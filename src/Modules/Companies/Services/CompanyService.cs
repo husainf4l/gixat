@@ -2,35 +2,37 @@ using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Companies.DTOs;
 using Gixat.Modules.Companies.Entities;
 using Gixat.Modules.Companies.Interfaces;
-using Gixat.Modules.Companies.Data;
 
 namespace Gixat.Modules.Companies.Services;
 
 public class CompanyService : ICompanyService
 {
-    private readonly CompanyDbContext _context;
+    private readonly DbContext _context;
 
-    public CompanyService(CompanyDbContext context)
+    public CompanyService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<Company> Companies => _context.Set<Company>();
+    private DbSet<Branch> Branches => _context.Set<Branch>();
+
     public async Task<CompanyDto?> GetByIdAsync(Guid id)
     {
-        var company = await _context.Companies.FindAsync(id);
+        var company = await Companies.FindAsync(id);
         return company == null ? null : MapToDto(company);
     }
 
     public async Task<CompanyDto?> GetByOwnerIdAsync(Guid ownerId)
     {
-        var company = await _context.Companies
+        var company = await Companies
             .FirstOrDefaultAsync(c => c.OwnerId == ownerId);
         return company == null ? null : MapToDto(company);
     }
 
     public async Task<IEnumerable<CompanyDto>> GetAllAsync()
     {
-        var companies = await _context.Companies.ToListAsync();
+        var companies = await Companies.ToListAsync();
         return companies.Select(MapToDto);
     }
 
@@ -54,7 +56,7 @@ public class CompanyService : ICompanyService
             OwnerId = ownerId
         };
 
-        _context.Companies.Add(company);
+        Companies.Add(company);
         await _context.SaveChangesAsync();
 
         return MapToDto(company);
@@ -62,7 +64,7 @@ public class CompanyService : ICompanyService
 
     public async Task<CompanyDto?> UpdateAsync(Guid id, UpdateCompanyDto dto)
     {
-        var company = await _context.Companies.FindAsync(id);
+        var company = await Companies.FindAsync(id);
         if (company == null) return null;
 
         company.Name = dto.Name;
@@ -87,17 +89,17 @@ public class CompanyService : ICompanyService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var company = await _context.Companies.FindAsync(id);
+        var company = await Companies.FindAsync(id);
         if (company == null) return false;
 
-        _context.Companies.Remove(company);
+        Companies.Remove(company);
         await _context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> ActivateAsync(Guid id)
     {
-        var company = await _context.Companies.FindAsync(id);
+        var company = await Companies.FindAsync(id);
         if (company == null) return false;
 
         company.IsActive = true;
@@ -108,7 +110,7 @@ public class CompanyService : ICompanyService
 
     public async Task<bool> DeactivateAsync(Guid id)
     {
-        var company = await _context.Companies.FindAsync(id);
+        var company = await Companies.FindAsync(id);
         if (company == null) return false;
 
         company.IsActive = false;
@@ -119,7 +121,7 @@ public class CompanyService : ICompanyService
 
     public async Task<bool> VerifyAsync(Guid id)
     {
-        var company = await _context.Companies.FindAsync(id);
+        var company = await Companies.FindAsync(id);
         if (company == null) return false;
 
         company.IsVerified = true;
@@ -130,14 +132,14 @@ public class CompanyService : ICompanyService
 
     public async Task<Company> CreateCompanyAsync(Company company)
     {
-        _context.Companies.Add(company);
+        Companies.Add(company);
         await _context.SaveChangesAsync();
         return company;
     }
 
     public async Task<Branch> CreateBranchAsync(Branch branch)
     {
-        _context.Branches.Add(branch);
+        Branches.Add(branch);
         await _context.SaveChangesAsync();
         return branch;
     }

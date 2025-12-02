@@ -2,7 +2,6 @@ using HotChocolate;
 using HotChocolate.Data;
 using HotChocolate.Types;
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Companies.Data;
 using Gixat.Modules.Companies.Entities;
 
 namespace Gixat.Modules.Companies.GraphQL.Queries;
@@ -13,23 +12,23 @@ public class CompanyQueries
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<Company> GetCompanies([Service] CompanyDbContext context)
+    public IQueryable<Company> GetCompanies([Service] DbContext context)
     {
-        return context.Companies;
+        return context.Set<Company>();
     }
 
     public async Task<Company?> GetCompanyById(
         Guid id,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
-        return await context.Companies.FindAsync(id);
+        return await context.Set<Company>().FindAsync(id);
     }
 
     public async Task<Company?> GetCompanyByOwnerId(
         Guid ownerId,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
-        return await context.Companies
+        return await context.Set<Company>()
             .FirstOrDefaultAsync(c => c.OwnerId == ownerId);
     }
 
@@ -38,16 +37,16 @@ public class CompanyQueries
     [UseSorting]
     public IQueryable<Branch> GetBranches(
         Guid companyId,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
-        return context.Branches.Where(b => b.CompanyId == companyId);
+        return context.Set<Branch>().Where(b => b.CompanyId == companyId);
     }
 
     public async Task<Branch?> GetBranchById(
         Guid id,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
-        return await context.Branches
+        return await context.Set<Branch>()
             .Include(b => b.Company)
             .FirstOrDefaultAsync(b => b.Id == id);
     }

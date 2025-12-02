@@ -2,7 +2,6 @@ using HotChocolate;
 using HotChocolate.Data;
 using HotChocolate.Types;
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Users.Data;
 using Gixat.Modules.Users.Entities;
 
 namespace Gixat.Modules.Users.GraphQL.Queries;
@@ -15,32 +14,32 @@ public class UserQueries
     [UseSorting]
     public IQueryable<CompanyUser> GetCompanyUsers(
         Guid companyId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        return context.CompanyUsers.Where(u => u.CompanyId == companyId);
+        return context.Set<CompanyUser>().Where(u => u.CompanyId == companyId);
     }
 
     public async Task<CompanyUser?> GetCompanyUserById(
         Guid id,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        return await context.CompanyUsers.FindAsync(id);
+        return await context.Set<CompanyUser>().FindAsync(id);
     }
 
     public async Task<CompanyUser?> GetCompanyUserByAuthId(
         Guid authUserId,
         Guid companyId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        return await context.CompanyUsers
+        return await context.Set<CompanyUser>()
             .FirstOrDefaultAsync(u => u.AuthUserId == authUserId && u.CompanyId == companyId);
     }
 
     public async Task<IEnumerable<CompanyUser>> GetUserCompanies(
         Guid authUserId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        return await context.CompanyUsers
+        return await context.Set<CompanyUser>()
             .Where(u => u.AuthUserId == authUserId && u.IsActive)
             .ToListAsync();
     }
@@ -50,9 +49,9 @@ public class UserQueries
     [UseSorting]
     public IQueryable<CompanyUser> GetTechnicians(
         Guid companyId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        return context.CompanyUsers
+        return context.Set<CompanyUser>()
             .Where(u => u.CompanyId == companyId && 
                         u.Role == CompanyUserRole.Technician && 
                         u.IsActive);
@@ -63,9 +62,9 @@ public class UserQueries
     [UseSorting]
     public IQueryable<UserInvitation> GetPendingInvitations(
         Guid companyId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        return context.UserInvitations
+        return context.Set<UserInvitation>()
             .Where(i => i.CompanyId == companyId && 
                         i.Status == InvitationStatus.Pending);
     }

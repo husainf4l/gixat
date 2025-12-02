@@ -1,14 +1,37 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Gixat.Modules.Auth.Entities;
+using Gixat.Modules.Companies.Entities;
+using Gixat.Modules.Clients.Entities;
+using Gixat.Modules.Users.Entities;
 using Gixat.Modules.Sessions.Entities;
 
-namespace Gixat.Modules.Sessions.Data;
+namespace Gixat.Web.Data;
 
-public class SessionDbContext : DbContext
+/// <summary>
+/// Unified application database context containing all entities.
+/// Single context = single migration path = best practice.
+/// </summary>
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
 {
-    public SessionDbContext(DbContextOptions<SessionDbContext> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 
+    // Companies Module
+    public DbSet<Company> Companies => Set<Company>();
+    public DbSet<Branch> Branches => Set<Branch>();
+
+    // Users Module
+    public DbSet<CompanyUser> CompanyUsers => Set<CompanyUser>();
+    public DbSet<UserInvitation> UserInvitations => Set<UserInvitation>();
+
+    // Clients Module
+    public DbSet<Client> Clients => Set<Client>();
+    public DbSet<ClientVehicle> ClientVehicles => Set<ClientVehicle>();
+
+    // Sessions Module
     public DbSet<GarageSession> GarageSessions => Set<GarageSession>();
     public DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
     public DbSet<Inspection> Inspections => Set<Inspection>();
@@ -22,7 +45,172 @@ public class SessionDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // GarageSession
+        // ============================================
+        // Auth / Identity Configuration
+        // ============================================
+        modelBuilder.Entity<ApplicationUser>(b =>
+        {
+            b.ToTable("Users");
+            b.Property(u => u.FirstName).HasMaxLength(100);
+            b.Property(u => u.LastName).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<ApplicationRole>(b =>
+        {
+            b.ToTable("Roles");
+            b.Property(r => r.Description).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("UserRoles");
+        modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("UserClaims");
+        modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("UserLogins");
+        modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
+        modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
+
+        // ============================================
+        // Companies Module Configuration
+        // ============================================
+        modelBuilder.Entity<Company>(b =>
+        {
+            b.ToTable("Companies");
+            b.HasKey(c => c.Id);
+            b.Property(c => c.Name).HasMaxLength(200).IsRequired();
+            b.Property(c => c.TradeName).HasMaxLength(200);
+            b.Property(c => c.Email).HasMaxLength(256).IsRequired();
+            b.Property(c => c.Phone).HasMaxLength(50);
+            b.Property(c => c.TaxId).HasMaxLength(50);
+            b.Property(c => c.RegistrationNumber).HasMaxLength(100);
+            b.Property(c => c.Website).HasMaxLength(256);
+            b.Property(c => c.Address).HasMaxLength(500);
+            b.Property(c => c.City).HasMaxLength(100);
+            b.Property(c => c.State).HasMaxLength(100);
+            b.Property(c => c.PostalCode).HasMaxLength(20);
+            b.Property(c => c.Country).HasMaxLength(100);
+            b.Property(c => c.LogoUrl).HasMaxLength(500);
+            b.Property(c => c.TimeZone).HasMaxLength(100);
+            b.Property(c => c.Currency).HasMaxLength(10);
+            b.Property(c => c.Locale).HasMaxLength(20);
+
+            b.HasIndex(c => c.Email).IsUnique();
+            b.HasIndex(c => c.OwnerId);
+        });
+
+        modelBuilder.Entity<Branch>(b =>
+        {
+            b.ToTable("Branches");
+            b.HasKey(br => br.Id);
+            b.Property(br => br.Name).HasMaxLength(100).IsRequired();
+            b.Property(br => br.Code).HasMaxLength(20);
+            b.Property(br => br.Phone).HasMaxLength(50);
+            b.Property(br => br.Email).HasMaxLength(256);
+            b.Property(br => br.Address).HasMaxLength(500);
+            b.Property(br => br.City).HasMaxLength(100);
+            b.Property(br => br.State).HasMaxLength(100);
+            b.Property(br => br.PostalCode).HasMaxLength(20);
+
+            b.HasOne(br => br.Company)
+                .WithMany()
+                .HasForeignKey(br => br.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            b.HasIndex(br => br.CompanyId);
+        });
+
+        // ============================================
+        // Users Module Configuration
+        // ============================================
+        modelBuilder.Entity<CompanyUser>(b =>
+        {
+            b.ToTable("CompanyUsers");
+            b.HasKey(u => u.Id);
+            
+            b.Property(u => u.FirstName).HasMaxLength(100).IsRequired();
+            b.Property(u => u.LastName).HasMaxLength(100).IsRequired();
+            b.Property(u => u.Email).HasMaxLength(256).IsRequired();
+            b.Property(u => u.Phone).HasMaxLength(50);
+            b.Property(u => u.Avatar).HasMaxLength(500);
+            b.Property(u => u.EmployeeId).HasMaxLength(50);
+            b.Property(u => u.JobTitle).HasMaxLength(100);
+            b.Property(u => u.Department).HasMaxLength(100);
+            b.Property(u => u.Permissions).HasMaxLength(4000);
+
+            b.HasIndex(u => u.AuthUserId);
+            b.HasIndex(u => u.CompanyId);
+            b.HasIndex(u => u.Email);
+            b.HasIndex(u => new { u.CompanyId, u.AuthUserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<UserInvitation>(b =>
+        {
+            b.ToTable("UserInvitations");
+            b.HasKey(i => i.Id);
+            
+            b.Property(i => i.Email).HasMaxLength(256).IsRequired();
+            b.Property(i => i.FirstName).HasMaxLength(100);
+            b.Property(i => i.LastName).HasMaxLength(100);
+            b.Property(i => i.Token).HasMaxLength(256).IsRequired();
+
+            b.HasIndex(i => i.Token).IsUnique();
+            b.HasIndex(i => i.CompanyId);
+            b.HasIndex(i => i.Email);
+        });
+
+        // ============================================
+        // Clients Module Configuration
+        // ============================================
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.ToTable("Clients");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.FirstName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.LastName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Email).HasMaxLength(256);
+            entity.Property(e => e.Phone).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.AlternatePhone).HasMaxLength(50);
+            entity.Property(e => e.Address).HasMaxLength(500);
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.State).HasMaxLength(100);
+            entity.Property(e => e.PostalCode).HasMaxLength(20);
+            entity.Property(e => e.Country).HasMaxLength(100);
+            entity.Property(e => e.Notes).HasMaxLength(2000);
+            entity.Property(e => e.PreferredContactMethod).HasMaxLength(50);
+            entity.Property(e => e.TotalSpent).HasPrecision(18, 2);
+
+            entity.HasIndex(e => e.CompanyId);
+            entity.HasIndex(e => e.Phone);
+            entity.HasIndex(e => e.Email);
+            entity.HasIndex(e => new { e.CompanyId, e.Phone }).IsUnique();
+
+            entity.HasMany(e => e.Vehicles)
+                .WithOne(v => v.Client)
+                .HasForeignKey(v => v.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ClientVehicle>(entity =>
+        {
+            entity.ToTable("ClientVehicles");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.Make).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Model).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Color).HasMaxLength(50);
+            entity.Property(e => e.LicensePlate).HasMaxLength(20);
+            entity.Property(e => e.Vin).HasMaxLength(50);
+            entity.Property(e => e.EngineType).HasMaxLength(50);
+            entity.Property(e => e.Transmission).HasMaxLength(50);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+
+            entity.HasIndex(e => e.ClientId);
+            entity.HasIndex(e => e.CompanyId);
+            entity.HasIndex(e => e.LicensePlate);
+            entity.HasIndex(e => e.Vin);
+        });
+
+        // ============================================
+        // Sessions Module Configuration
+        // ============================================
         modelBuilder.Entity<GarageSession>(entity =>
         {
             entity.ToTable("GarageSessions");
@@ -66,7 +254,6 @@ public class SessionDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // CustomerRequest
         modelBuilder.Entity<CustomerRequest>(entity =>
         {
             entity.ToTable("CustomerRequests");
@@ -88,7 +275,6 @@ public class SessionDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // Inspection
         modelBuilder.Entity<Inspection>(entity =>
         {
             entity.ToTable("Inspections");
@@ -124,7 +310,6 @@ public class SessionDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // InspectionItem
         modelBuilder.Entity<InspectionItem>(entity =>
         {
             entity.ToTable("InspectionItems");
@@ -139,7 +324,6 @@ public class SessionDbContext : DbContext
             entity.HasIndex(e => e.InspectionId);
         });
 
-        // TestDrive
         modelBuilder.Entity<TestDrive>(entity =>
         {
             entity.ToTable("TestDrives");
@@ -171,7 +355,6 @@ public class SessionDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // JobCard
         modelBuilder.Entity<JobCard>(entity =>
         {
             entity.ToTable("JobCards");
@@ -208,7 +391,6 @@ public class SessionDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // JobCardItem
         modelBuilder.Entity<JobCardItem>(entity =>
         {
             entity.ToTable("JobCardItems");
@@ -235,7 +417,6 @@ public class SessionDbContext : DbContext
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // MediaItem
         modelBuilder.Entity<MediaItem>(entity =>
         {
             entity.ToTable("MediaItems");

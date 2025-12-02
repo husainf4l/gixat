@@ -1,7 +1,6 @@
 using HotChocolate;
 using HotChocolate.Types;
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Users.Data;
 using Gixat.Modules.Users.Entities;
 
 namespace Gixat.Modules.Users.GraphQL.Mutations;
@@ -11,10 +10,10 @@ public class UserMutations
 {
     public async Task<CreateCompanyUserPayload> CreateCompanyUser(
         CreateCompanyUserInput input,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
         // Check if user already exists in this company
-        var existing = await context.CompanyUsers
+        var existing = await context.Set<CompanyUser>()
             .FirstOrDefaultAsync(u => u.CompanyId == input.CompanyId && u.AuthUserId == input.AuthUserId);
 
         if (existing != null)
@@ -38,7 +37,7 @@ public class UserMutations
             JoinedAt = DateTime.UtcNow
         };
 
-        context.CompanyUsers.Add(user);
+        context.Set<CompanyUser>().Add(user);
         await context.SaveChangesAsync();
 
         return new CreateCompanyUserPayload(user, null);
@@ -46,9 +45,9 @@ public class UserMutations
 
     public async Task<UpdateCompanyUserPayload> UpdateCompanyUser(
         UpdateCompanyUserInput input,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        var user = await context.CompanyUsers.FindAsync(input.Id);
+        var user = await context.Set<CompanyUser>().FindAsync(input.Id);
         
         if (user == null)
         {
@@ -71,9 +70,9 @@ public class UserMutations
     public async Task<ChangeUserRolePayload> ChangeUserRole(
         Guid userId,
         CompanyUserRole newRole,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        var user = await context.CompanyUsers.FindAsync(userId);
+        var user = await context.Set<CompanyUser>().FindAsync(userId);
         
         if (user == null)
         {
@@ -96,9 +95,9 @@ public class UserMutations
 
     public async Task<DeactivateUserPayload> DeactivateUser(
         Guid userId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        var user = await context.CompanyUsers.FindAsync(userId);
+        var user = await context.Set<CompanyUser>().FindAsync(userId);
         
         if (user == null)
         {
@@ -120,10 +119,10 @@ public class UserMutations
 
     public async Task<InviteUserPayload> InviteUser(
         InviteUserInput input,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
         // Check if already invited
-        var existing = await context.UserInvitations
+        var existing = await context.Set<UserInvitation>()
             .FirstOrDefaultAsync(i => i.CompanyId == input.CompanyId && 
                                       i.Email == input.Email && 
                                       i.Status == InvitationStatus.Pending);
@@ -146,7 +145,7 @@ public class UserMutations
             InvitedByUserId = input.InvitedByUserId
         };
 
-        context.UserInvitations.Add(invitation);
+        context.Set<UserInvitation>().Add(invitation);
         await context.SaveChangesAsync();
 
         return new InviteUserPayload(invitation, null);
@@ -155,9 +154,9 @@ public class UserMutations
     public async Task<AcceptInvitationPayload> AcceptInvitation(
         string token,
         Guid authUserId,
-        [Service] UserDbContext context)
+        [Service] DbContext context)
     {
-        var invitation = await context.UserInvitations
+        var invitation = await context.Set<UserInvitation>()
             .FirstOrDefaultAsync(i => i.Token == token);
 
         if (invitation == null)
@@ -190,7 +189,7 @@ public class UserMutations
             JoinedAt = DateTime.UtcNow
         };
 
-        context.CompanyUsers.Add(user);
+        context.Set<CompanyUser>().Add(user);
 
         // Update invitation
         invitation.Status = InvitationStatus.Accepted;

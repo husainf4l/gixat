@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Clients.Data;
 using Gixat.Modules.Clients.Entities;
 using Gixat.Modules.Clients.Interfaces;
 
@@ -7,23 +6,26 @@ namespace Gixat.Modules.Clients.Services;
 
 public class ClientService : IClientService
 {
-    private readonly ClientDbContext _context;
+    private readonly DbContext _context;
 
-    public ClientService(ClientDbContext context)
+    public ClientService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<Client> Clients => _context.Set<Client>();
+    private DbSet<ClientVehicle> ClientVehicles => _context.Set<ClientVehicle>();
+
     public async Task<Client?> GetByIdAsync(Guid id)
     {
-        return await _context.Clients
+        return await Clients
             .Include(c => c.Vehicles)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<IEnumerable<Client>> GetByCompanyIdAsync(Guid companyId)
     {
-        return await _context.Clients
+        return await Clients
             .Include(c => c.Vehicles)
             .Where(c => c.CompanyId == companyId)
             .OrderByDescending(c => c.CreatedAt)
@@ -32,7 +34,7 @@ public class ClientService : IClientService
 
     public async Task<IEnumerable<Client>> SearchAsync(Guid companyId, string? searchTerm)
     {
-        var query = _context.Clients
+        var query = Clients
             .Include(c => c.Vehicles)
             .Where(c => c.CompanyId == companyId);
 
@@ -53,14 +55,14 @@ public class ClientService : IClientService
 
     public async Task<Client> CreateAsync(Client client)
     {
-        _context.Clients.Add(client);
+        Clients.Add(client);
         await _context.SaveChangesAsync();
         return client;
     }
 
     public async Task<Client?> UpdateAsync(Client client)
     {
-        var existing = await _context.Clients.FindAsync(client.Id);
+        var existing = await Clients.FindAsync(client.Id);
         if (existing == null) return null;
 
         existing.FirstName = client.FirstName;
@@ -84,17 +86,17 @@ public class ClientService : IClientService
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var client = await _context.Clients.FindAsync(id);
+        var client = await Clients.FindAsync(id);
         if (client == null) return false;
 
-        _context.Clients.Remove(client);
+        Clients.Remove(client);
         await _context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> ActivateAsync(Guid id)
     {
-        var client = await _context.Clients.FindAsync(id);
+        var client = await Clients.FindAsync(id);
         if (client == null) return false;
 
         client.IsActive = true;
@@ -105,7 +107,7 @@ public class ClientService : IClientService
 
     public async Task<bool> DeactivateAsync(Guid id)
     {
-        var client = await _context.Clients.FindAsync(id);
+        var client = await Clients.FindAsync(id);
         if (client == null) return false;
 
         client.IsActive = false;
@@ -116,6 +118,6 @@ public class ClientService : IClientService
 
     public async Task<int> GetClientCountAsync(Guid companyId)
     {
-        return await _context.Clients.CountAsync(c => c.CompanyId == companyId && c.IsActive);
+        return await Clients.CountAsync(c => c.CompanyId == companyId && c.IsActive);
     }
 }

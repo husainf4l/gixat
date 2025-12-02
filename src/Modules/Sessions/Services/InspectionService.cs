@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,16 +8,20 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class InspectionService : IInspectionService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
 
-    public InspectionService(SessionDbContext context)
+    public InspectionService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<Inspection> Inspections => _context.Set<Inspection>();
+    private DbSet<InspectionItem> InspectionItems => _context.Set<InspectionItem>();
+    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+
     public async Task<InspectionDto?> GetByIdAsync(Guid id, Guid companyId)
     {
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .AsNoTracking()
             .Include(i => i.Items.OrderBy(item => item.SortOrder))
             .Include(i => i.MediaItems)
@@ -30,7 +33,7 @@ public class InspectionService : IInspectionService
 
     public async Task<InspectionDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .AsNoTracking()
             .Include(i => i.Items.OrderBy(item => item.SortOrder))
             .Include(i => i.MediaItems)
@@ -52,7 +55,7 @@ public class InspectionService : IInspectionService
             Status = RequestStatus.Pending
         };
 
-        _context.Inspections.Add(inspection);
+        Inspections.Add(inspection);
         await _context.SaveChangesAsync();
 
         // Update session status
@@ -63,7 +66,7 @@ public class InspectionService : IInspectionService
 
     public async Task<InspectionDto?> UpdateAsync(Guid id, UpdateInspectionDto dto, Guid companyId)
     {
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .Include(i => i.Items)
             .Include(i => i.MediaItems)
             .Where(i => i.Id == id && i.CompanyId == companyId)
@@ -97,7 +100,7 @@ public class InspectionService : IInspectionService
 
     public async Task<bool> StartInspectionAsync(Guid id, Guid inspectorId, Guid companyId)
     {
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .Where(i => i.Id == id && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -114,7 +117,7 @@ public class InspectionService : IInspectionService
 
     public async Task<bool> CompleteInspectionAsync(Guid id, Guid companyId)
     {
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .Where(i => i.Id == id && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -130,13 +133,13 @@ public class InspectionService : IInspectionService
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var inspection = await _context.Inspections
+        var inspection = await Inspections
             .Where(i => i.Id == id && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (inspection == null) return false;
 
-        _context.Inspections.Remove(inspection);
+        Inspections.Remove(inspection);
         await _context.SaveChangesAsync();
         return true;
     }
@@ -157,7 +160,7 @@ public class InspectionService : IInspectionService
             SortOrder = dto.SortOrder
         };
 
-        _context.InspectionItems.Add(item);
+        InspectionItems.Add(item);
         await _context.SaveChangesAsync();
 
         return MapItemToDto(item);
@@ -165,7 +168,7 @@ public class InspectionService : IInspectionService
 
     public async Task<bool> UpdateItemAsync(Guid itemId, string? condition, string? notes, Priority? priority, bool? requiresAttention)
     {
-        var item = await _context.InspectionItems.FindAsync(itemId);
+        var item = await InspectionItems.FindAsync(itemId);
         if (item == null) return false;
 
         if (condition != null) item.Condition = condition;
@@ -181,17 +184,17 @@ public class InspectionService : IInspectionService
 
     public async Task<bool> RemoveItemAsync(Guid itemId)
     {
-        var item = await _context.InspectionItems.FindAsync(itemId);
+        var item = await InspectionItems.FindAsync(itemId);
         if (item == null) return false;
 
-        _context.InspectionItems.Remove(item);
+        InspectionItems.Remove(item);
         await _context.SaveChangesAsync();
         return true;
     }
 
     private async Task UpdateSessionStatus(Guid sessionId, SessionStatus status)
     {
-        var session = await _context.GarageSessions.FindAsync(sessionId);
+        var session = await GarageSessions.FindAsync(sessionId);
         if (session != null && session.Status < status)
         {
             session.Status = status;

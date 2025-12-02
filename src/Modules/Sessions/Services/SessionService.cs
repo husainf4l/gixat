@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,16 +8,22 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class SessionService : ISessionService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
 
-    public SessionService(SessionDbContext context)
+    public SessionService(DbContext context)
     {
         _context = context;
     }
 
+    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+    private DbSet<CustomerRequest> CustomerRequests => _context.Set<CustomerRequest>();
+    private DbSet<Inspection> Inspections => _context.Set<Inspection>();
+    private DbSet<TestDrive> TestDrives => _context.Set<TestDrive>();
+    private DbSet<JobCard> JobCards => _context.Set<JobCard>();
+
     public async Task<SessionDto?> GetByIdAsync(Guid id, Guid companyId)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .AsNoTracking()
             .Where(s => s.Id == id && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -28,7 +33,7 @@ public class SessionService : ISessionService
 
     public async Task<SessionDto?> GetBySessionNumberAsync(string sessionNumber, Guid companyId)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .AsNoTracking()
             .Where(s => s.SessionNumber == sessionNumber && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -38,7 +43,7 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SessionDto>> GetAllAsync(Guid companyId, SessionStatus? status = null)
     {
-        var query = _context.GarageSessions
+        var query = GarageSessions
             .AsNoTracking()
             .Where(s => s.CompanyId == companyId);
 
@@ -59,7 +64,7 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SessionDto>> GetByClientAsync(Guid clientId, Guid companyId)
     {
-        var sessions = await _context.GarageSessions
+        var sessions = await GarageSessions
             .AsNoTracking()
             .Where(s => s.ClientId == clientId && s.CompanyId == companyId)
             .OrderByDescending(s => s.CheckInAt)
@@ -75,7 +80,7 @@ public class SessionService : ISessionService
 
     public async Task<IEnumerable<SessionDto>> GetByVehicleAsync(Guid vehicleId, Guid companyId)
     {
-        var sessions = await _context.GarageSessions
+        var sessions = await GarageSessions
             .AsNoTracking()
             .Where(s => s.ClientVehicleId == vehicleId && s.CompanyId == companyId)
             .OrderByDescending(s => s.CheckInAt)
@@ -103,7 +108,7 @@ public class SessionService : ISessionService
             SessionStatus.ReadyForPickup
         };
 
-        var sessions = await _context.GarageSessions
+        var sessions = await GarageSessions
             .AsNoTracking()
             .Where(s => s.CompanyId == companyId && activeStatuses.Contains(s.Status))
             .OrderByDescending(s => s.CheckInAt)
@@ -136,7 +141,7 @@ public class SessionService : ISessionService
             CheckInAt = DateTime.UtcNow
         };
 
-        _context.GarageSessions.Add(session);
+        GarageSessions.Add(session);
         await _context.SaveChangesAsync();
 
         return await MapToDto(session);
@@ -144,7 +149,7 @@ public class SessionService : ISessionService
 
     public async Task<SessionDto?> UpdateAsync(Guid id, UpdateSessionDto dto, Guid companyId)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .Where(s => s.Id == id && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -167,7 +172,7 @@ public class SessionService : ISessionService
 
     public async Task<bool> UpdateStatusAsync(Guid id, SessionStatus status, Guid companyId)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .Where(s => s.Id == id && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -187,7 +192,7 @@ public class SessionService : ISessionService
 
     public async Task<bool> CheckOutAsync(Guid id, int? mileageOut, Guid companyId)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .Where(s => s.Id == id && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -204,13 +209,13 @@ public class SessionService : ISessionService
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var session = await _context.GarageSessions
+        var session = await GarageSessions
             .Where(s => s.Id == id && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (session == null) return false;
 
-        _context.GarageSessions.Remove(session);
+        GarageSessions.Remove(session);
         await _context.SaveChangesAsync();
         return true;
     }
@@ -220,7 +225,7 @@ public class SessionService : ISessionService
         var today = DateTime.UtcNow;
         var prefix = $"SES-{today:yyyyMMdd}-";
 
-        var lastSession = await _context.GarageSessions
+        var lastSession = await GarageSessions
             .Where(s => s.CompanyId == companyId && s.SessionNumber.StartsWith(prefix))
             .OrderByDescending(s => s.SessionNumber)
             .FirstOrDefaultAsync();
@@ -242,7 +247,7 @@ public class SessionService : ISessionService
     {
         var term = searchTerm.ToLower();
 
-        var sessions = await _context.GarageSessions
+        var sessions = await GarageSessions
             .AsNoTracking()
             .Where(s => s.CompanyId == companyId &&
                 (s.SessionNumber.ToLower().Contains(term) ||
@@ -262,10 +267,10 @@ public class SessionService : ISessionService
     private async Task<SessionDto> MapToDto(GarageSession session)
     {
         // Check for related entities
-        var hasCustomerRequest = await _context.CustomerRequests.AnyAsync(r => r.SessionId == session.Id);
-        var hasInspection = await _context.Inspections.AnyAsync(i => i.SessionId == session.Id);
-        var hasTestDrive = await _context.TestDrives.AnyAsync(t => t.SessionId == session.Id);
-        var hasJobCard = await _context.JobCards.AnyAsync(j => j.SessionId == session.Id);
+        var hasCustomerRequest = await CustomerRequests.AnyAsync(r => r.SessionId == session.Id);
+        var hasInspection = await Inspections.AnyAsync(i => i.SessionId == session.Id);
+        var hasTestDrive = await TestDrives.AnyAsync(t => t.SessionId == session.Id);
+        var hasJobCard = await JobCards.AnyAsync(j => j.SessionId == session.Id);
 
         // Note: In a real app, you'd join with Clients module to get client/vehicle info
         // For now, we'll use placeholder values that can be enriched later

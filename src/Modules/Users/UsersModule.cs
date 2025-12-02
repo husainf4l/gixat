@@ -1,7 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Gixat.Modules.Users.Data;
 using Gixat.Modules.Users.Interfaces;
 using Gixat.Modules.Users.Services;
 
@@ -9,17 +6,12 @@ namespace Gixat.Modules.Users;
 
 public static class UsersModule
 {
-    public static IServiceCollection AddUsersModule(this IServiceCollection services, IConfiguration configuration)
+    /// <summary>
+    /// Register only services (no DbContext). Use when AppDbContext is registered centrally.
+    /// </summary>
+    public static IServiceCollection AddUsersModuleServices(this IServiceCollection services)
     {
-        // Add DbContext
-        services.AddDbContext<UserDbContext>(options =>
-            options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly("Gixat.Web")));
-
-        // Add services
         services.AddScoped<ICompanyUserService, CompanyUserService>();
-
         return services;
     }
 }

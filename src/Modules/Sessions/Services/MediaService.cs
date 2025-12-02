@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -10,20 +9,22 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class MediaService : IMediaService
 {
-    private readonly SessionDbContext _context;
+    private readonly DbContext _context;
     private readonly IAwsS3Service _s3Service;
     private readonly string _bucketName;
 
-    public MediaService(SessionDbContext context, IAwsS3Service s3Service, IConfiguration configuration)
+    public MediaService(DbContext context, IAwsS3Service s3Service, IConfiguration configuration)
     {
         _context = context;
         _s3Service = s3Service;
         _bucketName = configuration["AWS:S3:BucketName"] ?? "gixat-media";
     }
 
+    private DbSet<MediaItem> MediaItems => _context.Set<MediaItem>();
+
     public async Task<MediaItemDto?> GetByIdAsync(Guid id, Guid companyId)
     {
-        var media = await _context.MediaItems
+        var media = await MediaItems
             .AsNoTracking()
             .Where(m => m.Id == id && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -33,7 +34,7 @@ public class MediaService : IMediaService
 
     public async Task<IEnumerable<MediaItemDto>> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
-        var media = await _context.MediaItems
+        var media = await MediaItems
             .AsNoTracking()
             .Where(m => m.SessionId == sessionId && m.CompanyId == companyId)
             .OrderBy(m => m.Category)
@@ -45,7 +46,7 @@ public class MediaService : IMediaService
 
     public async Task<IEnumerable<MediaItemDto>> GetByCategoryAsync(Guid sessionId, MediaCategory category, Guid companyId)
     {
-        var media = await _context.MediaItems
+        var media = await MediaItems
             .AsNoTracking()
             .Where(m => m.SessionId == sessionId && m.Category == category && m.CompanyId == companyId)
             .OrderBy(m => m.SortOrder)
@@ -84,7 +85,7 @@ public class MediaService : IMediaService
             SortOrder = dto.SortOrder
         };
 
-        _context.MediaItems.Add(mediaItem);
+        MediaItems.Add(mediaItem);
         await _context.SaveChangesAsync();
 
         // Generate presigned upload URL
@@ -100,7 +101,7 @@ public class MediaService : IMediaService
 
     public async Task<MediaItemDto?> ConfirmUploadAsync(Guid mediaItemId, Guid companyId)
     {
-        var mediaItem = await _context.MediaItems
+        var mediaItem = await MediaItems
             .Where(m => m.Id == mediaItemId && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -111,7 +112,7 @@ public class MediaService : IMediaService
         if (!exists)
         {
             // Remove the record if upload failed
-            _context.MediaItems.Remove(mediaItem);
+            MediaItems.Remove(mediaItem);
             await _context.SaveChangesAsync();
             return null;
         }
@@ -127,7 +128,7 @@ public class MediaService : IMediaService
 
     public async Task<MediaDownloadUrlDto?> GetDownloadUrlAsync(Guid id, Guid companyId)
     {
-        var mediaItem = await _context.MediaItems
+        var mediaItem = await MediaItems
             .AsNoTracking()
             .Where(m => m.Id == id && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -145,7 +146,7 @@ public class MediaService : IMediaService
 
     public async Task<MediaDownloadUrlDto?> GetThumbnailUrlAsync(Guid id, Guid companyId)
     {
-        var mediaItem = await _context.MediaItems
+        var mediaItem = await MediaItems
             .AsNoTracking()
             .Where(m => m.Id == id && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
@@ -163,7 +164,7 @@ public class MediaService : IMediaService
 
     public async Task<MediaItemDto?> UpdateAsync(Guid id, string? title, string? description, string? tags, int? sortOrder, Guid companyId)
     {
-        var mediaItem = await _context.MediaItems
+        var mediaItem = await MediaItems
             .Where(m => m.Id == id && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -183,7 +184,7 @@ public class MediaService : IMediaService
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var mediaItem = await _context.MediaItems
+        var mediaItem = await MediaItems
             .Where(m => m.Id == id && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
@@ -197,7 +198,7 @@ public class MediaService : IMediaService
         }
 
         // Delete from database
-        _context.MediaItems.Remove(mediaItem);
+        MediaItems.Remove(mediaItem);
         await _context.SaveChangesAsync();
 
         return true;
@@ -205,7 +206,7 @@ public class MediaService : IMediaService
 
     public async Task<bool> DeleteBySessionAsync(Guid sessionId, Guid companyId)
     {
-        var mediaItems = await _context.MediaItems
+        var mediaItems = await MediaItems
             .Where(m => m.SessionId == sessionId && m.CompanyId == companyId)
             .ToListAsync();
 
@@ -218,7 +219,7 @@ public class MediaService : IMediaService
             }
         }
 
-        _context.MediaItems.RemoveRange(mediaItems);
+        MediaItems.RemoveRange(mediaItems);
         await _context.SaveChangesAsync();
 
         return true;

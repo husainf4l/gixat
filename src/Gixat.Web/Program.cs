@@ -1,22 +1,19 @@
-using System.Reflection;
 using dotenv.net;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Gixat.Web.Data;
 using Gixat.Modules.Auth;
-using Gixat.Modules.Auth.Data;
+using Gixat.Modules.Auth.Entities;
 using Gixat.Modules.Clients;
-using Gixat.Modules.Clients.Data;
 using Gixat.Modules.Companies;
-using Gixat.Modules.Companies.Data;
 using Gixat.Modules.Companies.GraphQL.Queries;
 using Gixat.Modules.Companies.GraphQL.Mutations;
 using Gixat.Modules.Companies.GraphQL.Types;
 using Gixat.Modules.Users;
-using Gixat.Modules.Users.Data;
 using Gixat.Modules.Users.GraphQL.Queries;
 using Gixat.Modules.Users.GraphQL.Mutations;
 using Gixat.Modules.Users.GraphQL.Types;
 using Gixat.Modules.Sessions;
-using Gixat.Modules.Sessions.Data;
 using Gixat.Modules.Sessions.GraphQL.Queries;
 using Gixat.Modules.Sessions.GraphQL.Mutations;
 using Gixat.Modules.Sessions.GraphQL.Types;
@@ -51,12 +48,43 @@ builder.Services.AddRazorPages()
     .AddApplicationPart(authAssembly);
 builder.Services.AddHttpContextAccessor();
 
-// Register Modules
-builder.Services.AddAuthModule(builder.Configuration);
-builder.Services.AddCompaniesModule(builder.Configuration);
-builder.Services.AddUsersModule(builder.Configuration);
-builder.Services.AddClientsModule(builder.Configuration);
-builder.Services.AddSessionsModule(builder.Configuration);
+// Register unified AppDbContext
+var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
+// Register DbContext as service so modules can inject it
+builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
+// Register Identity with AppDbContext
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login";
+    options.LogoutPath = "/Auth/Logout";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.SlidingExpiration = true;
+});
+
+// Register Module Services (without their DbContexts)
+builder.Services.AddAuthModuleServices();
+builder.Services.AddCompaniesModuleServices();
+builder.Services.AddUsersModuleServices();
+builder.Services.AddClientsModuleServices();
+builder.Services.AddSessionsModuleServices();
+builder.Services.AddAwsS3(builder.Configuration);
 
 // Configure GraphQL
 builder.Services
@@ -102,48 +130,19 @@ builder.Services
 
 var app = builder.Build();
 
-// Apply migrations automatically on startup
-using (var scope = app.Services.CreateScope())
+// Apply migrations only in Development or when APPLY_MIGRATIONS=true
+var applyMigrations = app.Environment.IsDevelopment() || 
+    Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
+
+if (applyMigrations)
 {
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     
-    try
-    {
-        logger.LogInformation("Applying database migrations...");
-        
-        // Apply Auth migrations
-        var authContext = services.GetRequiredService<AuthDbContext>();
-        await authContext.Database.MigrateAsync();
-        logger.LogInformation("Auth migrations applied.");
-        
-        // Apply Company migrations
-        var companyContext = services.GetRequiredService<CompanyDbContext>();
-        await companyContext.Database.MigrateAsync();
-        logger.LogInformation("Company migrations applied.");
-        
-        // Apply Client migrations
-        var clientContext = services.GetRequiredService<ClientDbContext>();
-        await clientContext.Database.MigrateAsync();
-        logger.LogInformation("Client migrations applied.");
-        
-        // Apply Users migrations
-        var usersContext = services.GetRequiredService<UserDbContext>();
-        await usersContext.Database.MigrateAsync();
-        logger.LogInformation("Users migrations applied.");
-        
-        // Apply Sessions migrations
-        var sessionContext = services.GetRequiredService<SessionDbContext>();
-        await sessionContext.Database.MigrateAsync();
-        logger.LogInformation("Sessions migrations applied.");
-        
-        logger.LogInformation("All database migrations completed successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "An error occurred while applying migrations.");
-        throw;
-    }
+    logger.LogInformation("Applying database migrations...");
+    await context.Database.MigrateAsync();
+    logger.LogInformation("Database migrations applied successfully.");
 }
 
 // Seed database

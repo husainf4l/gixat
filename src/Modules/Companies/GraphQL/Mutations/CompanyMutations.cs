@@ -1,6 +1,6 @@
 using HotChocolate;
 using HotChocolate.Types;
-using Gixat.Modules.Companies.Data;
+using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Companies.Entities;
 
 namespace Gixat.Modules.Companies.GraphQL.Mutations;
@@ -10,7 +10,7 @@ public class CompanyMutations
 {
     public async Task<CreateCompanyPayload> CreateCompany(
         CreateCompanyInput input,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
         var company = new Company
         {
@@ -30,7 +30,7 @@ public class CompanyMutations
             OwnerId = input.OwnerId
         };
 
-        context.Companies.Add(company);
+        context.Set<Company>().Add(company);
         await context.SaveChangesAsync();
 
         return new CreateCompanyPayload(company);
@@ -38,9 +38,9 @@ public class CompanyMutations
 
     public async Task<UpdateCompanyPayload> UpdateCompany(
         UpdateCompanyInput input,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
-        var company = await context.Companies.FindAsync(input.Id);
+        var company = await context.Set<Company>().FindAsync(input.Id);
         
         if (company == null)
         {
@@ -70,16 +70,16 @@ public class CompanyMutations
 
     public async Task<DeleteCompanyPayload> DeleteCompany(
         Guid id,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
-        var company = await context.Companies.FindAsync(id);
+        var company = await context.Set<Company>().FindAsync(id);
         
         if (company == null)
         {
             return new DeleteCompanyPayload(false, "Company not found");
         }
 
-        context.Companies.Remove(company);
+        context.Set<Company>().Remove(company);
         await context.SaveChangesAsync();
 
         return new DeleteCompanyPayload(true, null);
@@ -87,7 +87,7 @@ public class CompanyMutations
 
     public async Task<CreateBranchPayload> CreateBranch(
         CreateBranchInput input,
-        [Service] CompanyDbContext context)
+        [Service] DbContext context)
     {
         var branch = new Branch
         {
@@ -105,7 +105,7 @@ public class CompanyMutations
             IsMainBranch = input.IsMainBranch ?? false
         };
 
-        context.Branches.Add(branch);
+        context.Set<Branch>().Add(branch);
         await context.SaveChangesAsync();
 
         return new CreateBranchPayload(branch);
