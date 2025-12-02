@@ -10,14 +10,14 @@ using Gixat.Modules.Users.Interfaces;
 namespace Gixat.Web.Pages.Sessions.TestDrive;
 
 [Authorize]
-public class CreateModel : PageModel
+public class DetailsModel : PageModel
 {
     private readonly ISessionService _sessionService;
     private readonly ITestDriveService _testDriveService;
     private readonly IMediaService _mediaService;
     private readonly ICompanyUserService _companyUserService;
 
-    public CreateModel(
+    public DetailsModel(
         ISessionService sessionService,
         ITestDriveService testDriveService,
         IMediaService mediaService,
@@ -30,101 +30,34 @@ public class CreateModel : PageModel
     }
 
     public SessionDto Session { get; set; } = default!;
+    public TestDriveDto TestDrive { get; set; } = default!;
     public Guid CompanyId { get; set; }
-
-    [BindProperty]
-    public TestDriveInput Input { get; set; } = new();
-
-    public class TestDriveInput
-    {
-        public string Title { get; set; } = string.Empty;
-        public string? Description { get; set; }
-        public int? MileageStart { get; set; }
-        public Priority OverallPriority { get; set; } = Priority.Normal;
-        public string? MediaItemIds { get; set; }
-    }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
-        {
             return RedirectToPage("/Auth/Login");
-        }
 
         var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
         var currentCompany = userCompanies.FirstOrDefault();
         if (currentCompany == null)
-        {
             return RedirectToPage("/Setup/Company");
-        }
+
         CompanyId = currentCompany.CompanyId;
 
         var session = await _sessionService.GetByIdAsync(id, CompanyId);
         if (session == null)
-        {
             return NotFound();
-        }
 
         Session = session;
-        Input.Title = $"Test Drive - {session.VehicleDisplayName}";
-        Input.MileageStart = session.MileageIn;
-        
+
+        var testDrive = await _testDriveService.GetBySessionIdAsync(id, CompanyId);
+        if (testDrive == null)
+            return RedirectToPage("/Sessions/TestDrive/Create", new { id });
+
+        TestDrive = testDrive;
         return Page();
-    }
-
-    public async Task<IActionResult> OnPostAsync(Guid id)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-        {
-            return RedirectToPage("/Auth/Login");
-        }
-
-        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
-        var currentCompany = userCompanies.FirstOrDefault();
-        if (currentCompany == null)
-        {
-            return RedirectToPage("/Setup/Company");
-        }
-        CompanyId = currentCompany.CompanyId;
-
-        var session = await _sessionService.GetByIdAsync(id, CompanyId);
-        if (session == null)
-        {
-            return NotFound();
-        }
-
-        if (!ModelState.IsValid)
-        {
-            Session = session;
-            return Page();
-        }
-
-        var createDto = new CreateTestDriveDto(
-            SessionId: id,
-            Title: Input.Title,
-            Description: Input.Description,
-            MileageStart: Input.MileageStart,
-            OverallPriority: Input.OverallPriority
-        );
-
-        var testDrive = await _testDriveService.CreateAsync(createDto, CompanyId);
-
-        // Link any uploaded media items to the test drive
-        if (!string.IsNullOrEmpty(Input.MediaItemIds))
-        {
-            var mediaIds = Input.MediaItemIds.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var mediaIdStr in mediaIds)
-            {
-                if (Guid.TryParse(mediaIdStr.Trim(), out var mediaId))
-                {
-                    await _mediaService.LinkToTestDriveAsync(mediaId, testDrive.Id, CompanyId);
-                }
-            }
-        }
-
-        return RedirectToPage("/Sessions/TestDrive/Details", new { id });
     }
 
     public async Task<IActionResult> OnPostUploadAsync(Guid id, IFormFile file)
@@ -140,6 +73,10 @@ public class CreateModel : PageModel
 
         CompanyId = currentCompany.CompanyId;
 
+        var testDrive = await _testDriveService.GetBySessionIdAsync(id, CompanyId);
+        if (testDrive == null)
+            return new JsonResult(new { success = false, error = "Test drive not found" });
+
         if (file == null || file.Length == 0)
             return new JsonResult(new { success = false, error = "No file provided" });
 
@@ -152,7 +89,7 @@ public class CreateModel : PageModel
             FileSize: file.Length,
             MediaType: mediaType,
             Category: MediaCategory.TestDrive,
-            TestDriveId: null // Will be linked after test drive creation
+            TestDriveId: testDrive.Id
         );
 
         var uploadUrl = await _mediaService.CreateUploadUrlAsync(createDto, CompanyId);

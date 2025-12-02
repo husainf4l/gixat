@@ -149,6 +149,50 @@ public class MediaService : BaseService, IMediaService
         return media.ToDto();
     }
 
+    public async Task<bool> LinkToInspectionAsync(Guid mediaItemId, Guid inspectionId, Guid companyId)
+    {
+        var media = await MediaItems.Where(m => m.Id == mediaItemId && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return false;
+
+        media.InspectionId = inspectionId;
+        media.UpdatedAt = DateTime.UtcNow;
+        await SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> LinkToCustomerRequestAsync(Guid mediaItemId, Guid customerRequestId, Guid companyId)
+    {
+        var media = await MediaItems.Where(m => m.Id == mediaItemId && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return false;
+
+        media.CustomerRequestId = customerRequestId;
+        media.UpdatedAt = DateTime.UtcNow;
+        await SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> LinkToTestDriveAsync(Guid mediaItemId, Guid testDriveId, Guid companyId)
+    {
+        var media = await MediaItems.Where(m => m.Id == mediaItemId && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return false;
+
+        media.TestDriveId = testDriveId;
+        media.UpdatedAt = DateTime.UtcNow;
+        await SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> LinkToJobCardAsync(Guid mediaItemId, Guid jobCardId, Guid companyId)
+    {
+        var media = await MediaItems.Where(m => m.Id == mediaItemId && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return false;
+
+        media.JobCardId = jobCardId;
+        media.UpdatedAt = DateTime.UtcNow;
+        await SaveChangesAsync();
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
         var media = await MediaItems.Where(m => m.Id == id && m.CompanyId == companyId).FirstOrDefaultAsync();

@@ -62,6 +62,14 @@ public class CreateModel : PageModel
             return NotFound();
         }
 
+        // Check if a JobCard already exists for this session
+        var existingJobCard = await _jobCardService.GetBySessionIdAsync(id, CompanyId);
+        if (existingJobCard != null)
+        {
+            // Redirect to the existing JobCard details
+            return RedirectToPage("/Sessions/JobCard/Details", new { id = existingJobCard.Id });
+        }
+
         Session = session;
         Input.Title = $"Service Work - {session.VehicleDisplayName}";
         
@@ -88,6 +96,14 @@ public class CreateModel : PageModel
         if (session == null)
         {
             return NotFound();
+        }
+
+        // Check if a JobCard already exists for this session
+        var existingJobCard = await _jobCardService.GetBySessionIdAsync(id, CompanyId);
+        if (existingJobCard != null)
+        {
+            // Redirect to the existing JobCard details (route uses session id)
+            return RedirectToPage("/Sessions/JobCard/Details", new { id });
         }
 
         if (!ModelState.IsValid)

@@ -20,6 +20,8 @@ using Gixat.Modules.Sessions;
 using Gixat.Modules.Sessions.GraphQL.Queries;
 using Gixat.Modules.Sessions.GraphQL.Mutations;
 using Gixat.Modules.Sessions.GraphQL.Types;
+using Gixat.Shared.Interfaces;
+using Gixat.Shared.Services;
 
 // Load environment variables from .env file
 DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
@@ -48,6 +50,22 @@ builder.Configuration["Authentication:Google:ClientId"] =
     Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? builder.Configuration["Authentication:Google:ClientId"];
 builder.Configuration["Authentication:Google:ClientSecret"] = 
     Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? builder.Configuration["Authentication:Google:ClientSecret"];
+
+// SMTP Configuration
+builder.Configuration["Smtp:Host"] = 
+    Environment.GetEnvironmentVariable("SMTP_HOST") ?? builder.Configuration["Smtp:Host"];
+builder.Configuration["Smtp:Port"] = 
+    Environment.GetEnvironmentVariable("SMTP_PORT") ?? builder.Configuration["Smtp:Port"];
+builder.Configuration["Smtp:Secure"] = 
+    Environment.GetEnvironmentVariable("SMTP_SECURE") ?? builder.Configuration["Smtp:Secure"];
+builder.Configuration["Smtp:User"] = 
+    Environment.GetEnvironmentVariable("SMTP_USER") ?? builder.Configuration["Smtp:User"];
+builder.Configuration["Smtp:Password"] = 
+    Environment.GetEnvironmentVariable("SMTP_PASS") ?? builder.Configuration["Smtp:Password"];
+builder.Configuration["Smtp:FromName"] = 
+    Environment.GetEnvironmentVariable("SMTP_FROM_NAME") ?? builder.Configuration["Smtp:FromName"];
+builder.Configuration["Smtp:FromEmail"] = 
+    Environment.GetEnvironmentVariable("SMTP_FROM_EMAIL") ?? builder.Configuration["Smtp:FromEmail"];
 
 // Add services
 builder.Services.AddRazorPages();
@@ -104,6 +122,19 @@ builder.Services.AddUsersModuleServices();
 builder.Services.AddClientsModuleServices();
 builder.Services.AddSessionsModuleServices();
 builder.Services.AddAwsS3(builder.Configuration);
+
+// Register Email Service
+builder.Services.Configure<SmtpSettings>(options =>
+{
+    options.Host = builder.Configuration["Smtp:Host"] ?? "smtp.gmail.com";
+    options.Port = int.TryParse(builder.Configuration["Smtp:Port"], out var port) ? port : 465;
+    options.Secure = bool.TryParse(builder.Configuration["Smtp:Secure"], out var secure) ? secure : true;
+    options.User = builder.Configuration["Smtp:User"] ?? "";
+    options.Password = builder.Configuration["Smtp:Password"] ?? "";
+    options.FromName = builder.Configuration["Smtp:FromName"] ?? "Gixat";
+    options.FromEmail = builder.Configuration["Smtp:FromEmail"] ?? builder.Configuration["Smtp:User"] ?? "";
+});
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Configure GraphQL
 builder.Services

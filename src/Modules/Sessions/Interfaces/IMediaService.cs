@@ -20,6 +20,12 @@ public interface IMediaService
     // Update
     Task<MediaItemDto?> UpdateAsync(Guid id, string? title, string? description, string? tags, int? sortOrder, Guid companyId);
     
+    // Link media to entities (for deferred linking after creation)
+    Task<bool> LinkToInspectionAsync(Guid mediaItemId, Guid inspectionId, Guid companyId);
+    Task<bool> LinkToCustomerRequestAsync(Guid mediaItemId, Guid customerRequestId, Guid companyId);
+    Task<bool> LinkToTestDriveAsync(Guid mediaItemId, Guid testDriveId, Guid companyId);
+    Task<bool> LinkToJobCardAsync(Guid mediaItemId, Guid jobCardId, Guid companyId);
+    
     // Delete
     Task<bool> DeleteAsync(Guid id, Guid companyId);
     Task<bool> DeleteBySessionAsync(Guid sessionId, Guid companyId);
