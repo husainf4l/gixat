@@ -227,6 +227,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
             entity.HasIndex(e => e.SessionNumber);
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => new { e.CompanyId, e.SessionNumber }).IsUnique();
+            // Composite indexes for dashboard and date-range queries
+            entity.HasIndex(e => new { e.CompanyId, e.CheckInAt });
+            entity.HasIndex(e => new { e.CompanyId, e.Status, e.CheckInAt });
 
             entity.HasOne(e => e.CustomerRequest)
                 .WithOne(r => r.Session)

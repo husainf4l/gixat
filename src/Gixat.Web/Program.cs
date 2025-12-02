@@ -2,6 +2,7 @@ using dotenv.net;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Gixat.Web.Data;
+using Gixat.Web.Middleware;
 using Gixat.Modules.Auth;
 using Gixat.Modules.Auth.Entities;
 using Gixat.Modules.Clients;
@@ -43,6 +44,10 @@ builder.Configuration["AWS:Region"] =
     Environment.GetEnvironmentVariable("AWS_REGION") ?? builder.Configuration["AWS:Region"];
 builder.Configuration["AWS:S3:BucketName"] = 
     Environment.GetEnvironmentVariable("AWS_S3_BUCKET_NAME") ?? builder.Configuration["AWS:S3:BucketName"];
+builder.Configuration["Authentication:Google:ClientId"] = 
+    Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID") ?? builder.Configuration["Authentication:Google:ClientId"];
+builder.Configuration["Authentication:Google:ClientSecret"] = 
+    Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET") ?? builder.Configuration["Authentication:Google:ClientSecret"];
 
 // Add services - include Auth module's Razor Pages
 var authAssembly = typeof(AuthModule).Assembly;
@@ -79,6 +84,20 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
 });
+
+// Configure Google Authentication
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+{
+    builder.Services.AddAuthentication()
+        .AddGoogle(options =>
+        {
+            options.ClientId = googleClientId;
+            options.ClientSecret = googleClientSecret;
+            options.CallbackPath = "/signin-google";
+        });
+}
 
 // Register Module Services (without their DbContexts)
 builder.Services.AddAuthModuleServices();
@@ -167,6 +186,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+// Add global exception handling
+app.UseGlobalExceptionHandler();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

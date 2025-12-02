@@ -1,24 +1,35 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
+using Gixat.Modules.Clients.Entities;
 using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
 public class SessionService : BaseService, ISessionService
 {
-    public SessionService(DbContext context) : base(context) { }
+    private readonly ILogger<SessionService> _logger;
+
+    public SessionService(DbContext context, ILogger<SessionService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
     private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
     private DbSet<Inspection> Inspections => Set<Inspection>();
     private DbSet<TestDrive> TestDrives => Set<TestDrive>();
     private DbSet<JobCard> JobCards => Set<JobCard>();
+    private DbSet<Client> Clients => Set<Client>();
+    private DbSet<ClientVehicle> ClientVehicles => Set<ClientVehicle>();
 
     public async Task<SessionDto?> GetByIdAsync(Guid id, Guid companyId)
     {
+        _logger.LogDebug("Getting session {SessionId} for company {CompanyId}", id, companyId);
+        
         var session = await GarageSessions
             .AsNoTracking()
             .Where(s => s.Id == id && s.CompanyId == companyId)
@@ -39,6 +50,8 @@ public class SessionService : BaseService, ISessionService
 
     public async Task<IEnumerable<SessionDto>> GetAllAsync(Guid companyId, SessionStatus? status = null)
     {
+        _logger.LogDebug("Getting all sessions for company {CompanyId}, status filter: {Status}", companyId, status);
+        
         var query = GarageSessions
             .AsNoTracking()
             .Where(s => s.CompanyId == companyId);
@@ -120,6 +133,8 @@ public class SessionService : BaseService, ISessionService
 
     public async Task<SessionDto> CreateAsync(CreateSessionDto dto)
     {
+        _logger.LogInformation("Creating new session for company {CompanyId}, client {ClientId}", dto.CompanyId, dto.ClientId);
+        
         var sessionNumber = await GenerateSessionNumberAsync(dto.CompanyId);
 
         var session = new GarageSession
@@ -140,6 +155,7 @@ public class SessionService : BaseService, ISessionService
         GarageSessions.Add(session);
         await SaveChangesAsync();
 
+        _logger.LogInformation("Created session {SessionNumber} with ID {SessionId}", sessionNumber, session.Id);
         return await MapToDto(session);
     }
 
@@ -149,7 +165,11 @@ public class SessionService : BaseService, ISessionService
             .Where(s => s.Id == id && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        if (session == null) return null;
+        if (session == null)
+        {
+            _logger.LogWarning("Session {SessionId} not found for update", id);
+            return null;
+        }
 
         if (dto.Status.HasValue) session.Status = dto.Status.Value;
         if (dto.MileageIn.HasValue) session.MileageIn = dto.MileageIn.Value;
@@ -163,6 +183,7 @@ public class SessionService : BaseService, ISessionService
         session.UpdatedAt = DateTime.UtcNow;
 
         await SaveChangesAsync();
+        _logger.LogInformation("Updated session {SessionId}", id);
         return await MapToDto(session);
     }
 
@@ -174,6 +195,7 @@ public class SessionService : BaseService, ISessionService
 
         if (session == null) return false;
 
+        var oldStatus = session.Status;
         session.Status = status;
         session.UpdatedAt = DateTime.UtcNow;
 
@@ -183,6 +205,7 @@ public class SessionService : BaseService, ISessionService
         }
 
         await SaveChangesAsync();
+        _logger.LogInformation("Session {SessionId} status changed from {OldStatus} to {NewStatus}", id, oldStatus, status);
         return true;
     }
 
@@ -200,6 +223,7 @@ public class SessionService : BaseService, ISessionService
         session.UpdatedAt = DateTime.UtcNow;
 
         await SaveChangesAsync();
+        _logger.LogInformation("Session {SessionId} checked out with mileage {MileageOut}", id, mileageOut);
         return true;
     }
 
@@ -213,6 +237,7 @@ public class SessionService : BaseService, ISessionService
 
         GarageSessions.Remove(session);
         await SaveChangesAsync();
+        _logger.LogInformation("Deleted session {SessionId}", id);
         return true;
     }
 
@@ -268,8 +293,17 @@ public class SessionService : BaseService, ISessionService
         var hasTestDrive = await TestDrives.AnyAsync(t => t.SessionId == session.Id);
         var hasJobCard = await JobCards.AnyAsync(j => j.SessionId == session.Id);
 
-        // Note: In a real app, you'd join with Clients module to get client/vehicle info
-        // For now, we'll use placeholder values that can be enriched later
+        // Fetch client and vehicle data
+        var client = await Clients
+            .AsNoTracking()
+            .Where(c => c.Id == session.ClientId)
+            .FirstOrDefaultAsync();
+
+        var vehicle = await ClientVehicles
+            .AsNoTracking()
+            .Where(v => v.Id == session.ClientVehicleId)
+            .FirstOrDefaultAsync();
+
         return new SessionDto(
             Id: session.Id,
             SessionNumber: session.SessionNumber,
@@ -277,10 +311,10 @@ public class SessionService : BaseService, ISessionService
             CompanyId: session.CompanyId,
             BranchId: session.BranchId,
             ClientId: session.ClientId,
-            ClientName: "Client", // Would be fetched from Clients module
+            ClientName: client?.FullName ?? "Unknown Client",
             ClientVehicleId: session.ClientVehicleId,
-            VehicleDisplayName: "Vehicle", // Would be fetched from Clients module
-            VehicleLicensePlate: null, // Would be fetched from Clients module
+            VehicleDisplayName: vehicle?.DisplayName ?? "Unknown Vehicle",
+            VehicleLicensePlate: vehicle?.LicensePlate,
             MileageIn: session.MileageIn,
             MileageOut: session.MileageOut,
             CheckInAt: session.CheckInAt,

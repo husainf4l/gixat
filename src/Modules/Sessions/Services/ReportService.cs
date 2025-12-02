@@ -1,29 +1,58 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Interfaces;
+using Gixat.Modules.Clients.Entities;
+using Gixat.Modules.Users.Entities;
 using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
 public class ReportService : BaseService, IReportService
 {
-    public ReportService(DbContext context) : base(context) { }
+    private readonly ILogger<ReportService> _logger;
+
+    public ReportService(DbContext context, ILogger<ReportService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<GarageSession> Sessions => Set<GarageSession>();
     private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
     private DbSet<Inspection> Inspections => Set<Inspection>();
     private DbSet<TestDrive> TestDrives => Set<TestDrive>();
     private DbSet<JobCard> JobCards => Set<JobCard>();
+    private DbSet<Client> Clients => Set<Client>();
+    private DbSet<ClientVehicle> ClientVehicles => Set<ClientVehicle>();
+    private DbSet<CompanyUser> CompanyUsers => Set<CompanyUser>();
 
     public async Task<InitialReportDto?> GenerateInitialReportAsync(Guid sessionId, Guid companyId, string generatedBy)
     {
+        _logger.LogInformation("Generating initial report for session {SessionId}", sessionId);
+
         var session = await Sessions
             .AsNoTracking()
             .Where(s => s.Id == sessionId && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        if (session == null) return null;
+        if (session == null)
+        {
+            _logger.LogWarning("Session {SessionId} not found for company {CompanyId}", sessionId, companyId);
+            return null;
+        }
+
+        // Fetch client data
+        var client = await Clients
+            .AsNoTracking()
+            .Where(c => c.Id == session.ClientId)
+            .FirstOrDefaultAsync();
+
+        // Fetch vehicle data
+        var vehicle = await ClientVehicles
+            .AsNoTracking()
+            .Where(v => v.Id == session.ClientVehicleId)
+            .FirstOrDefaultAsync();
 
         var customerRequest = await CustomerRequests
             .AsNoTracking()
@@ -38,11 +67,35 @@ public class ReportService : BaseService, IReportService
             .Where(i => i.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
+        // Fetch inspector name if inspection exists
+        string? inspectorName = null;
+        if (inspection?.InspectorId != null)
+        {
+            inspectorName = await CompanyUsers
+                .AsNoTracking()
+                .Where(u => u.Id == inspection.InspectorId)
+                .Select(u => u.FirstName + " " + u.LastName)
+                .FirstOrDefaultAsync();
+        }
+
         var testDrive = await TestDrives
             .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.SessionId == sessionId)
             .FirstOrDefaultAsync();
+
+        // Fetch driver name if test drive exists
+        string? driverName = null;
+        if (testDrive?.DriverId != null)
+        {
+            driverName = await CompanyUsers
+                .AsNoTracking()
+                .Where(u => u.Id == testDrive.DriverId)
+                .Select(u => u.FirstName + " " + u.LastName)
+                .FirstOrDefaultAsync();
+        }
+
+        _logger.LogInformation("Initial report generated successfully for session {SessionId}", sessionId);
 
         return new InitialReportDto(
             SessionId: session.Id,
@@ -52,17 +105,17 @@ public class ReportService : BaseService, IReportService
             MileageIn: session.MileageIn,
             EstimatedCompletionAt: session.EstimatedCompletionAt,
             ClientId: session.ClientId,
-            ClientName: "Client", // TODO: fetch from client
-            ClientPhone: null,
-            ClientEmail: null,
+            ClientName: client?.FullName ?? "Unknown Client",
+            ClientPhone: client?.Phone,
+            ClientEmail: client?.Email,
             VehicleId: session.ClientVehicleId,
-            VehicleDisplayName: "Vehicle", // TODO: fetch from vehicle
-            VehicleMake: null,
-            VehicleModel: null,
-            VehicleYear: null,
-            VehicleColor: null,
-            VehicleLicensePlate: null,
-            VehicleVin: null,
+            VehicleDisplayName: vehicle?.DisplayName ?? "Unknown Vehicle",
+            VehicleMake: vehicle?.Make,
+            VehicleModel: vehicle?.Model,
+            VehicleYear: vehicle?.Year,
+            VehicleColor: vehicle?.Color,
+            VehicleLicensePlate: vehicle?.LicensePlate,
+            VehicleVin: vehicle?.Vin,
             CustomerRequest: customerRequest != null ? new CustomerRequestSummaryDto(
                 Id: customerRequest.Id,
                 Title: customerRequest.Title,
@@ -79,7 +132,7 @@ public class ReportService : BaseService, IReportService
                 Title: inspection.Title,
                 Status: inspection.Status,
                 InspectorId: inspection.InspectorId,
-                InspectorName: null, // TODO: fetch from user
+                InspectorName: inspectorName,
                 InspectionCompletedAt: inspection.InspectionCompletedAt,
                 Findings: inspection.Findings,
                 Recommendations: inspection.Recommendations,
@@ -94,7 +147,7 @@ public class ReportService : BaseService, IReportService
                 Title: testDrive.Title,
                 Status: testDrive.Status,
                 DriverId: testDrive.DriverId,
-                DriverName: null, // TODO: fetch from user
+                DriverName: driverName,
                 CompletedAt: testDrive.CompletedAt,
                 MileageStart: testDrive.MileageStart,
                 MileageEnd: testDrive.MileageEnd,
@@ -111,12 +164,30 @@ public class ReportService : BaseService, IReportService
 
     public async Task<FinalReportDto?> GenerateFinalReportAsync(Guid sessionId, Guid companyId, string generatedBy)
     {
+        _logger.LogInformation("Generating final report for session {SessionId}", sessionId);
+
         var session = await Sessions
             .AsNoTracking()
             .Where(s => s.Id == sessionId && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        if (session == null) return null;
+        if (session == null)
+        {
+            _logger.LogWarning("Session {SessionId} not found for company {CompanyId}", sessionId, companyId);
+            return null;
+        }
+
+        // Fetch client data
+        var client = await Clients
+            .AsNoTracking()
+            .Where(c => c.Id == session.ClientId)
+            .FirstOrDefaultAsync();
+
+        // Fetch vehicle data
+        var vehicle = await ClientVehicles
+            .AsNoTracking()
+            .Where(v => v.Id == session.ClientVehicleId)
+            .FirstOrDefaultAsync();
 
         var customerRequest = await CustomerRequests
             .AsNoTracking()
@@ -131,11 +202,33 @@ public class ReportService : BaseService, IReportService
             .Where(i => i.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
+        // Fetch inspector name
+        string? inspectorName = null;
+        if (inspection?.InspectorId != null)
+        {
+            inspectorName = await CompanyUsers
+                .AsNoTracking()
+                .Where(u => u.Id == inspection.InspectorId)
+                .Select(u => u.FirstName + " " + u.LastName)
+                .FirstOrDefaultAsync();
+        }
+
         var testDrive = await TestDrives
             .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.SessionId == sessionId)
             .FirstOrDefaultAsync();
+
+        // Fetch driver name
+        string? driverName = null;
+        if (testDrive?.DriverId != null)
+        {
+            driverName = await CompanyUsers
+                .AsNoTracking()
+                .Where(u => u.Id == testDrive.DriverId)
+                .Select(u => u.FirstName + " " + u.LastName)
+                .FirstOrDefaultAsync();
+        }
 
         var jobCard = await JobCards
             .AsNoTracking()
@@ -143,6 +236,8 @@ public class ReportService : BaseService, IReportService
             .Include(j => j.MediaItems)
             .Where(j => j.SessionId == sessionId)
             .FirstOrDefaultAsync();
+
+        _logger.LogInformation("Final report generated successfully for session {SessionId}", sessionId);
 
         return new FinalReportDto(
             SessionId: session.Id,
@@ -153,17 +248,17 @@ public class ReportService : BaseService, IReportService
             MileageIn: session.MileageIn,
             MileageOut: session.MileageOut,
             ClientId: session.ClientId,
-            ClientName: "Client", // TODO: fetch from client
-            ClientPhone: null,
-            ClientEmail: null,
+            ClientName: client?.FullName ?? "Unknown Client",
+            ClientPhone: client?.Phone,
+            ClientEmail: client?.Email,
             VehicleId: session.ClientVehicleId,
-            VehicleDisplayName: "Vehicle", // TODO: fetch from vehicle
-            VehicleMake: null,
-            VehicleModel: null,
-            VehicleYear: null,
-            VehicleColor: null,
-            VehicleLicensePlate: null,
-            VehicleVin: null,
+            VehicleDisplayName: vehicle?.DisplayName ?? "Unknown Vehicle",
+            VehicleMake: vehicle?.Make,
+            VehicleModel: vehicle?.Model,
+            VehicleYear: vehicle?.Year,
+            VehicleColor: vehicle?.Color,
+            VehicleLicensePlate: vehicle?.LicensePlate,
+            VehicleVin: vehicle?.Vin,
             CustomerRequest: customerRequest != null ? new CustomerRequestSummaryDto(
                 Id: customerRequest.Id,
                 Title: customerRequest.Title,
@@ -180,7 +275,7 @@ public class ReportService : BaseService, IReportService
                 Title: inspection.Title,
                 Status: inspection.Status,
                 InspectorId: inspection.InspectorId,
-                InspectorName: null,
+                InspectorName: inspectorName,
                 InspectionCompletedAt: inspection.InspectionCompletedAt,
                 Findings: inspection.Findings,
                 Recommendations: inspection.Recommendations,
@@ -195,7 +290,7 @@ public class ReportService : BaseService, IReportService
                 Title: testDrive.Title,
                 Status: testDrive.Status,
                 DriverId: testDrive.DriverId,
-                DriverName: null,
+                DriverName: driverName,
                 CompletedAt: testDrive.CompletedAt,
                 MileageStart: testDrive.MileageStart,
                 MileageEnd: testDrive.MileageEnd,

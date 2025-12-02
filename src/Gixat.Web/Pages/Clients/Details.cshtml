@@ -128,6 +128,11 @@
                 </div>
             }
             <div class="flex justify-end gap-2 mt-auto">
+                <form method="post" asp-page-handler="CreateSession" asp-route-id="@Model.Client.Id" asp-route-vehicleId="@vehicle.Id" class="inline">
+                    <button type="submit" class="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all text-sm flex items-center gap-1.5" title="Create new session for this vehicle">
+                        <i class="bi bi-plus-circle"></i> New Session
+                    </button>
+                </form>
                 <form method="post" asp-page-handler="DeleteVehicle" asp-route-id="@Model.Client.Id" asp-route-vehicleId="@vehicle.Id" class="inline">
                     <button type="submit" class="px-3 py-1.5 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors text-sm" onclick="return confirm('Are you sure you want to delete this vehicle?')">
                         <i class="bi bi-trash"></i>
