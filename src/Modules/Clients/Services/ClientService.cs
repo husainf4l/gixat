@@ -1,42 +1,29 @@
 using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Clients.Entities;
 using Gixat.Modules.Clients.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Clients.Services;
 
-public class ClientService : IClientService
+public class ClientService : BaseService, IClientService
 {
-    private readonly DbContext _context;
+    public ClientService(DbContext context) : base(context) { }
 
-    public ClientService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<Client> Clients => _context.Set<Client>();
-    private DbSet<ClientVehicle> ClientVehicles => _context.Set<ClientVehicle>();
+    private DbSet<Client> Clients => Set<Client>();
 
     public async Task<Client?> GetByIdAsync(Guid id)
-    {
-        return await Clients
-            .Include(c => c.Vehicles)
-            .FirstOrDefaultAsync(c => c.Id == id);
-    }
+        => await Clients.Include(c => c.Vehicles).FirstOrDefaultAsync(c => c.Id == id);
 
     public async Task<IEnumerable<Client>> GetByCompanyIdAsync(Guid companyId)
-    {
-        return await Clients
+        => await Clients
             .Include(c => c.Vehicles)
             .Where(c => c.CompanyId == companyId)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
-    }
 
     public async Task<IEnumerable<Client>> SearchAsync(Guid companyId, string? searchTerm)
     {
-        var query = Clients
-            .Include(c => c.Vehicles)
-            .Where(c => c.CompanyId == companyId);
+        var query = Clients.Include(c => c.Vehicles).Where(c => c.CompanyId == companyId);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -48,15 +35,13 @@ public class ClientService : IClientService
                 c.Phone.Contains(searchTerm));
         }
 
-        return await query
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+        return await query.OrderByDescending(c => c.CreatedAt).ToListAsync();
     }
 
     public async Task<Client> CreateAsync(Client client)
     {
         Clients.Add(client);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return client;
     }
 
@@ -80,7 +65,7 @@ public class ClientService : IClientService
         existing.IsVip = client.IsVip;
         existing.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return existing;
     }
 
@@ -90,34 +75,27 @@ public class ClientService : IClientService
         if (client == null) return false;
 
         Clients.Remove(client);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> ActivateAsync(Guid id)
-    {
-        var client = await Clients.FindAsync(id);
-        if (client == null) return false;
-
-        client.IsActive = true;
-        client.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-        return true;
-    }
+        => await SetActiveStatusAsync(id, true);
 
     public async Task<bool> DeactivateAsync(Guid id)
+        => await SetActiveStatusAsync(id, false);
+
+    public async Task<int> GetClientCountAsync(Guid companyId)
+        => await Clients.CountAsync(c => c.CompanyId == companyId && c.IsActive);
+
+    private async Task<bool> SetActiveStatusAsync(Guid id, bool isActive)
     {
         var client = await Clients.FindAsync(id);
         if (client == null) return false;
 
-        client.IsActive = false;
+        client.IsActive = isActive;
         client.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
-    }
-
-    public async Task<int> GetClientCountAsync(Guid companyId)
-    {
-        return await Clients.CountAsync(c => c.CompanyId == companyId && c.IsActive);
     }
 }

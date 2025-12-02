@@ -3,23 +3,19 @@ using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
-public class SessionService : ISessionService
+public class SessionService : BaseService, ISessionService
 {
-    private readonly DbContext _context;
+    public SessionService(DbContext context) : base(context) { }
 
-    public SessionService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
-    private DbSet<CustomerRequest> CustomerRequests => _context.Set<CustomerRequest>();
-    private DbSet<Inspection> Inspections => _context.Set<Inspection>();
-    private DbSet<TestDrive> TestDrives => _context.Set<TestDrive>();
-    private DbSet<JobCard> JobCards => _context.Set<JobCard>();
+    private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
+    private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
+    private DbSet<Inspection> Inspections => Set<Inspection>();
+    private DbSet<TestDrive> TestDrives => Set<TestDrive>();
+    private DbSet<JobCard> JobCards => Set<JobCard>();
 
     public async Task<SessionDto?> GetByIdAsync(Guid id, Guid companyId)
     {
@@ -142,7 +138,7 @@ public class SessionService : ISessionService
         };
 
         GarageSessions.Add(session);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
 
         return await MapToDto(session);
     }
@@ -166,7 +162,7 @@ public class SessionService : ISessionService
 
         session.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return await MapToDto(session);
     }
 
@@ -186,7 +182,7 @@ public class SessionService : ISessionService
             session.CheckOutAt = DateTime.UtcNow;
         }
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -203,7 +199,7 @@ public class SessionService : ISessionService
         session.CheckOutAt = DateTime.UtcNow;
         session.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -216,7 +212,7 @@ public class SessionService : ISessionService
         if (session == null) return false;
 
         GarageSessions.Remove(session);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 

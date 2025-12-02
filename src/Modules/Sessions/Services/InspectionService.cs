@@ -3,21 +3,17 @@ using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
-public class InspectionService : IInspectionService
+public class InspectionService : BaseService, IInspectionService
 {
-    private readonly DbContext _context;
+    public InspectionService(DbContext context) : base(context) { }
 
-    public InspectionService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<Inspection> Inspections => _context.Set<Inspection>();
-    private DbSet<InspectionItem> InspectionItems => _context.Set<InspectionItem>();
-    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+    private DbSet<Inspection> Inspections => Set<Inspection>();
+    private DbSet<InspectionItem> InspectionItems => Set<InspectionItem>();
+    private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
 
     public async Task<InspectionDto?> GetByIdAsync(Guid id, Guid companyId)
     {
@@ -28,7 +24,7 @@ public class InspectionService : IInspectionService
             .Where(i => i.Id == id && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return inspection == null ? null : MapToDto(inspection);
+        return inspection?.ToDto();
     }
 
     public async Task<InspectionDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
@@ -40,7 +36,7 @@ public class InspectionService : IInspectionService
             .Where(i => i.SessionId == sessionId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return inspection == null ? null : MapToDto(inspection);
+        return inspection?.ToDto();
     }
 
     public async Task<InspectionDto> CreateAsync(CreateInspectionDto dto, Guid companyId)
@@ -56,12 +52,11 @@ public class InspectionService : IInspectionService
         };
 
         Inspections.Add(inspection);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
 
-        // Update session status
         await UpdateSessionStatus(dto.SessionId, SessionStatus.Inspection);
 
-        return MapToDto(inspection);
+        return inspection.ToDto();
     }
 
     public async Task<InspectionDto?> UpdateAsync(Guid id, UpdateInspectionDto dto, Guid companyId)
@@ -94,8 +89,8 @@ public class InspectionService : IInspectionService
 
         inspection.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
-        return MapToDto(inspection);
+        await SaveChangesAsync();
+        return inspection.ToDto();
     }
 
     public async Task<bool> StartInspectionAsync(Guid id, Guid inspectorId, Guid companyId)
@@ -111,7 +106,7 @@ public class InspectionService : IInspectionService
         inspection.InspectionStartedAt = DateTime.UtcNow;
         inspection.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -127,7 +122,7 @@ public class InspectionService : IInspectionService
         inspection.InspectionCompletedAt = DateTime.UtcNow;
         inspection.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -140,11 +135,10 @@ public class InspectionService : IInspectionService
         if (inspection == null) return false;
 
         Inspections.Remove(inspection);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
-    // Inspection Items
     public async Task<InspectionItemDto> AddItemAsync(CreateInspectionItemDto dto)
     {
         var item = new InspectionItem
@@ -161,9 +155,9 @@ public class InspectionService : IInspectionService
         };
 
         InspectionItems.Add(item);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
 
-        return MapItemToDto(item);
+        return item.ToDto();
     }
 
     public async Task<bool> UpdateItemAsync(Guid itemId, string? condition, string? notes, Priority? priority, bool? requiresAttention)
@@ -178,7 +172,7 @@ public class InspectionService : IInspectionService
 
         item.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -188,7 +182,7 @@ public class InspectionService : IInspectionService
         if (item == null) return false;
 
         InspectionItems.Remove(item);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -199,66 +193,65 @@ public class InspectionService : IInspectionService
         {
             session.Status = status;
             session.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync();
         }
     }
+}
 
-    private static InspectionDto MapToDto(Inspection inspection)
-    {
-        return new InspectionDto(
-            Id: inspection.Id,
-            SessionId: inspection.SessionId,
-            Title: inspection.Title,
-            Description: inspection.Description,
-            Status: inspection.Status,
-            InspectorId: inspection.InspectorId,
-            InspectionStartedAt: inspection.InspectionStartedAt,
-            InspectionCompletedAt: inspection.InspectionCompletedAt,
-            ExteriorCondition: inspection.ExteriorCondition,
-            InteriorCondition: inspection.InteriorCondition,
-            EngineCondition: inspection.EngineCondition,
-            TransmissionCondition: inspection.TransmissionCondition,
-            BrakeCondition: inspection.BrakeCondition,
-            TireCondition: inspection.TireCondition,
-            SuspensionCondition: inspection.SuspensionCondition,
-            ElectricalCondition: inspection.ElectricalCondition,
-            FluidLevels: inspection.FluidLevels,
-            Findings: inspection.Findings,
-            Recommendations: inspection.Recommendations,
-            OverallPriority: inspection.OverallPriority,
-            Items: inspection.Items?.Select(MapItemToDto) ?? Enumerable.Empty<InspectionItemDto>(),
-            MediaItems: inspection.MediaItems?.Select(m => new MediaItemDto(
-                Id: m.Id,
-                FileName: m.FileName,
-                OriginalFileName: m.OriginalFileName,
-                ContentType: m.ContentType,
-                FileSize: m.FileSize,
-                S3Key: m.S3Key,
-                S3Url: m.S3Url,
-                MediaType: m.MediaType,
-                Category: m.Category,
-                Title: m.Title,
-                Description: m.Description,
-                ThumbnailS3Key: m.ThumbnailS3Key,
-                SortOrder: m.SortOrder,
-                CreatedAt: m.CreatedAt
-            )) ?? Enumerable.Empty<MediaItemDto>(),
-            CreatedAt: inspection.CreatedAt
-        );
-    }
+file static class InspectionMappingExtensions
+{
+    public static InspectionDto ToDto(this Inspection inspection) => new(
+        Id: inspection.Id,
+        SessionId: inspection.SessionId,
+        Title: inspection.Title,
+        Description: inspection.Description,
+        Status: inspection.Status,
+        InspectorId: inspection.InspectorId,
+        InspectionStartedAt: inspection.InspectionStartedAt,
+        InspectionCompletedAt: inspection.InspectionCompletedAt,
+        ExteriorCondition: inspection.ExteriorCondition,
+        InteriorCondition: inspection.InteriorCondition,
+        EngineCondition: inspection.EngineCondition,
+        TransmissionCondition: inspection.TransmissionCondition,
+        BrakeCondition: inspection.BrakeCondition,
+        TireCondition: inspection.TireCondition,
+        SuspensionCondition: inspection.SuspensionCondition,
+        ElectricalCondition: inspection.ElectricalCondition,
+        FluidLevels: inspection.FluidLevels,
+        Findings: inspection.Findings,
+        Recommendations: inspection.Recommendations,
+        OverallPriority: inspection.OverallPriority,
+        Items: inspection.Items?.Select(i => i.ToDto()) ?? [],
+        MediaItems: inspection.MediaItems?.Select(m => m.ToMediaItemDto()) ?? [],
+        CreatedAt: inspection.CreatedAt
+    );
 
-    private static InspectionItemDto MapItemToDto(InspectionItem item)
-    {
-        return new InspectionItemDto(
-            Id: item.Id,
-            Category: item.Category,
-            ItemName: item.ItemName,
-            Description: item.Description,
-            Condition: item.Condition,
-            Notes: item.Notes,
-            Priority: item.Priority,
-            RequiresAttention: item.RequiresAttention,
-            SortOrder: item.SortOrder
-        );
-    }
+    public static InspectionItemDto ToDto(this InspectionItem item) => new(
+        Id: item.Id,
+        Category: item.Category,
+        ItemName: item.ItemName,
+        Description: item.Description,
+        Condition: item.Condition,
+        Notes: item.Notes,
+        Priority: item.Priority,
+        RequiresAttention: item.RequiresAttention,
+        SortOrder: item.SortOrder
+    );
+
+    public static MediaItemDto ToMediaItemDto(this MediaItem m) => new(
+        Id: m.Id,
+        FileName: m.FileName,
+        OriginalFileName: m.OriginalFileName,
+        ContentType: m.ContentType,
+        FileSize: m.FileSize,
+        S3Key: m.S3Key,
+        S3Url: m.S3Url,
+        MediaType: m.MediaType,
+        Category: m.Category,
+        Title: m.Title,
+        Description: m.Description,
+        ThumbnailS3Key: m.ThumbnailS3Key,
+        SortOrder: m.SortOrder,
+        CreatedAt: m.CreatedAt
+    );
 }

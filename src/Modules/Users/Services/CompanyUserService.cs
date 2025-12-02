@@ -1,49 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Users.Entities;
 using Gixat.Modules.Users.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Users.Services;
 
-public class CompanyUserService : ICompanyUserService
+public class CompanyUserService : BaseService, ICompanyUserService
 {
-    private readonly DbContext _context;
+    public CompanyUserService(DbContext context) : base(context) { }
 
-    public CompanyUserService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<CompanyUser> CompanyUsers => _context.Set<CompanyUser>();
+    private DbSet<CompanyUser> CompanyUsers => Set<CompanyUser>();
 
     public async Task<CompanyUser?> GetByIdAsync(Guid id)
-    {
-        return await CompanyUsers.FindAsync(id);
-    }
+        => await CompanyUsers.FindAsync(id);
 
     public async Task<CompanyUser?> GetByAuthUserIdAndCompanyIdAsync(Guid authUserId, Guid companyId)
-    {
-        return await CompanyUsers
-            .FirstOrDefaultAsync(u => u.AuthUserId == authUserId && u.CompanyId == companyId);
-    }
+        => await CompanyUsers.FirstOrDefaultAsync(u => u.AuthUserId == authUserId && u.CompanyId == companyId);
 
     public async Task<IEnumerable<CompanyUser>> GetByCompanyIdAsync(Guid companyId)
-    {
-        return await CompanyUsers
-            .Where(u => u.CompanyId == companyId)
-            .ToListAsync();
-    }
+        => await CompanyUsers.Where(u => u.CompanyId == companyId).ToListAsync();
 
     public async Task<IEnumerable<CompanyUser>> GetUserCompaniesAsync(Guid authUserId)
-    {
-        return await CompanyUsers
-            .Where(u => u.AuthUserId == authUserId && u.IsActive)
-            .ToListAsync();
-    }
+        => await CompanyUsers.Where(u => u.AuthUserId == authUserId && u.IsActive).ToListAsync();
 
     public async Task<CompanyUser> CreateCompanyUserAsync(CompanyUser companyUser)
     {
         CompanyUsers.Add(companyUser);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return companyUser;
     }
 
@@ -52,9 +35,9 @@ public class CompanyUserService : ICompanyUserService
         var existing = await CompanyUsers.FindAsync(companyUser.Id);
         if (existing == null) return null;
 
-        _context.Entry(existing).CurrentValues.SetValues(companyUser);
+        Context.Entry(existing).CurrentValues.SetValues(companyUser);
         existing.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return existing;
     }
 
@@ -64,29 +47,24 @@ public class CompanyUserService : ICompanyUserService
         if (user == null) return false;
 
         CompanyUsers.Remove(user);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> DeactivateAsync(Guid id)
-    {
-        var user = await CompanyUsers.FindAsync(id);
-        if (user == null) return false;
-
-        user.IsActive = false;
-        user.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
-        return true;
-    }
+        => await SetActiveStatusAsync(id, false);
 
     public async Task<bool> ActivateAsync(Guid id)
+        => await SetActiveStatusAsync(id, true);
+
+    private async Task<bool> SetActiveStatusAsync(Guid id, bool isActive)
     {
         var user = await CompanyUsers.FindAsync(id);
         if (user == null) return false;
 
-        user.IsActive = true;
+        user.IsActive = isActive;
         user.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 }

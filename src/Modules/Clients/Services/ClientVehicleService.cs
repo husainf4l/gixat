@@ -1,35 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Clients.Entities;
 using Gixat.Modules.Clients.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Clients.Services;
 
-public class ClientVehicleService : IClientVehicleService
+public class ClientVehicleService : BaseService, IClientVehicleService
 {
-    private readonly DbContext _context;
+    public ClientVehicleService(DbContext context) : base(context) { }
 
-    public ClientVehicleService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<ClientVehicle> ClientVehicles => _context.Set<ClientVehicle>();
+    private DbSet<ClientVehicle> ClientVehicles => Set<ClientVehicle>();
 
     public async Task<ClientVehicle?> GetByIdAsync(Guid id)
-    {
-        return await ClientVehicles
-            .Include(v => v.Client)
-            .FirstOrDefaultAsync(v => v.Id == id);
-    }
+        => await ClientVehicles.Include(v => v.Client).FirstOrDefaultAsync(v => v.Id == id);
 
     public async Task<IEnumerable<ClientVehicle>> GetByClientIdAsync(Guid clientId)
-    {
-        return await ClientVehicles
+        => await ClientVehicles
             .Where(v => v.ClientId == clientId)
             .OrderByDescending(v => v.IsPrimary)
             .ThenByDescending(v => v.CreatedAt)
             .ToListAsync();
-    }
 
     public async Task<ClientVehicle> CreateAsync(ClientVehicle vehicle)
     {
@@ -41,7 +31,7 @@ public class ClientVehicleService : IClientVehicleService
         }
 
         ClientVehicles.Add(vehicle);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return vehicle;
     }
 
@@ -63,7 +53,7 @@ public class ClientVehicleService : IClientVehicleService
         existing.IsPrimary = vehicle.IsPrimary;
         existing.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return existing;
     }
 
@@ -73,7 +63,7 @@ public class ClientVehicleService : IClientVehicleService
         if (vehicle == null) return false;
 
         ClientVehicles.Remove(vehicle);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 }

@@ -3,24 +3,20 @@ using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
-using Microsoft.Extensions.Configuration;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
-public class MediaService : IMediaService
+public class MediaService : BaseService, IMediaService
 {
-    private readonly DbContext _context;
     private readonly IAwsS3Service _s3Service;
-    private readonly string _bucketName;
 
-    public MediaService(DbContext context, IAwsS3Service s3Service, IConfiguration configuration)
+    public MediaService(DbContext context, IAwsS3Service s3Service) : base(context)
     {
-        _context = context;
         _s3Service = s3Service;
-        _bucketName = configuration["AWS:S3:BucketName"] ?? "gixat-media";
     }
 
-    private DbSet<MediaItem> MediaItems => _context.Set<MediaItem>();
+    private DbSet<MediaItem> MediaItems => Set<MediaItem>();
 
     public async Task<MediaItemDto?> GetByIdAsync(Guid id, Guid companyId)
     {
@@ -29,49 +25,47 @@ public class MediaService : IMediaService
             .Where(m => m.Id == id && m.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return media == null ? null : MapToDto(media);
+        return media?.ToDto();
     }
 
     public async Task<IEnumerable<MediaItemDto>> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
-        var media = await MediaItems
+        var items = await MediaItems
             .AsNoTracking()
             .Where(m => m.SessionId == sessionId && m.CompanyId == companyId)
             .OrderBy(m => m.Category)
             .ThenBy(m => m.SortOrder)
             .ToListAsync();
 
-        return media.Select(MapToDto);
+        return items.Select(m => m.ToDto());
     }
 
     public async Task<IEnumerable<MediaItemDto>> GetByCategoryAsync(Guid sessionId, MediaCategory category, Guid companyId)
     {
-        var media = await MediaItems
+        var items = await MediaItems
             .AsNoTracking()
             .Where(m => m.SessionId == sessionId && m.Category == category && m.CompanyId == companyId)
             .OrderBy(m => m.SortOrder)
             .ToListAsync();
 
-        return media.Select(MapToDto);
+        return items.Select(m => m.ToDto());
     }
 
     public async Task<MediaUploadUrlDto> CreateUploadUrlAsync(CreateMediaItemDto dto, Guid companyId)
     {
-        // Generate unique filename and S3 key
         var s3Key = _s3Service.GenerateS3Key(companyId, dto.SessionId, dto.Category, dto.OriginalFileName);
-        var fileName = Path.GetFileName(s3Key);
+        var uploadUrl = await _s3Service.GeneratePresignedUploadUrlAsync(s3Key, dto.ContentType);
 
-        // Create media item record (pending upload)
-        var mediaItem = new MediaItem
+        var media = new MediaItem
         {
             SessionId = dto.SessionId,
             CompanyId = companyId,
-            FileName = fileName,
+            FileName = Path.GetFileName(s3Key),
             OriginalFileName = dto.OriginalFileName,
             ContentType = dto.ContentType,
             FileSize = dto.FileSize,
             S3Key = s3Key,
-            S3Bucket = _bucketName,
+            S3Bucket = "gixat-media",
             MediaType = dto.MediaType,
             Category = dto.Category,
             CustomerRequestId = dto.CustomerRequestId,
@@ -85,14 +79,11 @@ public class MediaService : IMediaService
             SortOrder = dto.SortOrder
         };
 
-        MediaItems.Add(mediaItem);
-        await _context.SaveChangesAsync();
-
-        // Generate presigned upload URL
-        var uploadUrl = await _s3Service.GeneratePresignedUploadUrlAsync(s3Key, dto.ContentType);
+        MediaItems.Add(media);
+        await SaveChangesAsync();
 
         return new MediaUploadUrlDto(
-            MediaItemId: mediaItem.Id,
+            MediaItemId: media.Id,
             UploadUrl: uploadUrl,
             S3Key: s3Key,
             ExpiresAt: DateTime.UtcNow.AddMinutes(15)
@@ -101,44 +92,28 @@ public class MediaService : IMediaService
 
     public async Task<MediaItemDto?> ConfirmUploadAsync(Guid mediaItemId, Guid companyId)
     {
-        var mediaItem = await MediaItems
-            .Where(m => m.Id == mediaItemId && m.CompanyId == companyId)
-            .FirstOrDefaultAsync();
+        var media = await MediaItems.Where(m => m.Id == mediaItemId && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return null;
 
-        if (mediaItem == null) return null;
+        var exists = await _s3Service.ObjectExistsAsync(media.S3Key);
+        if (!exists) return null;
 
-        // Verify file exists in S3
-        var exists = await _s3Service.ObjectExistsAsync(mediaItem.S3Key);
-        if (!exists)
-        {
-            // Remove the record if upload failed
-            MediaItems.Remove(mediaItem);
-            await _context.SaveChangesAsync();
-            return null;
-        }
+        media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        media.UpdatedAt = DateTime.UtcNow;
 
-        // Generate permanent download URL (or you could generate on-demand)
-        mediaItem.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(mediaItem.S3Key, 60 * 24 * 7); // 7 days
-        mediaItem.UpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return MapToDto(mediaItem);
+        await SaveChangesAsync();
+        return media.ToDto();
     }
 
     public async Task<MediaDownloadUrlDto?> GetDownloadUrlAsync(Guid id, Guid companyId)
     {
-        var mediaItem = await MediaItems
-            .AsNoTracking()
-            .Where(m => m.Id == id && m.CompanyId == companyId)
-            .FirstOrDefaultAsync();
+        var media = await MediaItems.Where(m => m.Id == id && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return null;
 
-        if (mediaItem == null) return null;
-
-        var downloadUrl = await _s3Service.GeneratePresignedDownloadUrlAsync(mediaItem.S3Key);
+        var downloadUrl = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
 
         return new MediaDownloadUrlDto(
-            MediaItemId: mediaItem.Id,
+            MediaItemId: media.Id,
             DownloadUrl: downloadUrl,
             ExpiresAt: DateTime.UtcNow.AddMinutes(60)
         );
@@ -146,17 +121,13 @@ public class MediaService : IMediaService
 
     public async Task<MediaDownloadUrlDto?> GetThumbnailUrlAsync(Guid id, Guid companyId)
     {
-        var mediaItem = await MediaItems
-            .AsNoTracking()
-            .Where(m => m.Id == id && m.CompanyId == companyId)
-            .FirstOrDefaultAsync();
+        var media = await MediaItems.Where(m => m.Id == id && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media?.ThumbnailS3Key == null) return null;
 
-        if (mediaItem == null || string.IsNullOrEmpty(mediaItem.ThumbnailS3Key)) return null;
-
-        var downloadUrl = await _s3Service.GeneratePresignedDownloadUrlAsync(mediaItem.ThumbnailS3Key);
+        var downloadUrl = await _s3Service.GeneratePresignedDownloadUrlAsync(media.ThumbnailS3Key);
 
         return new MediaDownloadUrlDto(
-            MediaItemId: mediaItem.Id,
+            MediaItemId: media.Id,
             DownloadUrl: downloadUrl,
             ExpiresAt: DateTime.UtcNow.AddMinutes(60)
         );
@@ -164,84 +135,67 @@ public class MediaService : IMediaService
 
     public async Task<MediaItemDto?> UpdateAsync(Guid id, string? title, string? description, string? tags, int? sortOrder, Guid companyId)
     {
-        var mediaItem = await MediaItems
-            .Where(m => m.Id == id && m.CompanyId == companyId)
-            .FirstOrDefaultAsync();
+        var media = await MediaItems.Where(m => m.Id == id && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return null;
 
-        if (mediaItem == null) return null;
+        if (title != null) media.Title = title;
+        if (description != null) media.Description = description;
+        if (tags != null) media.Tags = tags;
+        if (sortOrder.HasValue) media.SortOrder = sortOrder.Value;
 
-        if (title != null) mediaItem.Title = title;
-        if (description != null) mediaItem.Description = description;
-        if (tags != null) mediaItem.Tags = tags;
-        if (sortOrder.HasValue) mediaItem.SortOrder = sortOrder.Value;
+        media.UpdatedAt = DateTime.UtcNow;
 
-        mediaItem.UpdatedAt = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-
-        return MapToDto(mediaItem);
+        await SaveChangesAsync();
+        return media.ToDto();
     }
 
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
-        var mediaItem = await MediaItems
-            .Where(m => m.Id == id && m.CompanyId == companyId)
-            .FirstOrDefaultAsync();
+        var media = await MediaItems.Where(m => m.Id == id && m.CompanyId == companyId).FirstOrDefaultAsync();
+        if (media == null) return false;
 
-        if (mediaItem == null) return false;
+        await _s3Service.DeleteObjectAsync(media.S3Key);
+        if (media.ThumbnailS3Key != null)
+            await _s3Service.DeleteObjectAsync(media.ThumbnailS3Key);
 
-        // Delete from S3
-        await _s3Service.DeleteObjectAsync(mediaItem.S3Key);
-        if (!string.IsNullOrEmpty(mediaItem.ThumbnailS3Key))
-        {
-            await _s3Service.DeleteObjectAsync(mediaItem.ThumbnailS3Key);
-        }
-
-        // Delete from database
-        MediaItems.Remove(mediaItem);
-        await _context.SaveChangesAsync();
-
+        MediaItems.Remove(media);
+        await SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> DeleteBySessionAsync(Guid sessionId, Guid companyId)
     {
-        var mediaItems = await MediaItems
-            .Where(m => m.SessionId == sessionId && m.CompanyId == companyId)
-            .ToListAsync();
+        var items = await MediaItems.Where(m => m.SessionId == sessionId && m.CompanyId == companyId).ToListAsync();
 
-        foreach (var item in mediaItems)
+        foreach (var media in items)
         {
-            await _s3Service.DeleteObjectAsync(item.S3Key);
-            if (!string.IsNullOrEmpty(item.ThumbnailS3Key))
-            {
-                await _s3Service.DeleteObjectAsync(item.ThumbnailS3Key);
-            }
+            await _s3Service.DeleteObjectAsync(media.S3Key);
+            if (media.ThumbnailS3Key != null)
+                await _s3Service.DeleteObjectAsync(media.ThumbnailS3Key);
         }
 
-        MediaItems.RemoveRange(mediaItems);
-        await _context.SaveChangesAsync();
-
+        MediaItems.RemoveRange(items);
+        await SaveChangesAsync();
         return true;
     }
+}
 
-    private static MediaItemDto MapToDto(MediaItem media)
-    {
-        return new MediaItemDto(
-            Id: media.Id,
-            FileName: media.FileName,
-            OriginalFileName: media.OriginalFileName,
-            ContentType: media.ContentType,
-            FileSize: media.FileSize,
-            S3Key: media.S3Key,
-            S3Url: media.S3Url,
-            MediaType: media.MediaType,
-            Category: media.Category,
-            Title: media.Title,
-            Description: media.Description,
-            ThumbnailS3Key: media.ThumbnailS3Key,
-            SortOrder: media.SortOrder,
-            CreatedAt: media.CreatedAt
-        );
-    }
+file static class MediaMappingExtensions
+{
+    public static MediaItemDto ToDto(this MediaItem m) => new(
+        Id: m.Id,
+        FileName: m.FileName,
+        OriginalFileName: m.OriginalFileName,
+        ContentType: m.ContentType,
+        FileSize: m.FileSize,
+        S3Key: m.S3Key,
+        S3Url: m.S3Url,
+        MediaType: m.MediaType,
+        Category: m.Category,
+        Title: m.Title,
+        Description: m.Description,
+        ThumbnailS3Key: m.ThumbnailS3Key,
+        SortOrder: m.SortOrder,
+        CreatedAt: m.CreatedAt
+    );
 }

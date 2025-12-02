@@ -9,7 +9,7 @@
                 "watch",
                 "run",
                 "--project",
-                "src/Gixat.API/Gixat.API.csproj"
+                "src/Gixat.Web/Gixat.Web.csproj"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

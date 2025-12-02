@@ -3,20 +3,16 @@ using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
-public class CustomerRequestService : ICustomerRequestService
+public class CustomerRequestService : BaseService, ICustomerRequestService
 {
-    private readonly DbContext _context;
+    public CustomerRequestService(DbContext context) : base(context) { }
 
-    public CustomerRequestService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<CustomerRequest> CustomerRequests => _context.Set<CustomerRequest>();
-    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+    private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
+    private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
 
     public async Task<CustomerRequestDto?> GetByIdAsync(Guid id, Guid companyId)
     {
@@ -26,7 +22,7 @@ public class CustomerRequestService : ICustomerRequestService
             .Where(r => r.Id == id && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return request == null ? null : MapToDto(request);
+        return request?.ToDto();
     }
 
     public async Task<CustomerRequestDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
@@ -37,7 +33,7 @@ public class CustomerRequestService : ICustomerRequestService
             .Where(r => r.SessionId == sessionId && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return request == null ? null : MapToDto(request);
+        return request?.ToDto();
     }
 
     public async Task<CustomerRequestDto> CreateAsync(CreateCustomerRequestDto dto, Guid companyId)
@@ -56,12 +52,12 @@ public class CustomerRequestService : ICustomerRequestService
         };
 
         CustomerRequests.Add(request);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
 
         // Update session status
         await UpdateSessionStatus(dto.SessionId, SessionStatus.CustomerRequest);
 
-        return MapToDto(request);
+        return request.ToDto();
     }
 
     public async Task<CustomerRequestDto?> UpdateAsync(Guid id, UpdateCustomerRequestDto dto, Guid companyId)
@@ -83,8 +79,8 @@ public class CustomerRequestService : ICustomerRequestService
 
         request.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
-        return MapToDto(request);
+        await SaveChangesAsync();
+        return request.ToDto();
     }
 
     public async Task<bool> CompleteAsync(Guid id, Guid completedById, Guid companyId)
@@ -100,7 +96,7 @@ public class CustomerRequestService : ICustomerRequestService
         request.CompletedById = completedById;
         request.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -113,7 +109,7 @@ public class CustomerRequestService : ICustomerRequestService
         if (request == null) return false;
 
         CustomerRequests.Remove(request);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -124,40 +120,42 @@ public class CustomerRequestService : ICustomerRequestService
         {
             session.Status = status;
             session.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync();
         }
     }
+}
 
-    private static CustomerRequestDto MapToDto(CustomerRequest request)
-    {
-        return new CustomerRequestDto(
-            Id: request.Id,
-            SessionId: request.SessionId,
-            Title: request.Title,
-            Description: request.Description,
-            Status: request.Status,
-            CustomerConcerns: request.CustomerConcerns,
-            RequestedServices: request.RequestedServices,
-            Priority: request.Priority,
-            Notes: request.Notes,
-            CompletedAt: request.CompletedAt,
-            MediaItems: request.MediaItems?.Select(m => new MediaItemDto(
-                Id: m.Id,
-                FileName: m.FileName,
-                OriginalFileName: m.OriginalFileName,
-                ContentType: m.ContentType,
-                FileSize: m.FileSize,
-                S3Key: m.S3Key,
-                S3Url: m.S3Url,
-                MediaType: m.MediaType,
-                Category: m.Category,
-                Title: m.Title,
-                Description: m.Description,
-                ThumbnailS3Key: m.ThumbnailS3Key,
-                SortOrder: m.SortOrder,
-                CreatedAt: m.CreatedAt
-            )) ?? Enumerable.Empty<MediaItemDto>(),
-            CreatedAt: request.CreatedAt
-        );
-    }
+file static class CustomerRequestMappingExtensions
+{
+    public static CustomerRequestDto ToDto(this CustomerRequest request) => new(
+        Id: request.Id,
+        SessionId: request.SessionId,
+        Title: request.Title,
+        Description: request.Description,
+        Status: request.Status,
+        CustomerConcerns: request.CustomerConcerns,
+        RequestedServices: request.RequestedServices,
+        Priority: request.Priority,
+        Notes: request.Notes,
+        CompletedAt: request.CompletedAt,
+        MediaItems: request.MediaItems?.Select(m => m.ToDto()) ?? [],
+        CreatedAt: request.CreatedAt
+    );
+
+    public static MediaItemDto ToDto(this MediaItem m) => new(
+        Id: m.Id,
+        FileName: m.FileName,
+        OriginalFileName: m.OriginalFileName,
+        ContentType: m.ContentType,
+        FileSize: m.FileSize,
+        S3Key: m.S3Key,
+        S3Url: m.S3Url,
+        MediaType: m.MediaType,
+        Category: m.Category,
+        Title: m.Title,
+        Description: m.Description,
+        ThumbnailS3Key: m.ThumbnailS3Key,
+        SortOrder: m.SortOrder,
+        CreatedAt: m.CreatedAt
+    );
 }

@@ -3,20 +3,16 @@ using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
-public class TestDriveService : ITestDriveService
+public class TestDriveService : BaseService, ITestDriveService
 {
-    private readonly DbContext _context;
+    public TestDriveService(DbContext context) : base(context) { }
 
-    public TestDriveService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<TestDrive> TestDrives => _context.Set<TestDrive>();
-    private DbSet<GarageSession> GarageSessions => _context.Set<GarageSession>();
+    private DbSet<TestDrive> TestDrives => Set<TestDrive>();
+    private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
 
     public async Task<TestDriveDto?> GetByIdAsync(Guid id, Guid companyId)
     {
@@ -26,7 +22,7 @@ public class TestDriveService : ITestDriveService
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return testDrive == null ? null : MapToDto(testDrive);
+        return testDrive?.ToDto();
     }
 
     public async Task<TestDriveDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
@@ -37,7 +33,7 @@ public class TestDriveService : ITestDriveService
             .Where(t => t.SessionId == sessionId && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return testDrive == null ? null : MapToDto(testDrive);
+        return testDrive?.ToDto();
     }
 
     public async Task<TestDriveDto> CreateAsync(CreateTestDriveDto dto, Guid companyId)
@@ -54,12 +50,11 @@ public class TestDriveService : ITestDriveService
         };
 
         TestDrives.Add(testDrive);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
 
-        // Update session status
         await UpdateSessionStatus(dto.SessionId, SessionStatus.TestDrive);
 
-        return MapToDto(testDrive);
+        return testDrive.ToDto();
     }
 
     public async Task<TestDriveDto?> UpdateAsync(Guid id, UpdateTestDriveDto dto, Guid companyId)
@@ -94,8 +89,8 @@ public class TestDriveService : ITestDriveService
 
         testDrive.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
-        return MapToDto(testDrive);
+        await SaveChangesAsync();
+        return testDrive.ToDto();
     }
 
     public async Task<bool> StartTestDriveAsync(Guid id, Guid driverId, int? mileageStart, Guid companyId)
@@ -112,7 +107,7 @@ public class TestDriveService : ITestDriveService
         if (mileageStart.HasValue) testDrive.MileageStart = mileageStart.Value;
         testDrive.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -129,7 +124,7 @@ public class TestDriveService : ITestDriveService
         if (mileageEnd.HasValue) testDrive.MileageEnd = mileageEnd.Value;
         testDrive.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -142,7 +137,7 @@ public class TestDriveService : ITestDriveService
         if (testDrive == null) return false;
 
         TestDrives.Remove(testDrive);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -153,53 +148,53 @@ public class TestDriveService : ITestDriveService
         {
             session.Status = status;
             session.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await SaveChangesAsync();
         }
     }
+}
 
-    private static TestDriveDto MapToDto(TestDrive testDrive)
-    {
-        return new TestDriveDto(
-            Id: testDrive.Id,
-            SessionId: testDrive.SessionId,
-            Title: testDrive.Title,
-            Description: testDrive.Description,
-            Status: testDrive.Status,
-            DriverId: testDrive.DriverId,
-            StartedAt: testDrive.StartedAt,
-            CompletedAt: testDrive.CompletedAt,
-            MileageStart: testDrive.MileageStart,
-            MileageEnd: testDrive.MileageEnd,
-            RouteDescription: testDrive.RouteDescription,
-            EnginePerformance: testDrive.EnginePerformance,
-            TransmissionPerformance: testDrive.TransmissionPerformance,
-            BrakePerformance: testDrive.BrakePerformance,
-            SteeringPerformance: testDrive.SteeringPerformance,
-            SuspensionPerformance: testDrive.SuspensionPerformance,
-            NoiseObservations: testDrive.NoiseObservations,
-            VibrationObservations: testDrive.VibrationObservations,
-            ElectricalObservations: testDrive.ElectricalObservations,
-            AcPerformance: testDrive.AcPerformance,
-            Findings: testDrive.Findings,
-            Recommendations: testDrive.Recommendations,
-            OverallPriority: testDrive.OverallPriority,
-            MediaItems: testDrive.MediaItems?.Select(m => new MediaItemDto(
-                Id: m.Id,
-                FileName: m.FileName,
-                OriginalFileName: m.OriginalFileName,
-                ContentType: m.ContentType,
-                FileSize: m.FileSize,
-                S3Key: m.S3Key,
-                S3Url: m.S3Url,
-                MediaType: m.MediaType,
-                Category: m.Category,
-                Title: m.Title,
-                Description: m.Description,
-                ThumbnailS3Key: m.ThumbnailS3Key,
-                SortOrder: m.SortOrder,
-                CreatedAt: m.CreatedAt
-            )) ?? Enumerable.Empty<MediaItemDto>(),
-            CreatedAt: testDrive.CreatedAt
-        );
-    }
+file static class TestDriveMappingExtensions
+{
+    public static TestDriveDto ToDto(this TestDrive t) => new(
+        Id: t.Id,
+        SessionId: t.SessionId,
+        Title: t.Title,
+        Description: t.Description,
+        Status: t.Status,
+        DriverId: t.DriverId,
+        StartedAt: t.StartedAt,
+        CompletedAt: t.CompletedAt,
+        MileageStart: t.MileageStart,
+        MileageEnd: t.MileageEnd,
+        RouteDescription: t.RouteDescription,
+        EnginePerformance: t.EnginePerformance,
+        TransmissionPerformance: t.TransmissionPerformance,
+        BrakePerformance: t.BrakePerformance,
+        SteeringPerformance: t.SteeringPerformance,
+        SuspensionPerformance: t.SuspensionPerformance,
+        NoiseObservations: t.NoiseObservations,
+        VibrationObservations: t.VibrationObservations,
+        ElectricalObservations: t.ElectricalObservations,
+        AcPerformance: t.AcPerformance,
+        Findings: t.Findings,
+        Recommendations: t.Recommendations,
+        OverallPriority: t.OverallPriority,
+        MediaItems: t.MediaItems?.Select(m => new MediaItemDto(
+            Id: m.Id,
+            FileName: m.FileName,
+            OriginalFileName: m.OriginalFileName,
+            ContentType: m.ContentType,
+            FileSize: m.FileSize,
+            S3Key: m.S3Key,
+            S3Url: m.S3Url,
+            MediaType: m.MediaType,
+            Category: m.Category,
+            Title: m.Title,
+            Description: m.Description,
+            ThumbnailS3Key: m.ThumbnailS3Key,
+            SortOrder: m.SortOrder,
+            CreatedAt: m.CreatedAt
+        )) ?? [],
+        CreatedAt: t.CreatedAt
+    );
 }

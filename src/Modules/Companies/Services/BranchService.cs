@@ -2,24 +2,20 @@ using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Companies.DTOs;
 using Gixat.Modules.Companies.Entities;
 using Gixat.Modules.Companies.Interfaces;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Companies.Services;
 
-public class BranchService : IBranchService
+public class BranchService : BaseService, IBranchService
 {
-    private readonly DbContext _context;
+    public BranchService(DbContext context) : base(context) { }
 
-    public BranchService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<Branch> Branches => _context.Set<Branch>();
+    private DbSet<Branch> Branches => Set<Branch>();
 
     public async Task<BranchDto?> GetByIdAsync(Guid id)
     {
         var branch = await Branches.FindAsync(id);
-        return branch == null ? null : MapToDto(branch);
+        return branch?.ToDto();
     }
 
     public async Task<IEnumerable<BranchDto>> GetByCompanyIdAsync(Guid companyId)
@@ -28,7 +24,7 @@ public class BranchService : IBranchService
             .Where(b => b.CompanyId == companyId)
             .OrderBy(b => b.Name)
             .ToListAsync();
-        return branches.Select(MapToDto);
+        return branches.Select(b => b.ToDto());
     }
 
     public async Task<BranchDto> CreateAsync(Guid companyId, CreateBranchDto dto)
@@ -50,9 +46,9 @@ public class BranchService : IBranchService
         };
 
         Branches.Add(branch);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
 
-        return MapToDto(branch);
+        return branch.ToDto();
     }
 
     public async Task<BranchDto?> UpdateAsync(Guid id, UpdateBranchDto dto)
@@ -73,8 +69,8 @@ public class BranchService : IBranchService
         branch.IsActive = dto.IsActive;
         branch.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
-        return MapToDto(branch);
+        await SaveChangesAsync();
+        return branch.ToDto();
     }
 
     public async Task<bool> DeleteAsync(Guid id)
@@ -83,7 +79,7 @@ public class BranchService : IBranchService
         if (branch == null) return false;
 
         Branches.Remove(branch);
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
 
@@ -105,29 +101,29 @@ public class BranchService : IBranchService
         branch.IsMainBranch = true;
         branch.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await SaveChangesAsync();
         return true;
     }
+}
 
-    private static BranchDto MapToDto(Branch branch)
-    {
-        return new BranchDto
-        {
-            Id = branch.Id,
-            CompanyId = branch.CompanyId,
-            Name = branch.Name,
-            Code = branch.Code,
-            Email = branch.Email,
-            Phone = branch.Phone,
-            Address = branch.Address,
-            City = branch.City,
-            State = branch.State,
-            PostalCode = branch.PostalCode,
-            OperatingHours = branch.OperatingHours,
-            ServiceBays = branch.ServiceBays,
-            IsMainBranch = branch.IsMainBranch,
-            IsActive = branch.IsActive,
-            CreatedAt = branch.CreatedAt
-        };
-    }
+// Extension method for entity to DTO mapping
+file static class BranchMappingExtensions
+{
+    public static BranchDto ToDto(this Branch branch) => new(
+        Id: branch.Id,
+        CompanyId: branch.CompanyId,
+        Name: branch.Name,
+        Code: branch.Code,
+        Phone: branch.Phone,
+        Email: branch.Email,
+        Address: branch.Address,
+        City: branch.City,
+        State: branch.State,
+        PostalCode: branch.PostalCode,
+        OperatingHours: branch.OperatingHours,
+        ServiceBays: branch.ServiceBays,
+        IsMainBranch: branch.IsMainBranch,
+        IsActive: branch.IsActive,
+        CreatedAt: branch.CreatedAt
+    );
 }

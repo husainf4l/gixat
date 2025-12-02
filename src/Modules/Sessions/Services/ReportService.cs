@@ -1,35 +1,30 @@
 using Microsoft.EntityFrameworkCore;
 using Gixat.Modules.Sessions.DTOs;
+using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Interfaces;
-using TaskStatus = Gixat.Modules.Sessions.Enums.TaskStatus;
+using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
 
-public class ReportService : IReportService
+public class ReportService : BaseService, IReportService
 {
-    private readonly DbContext _context;
+    public ReportService(DbContext context) : base(context) { }
 
-    public ReportService(DbContext context)
-    {
-        _context = context;
-    }
-
-    private DbSet<Entities.GarageSession> GarageSessions => _context.Set<Entities.GarageSession>();
-    private DbSet<Entities.CustomerRequest> CustomerRequests => _context.Set<Entities.CustomerRequest>();
-    private DbSet<Entities.Inspection> Inspections => _context.Set<Entities.Inspection>();
-    private DbSet<Entities.TestDrive> TestDrives => _context.Set<Entities.TestDrive>();
-    private DbSet<Entities.JobCard> JobCards => _context.Set<Entities.JobCard>();
+    private DbSet<GarageSession> Sessions => Set<GarageSession>();
+    private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
+    private DbSet<Inspection> Inspections => Set<Inspection>();
+    private DbSet<TestDrive> TestDrives => Set<TestDrive>();
+    private DbSet<JobCard> JobCards => Set<JobCard>();
 
     public async Task<InitialReportDto?> GenerateInitialReportAsync(Guid sessionId, Guid companyId, string generatedBy)
     {
-        var session = await GarageSessions
+        var session = await Sessions
             .AsNoTracking()
             .Where(s => s.Id == sessionId && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (session == null) return null;
 
-        // Get related data
         var customerRequest = await CustomerRequests
             .AsNoTracking()
             .Include(r => r.MediaItems)
@@ -49,8 +44,6 @@ public class ReportService : IReportService
             .Where(t => t.SessionId == sessionId)
             .FirstOrDefaultAsync();
 
-        // Note: In production, you'd fetch client/vehicle info from Clients module
-        // For now using placeholder values
         return new InitialReportDto(
             SessionId: session.Id,
             SessionNumber: session.SessionNumber,
@@ -58,22 +51,19 @@ public class ReportService : IReportService
             CheckInAt: session.CheckInAt,
             MileageIn: session.MileageIn,
             EstimatedCompletionAt: session.EstimatedCompletionAt,
-            
             ClientId: session.ClientId,
-            ClientName: "Client Name", // Placeholder - fetch from Clients module
+            ClientName: "Client", // TODO: fetch from client
             ClientPhone: null,
             ClientEmail: null,
-            
             VehicleId: session.ClientVehicleId,
-            VehicleDisplayName: "Vehicle", // Placeholder
+            VehicleDisplayName: "Vehicle", // TODO: fetch from vehicle
             VehicleMake: null,
             VehicleModel: null,
             VehicleYear: null,
             VehicleColor: null,
             VehicleLicensePlate: null,
             VehicleVin: null,
-            
-            CustomerRequest: customerRequest == null ? null : new CustomerRequestSummaryDto(
+            CustomerRequest: customerRequest != null ? new CustomerRequestSummaryDto(
                 Id: customerRequest.Id,
                 Title: customerRequest.Title,
                 Description: customerRequest.Description,
@@ -83,14 +73,13 @@ public class ReportService : IReportService
                 Priority: customerRequest.Priority,
                 MediaCount: customerRequest.MediaItems?.Count ?? 0,
                 CreatedAt: customerRequest.CreatedAt
-            ),
-            
-            Inspection: inspection == null ? null : new InspectionSummaryDto(
+            ) : null,
+            Inspection: inspection != null ? new InspectionSummaryDto(
                 Id: inspection.Id,
                 Title: inspection.Title,
                 Status: inspection.Status,
                 InspectorId: inspection.InspectorId,
-                InspectorName: null, // Placeholder
+                InspectorName: null, // TODO: fetch from user
                 InspectionCompletedAt: inspection.InspectionCompletedAt,
                 Findings: inspection.Findings,
                 Recommendations: inspection.Recommendations,
@@ -99,14 +88,13 @@ public class ReportService : IReportService
                 ItemsRequiringAttention: inspection.Items?.Count(i => i.RequiresAttention) ?? 0,
                 MediaCount: inspection.MediaItems?.Count ?? 0,
                 CreatedAt: inspection.CreatedAt
-            ),
-            
-            TestDrive: testDrive == null ? null : new TestDriveSummaryDto(
+            ) : null,
+            TestDrive: testDrive != null ? new TestDriveSummaryDto(
                 Id: testDrive.Id,
                 Title: testDrive.Title,
                 Status: testDrive.Status,
                 DriverId: testDrive.DriverId,
-                DriverName: null, // Placeholder
+                DriverName: null, // TODO: fetch from user
                 CompletedAt: testDrive.CompletedAt,
                 MileageStart: testDrive.MileageStart,
                 MileageEnd: testDrive.MileageEnd,
@@ -115,8 +103,7 @@ public class ReportService : IReportService
                 OverallPriority: testDrive.OverallPriority,
                 MediaCount: testDrive.MediaItems?.Count ?? 0,
                 CreatedAt: testDrive.CreatedAt
-            ),
-            
+            ) : null,
             GeneratedAt: DateTime.UtcNow,
             GeneratedBy: generatedBy
         );
@@ -124,14 +111,13 @@ public class ReportService : IReportService
 
     public async Task<FinalReportDto?> GenerateFinalReportAsync(Guid sessionId, Guid companyId, string generatedBy)
     {
-        var session = await GarageSessions
+        var session = await Sessions
             .AsNoTracking()
             .Where(s => s.Id == sessionId && s.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
         if (session == null) return null;
 
-        // Get all related data
         var customerRequest = await CustomerRequests
             .AsNoTracking()
             .Include(r => r.MediaItems)
@@ -166,22 +152,19 @@ public class ReportService : IReportService
             CheckOutAt: session.CheckOutAt,
             MileageIn: session.MileageIn,
             MileageOut: session.MileageOut,
-            
             ClientId: session.ClientId,
-            ClientName: "Client Name", // Placeholder
+            ClientName: "Client", // TODO: fetch from client
             ClientPhone: null,
             ClientEmail: null,
-            
             VehicleId: session.ClientVehicleId,
-            VehicleDisplayName: "Vehicle", // Placeholder
+            VehicleDisplayName: "Vehicle", // TODO: fetch from vehicle
             VehicleMake: null,
             VehicleModel: null,
             VehicleYear: null,
             VehicleColor: null,
             VehicleLicensePlate: null,
             VehicleVin: null,
-            
-            CustomerRequest: customerRequest == null ? null : new CustomerRequestSummaryDto(
+            CustomerRequest: customerRequest != null ? new CustomerRequestSummaryDto(
                 Id: customerRequest.Id,
                 Title: customerRequest.Title,
                 Description: customerRequest.Description,
@@ -191,9 +174,8 @@ public class ReportService : IReportService
                 Priority: customerRequest.Priority,
                 MediaCount: customerRequest.MediaItems?.Count ?? 0,
                 CreatedAt: customerRequest.CreatedAt
-            ),
-            
-            Inspection: inspection == null ? null : new InspectionSummaryDto(
+            ) : null,
+            Inspection: inspection != null ? new InspectionSummaryDto(
                 Id: inspection.Id,
                 Title: inspection.Title,
                 Status: inspection.Status,
@@ -207,9 +189,8 @@ public class ReportService : IReportService
                 ItemsRequiringAttention: inspection.Items?.Count(i => i.RequiresAttention) ?? 0,
                 MediaCount: inspection.MediaItems?.Count ?? 0,
                 CreatedAt: inspection.CreatedAt
-            ),
-            
-            TestDrive: testDrive == null ? null : new TestDriveSummaryDto(
+            ) : null,
+            TestDrive: testDrive != null ? new TestDriveSummaryDto(
                 Id: testDrive.Id,
                 Title: testDrive.Title,
                 Status: testDrive.Status,
@@ -223,9 +204,8 @@ public class ReportService : IReportService
                 OverallPriority: testDrive.OverallPriority,
                 MediaCount: testDrive.MediaItems?.Count ?? 0,
                 CreatedAt: testDrive.CreatedAt
-            ),
-            
-            JobCard: jobCard == null ? null : new JobCardSummaryDto(
+            ) : null,
+            JobCard: jobCard != null ? new JobCardSummaryDto(
                 Id: jobCard.Id,
                 JobCardNumber: jobCard.JobCardNumber,
                 Title: jobCard.Title,
@@ -248,13 +228,12 @@ public class ReportService : IReportService
                     EstimatedHours: i.EstimatedHours,
                     ActualHours: i.ActualHours,
                     QualityChecked: i.QualityChecked
-                )) ?? Enumerable.Empty<JobCardItemSummaryDto>(),
+                )) ?? [],
                 TotalItems: jobCard.Items?.Count ?? 0,
-                CompletedItems: jobCard.Items?.Count(i => i.Status == TaskStatus.Completed) ?? 0,
+                CompletedItems: jobCard.Items?.Count(i => i.Status == Enums.TaskStatus.Completed) ?? 0,
                 MediaCount: jobCard.MediaItems?.Count ?? 0,
                 CreatedAt: jobCard.CreatedAt
-            ),
-            
+            ) : null,
             GeneratedAt: DateTime.UtcNow,
             GeneratedBy: generatedBy
         );
