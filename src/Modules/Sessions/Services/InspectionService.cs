@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,7 +10,12 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class InspectionService : BaseService, IInspectionService
 {
-    public InspectionService(DbContext context) : base(context) { }
+    private readonly ILogger<InspectionService> _logger;
+
+    public InspectionService(DbContext context, ILogger<InspectionService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<Inspection> Inspections => Set<Inspection>();
     private DbSet<InspectionItem> InspectionItems => Set<InspectionItem>();
@@ -41,6 +47,7 @@ public class InspectionService : BaseService, IInspectionService
 
     public async Task<InspectionDto> CreateAsync(CreateInspectionDto dto, Guid companyId)
     {
+        _logger.LogInformation("Creating inspection for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
         var inspection = new Inspection
         {
             SessionId = dto.SessionId,
@@ -53,6 +60,7 @@ public class InspectionService : BaseService, IInspectionService
 
         Inspections.Add(inspection);
         await SaveChangesAsync();
+        _logger.LogInformation("Created inspection {InspectionId}", inspection.Id);
 
         await UpdateSessionStatus(dto.SessionId, SessionStatus.Inspection);
 

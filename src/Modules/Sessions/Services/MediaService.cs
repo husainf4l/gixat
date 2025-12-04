@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -10,10 +11,12 @@ namespace Gixat.Modules.Sessions.Services;
 public class MediaService : BaseService, IMediaService
 {
     private readonly IAwsS3Service _s3Service;
+    private readonly ILogger<MediaService> _logger;
 
-    public MediaService(DbContext context, IAwsS3Service s3Service) : base(context)
+    public MediaService(DbContext context, IAwsS3Service s3Service, ILogger<MediaService> logger) : base(context)
     {
         _s3Service = s3Service;
+        _logger = logger;
     }
 
     private DbSet<MediaItem> MediaItems => Set<MediaItem>();
@@ -53,6 +56,7 @@ public class MediaService : BaseService, IMediaService
 
     public async Task<MediaUploadUrlDto> CreateUploadUrlAsync(CreateMediaItemDto dto, Guid companyId)
     {
+        _logger.LogInformation("Creating upload URL for session {SessionId}, file {FileName}", dto.SessionId, dto.OriginalFileName);
         var s3Key = _s3Service.GenerateS3Key(companyId, dto.SessionId, dto.Category, dto.OriginalFileName);
         var uploadUrl = await _s3Service.GeneratePresignedUploadUrlAsync(s3Key, dto.ContentType);
 

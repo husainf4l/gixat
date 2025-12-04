@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Users.Entities;
 using Gixat.Modules.Users.Interfaces;
 using Gixat.Shared.Services;
@@ -7,7 +8,12 @@ namespace Gixat.Modules.Users.Services;
 
 public class CompanyUserService : BaseService, ICompanyUserService
 {
-    public CompanyUserService(DbContext context) : base(context) { }
+    private readonly ILogger<CompanyUserService> _logger;
+
+    public CompanyUserService(DbContext context, ILogger<CompanyUserService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<CompanyUser> CompanyUsers => Set<CompanyUser>();
 
@@ -25,8 +31,10 @@ public class CompanyUserService : BaseService, ICompanyUserService
 
     public async Task<CompanyUser> CreateCompanyUserAsync(CompanyUser companyUser)
     {
+        _logger.LogInformation("Creating company user for company {CompanyId}, auth user {AuthUserId}", companyUser.CompanyId, companyUser.AuthUserId);
         CompanyUsers.Add(companyUser);
         await SaveChangesAsync();
+        _logger.LogInformation("Created company user {CompanyUserId}", companyUser.Id);
         return companyUser;
     }
 

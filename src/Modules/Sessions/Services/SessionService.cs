@@ -5,6 +5,7 @@ using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
 using Gixat.Modules.Clients.Entities;
+using Gixat.Shared.Pagination;
 using Gixat.Shared.Services;
 
 namespace Gixat.Modules.Sessions.Services;
@@ -26,81 +27,132 @@ public class SessionService : BaseService, ISessionService
     private DbSet<Client> Clients => Set<Client>();
     private DbSet<ClientVehicle> ClientVehicles => Set<ClientVehicle>();
 
+    // Projects a pre-filtered session query to DTOs with LEFT JOINs
+    private IQueryable<SessionDto> ProjectSessionsToDto(IQueryable<GarageSession> sessions)
+    {
+        return from s in sessions
+               join c in Clients on s.ClientId equals c.Id into clientJoin
+               from client in clientJoin.DefaultIfEmpty()
+               join v in ClientVehicles on s.ClientVehicleId equals v.Id into vehicleJoin
+               from vehicle in vehicleJoin.DefaultIfEmpty()
+               select new SessionDto(
+                   s.Id,
+                   s.SessionNumber,
+                   s.Status,
+                   s.CompanyId,
+                   s.BranchId,
+                   s.ClientId,
+                   client != null ? client.FirstName + " " + client.LastName : "Unknown Client",
+                   s.ClientVehicleId,
+                   vehicle != null 
+                       ? (vehicle.Year != null ? vehicle.Year.ToString() + " " : "") + vehicle.Make + " " + vehicle.Model
+                       : "Unknown Vehicle",
+                   vehicle != null ? vehicle.LicensePlate : null,
+                   s.MileageIn,
+                   s.MileageOut,
+                   s.CheckInAt,
+                   s.CheckOutAt,
+                   s.EstimatedCompletionAt,
+                   s.ServiceAdvisorId,
+                   s.TechnicianId,
+                   s.Notes,
+                   CustomerRequests.Any(r => r.SessionId == s.Id),
+                   Inspections.Any(i => i.SessionId == s.Id),
+                   TestDrives.Any(t => t.SessionId == s.Id),
+                   JobCards.Any(j => j.SessionId == s.Id),
+                   s.CreatedAt
+               );
+    }
+
+    // Base session query for a company - filter this BEFORE calling ProjectSessionsToDto
+    private IQueryable<GarageSession> GetBaseQuery(Guid companyId)
+    {
+        return GarageSessions.AsNoTracking().Where(s => s.CompanyId == companyId);
+    }
+
+    // Convenience method when no pre-filtering is needed
+    private IQueryable<SessionDto> GetSessionQuery(Guid companyId)
+    {
+        return ProjectSessionsToDto(GetBaseQuery(companyId));
+    }
+
     public async Task<SessionDto?> GetByIdAsync(Guid id, Guid companyId)
     {
         _logger.LogDebug("Getting session {SessionId} for company {CompanyId}", id, companyId);
         
-        var session = await GarageSessions
-            .AsNoTracking()
-            .Where(s => s.Id == id && s.CompanyId == companyId)
-            .FirstOrDefaultAsync();
-
-        return session == null ? null : await MapToDto(session);
+        return await GetSessionQuery(companyId)
+            .FirstOrDefaultAsync(s => s.Id == id);
     }
 
     public async Task<SessionDto?> GetBySessionNumberAsync(string sessionNumber, Guid companyId)
     {
-        var session = await GarageSessions
-            .AsNoTracking()
-            .Where(s => s.SessionNumber == sessionNumber && s.CompanyId == companyId)
-            .FirstOrDefaultAsync();
-
-        return session == null ? null : await MapToDto(session);
+        return await GetSessionQuery(companyId)
+            .FirstOrDefaultAsync(s => s.SessionNumber == sessionNumber);
     }
 
     public async Task<IEnumerable<SessionDto>> GetAllAsync(Guid companyId, SessionStatus? status = null)
     {
         _logger.LogDebug("Getting all sessions for company {CompanyId}, status filter: {Status}", companyId, status);
         
-        var query = GarageSessions
-            .AsNoTracking()
-            .Where(s => s.CompanyId == companyId);
+        var baseQuery = GetBaseQuery(companyId);
 
         if (status.HasValue)
-            query = query.Where(s => s.Status == status.Value);
+            baseQuery = baseQuery.Where(s => s.Status == status.Value);
 
-        var sessions = await query
-            .OrderByDescending(s => s.CheckInAt)
-            .ToListAsync();
+        // Apply ordering on entity level before projection
+        baseQuery = baseQuery.OrderByDescending(s => s.CheckInAt);
 
-        var results = new List<SessionDto>();
-        foreach (var session in sessions)
+        return await ProjectSessionsToDto(baseQuery).ToListAsync();
+    }
+
+    public async Task<PagedResponse<SessionDto>> GetAllPagedAsync(Guid companyId, PagedRequest request, SessionStatus? status = null)
+    {
+        _logger.LogDebug("Getting paginated sessions for company {CompanyId}, page {Page}, pageSize {PageSize}, status: {Status}", 
+            companyId, request.Page, request.PageSize, status);
+        
+        var baseQuery = GetBaseQuery(companyId);
+
+        if (status.HasValue)
+            baseQuery = baseQuery.Where(s => s.Status == status.Value);
+
+        // Apply search filter on entity level
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            results.Add(await MapToDto(session));
+            var searchTerm = request.SearchTerm.ToLower();
+            baseQuery = baseQuery.Where(s => s.SessionNumber.ToLower().Contains(searchTerm) ||
+                (s.Notes != null && s.Notes.ToLower().Contains(searchTerm)));
         }
-        return results;
+
+        var totalCount = await baseQuery.CountAsync();
+
+        // Apply sorting and pagination on entity level
+        baseQuery = request.SortDescending
+            ? baseQuery.OrderByDescending(s => s.CheckInAt)
+            : baseQuery.OrderBy(s => s.CheckInAt);
+
+        baseQuery = baseQuery.Skip(request.Skip).Take(request.PageSize);
+
+        var items = await ProjectSessionsToDto(baseQuery).ToListAsync();
+
+        return PagedResponse<SessionDto>.Create(items, totalCount, request.Page, request.PageSize);
     }
 
     public async Task<IEnumerable<SessionDto>> GetByClientAsync(Guid clientId, Guid companyId)
     {
-        var sessions = await GarageSessions
-            .AsNoTracking()
-            .Where(s => s.ClientId == clientId && s.CompanyId == companyId)
-            .OrderByDescending(s => s.CheckInAt)
-            .ToListAsync();
+        var baseQuery = GetBaseQuery(companyId)
+            .Where(s => s.ClientId == clientId)
+            .OrderByDescending(s => s.CheckInAt);
 
-        var results = new List<SessionDto>();
-        foreach (var session in sessions)
-        {
-            results.Add(await MapToDto(session));
-        }
-        return results;
+        return await ProjectSessionsToDto(baseQuery).ToListAsync();
     }
 
     public async Task<IEnumerable<SessionDto>> GetByVehicleAsync(Guid vehicleId, Guid companyId)
     {
-        var sessions = await GarageSessions
-            .AsNoTracking()
-            .Where(s => s.ClientVehicleId == vehicleId && s.CompanyId == companyId)
-            .OrderByDescending(s => s.CheckInAt)
-            .ToListAsync();
+        var baseQuery = GetBaseQuery(companyId)
+            .Where(s => s.ClientVehicleId == vehicleId)
+            .OrderByDescending(s => s.CheckInAt);
 
-        var results = new List<SessionDto>();
-        foreach (var session in sessions)
-        {
-            results.Add(await MapToDto(session));
-        }
-        return results;
+        return await ProjectSessionsToDto(baseQuery).ToListAsync();
     }
 
     public async Task<IEnumerable<SessionDto>> GetActiveSessionsAsync(Guid companyId)
@@ -117,18 +169,11 @@ public class SessionService : BaseService, ISessionService
             SessionStatus.ReadyForPickup
         };
 
-        var sessions = await GarageSessions
-            .AsNoTracking()
-            .Where(s => s.CompanyId == companyId && activeStatuses.Contains(s.Status))
-            .OrderByDescending(s => s.CheckInAt)
-            .ToListAsync();
+        var baseQuery = GetBaseQuery(companyId)
+            .Where(s => activeStatuses.Contains(s.Status))
+            .OrderByDescending(s => s.CheckInAt);
 
-        var results = new List<SessionDto>();
-        foreach (var session in sessions)
-        {
-            results.Add(await MapToDto(session));
-        }
-        return results;
+        return await ProjectSessionsToDto(baseQuery).ToListAsync();
     }
 
     public async Task<SessionDto> CreateAsync(CreateSessionDto dto)
@@ -268,25 +313,58 @@ public class SessionService : BaseService, ISessionService
     {
         var term = searchTerm.ToLower();
 
-        var sessions = await GarageSessions
-            .AsNoTracking()
-            .Where(s => s.CompanyId == companyId &&
-                (s.SessionNumber.ToLower().Contains(term) ||
-                 (s.Notes != null && s.Notes.ToLower().Contains(term))))
+        return await GetSessionQuery(companyId)
+            .Where(s => s.SessionNumber.ToLower().Contains(term) ||
+                 (s.Notes != null && s.Notes.ToLower().Contains(term)))
             .OrderByDescending(s => s.CheckInAt)
             .Take(50)
             .ToListAsync();
+    }
 
-        var results = new List<SessionDto>();
-        foreach (var session in sessions)
+    public async Task<SessionStatsDto> GetSessionStatsAsync(Guid companyId)
+    {
+        var today = DateTime.UtcNow.Date;
+        var activeStatuses = new[]
         {
-            results.Add(await MapToDto(session));
-        }
-        return results;
+            SessionStatus.CheckedIn,
+            SessionStatus.CustomerRequest,
+            SessionStatus.Inspection,
+            SessionStatus.TestDrive,
+            SessionStatus.AwaitingApproval,
+            SessionStatus.InProgress,
+            SessionStatus.Completed,
+            SessionStatus.ReadyForPickup
+        };
+
+        var stats = await GarageSessions
+            .Where(s => s.CompanyId == companyId)
+            .GroupBy(s => 1)
+            .Select(g => new SessionStatsDto
+            {
+                ActiveSessions = g.Count(s => activeStatuses.Contains(s.Status)),
+                TodaySessions = g.Count(s => s.CheckInAt.Date == today),
+                InProgressSessions = g.Count(s => s.Status == SessionStatus.InProgress),
+                AwaitingPickup = g.Count(s => s.Status == SessionStatus.ReadyForPickup)
+            })
+            .FirstOrDefaultAsync();
+
+        return stats ?? new SessionStatsDto();
+    }
+
+    public async Task<IEnumerable<SessionDto>> GetRecentSessionsAsync(Guid companyId, int count)
+    {
+        var baseQuery = GetBaseQuery(companyId)
+            .OrderByDescending(s => s.CheckInAt)
+            .Take(count);
+
+        return await ProjectSessionsToDto(baseQuery).ToListAsync();
     }
 
     private async Task<SessionDto> MapToDto(GarageSession session)
     {
+        // This method is now only used for Create/Update where we have the entity in memory
+        // and want to return a DTO. For bulk reads, use GetSessionQuery projection.
+        
         // Check for related entities
         var hasCustomerRequest = await CustomerRequests.AnyAsync(r => r.SessionId == session.Id);
         var hasInspection = await Inspections.AnyAsync(i => i.SessionId == session.Id);

@@ -8,9 +8,14 @@
 <!-- Navbar -->
 <nav class="bg-apple-dark sticky top-0 z-50 px-4 py-3">
     <div class="flex items-center justify-between max-w-full">
-        <a class="flex items-center text-white font-semibold text-xl no-underline" href="/Dashboard">
-            <i class="bi bi-gear-wide-connected mr-2"></i>Gixat
-        </a>
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-btn" class="lg:hidden text-white/80 hover:text-white">
+                <i class="bi bi-list text-2xl"></i>
+            </button>
+            <a class="flex items-center text-white font-semibold text-xl no-underline" href="/Dashboard">
+                <i class="bi bi-gear-wide-connected mr-2"></i>Gixat
+            </a>
+        </div>
         <div class="flex items-center gap-4">
             <span class="text-white/80 hover:text-white cursor-pointer">
                 <i class="bi bi-bell text-lg"></i>
@@ -25,6 +30,83 @@
         </div>
     </div>
 </nav>
+
+<!-- Mobile Sidebar Overlay -->
+<div id="mobile-backdrop" class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 opacity-0 pointer-events-none lg:hidden"></div>
+
+<!-- Mobile Sidebar -->
+<aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white z-50 transform -translate-x-full transition-transform duration-300 lg:hidden shadow-xl">
+    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+        <span class="font-semibold text-lg text-apple-dark">Menu</span>
+        <button id="close-mobile-menu" class="text-gray-500 hover:text-gray-700">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    <div class="overflow-y-auto h-full py-4">
+        <ul class="space-y-1 px-3">
+            <li>
+                <a href="/Dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath == "/dashboard" ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
+                    <i class="bi bi-grid-1x2 text-lg w-6 text-center"></i>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="/Sessions" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath.StartsWith("/sessions") ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
+                    <i class="bi bi-clipboard-check text-lg w-6 text-center"></i>
+                    Sessions
+                </a>
+            </li>
+            <li>
+                <a href="/Clients" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath.StartsWith("/clients") ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
+                    <i class="bi bi-people text-lg w-6 text-center"></i>
+                    Clients
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-car-front text-lg w-6 text-center"></i>
+                    Vehicles
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-wrench text-lg w-6 text-center"></i>
+                    Services
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-calendar-check text-lg w-6 text-center"></i>
+                    Appointments
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-receipt text-lg w-6 text-center"></i>
+                    Invoices
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-box-seam text-lg w-6 text-center"></i>
+                    Inventory
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-graph-up text-lg w-6 text-center"></i>
+                    Reports
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
+                    <i class="bi bi-gear text-lg w-6 text-center"></i>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>
 
 <div class="flex min-h-[calc(100vh-56px)]">
     <!-- Sidebar -->
@@ -103,3 +185,29 @@
 </div>
 
 @RenderSection("Scripts", required: false)
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileSidebar = document.getElementById('mobile-sidebar');
+        const mobileBackdrop = document.getElementById('mobile-backdrop');
+        const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
+
+        function toggleMenu() {
+            const isHidden = mobileSidebar.classList.contains('-translate-x-full');
+            if (isHidden) {
+                // Open
+                mobileSidebar.classList.remove('-translate-x-full');
+                mobileBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                // Close
+                mobileSidebar.classList.add('-translate-x-full');
+                mobileBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleMenu);
+        if (mobileBackdrop) mobileBackdrop.addEventListener('click', toggleMenu);
+        if (closeMobileMenuBtn) closeMobileMenuBtn.addEventListener('click', toggleMenu);
+    });
+</script>

@@ -1,6 +1,7 @@
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
+using Gixat.Shared.Pagination;
 
 namespace Gixat.Modules.Sessions.Interfaces;
 
@@ -10,6 +11,7 @@ public interface ISessionService
     Task<SessionDto?> GetByIdAsync(Guid id, Guid companyId);
     Task<SessionDto?> GetBySessionNumberAsync(string sessionNumber, Guid companyId);
     Task<IEnumerable<SessionDto>> GetAllAsync(Guid companyId, SessionStatus? status = null);
+    Task<PagedResponse<SessionDto>> GetAllPagedAsync(Guid companyId, PagedRequest request, SessionStatus? status = null);
     Task<IEnumerable<SessionDto>> GetByClientAsync(Guid clientId, Guid companyId);
     Task<IEnumerable<SessionDto>> GetByVehicleAsync(Guid vehicleId, Guid companyId);
     Task<IEnumerable<SessionDto>> GetActiveSessionsAsync(Guid companyId);
@@ -24,6 +26,10 @@ public interface ISessionService
     
     // Search
     Task<IEnumerable<SessionDto>> SearchAsync(Guid companyId, string searchTerm);
+
+    // Stats
+    Task<SessionStatsDto> GetSessionStatsAsync(Guid companyId);
+    Task<IEnumerable<SessionDto>> GetRecentSessionsAsync(Guid companyId, int count);
 }
 
 public interface ICustomerRequestService

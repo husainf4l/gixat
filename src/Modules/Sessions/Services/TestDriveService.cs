@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,7 +10,12 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class TestDriveService : BaseService, ITestDriveService
 {
-    public TestDriveService(DbContext context) : base(context) { }
+    private readonly ILogger<TestDriveService> _logger;
+
+    public TestDriveService(DbContext context, ILogger<TestDriveService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<TestDrive> TestDrives => Set<TestDrive>();
     private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
@@ -38,6 +44,7 @@ public class TestDriveService : BaseService, ITestDriveService
 
     public async Task<TestDriveDto> CreateAsync(CreateTestDriveDto dto, Guid companyId)
     {
+        _logger.LogInformation("Creating test drive for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
         var testDrive = new TestDrive
         {
             SessionId = dto.SessionId,
@@ -51,6 +58,7 @@ public class TestDriveService : BaseService, ITestDriveService
 
         TestDrives.Add(testDrive);
         await SaveChangesAsync();
+        _logger.LogInformation("Created test drive {TestDriveId}", testDrive.Id);
 
         await UpdateSessionStatus(dto.SessionId, SessionStatus.TestDrive);
 

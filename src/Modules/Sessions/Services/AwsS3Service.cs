@@ -1,6 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.Enums;
 using Gixat.Modules.Sessions.Interfaces;
 
@@ -9,11 +10,13 @@ namespace Gixat.Modules.Sessions.Services;
 public class AwsS3Service : IAwsS3Service
 {
     private readonly IAmazonS3 _s3Client;
+    private readonly ILogger<AwsS3Service> _logger;
     private readonly string _bucketName;
 
-    public AwsS3Service(IAmazonS3 s3Client, IConfiguration configuration)
+    public AwsS3Service(IAmazonS3 s3Client, IConfiguration configuration, ILogger<AwsS3Service> logger)
     {
         _s3Client = s3Client;
+        _logger = logger;
         _bucketName = configuration["AWS:S3:BucketName"] ?? "gixat-media";
     }
 
@@ -48,6 +51,7 @@ public class AwsS3Service : IAwsS3Service
     {
         try
         {
+            _logger.LogDebug("Deleting S3 object: {Key}", key);
             var request = new DeleteObjectRequest
             {
                 BucketName = _bucketName,
@@ -55,10 +59,12 @@ public class AwsS3Service : IAwsS3Service
             };
 
             await _s3Client.DeleteObjectAsync(request);
+            _logger.LogInformation("Deleted S3 object: {Key}", key);
             return true;
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to delete S3 object: {Key}", key);
             return false;
         }
     }

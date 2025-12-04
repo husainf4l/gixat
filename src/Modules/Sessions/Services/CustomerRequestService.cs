@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,7 +10,12 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class CustomerRequestService : BaseService, ICustomerRequestService
 {
-    public CustomerRequestService(DbContext context) : base(context) { }
+    private readonly ILogger<CustomerRequestService> _logger;
+
+    public CustomerRequestService(DbContext context, ILogger<CustomerRequestService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
     private DbSet<GarageSession> GarageSessions => Set<GarageSession>();
@@ -38,6 +44,7 @@ public class CustomerRequestService : BaseService, ICustomerRequestService
 
     public async Task<CustomerRequestDto> CreateAsync(CreateCustomerRequestDto dto, Guid companyId)
     {
+        _logger.LogInformation("Creating customer request for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
         var request = new CustomerRequest
         {
             SessionId = dto.SessionId,
@@ -53,6 +60,7 @@ public class CustomerRequestService : BaseService, ICustomerRequestService
 
         CustomerRequests.Add(request);
         await SaveChangesAsync();
+        _logger.LogInformation("Created customer request {RequestId}", request.Id);
 
         // Update session status
         await UpdateSessionStatus(dto.SessionId, SessionStatus.CustomerRequest);

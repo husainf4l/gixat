@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Companies.DTOs;
 using Gixat.Modules.Companies.Entities;
 using Gixat.Modules.Companies.Interfaces;
@@ -8,7 +9,12 @@ namespace Gixat.Modules.Companies.Services;
 
 public class CompanyService : BaseService, ICompanyService
 {
-    public CompanyService(DbContext context) : base(context) { }
+    private readonly ILogger<CompanyService> _logger;
+
+    public CompanyService(DbContext context, ILogger<CompanyService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<Company> Companies => Set<Company>();
     private DbSet<Branch> Branches => Set<Branch>();
@@ -33,6 +39,7 @@ public class CompanyService : BaseService, ICompanyService
 
     public async Task<CompanyDto> CreateAsync(CreateCompanyDto dto, Guid ownerId)
     {
+        _logger.LogInformation("Creating company {CompanyName} for owner {OwnerId}", dto.Name, ownerId);
         var company = new Company
         {
             Name = dto.Name,
@@ -53,6 +60,7 @@ public class CompanyService : BaseService, ICompanyService
 
         Companies.Add(company);
         await SaveChangesAsync();
+        _logger.LogInformation("Created company {CompanyId}", company.Id);
 
         return company.ToDto();
     }

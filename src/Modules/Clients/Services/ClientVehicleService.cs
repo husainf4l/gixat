@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Clients.Entities;
 using Gixat.Modules.Clients.Interfaces;
 using Gixat.Shared.Services;
@@ -7,7 +8,12 @@ namespace Gixat.Modules.Clients.Services;
 
 public class ClientVehicleService : BaseService, IClientVehicleService
 {
-    public ClientVehicleService(DbContext context) : base(context) { }
+    private readonly ILogger<ClientVehicleService> _logger;
+
+    public ClientVehicleService(DbContext context, ILogger<ClientVehicleService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<ClientVehicle> ClientVehicles => Set<ClientVehicle>();
 
@@ -23,6 +29,7 @@ public class ClientVehicleService : BaseService, IClientVehicleService
 
     public async Task<ClientVehicle> CreateAsync(ClientVehicle vehicle)
     {
+        _logger.LogInformation("Creating vehicle for client {ClientId}: {Make} {Model} {Year}", vehicle.ClientId, vehicle.Make, vehicle.Model, vehicle.Year);
         // If this is the first vehicle, make it primary
         var existingCount = await ClientVehicles.CountAsync(v => v.ClientId == vehicle.ClientId);
         if (existingCount == 0)
@@ -32,6 +39,7 @@ public class ClientVehicleService : BaseService, IClientVehicleService
 
         ClientVehicles.Add(vehicle);
         await SaveChangesAsync();
+        _logger.LogInformation("Created vehicle {VehicleId}", vehicle.Id);
         return vehicle;
     }
 

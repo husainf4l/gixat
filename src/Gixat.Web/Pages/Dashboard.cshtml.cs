@@ -61,23 +61,22 @@ public class DashboardModel : PageModel
         CompanyId = currentCompany.CompanyId;
         UserRole = currentCompany.Role.ToString();
 
-        // Get client statistics
-        var clients = await _clientService.GetByCompanyIdAsync(currentCompany.CompanyId);
-        var clientList = clients.ToList();
-        
-        TotalClients = clientList.Count;
-        TotalVehicles = clientList.Sum(c => c.Vehicles?.Count ?? 0);
-        VipClients = clientList.Count(c => c.IsVip);
+        // Run queries sequentially - DbContext is not thread-safe
+        var clientStats = await _clientService.GetClientStatsAsync(CompanyId);
+        var sessionStats = await _sessionService.GetSessionStatsAsync(CompanyId);
+        var recentSessions = await _sessionService.GetRecentSessionsAsync(CompanyId, 5);
 
-        // Get session statistics
-        var activeSessions = await _sessionService.GetActiveSessionsAsync(currentCompany.CompanyId);
-        var activeList = activeSessions.ToList();
-        
-        ActiveSessions = activeList.Count;
-        TodaySessions = activeList.Count(s => s.CheckInAt.Date == DateTime.UtcNow.Date);
-        InProgressSessions = activeList.Count(s => s.Status == SessionStatus.InProgress);
-        AwaitingPickup = activeList.Count(s => s.Status == SessionStatus.ReadyForPickup);
-        RecentSessions = activeList.OrderByDescending(s => s.CheckInAt).Take(5).ToList();
+        // Map results
+        TotalClients = clientStats.TotalClients;
+        TotalVehicles = clientStats.TotalVehicles;
+        VipClients = clientStats.VipClients;
+
+        ActiveSessions = sessionStats.ActiveSessions;
+        TodaySessions = sessionStats.TodaySessions;
+        InProgressSessions = sessionStats.InProgressSessions;
+        AwaitingPickup = sessionStats.AwaitingPickup;
+
+        RecentSessions = recentSessions.ToList();
 
         return Page();
     }

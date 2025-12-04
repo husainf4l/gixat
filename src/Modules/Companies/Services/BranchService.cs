@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Companies.DTOs;
 using Gixat.Modules.Companies.Entities;
 using Gixat.Modules.Companies.Interfaces;
@@ -8,7 +9,12 @@ namespace Gixat.Modules.Companies.Services;
 
 public class BranchService : BaseService, IBranchService
 {
-    public BranchService(DbContext context) : base(context) { }
+    private readonly ILogger<BranchService> _logger;
+
+    public BranchService(DbContext context, ILogger<BranchService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<Branch> Branches => Set<Branch>();
 
@@ -29,6 +35,7 @@ public class BranchService : BaseService, IBranchService
 
     public async Task<BranchDto> CreateAsync(Guid companyId, CreateBranchDto dto)
     {
+        _logger.LogInformation("Creating branch {BranchName} for company {CompanyId}", dto.Name, companyId);
         var branch = new Branch
         {
             CompanyId = companyId,
@@ -47,6 +54,7 @@ public class BranchService : BaseService, IBranchService
 
         Branches.Add(branch);
         await SaveChangesAsync();
+        _logger.LogInformation("Created branch {BranchId}", branch.Id);
 
         return branch.ToDto();
     }

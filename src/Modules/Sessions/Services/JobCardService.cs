@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Gixat.Modules.Sessions.DTOs;
 using Gixat.Modules.Sessions.Entities;
 using Gixat.Modules.Sessions.Enums;
@@ -9,7 +10,12 @@ namespace Gixat.Modules.Sessions.Services;
 
 public class JobCardService : BaseService, IJobCardService
 {
-    public JobCardService(DbContext context) : base(context) { }
+    private readonly ILogger<JobCardService> _logger;
+
+    public JobCardService(DbContext context, ILogger<JobCardService> logger) : base(context)
+    {
+        _logger = logger;
+    }
 
     private DbSet<JobCard> JobCards => Set<JobCard>();
     private DbSet<JobCardItem> JobCardItems => Set<JobCardItem>();
@@ -67,6 +73,7 @@ public class JobCardService : BaseService, IJobCardService
 
     public async Task<JobCardDto> CreateAsync(CreateJobCardDto dto, Guid companyId)
     {
+        _logger.LogInformation("Creating job card for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
         var jobCardNumber = await GenerateJobCardNumberAsync(companyId);
 
         var jobCard = new JobCard
@@ -87,6 +94,7 @@ public class JobCardService : BaseService, IJobCardService
 
         JobCards.Add(jobCard);
         await SaveChangesAsync();
+        _logger.LogInformation("Created job card {JobCardNumber} with ID {JobCardId}", jobCardNumber, jobCard.Id);
 
         await UpdateSessionStatus(dto.SessionId, SessionStatus.AwaitingApproval);
 

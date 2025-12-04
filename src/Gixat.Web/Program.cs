@@ -1,8 +1,10 @@
 using dotenv.net;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Gixat.Web.Data;
 using Gixat.Web.Middleware;
+using System.IO.Compression;
 using Gixat.Modules.Auth;
 using Gixat.Modules.Auth.Entities;
 using Gixat.Modules.Clients;
@@ -70,6 +72,39 @@ builder.Configuration["Smtp:FromEmail"] =
 // Add services
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
+
+// Add Response Compression for faster page loads
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/javascript",
+        "text/css",
+        "application/json",
+        "text/html",
+        "image/svg+xml"
+    });
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
+
+// Add Output Caching for static content
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder => builder.Cache());
+    options.AddPolicy("Dashboard", builder => builder.Expire(TimeSpan.FromSeconds(30)));
+});
 
 // Register unified AppDbContext
 var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
@@ -219,9 +254,25 @@ if (!app.Environment.IsDevelopment())
 // Add global exception handling
 app.UseGlobalExceptionHandler();
 
+// Enable response compression
+app.UseResponseCompression();
+
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Static files with caching headers
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache static files for 1 year
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000,immutable");
+    }
+});
+
 app.UseRouting();
+
+// Output caching
+app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
