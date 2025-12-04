@@ -1,4 +1,6 @@
 using Amazon.S3;
+using Amazon.S3.Model;
+using Amazon.Runtime;
 using Amazon.Extensions.NETCore.Setup;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,27 +34,39 @@ public static class SessionsModule
     /// </summary>
     public static IServiceCollection AddAwsS3(this IServiceCollection services, IConfiguration configuration)
     {
-        var awsOptions = configuration.GetAWSOptions();
-        if (!string.IsNullOrEmpty(configuration["AWS:AccessKey"]))
+        var accessKey = configuration["AWS:AccessKey"];
+        var secretKey = configuration["AWS:SecretKey"];
+        var region = configuration["AWS:Region"];
+        
+        if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
         {
-            services.AddDefaultAWSOptions(awsOptions);
-            services.AddAWSService<IAmazonS3>();
-        }
-        else
-        {
+            // Configure AWS credentials explicitly
             services.AddSingleton<IAmazonS3>(sp => 
             {
                 var config = new AmazonS3Config
                 {
-                    ServiceURL = configuration["AWS:S3:ServiceURL"] ?? "https://s3.amazonaws.com",
-                    ForcePathStyle = true
+                    RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(region ?? "us-east-1"),
+                    Timeout = TimeSpan.FromSeconds(10),
+                    MaxErrorRetry = 3
                 };
-                return new AmazonS3Client(
-                    configuration["AWS:AccessKey"] ?? "",
-                    configuration["AWS:SecretKey"] ?? "",
-                    config);
+                
+                var credentials = new Amazon.Runtime.BasicAWSCredentials(accessKey, secretKey);
+                return new AmazonS3Client(credentials, config);
             });
         }
+        else
+        {
+            // No credentials configured - create a dummy client for health checks
+            services.AddSingleton<IAmazonS3>(sp => 
+            {
+                var config = new AmazonS3Config
+                {
+                    RegionEndpoint = Amazon.RegionEndpoint.USEast1
+                };
+                return new AmazonS3Client(config);
+            });
+        }
+        
         return services;
     }
 }

@@ -1,0 +1,188 @@
+@page "/Admin/Health"
+@model Gixat.Web.Pages.Admin.HealthModel
+@using Microsoft.Extensions.Diagnostics.HealthChecks
+@{
+    ViewData["Title"] = "System Health";
+    Layout = "_AppLayout";
+}
+
+<div class="max-w-6xl mx-auto animate-fade-in">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-apple-blue to-apple-indigo rounded-2xl p-6 mb-6 animate-slide-up">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                    <i class="bi bi-heart-pulse text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-semibold text-white">System Health Dashboard</h1>
+                    <p class="text-white/80 text-sm mt-1">Monitor application health and dependencies</p>
+                </div>
+            </div>
+            <div>
+                @if (Model.HealthReport != null)
+                {
+                    var statusConfig = Model.HealthReport.Status switch
+                    {
+                        HealthStatus.Healthy => ("bg-apple-green/20 text-white border-white/20", "bi-check-circle-fill", "Healthy"),
+                        HealthStatus.Degraded => ("bg-apple-orange/20 text-white border-white/20", "bi-exclamation-triangle-fill", "Degraded"),
+                        _ => ("bg-apple-red/20 text-white border-white/20", "bi-x-circle-fill", "Unhealthy")
+                    };
+                    
+                    <div class="flex items-center gap-3 px-6 py-3 rounded-xl @statusConfig.Item1 border backdrop-blur-sm">
+                        <i class="bi @statusConfig.Item2 text-xl"></i>
+                        <div>
+                            <div class="text-sm font-medium">Overall Status</div>
+                            <div class="text-lg font-bold">@statusConfig.Item3</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (Model.HealthReport != null)
+    {
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 animate-slide-up" style="animation-delay: 0.1s">
+            <div class="card-apple p-5">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-apple-green/10 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-check-circle text-apple-green text-lg"></i>
+                    </div>
+                    <span class="text-sm text-apple-gray">Healthy</span>
+                </div>
+                <div class="text-2xl font-bold text-apple-dark">
+                    @Model.HealthReport.Entries.Count(e => e.Value.Status == HealthStatus.Healthy)
+                </div>
+            </div>
+
+            <div class="card-apple p-5">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-apple-orange/10 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-exclamation-triangle text-apple-orange text-lg"></i>
+                    </div>
+                    <span class="text-sm text-apple-gray">Degraded</span>
+                </div>
+                <div class="text-2xl font-bold text-apple-dark">
+                    @Model.HealthReport.Entries.Count(e => e.Value.Status == HealthStatus.Degraded)
+                </div>
+            </div>
+
+            <div class="card-apple p-5">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-apple-red/10 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-x-circle text-apple-red text-lg"></i>
+                    </div>
+                    <span class="text-sm text-apple-gray">Unhealthy</span>
+                </div>
+                <div class="text-2xl font-bold text-apple-dark">
+                    @Model.HealthReport.Entries.Count(e => e.Value.Status == HealthStatus.Unhealthy)
+                </div>
+            </div>
+
+            <div class="card-apple p-5">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-apple-blue/10 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-clock text-apple-blue text-lg"></i>
+                    </div>
+                    <span class="text-sm text-apple-gray">Duration</span>
+                </div>
+                <div class="text-2xl font-bold text-apple-dark">
+                    @Model.HealthReport.TotalDuration.TotalMilliseconds.ToString("F0")ms
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Checks Detail -->
+        <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.2s">
+            <h2 class="text-lg font-semibold text-apple-dark mb-5 flex items-center gap-2">
+                <i class="bi bi-list-check text-apple-blue"></i>
+                Health Checks
+            </h2>
+
+            <div class="space-y-3">
+                @foreach (var entry in Model.HealthReport.Entries.OrderBy(e => e.Key))
+                {
+                    var statusConfig = entry.Value.Status switch
+                    {
+                        HealthStatus.Healthy => ("border-apple-green/20 bg-apple-green/5", "apple-green", "bi-check-circle-fill"),
+                        HealthStatus.Degraded => ("border-apple-orange/20 bg-apple-orange/5", "apple-orange", "bi-exclamation-triangle-fill"),
+                        _ => ("border-apple-red/20 bg-apple-red/5", "apple-red", "bi-x-circle-fill")
+                    };
+
+                    <div class="border @statusConfig.Item1 rounded-xl p-5">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <i class="bi @statusConfig.Item3 text-@statusConfig.Item2 text-xl"></i>
+                                <div>
+                                    <h3 class="font-semibold text-apple-dark">@entry.Key</h3>
+                                    @if (!string.IsNullOrEmpty(entry.Value.Description))
+                                    {
+                                        <p class="text-sm text-apple-gray mt-1">@entry.Value.Description</p>
+                                    }
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="badge-apple-gray text-xs">
+                                    @entry.Value.Duration.TotalMilliseconds.ToString("F0")ms
+                                </span>
+                            </div>
+                        </div>
+
+                        @if (entry.Value.Data?.Any() == true)
+                        {
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    @foreach (var data in entry.Value.Data)
+                                    {
+                                        <div class="bg-white rounded-lg p-3 border border-gray-100">
+                                            <div class="text-xs text-apple-gray mb-1">@data.Key</div>
+                                            <div class="text-sm font-medium text-apple-dark">@data.Value</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (entry.Value.Exception != null)
+                        {
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="bg-apple-red/5 border border-apple-red/20 rounded-lg p-3">
+                                    <div class="text-xs font-medium text-apple-red mb-1">Error Details</div>
+                                    <div class="text-xs text-apple-gray font-mono">@entry.Value.Exception.Message</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Auto Refresh -->
+        <div class="mt-6 text-center animate-slide-up" style="animation-delay: 0.3s">
+            <button onclick="location.reload()" class="btn-apple-primary">
+                <i class="bi bi-arrow-clockwise mr-2"></i>
+                Refresh Status
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="card-apple p-12 text-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-exclamation-triangle text-3xl text-gray-300"></i>
+            </div>
+            <p class="text-apple-gray font-medium">No health check data available</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script>
+    // Auto-refresh every 30 seconds
+    setTimeout(() => {
+        location.reload();
+    }, 30000);
+</script>
+}

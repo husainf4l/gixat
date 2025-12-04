@@ -24,6 +24,10 @@ using Gixat.Web.Modules.Sessions.GraphQL.Mutations;
 using Gixat.Web.Modules.Sessions.GraphQL.Types;
 using Gixat.Web.Shared.Interfaces;
 using Gixat.Web.Shared.Services;
+using Gixat.Web.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 // Load environment variables from .env file
 DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
@@ -109,7 +113,22 @@ builder.Services.AddOutputCache(options =>
 // Register unified AppDbContext
 var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(connectionString));
+{
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        // Enable connection pooling and async operations
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorCodesToAdd: null);
+        
+        // Command timeout for long-running queries
+        npgsqlOptions.CommandTimeout(30);
+    });
+    
+    // Disable query tracking for better performance in read-only scenarios
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 
 // Register DbContext as service so modules can inject it
 builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<AppDbContext>());
@@ -171,6 +190,37 @@ builder.Services.Configure<SmtpSettings>(options =>
 });
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+// ====================================
+// HEALTH CHECKS CONFIGURATION
+// ====================================
+builder.Services.AddHealthChecks()
+    // Database health check
+    .AddNpgSql(
+        connectionString ?? throw new InvalidOperationException("Database connection string is required"),
+        name: "PostgreSQL Database",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "database", "postgresql", "critical" },
+        timeout: TimeSpan.FromSeconds(5))
+    
+    // Custom health checks
+    .AddCheck<AwsS3HealthCheck>(
+        "AWS S3 Storage",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "storage", "aws", "s3" },
+        timeout: TimeSpan.FromSeconds(10))
+    
+    .AddCheck<SmtpHealthCheck>(
+        "SMTP Email Service",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "email", "smtp" },
+        timeout: TimeSpan.FromSeconds(10))
+    
+    .AddCheck<MemoryHealthCheck>(
+        "Memory Usage",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "memory", "system" },
+        timeout: TimeSpan.FromSeconds(3));
+
 // Configure GraphQL
 builder.Services
     .AddGraphQLServer()
@@ -222,27 +272,45 @@ builder.Services
 var app = builder.Build();
 
 // Apply migrations only in Development or when APPLY_MIGRATIONS=true
-// var applyMigrations = app.Environment.IsDevelopment() || 
-//     Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
+var applyMigrations = app.Environment.IsDevelopment() || 
+    Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
 
-// if (applyMigrations)
-// {
-//     using var scope = app.Services.CreateScope();
-//     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+if (applyMigrations)
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     
-//     logger.LogInformation("Applying database migrations...");
-//     await context.Database.MigrateAsync();
-//     logger.LogInformation("Database migrations applied successfully.");
-// }
+    try
+    {
+        logger.LogInformation("Applying database migrations...");
+        await context.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while migrating the database.");
+        throw;
+    }
+}
 
-// // Seed database
-// using (var scope = app.Services.CreateScope())
-// {
-//     var services = scope.ServiceProvider;
-//     await AuthModule.SeedRolesAsync(services);
-//     await AuthModule.SeedAdminUserAsync(services, builder.Configuration);
-// }
+// Seed database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        await AuthModule.SeedRolesAsync(services);
+        await AuthModule.SeedAdminUserAsync(services, builder.Configuration);
+        logger.LogInformation("Database seeding completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while seeding the database.");
+    }
+}
 
 // Configure pipeline
 if (!app.Environment.IsDevelopment())
@@ -257,7 +325,11 @@ app.UseGlobalExceptionHandler();
 // Enable response compression
 app.UseResponseCompression();
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 // Static files with caching headers
 app.UseStaticFiles(new StaticFileOptions
@@ -276,6 +348,30 @@ app.UseOutputCache();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ====================================
+// HEALTH CHECKS ENDPOINTS
+// ====================================
+// Health check endpoint with detailed JSON response
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
+    AllowCachingResponses = false
+});
+
+// Simple health check endpoint for load balancers
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("critical"),
+    AllowCachingResponses = false
+});
+
+// Liveness probe - checks if application is running
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false, // Exclude all checks, just return 200 if app is running
+    AllowCachingResponses = false
+});
 
 app.MapRazorPages();
 app.MapGraphQL(); // GraphQL endpoint at /graphql
