@@ -1,6 +1,0 @@
-<Project>
-  <!-- Default startup project for 'dotnet run' from solution root -->
-  <PropertyGroup Condition="'$(MSBuildProjectName)' == ''">
-    <DefaultProjectPath>src/Gixat.Web/Gixat.Web.csproj</DefaultProjectPath>
-  </PropertyGroup>
-</Project>
