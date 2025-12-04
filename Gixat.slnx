@@ -1,24 +1,5 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Gixat.Shared/Gixat.Shared.csproj" />
-    <Project Path="src/Gixat.Web/Gixat.Web.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/" />
-  <Folder Name="/src/Modules/Auth/">
-    <Project Path="src/Modules/Auth/Gixat.Modules.Auth.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Clients/">
-    <Project Path="src/Modules/Clients/Gixat.Modules.Clients.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Companies/">
-    <Project Path="src/Modules/Companies/Gixat.Modules.Companies.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Sessions/">
-    <Project Path="src/Modules/Sessions/Gixat.Modules.Sessions.csproj" />
-  </Folder>
-  <Folder Name="/src/Modules/Users/">
-    <Project Path="src/Modules/Users/Gixat.Modules.Users.csproj" />
-  </Folder>
+  <Project Path="Gixat.csproj" />
   <Folder Name="/tests/">
     <Project Path="tests/Gixat.Tests/Gixat.Tests.csproj" />
   </Folder>

@@ -1,0 +1,267 @@
+@page "/Sessions/{id:guid}/TestDrive/Create"
+@model Gixat.Web.Pages.Sessions.TestDrive.CreateModel
+@using Gixat.Web.Modules.Sessions.Enums
+@{
+    ViewData["Title"] = "Record Test Drive";
+    Layout = "_AppLayout";
+}
+
+<div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+        <a href="/Sessions/Details/@Model.Session?.Id" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="bi bi-arrow-left text-gray-500"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-900">Record Test Drive</h1>
+            <p class="text-sm text-gray-500">Session #@Model.Session?.SessionNumber • @Model.Session?.VehicleDisplayName</p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <form method="post" id="testDriveForm">
+            <div class="space-y-6">
+                <!-- Title -->
+                <div>
+                    <label asp-for="Input.Title" class="block text-sm font-medium text-gray-700 mb-1.5">Test Drive Title <span class="text-red-500">*</span></label>
+                    <input asp-for="Input.Title" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" required />
+                    <span asp-validation-for="Input.Title" class="text-red-500 text-xs mt-1"></span>
+                </div>
+
+                <!-- Mileage Start -->
+                <div>
+                    <label asp-for="Input.MileageStart" class="block text-sm font-medium text-gray-700 mb-1.5">Starting Mileage (km)</label>
+                    <input asp-for="Input.MileageStart" type="number" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="e.g., 50000" />
+                    <p class="text-xs text-gray-500 mt-1">Odometer reading before starting the test drive</p>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <label asp-for="Input.OverallPriority" class="block text-sm font-medium text-gray-700 mb-1.5">Priority</label>
+                    <select asp-for="Input.OverallPriority" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-white">
+                        <option value="@Priority.Low">Low</option>
+                        <option value="@Priority.Normal" selected>Normal</option>
+                        <option value="@Priority.High">High</option>
+                        <option value="@Priority.Urgent">Urgent</option>
+                    </select>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label asp-for="Input.Description" class="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                    <textarea asp-for="Input.Description" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none" placeholder="Describe the purpose or route of the test drive..."></textarea>
+                </div>
+
+                <!-- Media Upload Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Photos & Videos</label>
+                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-indigo-400 transition-colors cursor-pointer">
+                        <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
+                        <svg class="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-sm text-gray-600">Drop photos or videos here, or click to upload</p>
+                        <p class="text-xs text-gray-400 mt-1">Images will be compressed automatically</p>
+                    </div>
+
+                    <div id="uploadProgress" class="hidden mt-3">
+                        <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                            <span class="text-sm text-blue-700">Uploading and compressing...</span>
+                        </div>
+                    </div>
+
+                    <div id="mediaGrid" class="grid grid-cols-3 md:grid-cols-4 gap-3 mt-4"></div>
+                    <input type="hidden" asp-for="Input.MediaItemIds" id="mediaItemIds" />
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div class="flex gap-3">
+                        <i class="bi bi-exclamation-triangle text-amber-500 text-lg"></i>
+                        <div>
+                            <h4 class="text-sm font-medium text-amber-800">Safety Reminder</h4>
+                            <p class="text-sm text-amber-700 mt-1">Ensure proper authorization before conducting test drives. Record ending mileage and observations after the drive.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+                <a href="/Sessions/Details/@Model.Session?.Id" class="px-5 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all flex items-center gap-2">
+                    <i class="bi bi-speedometer2"></i> Start Test Drive
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const sessionId = '@Model.Session?.Id';
+    const mediaGrid = document.getElementById('mediaGrid');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const dropZone = document.getElementById('dropZone');
+    const mediaItemIds = document.getElementById('mediaItemIds');
+    const uploadedIds = [];
+
+    // Click to upload
+    dropZone.addEventListener('click', () => document.getElementById('mediaUpload').click());
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-indigo-500', 'bg-indigo-50');
+    });
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+    });
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+        if (files.length > 0) handleFiles(files);
+    });
+
+    document.getElementById('mediaUpload').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) handleFiles(files);
+        e.target.value = '';
+    });
+
+    async function handleFiles(files) {
+        uploadProgress.classList.remove('hidden');
+
+        for (const file of files) {
+            try {
+                let processedFile = file;
+                if (file.type.startsWith('image/')) {
+                    processedFile = await compressImage(file);
+                }
+
+                const formData = new FormData();
+                formData.append('file', processedFile);
+
+                const response = await fetch(`/Sessions/${sessionId}/TestDrive/Create?handler=Upload`, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
+                });
+
+                const result = await response.json();
+                if (!result.success) continue;
+
+                await fetch(result.uploadUrl, {
+                    method: 'PUT',
+                    body: processedFile,
+                    headers: { 'Content-Type': processedFile.type }
+                });
+
+                const confirmResponse = await fetch(`/Sessions/${sessionId}/TestDrive/Create?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    }
+                });
+
+                const confirmResult = await confirmResponse.json();
+                if (confirmResult.success) {
+                    uploadedIds.push(confirmResult.media.id);
+                    mediaItemIds.value = uploadedIds.join(',');
+                    addMediaToGrid(confirmResult.media);
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+            }
+        }
+
+        uploadProgress.classList.add('hidden');
+    }
+
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 1920;
+                    let width = img.width, height = img.height;
+
+                    if (width > height && width > maxSize) {
+                        height = (height * maxSize) / width;
+                        width = maxSize;
+                    } else if (height > maxSize) {
+                        width = (width * maxSize) / height;
+                        height = maxSize;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((blob) => {
+                        resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                    }, 'image/jpeg', 0.8);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function addMediaToGrid(media) {
+        const div = document.createElement('div');
+        div.className = 'relative group';
+        div.dataset.mediaId = media.id;
+
+        if (media.mediaType === 0) {
+            div.innerHTML = `
+                <img src="${media.s3Url}" class="w-full h-24 object-cover rounded-lg" />
+                <button type="button" onclick="deleteMedia('${media.id}')" 
+                        class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>`;
+        } else {
+            div.innerHTML = `
+                <div class="w-full h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <button type="button" onclick="deleteMedia('${media.id}')" 
+                        class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>`;
+        }
+        mediaGrid.appendChild(div);
+    }
+
+    async function deleteMedia(mediaId) {
+        const response = await fetch(`/Sessions/${sessionId}/TestDrive/Create?handler=DeleteMedia&mediaId=${mediaId}`, {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || '' }
+        });
+        const result = await response.json();
+        if (result.success) {
+            document.querySelector(`[data-media-id="${mediaId}"]`)?.remove();
+            const idx = uploadedIds.indexOf(mediaId);
+            if (idx > -1) uploadedIds.splice(idx, 1);
+            mediaItemIds.value = uploadedIds.join(',');
+        }
+    }
+</script>
+<form method="post" class="hidden">@Html.AntiForgeryToken()</form>
+}

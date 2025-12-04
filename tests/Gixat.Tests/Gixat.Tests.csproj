@@ -21,10 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Gixat.Shared\Gixat.Shared.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Sessions\Gixat.Modules.Sessions.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Clients\Gixat.Modules.Clients.csproj" />
-    <ProjectReference Include="..\..\src\Modules\Companies\Gixat.Modules.Companies.csproj" />
+    <ProjectReference Include="..\..\Gixat.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using Gixat.Modules.Sessions.Entities;
-using Gixat.Modules.Sessions.Services;
-using Gixat.Modules.Sessions.DTOs;
-using Gixat.Modules.Sessions.Enums;
-using Gixat.Modules.Clients.Entities;
-using Gixat.Shared.Pagination;
+using Gixat.Web.Modules.Sessions.Entities;
+using Gixat.Web.Modules.Sessions.Services;
+using Gixat.Web.Modules.Sessions.DTOs;
+using Gixat.Web.Modules.Sessions.Enums;
+using Gixat.Web.Modules.Clients.Entities;
+using Gixat.Web.Shared.Pagination;
 
 namespace Gixat.Tests.Services;
 

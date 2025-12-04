@@ -1,0 +1,184 @@
+@page
+@model Gixat.Web.Pages.Sessions.IndexModel
+@{
+    ViewData["Title"] = "Sessions";
+    Layout = "_AppLayout";
+}
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h2 class="text-2xl font-semibold text-apple-dark mb-1">Sessions</h2>
+        <p class="text-apple-gray">Manage garage sessions and vehicle check-ins</p>
+    </div>
+    <a href="/Sessions/Create" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        New Check-In
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl shadow-sm mb-6">
+    <div class="p-6">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-4">
+                <div class="flex">
+                    <span class="inline-flex items-center px-3 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </span>
+                    <input type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" name="SearchTerm" value="@Model.SearchTerm" placeholder="Search sessions...">
+                </div>
+            </div>
+            <div class="md:col-span-3">
+                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white" name="StatusFilter">
+                    <option value="">All Active</option>
+                    <option value="CheckedIn" selected="@(Model.StatusFilter == "CheckedIn")">Checked In</option>
+                    <option value="CustomerRequest" selected="@(Model.StatusFilter == "CustomerRequest")">Customer Request</option>
+                    <option value="Inspection" selected="@(Model.StatusFilter == "Inspection")">Inspection</option>
+                    <option value="TestDrive" selected="@(Model.StatusFilter == "TestDrive")">Test Drive</option>
+                    <option value="InProgress" selected="@(Model.StatusFilter == "InProgress")">In Progress</option>
+                    <option value="Completed" selected="@(Model.StatusFilter == "Completed")">Completed</option>
+                    <option value="ReadyForPickup" selected="@(Model.StatusFilter == "ReadyForPickup")">Ready for Pickup</option>
+                    <option value="Closed" selected="@(Model.StatusFilter == "Closed")">Closed</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-indigo-500 text-indigo-500 rounded-lg hover:bg-indigo-50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+                    </svg>
+                    Filter
+                </button>
+            </div>
+            <div class="md:col-span-2">
+                <a href="/Sessions" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Sessions Table -->
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+    @if (Model.Sessions.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Session #</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Client</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Vehicle</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Status</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Progress</th>
+                        <th class="text-left py-4 px-6 text-sm font-semibold text-apple-gray">Check-In</th>
+                        <th class="text-right py-4 px-6 text-sm font-semibold text-apple-gray">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var session in Model.Sessions)
+                    {
+                        var badgeClass = session.Status switch
+                        {
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-cyan-100 text-cyan-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bg-gray-100 text-gray-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Inspection => "bg-gray-100 text-gray-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "bg-gray-100 text-gray-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bg-yellow-100 text-yellow-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-indigo-100 text-indigo-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed => "bg-green-100 text-green-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-yellow-100 text-yellow-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-800 text-white",
+                            _ => "bg-gray-100 text-gray-700"
+                        };
+                        
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 px-6">
+                                <a href="/Sessions/Details/@session.Id" class="font-semibold text-indigo-600 hover:text-indigo-800 no-underline">
+                                    @session.SessionNumber
+                                </a>
+                            </td>
+                            <td class="py-4 px-6">@session.ClientName</td>
+                            <td class="py-4 px-6">
+                                <span>@session.VehicleDisplayName</span>
+                                @if (!string.IsNullOrEmpty(session.VehicleLicensePlate))
+                                {
+                                    <br><span class="text-sm text-apple-gray">@session.VehicleLicensePlate</span>
+                                }
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-medium @badgeClass">@session.Status</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex gap-1">
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasCustomerRequest ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Customer Request">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                                        </svg>
+                                    </span>
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasInspection ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Inspection">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+                                        </svg>
+                                    </span>
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasTestDrive ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Test Drive">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                        </svg>
+                                    </span>
+                                    <span class="px-2 py-1 rounded text-xs @(session.HasJobCard ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Job Card">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17 17.25 21A2.26 2.26 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.794 9.961a4.891 4.891 0 0 1-3.057-.817 4.905 4.905 0 0 1-1.576-1.576 4.893 4.893 0 0 1-.817-3.057c0-.773.2-1.49.515-2.163a4.935 4.935 0 0 1 1.608-1.719c.654-.435 1.418-.656 2.187-.656.643 0 1.284.155 1.874.463.63.329 1.174.82 1.575 1.41.436.642.657 1.406.657 2.187 0 .769-.22 1.533-.657 2.187a4.933 4.933 0 0 1-1.41 1.575c-.59.4-1.23.555-1.874.463l-.455.455a3.578 3.578 0 0 1-1.576 1.576 3.585 3.585 0 0 1-2.163.515Z" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span>@session.CheckInAt.ToString("MMM dd, yyyy")</span>
+                                <br><span class="text-sm text-apple-gray">@session.CheckInAt.ToString("HH:mm")</span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="inline-flex gap-1">
+                                    <a href="/Sessions/Details/@session.Id" class="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                    </a>
+                                    <a href="/Sessions/Edit/@session.Id" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-16">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 text-gray-300 mb-4 mx-auto block">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0-3-3m3 3 3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+            </svg>
+            <h4 class="text-xl font-semibold text-apple-dark mb-2">No sessions found</h4>
+            <p class="text-apple-gray mb-6">Get started by creating a new check-in</p>
+            <a href="/Sessions/Create" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                New Check-In
+            </a>
+        </div>
+    }
+</div>

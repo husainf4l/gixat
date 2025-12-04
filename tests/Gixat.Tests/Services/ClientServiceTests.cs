@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using Gixat.Modules.Clients.Entities;
-using Gixat.Modules.Clients.Services;
+using Gixat.Web.Modules.Clients.Entities;
+using Gixat.Web.Modules.Clients.Services;
 
 namespace Gixat.Tests.Services;
 
@@ -108,7 +108,7 @@ public class ClientServiceTests
             await _service.CreateAsync(client);
         }
 
-        var request = new Gixat.Shared.Pagination.PagedRequest
+        var request = new Gixat.Web.Shared.Pagination.PagedRequest
         {
             Page = 1,
             PageSize = 10
@@ -134,7 +134,7 @@ public class ClientServiceTests
         await _service.CreateAsync(client1);
         await _service.CreateAsync(client2);
 
-        var request = new Gixat.Shared.Pagination.PagedRequest
+        var request = new Gixat.Web.Shared.Pagination.PagedRequest
         {
             Page = 1,
             PageSize = 10,

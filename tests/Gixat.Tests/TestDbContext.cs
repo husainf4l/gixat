@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Gixat.Modules.Clients.Entities;
-using Gixat.Modules.Companies.Entities;
-using Gixat.Modules.Sessions.Entities;
+using Gixat.Web.Modules.Clients.Entities;
+using Gixat.Web.Modules.Companies.Entities;
+using Gixat.Web.Modules.Sessions.Entities;
 
 namespace Gixat.Tests;
 
