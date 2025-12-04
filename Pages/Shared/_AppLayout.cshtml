@@ -5,182 +5,197 @@
 
 @RenderSection("Styles", required: false)
 
-<!-- Navbar -->
-<nav class="bg-apple-dark sticky top-0 z-50 px-4 py-3">
-    <div class="flex items-center justify-between max-w-full">
-        <div class="flex items-center gap-3">
-            <button id="mobile-menu-btn" class="lg:hidden text-white/80 hover:text-white">
-                <i class="bi bi-list text-2xl"></i>
-            </button>
-            <a class="flex items-center text-white font-semibold text-xl no-underline" href="/Dashboard">
-                <i class="bi bi-gear-wide-connected mr-2"></i>Gixat
-            </a>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-white/80 hover:text-white cursor-pointer">
-                <i class="bi bi-bell text-lg"></i>
-            </span>
-            <span class="text-white/80 text-sm flex items-center gap-1">
-                <i class="bi bi-person-circle"></i>
-                @User.Identity?.Name
-            </span>
-            <a class="text-white/80 hover:text-white no-underline" href="/Auth/Logout">
-                <i class="bi bi-box-arrow-right"></i>
-            </a>
+<!-- Top Navigation Bar -->
+<nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-apple border-b border-gray-200/60">
+    <div class="px-4 lg:px-6">
+        <div class="flex items-center justify-between h-14">
+            <!-- Left: Logo & Mobile Menu -->
+            <div class="flex items-center gap-3">
+                <button id="mobile-menu-btn" class="lg:hidden p-2 -ml-2 text-apple-gray hover:text-apple-dark hover:bg-gray-100 rounded-apple transition-colors">
+                    <i class="bi bi-list text-xl"></i>
+                </button>
+                <a href="/Dashboard" class="flex items-center gap-2.5 text-apple-dark font-semibold text-lg tracking-tight">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-apple-blue to-apple-indigo flex items-center justify-center">
+                        <i class="bi bi-gear-wide-connected text-white text-sm"></i>
+                    </div>
+                    <span class="hidden sm:inline">Gixat</span>
+                </a>
+            </div>
+
+            <!-- Center: Search (Desktop) -->
+            <div class="hidden md:flex flex-1 max-w-md mx-8">
+                <div class="relative w-full">
+                    <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-apple-gray text-sm"></i>
+                    <input type="text" placeholder="Search sessions, clients, vehicles..." 
+                           class="w-full pl-9 pr-4 py-2 bg-gray-100 border-0 rounded-lg text-sm placeholder:text-apple-gray focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:bg-white transition-all" />
+                </div>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-2">
+                <!-- Notifications -->
+                <button class="relative p-2 text-apple-gray hover:text-apple-dark hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="bi bi-bell text-lg"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-apple-red rounded-full"></span>
+                </button>
+                
+                <!-- User Menu -->
+                <div class="flex items-center gap-2 pl-2 ml-2 border-l border-gray-200">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-apple-purple to-apple-pink flex items-center justify-center text-white text-xs font-medium">
+                        @(User.Identity?.Name?.Substring(0, 2).ToUpper() ?? "U")
+                    </div>
+                    <span class="hidden sm:block text-sm font-medium text-apple-dark max-w-[120px] truncate">
+                        @User.Identity?.Name
+                    </span>
+                    <a href="/Auth/Logout" class="p-2 text-apple-gray hover:text-apple-red hover:bg-apple-red/10 rounded-lg transition-colors" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </nav>
 
 <!-- Mobile Sidebar Overlay -->
-<div id="mobile-backdrop" class="fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 opacity-0 pointer-events-none lg:hidden"></div>
+<div id="mobile-backdrop" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"></div>
 
 <!-- Mobile Sidebar -->
-<aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white z-50 transform -translate-x-full transition-transform duration-300 lg:hidden shadow-xl">
-    <div class="flex items-center justify-between p-4 border-b border-gray-200">
-        <span class="font-semibold text-lg text-apple-dark">Menu</span>
-        <button id="close-mobile-menu" class="text-gray-500 hover:text-gray-700">
+<aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-apple-spring lg:hidden shadow-apple-xl">
+    <div class="flex items-center justify-between p-4 border-b border-gray-100">
+        <span class="font-semibold text-apple-dark">Menu</span>
+        <button id="close-mobile-menu" class="p-2 text-apple-gray hover:text-apple-dark hover:bg-gray-100 rounded-lg transition-colors">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>
-    <div class="overflow-y-auto h-full py-4">
-        <ul class="space-y-1 px-3">
-            <li>
-                <a href="/Dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath == "/dashboard" ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
-                    <i class="bi bi-grid-1x2 text-lg w-6 text-center"></i>
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="/Sessions" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath.StartsWith("/sessions") ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
-                    <i class="bi bi-clipboard-check text-lg w-6 text-center"></i>
-                    Sessions
-                </a>
-            </li>
-            <li>
-                <a href="/Clients" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath.StartsWith("/clients") ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
-                    <i class="bi bi-people text-lg w-6 text-center"></i>
-                    Clients
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-car-front text-lg w-6 text-center"></i>
-                    Vehicles
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-wrench text-lg w-6 text-center"></i>
-                    Services
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-calendar-check text-lg w-6 text-center"></i>
-                    Appointments
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-receipt text-lg w-6 text-center"></i>
-                    Invoices
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-box-seam text-lg w-6 text-center"></i>
-                    Inventory
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-graph-up text-lg w-6 text-center"></i>
-                    Reports
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-gear text-lg w-6 text-center"></i>
-                    Settings
-                </a>
-            </li>
-        </ul>
+    
+    <!-- Mobile Search -->
+    <div class="p-4 border-b border-gray-100">
+        <div class="relative">
+            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-apple-gray text-sm"></i>
+            <input type="text" placeholder="Search..." class="w-full pl-9 pr-4 py-2.5 bg-gray-100 border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/30" />
+        </div>
     </div>
+    
+    <nav class="p-3 overflow-y-auto h-[calc(100%-130px)]">
+        <p class="px-3 pb-2 text-xxs font-semibold text-apple-gray uppercase tracking-wider">Main Menu</p>
+        <div class="space-y-0.5">
+            <a href="/Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium transition-all duration-200 @(currentPath == "/dashboard" ? "bg-apple-blue text-white" : "text-apple-dark hover:bg-gray-100")">
+                <i class="bi bi-grid-1x2 text-base w-5 text-center"></i>
+                Dashboard
+            </a>
+            <a href="/Sessions" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium transition-all duration-200 @(currentPath.StartsWith("/sessions") ? "bg-apple-blue text-white" : "text-apple-dark hover:bg-gray-100")">
+                <i class="bi bi-clipboard-check text-base w-5 text-center"></i>
+                Sessions
+            </a>
+            <a href="/Clients" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium transition-all duration-200 @(currentPath.StartsWith("/clients") ? "bg-apple-blue text-white" : "text-apple-dark hover:bg-gray-100")">
+                <i class="bi bi-people text-base w-5 text-center"></i>
+                Clients
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-car-front text-base w-5 text-center"></i>
+                Vehicles
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-calendar-check text-base w-5 text-center"></i>
+                Appointments
+            </a>
+        </div>
+        
+        <p class="px-3 pt-6 pb-2 text-xxs font-semibold text-apple-gray uppercase tracking-wider">Business</p>
+        <div class="space-y-0.5">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-receipt text-base w-5 text-center"></i>
+                Invoices
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-box-seam text-base w-5 text-center"></i>
+                Inventory
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-graph-up text-base w-5 text-center"></i>
+                Reports
+            </a>
+        </div>
+        
+        <p class="px-3 pt-6 pb-2 text-xxs font-semibold text-apple-gray uppercase tracking-wider">Settings</p>
+        <div class="space-y-0.5">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                <i class="bi bi-gear text-base w-5 text-center"></i>
+                Settings
+            </a>
+        </div>
+    </nav>
 </aside>
 
 <div class="flex min-h-[calc(100vh-56px)]">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 fixed h-[calc(100vh-56px)] overflow-y-auto py-6 hidden lg:block">
-        <div class="px-5 pb-5 border-b border-gray-200 mb-4">
-            <h6 class="text-xs font-semibold text-apple-gray uppercase tracking-wide">Main Menu</h6>
-        </div>
-        <ul class="space-y-1 px-3">
-            <li>
-                <a href="/Dashboard" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath == "/dashboard" ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
-                    <i class="bi bi-grid-1x2 text-lg w-6 text-center"></i>
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:flex lg:flex-col w-60 bg-white/50 backdrop-blur-sm border-r border-gray-200/60 fixed h-[calc(100vh-56px)] overflow-y-auto">
+        <nav class="flex-1 p-3">
+            <p class="px-3 pb-2 text-xxs font-semibold text-apple-gray uppercase tracking-wider">Main Menu</p>
+            <div class="space-y-0.5">
+                <a href="/Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium transition-all duration-200 @(currentPath == "/dashboard" ? "bg-apple-blue text-white shadow-sm" : "text-apple-dark hover:bg-gray-100")">
+                    <i class="bi bi-grid-1x2 text-base w-5 text-center"></i>
                     Dashboard
                 </a>
-            </li>
-            <li>
-                <a href="/Sessions" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath.StartsWith("/sessions") ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
-                    <i class="bi bi-clipboard-check text-lg w-6 text-center"></i>
+                <a href="/Sessions" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium transition-all duration-200 @(currentPath.StartsWith("/sessions") ? "bg-apple-blue text-white shadow-sm" : "text-apple-dark hover:bg-gray-100")">
+                    <i class="bi bi-clipboard-check text-base w-5 text-center"></i>
                     Sessions
                 </a>
-            </li>
-            <li>
-                <a href="/Clients" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 @(currentPath.StartsWith("/clients") ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white" : "text-apple-dark hover:bg-gray-100")">
-                    <i class="bi bi-people text-lg w-6 text-center"></i>
+                <a href="/Clients" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium transition-all duration-200 @(currentPath.StartsWith("/clients") ? "bg-apple-blue text-white shadow-sm" : "text-apple-dark hover:bg-gray-100")">
+                    <i class="bi bi-people text-base w-5 text-center"></i>
                     Clients
                 </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-car-front text-lg w-6 text-center"></i>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                    <i class="bi bi-car-front text-base w-5 text-center"></i>
                     Vehicles
                 </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-wrench text-lg w-6 text-center"></i>
-                    Services
-                </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-calendar-check text-lg w-6 text-center"></i>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                    <i class="bi bi-calendar-check text-base w-5 text-center"></i>
                     Appointments
                 </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-receipt text-lg w-6 text-center"></i>
+            </div>
+            
+            <p class="px-3 pt-6 pb-2 text-xxs font-semibold text-apple-gray uppercase tracking-wider">Business</p>
+            <div class="space-y-0.5">
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                    <i class="bi bi-receipt text-base w-5 text-center"></i>
                     Invoices
                 </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-box-seam text-lg w-6 text-center"></i>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                    <i class="bi bi-box-seam text-base w-5 text-center"></i>
                     Inventory
                 </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-graph-up text-lg w-6 text-center"></i>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                    <i class="bi bi-graph-up text-base w-5 text-center"></i>
                     Reports
                 </a>
-            </li>
-            <li>
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all duration-200 text-apple-dark hover:bg-gray-100">
-                    <i class="bi bi-gear text-lg w-6 text-center"></i>
+            </div>
+            
+            <p class="px-3 pt-6 pb-2 text-xxs font-semibold text-apple-gray uppercase tracking-wider">Settings</p>
+            <div class="space-y-0.5">
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-apple text-sm font-medium text-apple-dark hover:bg-gray-100 transition-all duration-200">
+                    <i class="bi bi-gear text-base w-5 text-center"></i>
                     Settings
                 </a>
-            </li>
-        </ul>
+            </div>
+        </nav>
+        
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-gray-100">
+            <div class="p-3 bg-gradient-to-br from-gray-50 to-gray-100/80 rounded-apple">
+                <p class="text-xs text-apple-gray mb-1">Need help?</p>
+                <a href="#" class="text-sm font-medium text-apple-blue hover:text-apple-blue-hover transition-colors">
+                    View Documentation →
+                </a>
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 lg:ml-64 p-8">
-        @RenderBody()
+    <main class="flex-1 lg:ml-60">
+        <div class="p-4 lg:p-8 max-w-7xl mx-auto">
+            @RenderBody()
+        </div>
     </main>
 </div>
 
@@ -193,21 +208,25 @@
         const mobileBackdrop = document.getElementById('mobile-backdrop');
         const closeMobileMenuBtn = document.getElementById('close-mobile-menu');
 
-        function toggleMenu() {
-            const isHidden = mobileSidebar.classList.contains('-translate-x-full');
-            if (isHidden) {
-                // Open
-                mobileSidebar.classList.remove('-translate-x-full');
-                mobileBackdrop.classList.remove('opacity-0', 'pointer-events-none');
-            } else {
-                // Close
-                mobileSidebar.classList.add('-translate-x-full');
-                mobileBackdrop.classList.add('opacity-0', 'pointer-events-none');
-            }
+        function openMenu() {
+            mobileSidebar.classList.remove('-translate-x-full');
+            mobileBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'hidden';
         }
 
-        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleMenu);
-        if (mobileBackdrop) mobileBackdrop.addEventListener('click', toggleMenu);
-        if (closeMobileMenuBtn) closeMobileMenuBtn.addEventListener('click', toggleMenu);
+        function closeMenu() {
+            mobileSidebar.classList.add('-translate-x-full');
+            mobileBackdrop.classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = '';
+        }
+
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMenu);
+        if (mobileBackdrop) mobileBackdrop.addEventListener('click', closeMenu);
+        if (closeMobileMenuBtn) closeMobileMenuBtn.addEventListener('click', closeMenu);
+        
+        // Close on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMenu();
+        });
     });
 </script>

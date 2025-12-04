@@ -6,98 +6,144 @@
     Layout = "_AppLayout";
 }
 
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-            <a href="/Sessions/Details/@Model.Session.Id" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            <div>
-                <h1 class="text-2xl font-semibold text-gray-900">Test Drive</h1>
-                <p class="text-sm text-gray-500">Session #@Model.Session.SessionNumber • @Model.Session.VehicleDisplayName</p>
+<div class="space-y-6 animate-fade-in">
+    <!-- Header with gradient -->
+    <div class="bg-gradient-to-r from-apple-teal to-apple-green rounded-2xl p-6 animate-slide-up">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <a href="/Sessions/Details/@Model.Session.Id" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
+                    <i class="bi bi-arrow-left text-white text-lg"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-semibold text-white">Test Drive</h1>
+                    <p class="text-white/80 text-sm mt-1">Session #@Model.Session.SessionNumber • @Model.Session.VehicleDisplayName</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                @{
+                    var statusConfig = Model.TestDrive.Status switch
+                    {
+                        RequestStatus.Completed => ("bg-white/20 text-white", "bi-check-circle-fill"),
+                        RequestStatus.InProgress => ("bg-white/20 text-white", "bi-arrow-repeat"),
+                        _ => ("bg-white/20 text-white", "bi-clock")
+                    };
+                }
+                <span class="px-4 py-2 @statusConfig.Item1 backdrop-blur-sm rounded-xl text-sm font-medium flex items-center gap-2">
+                    <i class="bi @statusConfig.Item2"></i>
+                    @Model.TestDrive.Status
+                </span>
             </div>
         </div>
-        <span class="px-3 py-1 text-sm font-medium rounded-full @(Model.TestDrive.Status == RequestStatus.Completed ? "bg-green-100 text-green-800" : Model.TestDrive.Status == RequestStatus.InProgress ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800")">
-            @Model.TestDrive.Status
-        </span>
     </div>
 
-    <!-- Test Drive Details -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Test Drive Details</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p class="text-sm text-gray-500">Title</p>
-                <p class="text-base font-medium text-gray-900">@Model.TestDrive.Title</p>
+    <!-- Test Drive Details Card -->
+    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-apple-teal/10 to-apple-green/10 rounded-xl flex items-center justify-center">
+                <i class="bi bi-speedometer2 text-apple-teal text-lg"></i>
+            </div>
+            <h2 class="text-lg font-semibold text-apple-dark">Test Drive Details</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1">
+                <p class="text-sm text-apple-gray">Title</p>
+                <p class="text-base font-medium text-apple-dark">@Model.TestDrive.Title</p>
             </div>
             @if (!string.IsNullOrEmpty(Model.TestDrive.Description))
             {
-                <div>
-                    <p class="text-sm text-gray-500">Description</p>
-                    <p class="text-base text-gray-900">@Model.TestDrive.Description</p>
+                <div class="space-y-1">
+                    <p class="text-sm text-apple-gray">Description</p>
+                    <p class="text-base text-apple-dark">@Model.TestDrive.Description</p>
                 </div>
             }
             @if (Model.TestDrive.MileageStart.HasValue || Model.TestDrive.MileageEnd.HasValue)
             {
-                <div>
-                    <p class="text-sm text-gray-500">Mileage</p>
-                    <p class="text-base text-gray-900">
-                        @(Model.TestDrive.MileageStart?.ToString("N0") ?? "—") km → @(Model.TestDrive.MileageEnd?.ToString("N0") ?? "—") km
+                <div class="md:col-span-2">
+                    <p class="text-sm text-apple-gray mb-2">Mileage</p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-1 bg-gradient-to-r from-apple-teal/5 to-transparent rounded-xl p-4 border border-apple-teal/10">
+                            <p class="text-xs text-apple-gray mb-1">Start</p>
+                            <p class="text-xl font-semibold text-apple-dark">@(Model.TestDrive.MileageStart?.ToString("N0") ?? "—") <span class="text-sm font-normal text-apple-gray">km</span></p>
+                        </div>
+                        <div class="w-12 h-12 bg-apple-teal/10 rounded-full flex items-center justify-center">
+                            <i class="bi bi-arrow-right text-apple-teal text-xl"></i>
+                        </div>
+                        <div class="flex-1 bg-gradient-to-l from-apple-green/5 to-transparent rounded-xl p-4 border border-apple-green/10">
+                            <p class="text-xs text-apple-gray mb-1">End</p>
+                            <p class="text-xl font-semibold text-apple-dark">@(Model.TestDrive.MileageEnd?.ToString("N0") ?? "—") <span class="text-sm font-normal text-apple-gray">km</span></p>
+                        </div>
                         @if (Model.TestDrive.MileageStart.HasValue && Model.TestDrive.MileageEnd.HasValue)
                         {
-                            <span class="text-gray-500 text-sm ml-1">(@((Model.TestDrive.MileageEnd.Value - Model.TestDrive.MileageStart.Value).ToString("N0")) km driven)</span>
+                            <div class="bg-apple-green/10 rounded-xl p-4 border border-apple-green/20">
+                                <p class="text-xs text-apple-gray mb-1">Distance</p>
+                                <p class="text-xl font-bold text-apple-green">@((Model.TestDrive.MileageEnd.Value - Model.TestDrive.MileageStart.Value).ToString("N0")) <span class="text-sm font-normal">km</span></p>
+                            </div>
                         }
-                    </p>
+                    </div>
                 </div>
             }
             @if (!string.IsNullOrEmpty(Model.TestDrive.RouteDescription))
             {
-                <div class="md:col-span-2">
-                    <p class="text-sm text-gray-500">Route</p>
-                    <p class="text-base text-gray-900">@Model.TestDrive.RouteDescription</p>
+                <div class="md:col-span-2 space-y-1">
+                    <p class="text-sm text-apple-gray">Route Description</p>
+                    <p class="text-base text-apple-dark">@Model.TestDrive.RouteDescription</p>
                 </div>
             }
         </div>
     </div>
 
     <!-- Performance Summary -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Performance Observations</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @{
-                var observations = new[] {
-                    ("Engine", Model.TestDrive.EnginePerformance, "🔧"),
-                    ("Transmission", Model.TestDrive.TransmissionPerformance, "⚙️"),
-                    ("Brakes", Model.TestDrive.BrakePerformance, "🛑"),
-                    ("Steering", Model.TestDrive.SteeringPerformance, "🎯"),
-                    ("Suspension", Model.TestDrive.SuspensionPerformance, "🔩"),
-                    ("Noise", Model.TestDrive.NoiseObservations, "🔊"),
-                    ("Vibration", Model.TestDrive.VibrationObservations, "📳"),
-                    ("Electrical", Model.TestDrive.ElectricalObservations, "⚡"),
-                    ("A/C", Model.TestDrive.AcPerformance, "❄️")
-                };
-            }
-            @foreach (var (name, value, icon) in observations)
-            {
-                if (!string.IsNullOrEmpty(value))
-                {
-                    <div class="p-4 bg-gray-50 rounded-xl">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-lg">@icon</span>
-                            <span class="font-medium text-gray-900">@name</span>
-                        </div>
-                        <p class="text-sm text-gray-700">@value</p>
-                    </div>
-                }
-            }
+    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.2s">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="w-10 h-10 bg-gradient-to-br from-apple-blue/10 to-apple-indigo/10 rounded-xl flex items-center justify-center">
+                <i class="bi bi-graph-up text-apple-blue text-lg"></i>
+            </div>
+            <h2 class="text-lg font-semibold text-apple-dark">Performance Observations</h2>
         </div>
-        @if (observations.All(o => string.IsNullOrEmpty(o.Item2)))
+        
+        @{
+            var observations = new[] {
+                ("Engine", Model.TestDrive.EnginePerformance, "bi-gear-wide-connected", "from-apple-blue to-apple-indigo"),
+                ("Transmission", Model.TestDrive.TransmissionPerformance, "bi-gear", "from-apple-purple to-apple-indigo"),
+                ("Brakes", Model.TestDrive.BrakePerformance, "bi-disc", "from-apple-red to-apple-orange"),
+                ("Steering", Model.TestDrive.SteeringPerformance, "bi-joystick", "from-apple-teal to-apple-green"),
+                ("Suspension", Model.TestDrive.SuspensionPerformance, "bi-arrows-expand", "from-apple-orange to-apple-red"),
+                ("Noise", Model.TestDrive.NoiseObservations, "bi-volume-up", "from-gray-500 to-gray-600"),
+                ("Vibration", Model.TestDrive.VibrationObservations, "bi-activity", "from-apple-orange to-amber-600"),
+                ("Electrical", Model.TestDrive.ElectricalObservations, "bi-lightning", "from-yellow-500 to-apple-orange"),
+                ("A/C", Model.TestDrive.AcPerformance, "bi-snow2", "from-cyan-500 to-apple-blue")
+            };
+            var hasObservations = observations.Any(o => !string.IsNullOrEmpty(o.Item2));
+        }
+        
+        @if (hasObservations)
         {
-            <div class="text-center py-6 text-gray-500">
-                <p>No performance observations recorded yet</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @foreach (var (name, value, icon, gradient) in observations)
+                {
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        <div class="group p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 bg-gradient-to-br @gradient rounded-lg flex items-center justify-center">
+                                    <i class="bi @icon text-white text-sm"></i>
+                                </div>
+                                <span class="font-medium text-apple-dark">@name</span>
+                            </div>
+                            <p class="text-sm text-apple-gray leading-relaxed">@value</p>
+                        </div>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-12">
+                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-clipboard text-3xl text-gray-300"></i>
+                </div>
+                <p class="text-apple-gray font-medium">No performance observations recorded yet</p>
+                <p class="text-sm text-gray-400 mt-1">Observations will appear here after the test drive</p>
             </div>
         }
     </div>
@@ -105,46 +151,53 @@
     <!-- Findings & Recommendations -->
     @if (!string.IsNullOrEmpty(Model.TestDrive.Findings) || !string.IsNullOrEmpty(Model.TestDrive.Recommendations))
     {
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">Findings & Recommendations</h2>
-            <div class="space-y-4">
-                @if (!string.IsNullOrEmpty(Model.TestDrive.Findings))
-                {
-                    <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
-                        <p class="text-sm font-medium text-yellow-800 mb-1">Key Findings</p>
-                        <p class="text-yellow-900">@Model.TestDrive.Findings</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up" style="animation-delay: 0.3s">
+            @if (!string.IsNullOrEmpty(Model.TestDrive.Findings))
+            {
+                <div class="bg-gradient-to-br from-apple-orange/5 to-amber-50 border border-apple-orange/20 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 bg-apple-orange/20 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-exclamation-triangle text-apple-orange text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold text-apple-dark">Key Findings</h3>
                     </div>
-                }
-                @if (!string.IsNullOrEmpty(Model.TestDrive.Recommendations))
-                {
-                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                        <p class="text-sm font-medium text-blue-800 mb-1">Recommendations</p>
-                        <p class="text-blue-900">@Model.TestDrive.Recommendations</p>
+                    <p class="text-apple-dark leading-relaxed">@Model.TestDrive.Findings</p>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.TestDrive.Recommendations))
+            {
+                <div class="bg-gradient-to-br from-apple-blue/5 to-blue-50 border border-apple-blue/20 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 bg-apple-blue/20 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-lightbulb text-apple-blue text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold text-apple-dark">Recommendations</h3>
                     </div>
-                }
-            </div>
+                    <p class="text-apple-dark leading-relaxed">@Model.TestDrive.Recommendations</p>
+                </div>
+            }
         </div>
     }
 
     <!-- Media Upload Section -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-semibold text-gray-900">Test Drive Photos & Videos</h2>
-            <label class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors cursor-pointer">
+    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.4s">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-apple-purple/10 to-apple-indigo/10 rounded-xl flex items-center justify-center">
+                    <i class="bi bi-images text-apple-purple text-lg"></i>
+                </div>
+                <h2 class="text-lg font-semibold text-apple-dark">Test Drive Media</h2>
+            </div>
+            <label class="btn-apple-primary cursor-pointer">
                 <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
-                <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Upload Media
-                </span>
+                <i class="bi bi-plus-lg mr-2"></i> Upload Media
             </label>
         </div>
 
         <div id="uploadProgress" class="hidden mb-4">
-            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                <span class="text-sm text-blue-700">Uploading and compressing...</span>
+            <div class="flex items-center gap-3 p-4 bg-apple-blue/5 border border-apple-blue/20 rounded-xl">
+                <div class="animate-spin rounded-full h-5 w-5 border-2 border-apple-blue border-t-transparent"></div>
+                <span class="text-sm text-apple-blue font-medium">Uploading and compressing...</span>
             </div>
         </div>
 
@@ -153,58 +206,54 @@
             {
                 @foreach (var media in Model.TestDrive.MediaItems)
                 {
-                    <div class="relative group" data-media-id="@media.Id">
+                    <div class="relative group rounded-xl overflow-hidden" data-media-id="@media.Id">
                         @if (media.MediaType == MediaType.Image)
                         {
                             <img src="@media.S3Url" alt="@media.Title" 
-                                 class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90"
+                                 class="w-full h-32 object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                                  onclick="openMediaViewer('@media.S3Url', 'image')" />
                         }
                         else if (media.MediaType == MediaType.Video)
                         {
-                            <div class="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200"
+                            <div class="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-100 transition-all"
                                  onclick="openMediaViewer('@media.S3Url', 'video')">
-                                <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
+                                <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                                    <i class="bi bi-play-fill text-2xl text-apple-dark"></i>
+                                </div>
                             </div>
                         }
                         <button onclick="deleteMedia('@media.Id')" 
-                                class="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
+                                class="absolute top-2 right-2 w-8 h-8 bg-apple-red/90 backdrop-blur-sm text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg flex items-center justify-center hover:scale-110">
+                            <i class="bi bi-x-lg text-sm"></i>
                         </button>
                     </div>
                 }
             }
         </div>
 
-        <div id="emptyMedia" class="@(Model.TestDrive.MediaItems?.Any() == true ? "hidden" : "") text-center py-8">
-            <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <p class="text-gray-500">No photos or videos yet</p>
-            <p class="text-sm text-gray-400">Upload images to document test drive observations</p>
+        <div id="emptyMedia" class="@(Model.TestDrive.MediaItems?.Any() == true ? "hidden" : "") text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-image text-3xl text-gray-300"></i>
+            </div>
+            <p class="text-apple-gray font-medium">No photos or videos yet</p>
+            <p class="text-sm text-gray-400 mt-1">Upload images to document test drive observations</p>
         </div>
     </div>
 
-    <div class="flex justify-start">
-        <a href="/Sessions/Details/@Model.Session.Id" class="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium">
-            ← Back to Session
+    <!-- Back Link -->
+    <div class="flex justify-start animate-slide-up" style="animation-delay: 0.5s">
+        <a href="/Sessions/Details/@Model.Session.Id" class="btn-apple-ghost">
+            <i class="bi bi-arrow-left mr-2"></i> Back to Session
         </a>
     </div>
 </div>
 
 <!-- Media Viewer Modal -->
-<div id="mediaViewer" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden items-center justify-center">
-    <button onclick="closeMediaViewer()" class="absolute top-4 right-4 p-2 text-white hover:text-gray-300">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
+<div id="mediaViewer" class="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 hidden items-center justify-center">
+    <button onclick="closeMediaViewer()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all">
+        <i class="bi bi-x-lg text-xl"></i>
     </button>
-    <div id="mediaContent" class="max-w-4xl max-h-[90vh]"></div>
+    <div id="mediaContent" class="max-w-5xl max-h-[90vh]"></div>
 </div>
 
 @section Scripts {
@@ -300,33 +349,28 @@
     function addMediaToGrid(media) {
         emptyMedia.classList.add('hidden');
         const div = document.createElement('div');
-        div.className = 'relative group';
+        div.className = 'relative group rounded-xl overflow-hidden animate-scale-in';
         div.dataset.mediaId = media.id;
 
         if (media.mediaType === 0) {
             div.innerHTML = `
-                <img src="${media.s3Url}" class="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-90"
+                <img src="${media.s3Url}" class="w-full h-32 object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                      onclick="openMediaViewer('${media.s3Url}', 'image')" />
                 <button onclick="deleteMedia('${media.id}')" 
-                        class="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
+                        class="absolute top-2 right-2 w-8 h-8 bg-apple-red/90 backdrop-blur-sm text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg flex items-center justify-center hover:scale-110">
+                    <i class="bi bi-x-lg text-sm"></i>
                 </button>`;
         } else {
             div.innerHTML = `
-                <div class="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200"
+                <div class="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-100 transition-all"
                      onclick="openMediaViewer('${media.s3Url}', 'video')">
-                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+                    <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                        <i class="bi bi-play-fill text-2xl text-apple-dark"></i>
+                    </div>
                 </div>
                 <button onclick="deleteMedia('${media.id}')" 
-                        class="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
+                        class="absolute top-2 right-2 w-8 h-8 bg-apple-red/90 backdrop-blur-sm text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg flex items-center justify-center hover:scale-110">
+                    <i class="bi bi-x-lg text-sm"></i>
                 </button>`;
         }
         mediaGrid.appendChild(div);
@@ -340,7 +384,12 @@
         });
         const result = await response.json();
         if (result.success) {
-            document.querySelector(`[data-media-id="${mediaId}"]`)?.remove();
+            const el = document.querySelector(`[data-media-id="${mediaId}"]`);
+            if (el) {
+                el.style.transform = 'scale(0)';
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 200);
+            }
             if (mediaGrid.children.length === 0) emptyMedia.classList.remove('hidden');
         }
     }
@@ -349,8 +398,8 @@
         const viewer = document.getElementById('mediaViewer');
         const content = document.getElementById('mediaContent');
         content.innerHTML = type === 'image' 
-            ? `<img src="${url}" class="max-w-full max-h-[90vh] rounded-lg" />`
-            : `<video src="${url}" controls autoplay class="max-w-full max-h-[90vh] rounded-lg"></video>`;
+            ? `<img src="${url}" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl" />`
+            : `<video src="${url}" controls autoplay class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl"></video>`;
         viewer.classList.remove('hidden');
         viewer.classList.add('flex');
     }
@@ -363,5 +412,12 @@
 
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMediaViewer(); });
 </script>
+<style>
+    @@keyframes scale-in {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    .animate-scale-in { animation: scale-in 0.2s ease-out; }
+</style>
 <form method="post" class="hidden">@Html.AntiForgeryToken()</form>
 }

@@ -5,53 +5,56 @@
     ViewData["Title"] = $"{Model.Client.FirstName} {Model.Client.LastName}";
 }
 
-<a href="/Clients" class="inline-flex items-center gap-2 text-apple-gray hover:text-indigo-500 no-underline mb-6 transition-colors">
+<!-- Back Navigation -->
+<a href="/Clients" class="inline-flex items-center gap-2 text-apple-gray hover:text-apple-blue no-underline mb-6 text-sm transition-colors animate-fade-in">
     <i class="bi bi-arrow-left"></i>
     Back to Clients
 </a>
 
-<!-- Client Header -->
-<div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-8 text-white mb-8">
-    <div class="flex flex-col lg:flex-row lg:items-center gap-6">
-        <div class="flex items-center gap-6">
-            <div class="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-4xl font-semibold border-4 border-white/30 flex-shrink-0">
-                @Model.Client.FirstName[0]@Model.Client.LastName[0]
+<!-- Client Header Card -->
+<div class="card-apple overflow-hidden mb-8 animate-slide-up">
+    <div class="bg-gradient-to-r from-apple-blue to-apple-purple p-8 text-white">
+        <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+            <div class="flex items-center gap-5">
+                <div class="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-3xl font-semibold border-2 border-white/30 flex-shrink-0 backdrop-blur">
+                    @Model.Client.FirstName[0]@Model.Client.LastName[0]
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                        <h1 class="text-2xl font-semibold tracking-tight">@Model.Client.FirstName @Model.Client.LastName</h1>
+                        @if (Model.Client.IsVip)
+                        {
+                            <span class="bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                                <i class="bi bi-star-fill"></i>VIP
+                            </span>
+                        }
+                    </div>
+                    <div class="flex gap-5 flex-wrap opacity-90 text-sm">
+                        @if (!string.IsNullOrEmpty(Model.Client.Phone))
+                        {
+                            <span class="flex items-center gap-2"><i class="bi bi-telephone"></i>@Model.Client.Phone</span>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Client.Email))
+                        {
+                            <span class="flex items-center gap-2"><i class="bi bi-envelope"></i>@Model.Client.Email</span>
+                        }
+                    </div>
+                </div>
             </div>
-            <div>
-                <div class="flex items-center gap-3 mb-2 flex-wrap">
-                    <h1 class="text-2xl font-bold">@Model.Client.FirstName @Model.Client.LastName</h1>
-                    @if (Model.Client.IsVip)
-                    {
-                        <span class="bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 rounded-full text-sm font-semibold">
-                            <i class="bi bi-star-fill mr-1"></i>VIP
-                        </span>
-                    }
-                </div>
-                <div class="flex gap-4 flex-wrap opacity-90 text-sm">
-                    @if (!string.IsNullOrEmpty(Model.Client.Phone))
-                    {
-                        <span><i class="bi bi-telephone mr-2"></i>@Model.Client.Phone</span>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.Client.Email))
-                    {
-                        <span><i class="bi bi-envelope mr-2"></i>@Model.Client.Email</span>
-                    }
-                </div>
-            </div>
-        </div>
-        <div class="lg:ml-auto">
-            <div class="flex gap-3 flex-wrap">
-                <div class="bg-white/15 rounded-xl p-4 text-center min-w-[100px]">
-                    <div class="text-2xl font-bold">@Model.Client.TotalVisits</div>
-                    <div class="text-xs uppercase tracking-wider opacity-80">Total Visits</div>
-                </div>
-                <div class="bg-white/15 rounded-xl p-4 text-center min-w-[100px]">
-                    <div class="text-2xl font-bold">$@Model.Client.TotalSpent.ToString("N0")</div>
-                    <div class="text-xs uppercase tracking-wider opacity-80">Total Spent</div>
-                </div>
-                <div class="bg-white/15 rounded-xl p-4 text-center min-w-[100px]">
-                    <div class="text-2xl font-bold">@Model.Vehicles.Count()</div>
-                    <div class="text-xs uppercase tracking-wider opacity-80">Vehicles</div>
+            <div class="lg:ml-auto">
+                <div class="flex gap-4 flex-wrap">
+                    <div class="bg-white/15 backdrop-blur rounded-2xl p-4 text-center min-w-[100px]">
+                        <div class="text-2xl font-bold">@Model.Client.TotalVisits</div>
+                        <div class="text-[11px] uppercase tracking-wider opacity-80">Visits</div>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur rounded-2xl p-4 text-center min-w-[100px]">
+                        <div class="text-2xl font-bold">$@Model.Client.TotalSpent.ToString("N0")</div>
+                        <div class="text-[11px] uppercase tracking-wider opacity-80">Spent</div>
+                    </div>
+                    <div class="bg-white/15 backdrop-blur rounded-2xl p-4 text-center min-w-[100px]">
+                        <div class="text-2xl font-bold">@Model.Vehicles.Count()</div>
+                        <div class="text-[11px] uppercase tracking-wider opacity-80">Vehicles</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -59,28 +62,32 @@
 </div>
 
 <!-- Vehicles Section -->
-<div class="flex justify-between items-center mb-6">
-    <h3 class="text-xl font-bold text-apple-dark flex items-center gap-2">
-        <i class="bi bi-car-front text-indigo-500"></i>Vehicles
+<div class="flex justify-between items-center mb-5 animate-slide-up" style="animation-delay: 0.1s;">
+    <h3 class="text-lg font-semibold text-apple-dark flex items-center gap-2">
+        <i class="bi bi-car-front text-apple-blue"></i>Vehicles
     </h3>
+    <button onclick="openModal()" class="btn-apple-ghost text-sm">
+        <i class="bi bi-plus-lg"></i>
+        Add Vehicle
+    </button>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 animate-slide-up" style="animation-delay: 0.15s;">
     @foreach (var vehicle in Model.Vehicles)
     {
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all relative h-full">
+        <div class="card-apple p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all group relative">
             @if (vehicle.IsPrimary)
             {
-                <span class="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">Primary</span>
+                <span class="absolute top-4 right-4 badge-apple-green text-xs">Primary</span>
             }
             <div class="flex gap-4 mb-4">
-                <div class="w-14 h-14 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl flex-shrink-0">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-apple-blue to-apple-purple flex items-center justify-center text-white text-lg flex-shrink-0">
                     <i class="bi bi-car-front-fill"></i>
                 </div>
-                <div class="overflow-hidden">
+                <div class="overflow-hidden min-w-0">
                     <h5 class="font-semibold text-apple-dark truncate">@vehicle.Year @vehicle.Make @vehicle.Model</h5>
-                    <span class="text-apple-gray text-sm">
-                        <i class="bi bi-card-text mr-1"></i>@vehicle.LicensePlate
+                    <span class="text-apple-gray text-sm flex items-center gap-1">
+                        <i class="bi bi-card-text"></i>@vehicle.LicensePlate
                     </span>
                 </div>
             </div>
@@ -88,28 +95,28 @@
                 @if (!string.IsNullOrEmpty(vehicle.Color))
                 {
                     <div>
-                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide">Color</span>
+                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide mb-0.5">Color</span>
                         <span class="text-sm font-medium text-apple-dark">@vehicle.Color</span>
                     </div>
                 }
                 @if (!string.IsNullOrEmpty(vehicle.EngineType))
                 {
                     <div>
-                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide">Engine</span>
+                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide mb-0.5">Engine</span>
                         <span class="text-sm font-medium text-apple-dark">@vehicle.EngineType</span>
                     </div>
                 }
                 @if (!string.IsNullOrEmpty(vehicle.Transmission))
                 {
                     <div>
-                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide">Transmission</span>
+                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide mb-0.5">Transmission</span>
                         <span class="text-sm font-medium text-apple-dark">@vehicle.Transmission</span>
                     </div>
                 }
                 @if (vehicle.Mileage.HasValue)
                 {
                     <div>
-                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide">Mileage</span>
+                        <span class="block text-[10px] text-apple-gray uppercase tracking-wide mb-0.5">Mileage</span>
                         <span class="text-sm font-medium text-apple-dark">@vehicle.Mileage.Value.ToString("N0") mi</span>
                     </div>
                 }
@@ -117,32 +124,33 @@
             @if (!string.IsNullOrEmpty(vehicle.Vin))
             {
                 <div class="mb-4">
-                    <span class="block text-[10px] text-apple-gray uppercase tracking-wide">VIN</span>
+                    <span class="block text-[10px] text-apple-gray uppercase tracking-wide mb-0.5">VIN</span>
                     <div class="text-xs font-medium text-apple-dark font-mono truncate">@vehicle.Vin</div>
                 </div>
             }
             @if (!string.IsNullOrEmpty(vehicle.Notes))
             {
-                <div class="bg-gray-50 rounded-lg px-3 py-2 mb-4 text-xs text-apple-gray">
-                    <i class="bi bi-sticky mr-1"></i>@vehicle.Notes
+                <div class="bg-gray-50 rounded-xl px-3 py-2 mb-4 text-xs text-apple-gray flex items-start gap-2">
+                    <i class="bi bi-sticky mt-0.5"></i>
+                    <span>@vehicle.Notes</span>
                 </div>
             }
-            <div class="flex justify-end gap-2 mt-auto">
+            <div class="flex justify-end gap-2 mt-auto opacity-60 group-hover:opacity-100 transition-opacity">
                 <form method="post" asp-page-handler="CreateSession" asp-route-id="@Model.Client.Id" asp-route-vehicleId="@vehicle.Id" class="inline">
-                    <button type="submit" class="px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all text-sm flex items-center gap-1.5" title="Create new session for this vehicle">
-                        <i class="bi bi-plus-circle"></i> New Session
+                    <button type="submit" class="btn-apple-primary text-sm py-2 px-3" title="Create new session for this vehicle">
+                        <i class="bi bi-plus-circle"></i>New Session
                     </button>
                 </form>
                 <form method="post" asp-page-handler="DeleteVehicle" asp-route-id="@Model.Client.Id" asp-route-vehicleId="@vehicle.Id" class="inline">
-                    <button type="submit" class="px-3 py-1.5 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors text-sm" onclick="return confirm('Are you sure you want to delete this vehicle?')">
+                    <button type="submit" class="w-9 h-9 flex items-center justify-center border border-apple-red/30 text-apple-red rounded-xl hover:bg-apple-red/10 transition-colors" onclick="return confirm('Are you sure you want to delete this vehicle?')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </form>
             </div>
         </div>
     }
-    <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/30 transition-all min-h-[200px]" onclick="openModal()">
-        <div class="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-apple-gray text-xl mb-4">
+    <div class="card-apple border-2 border-dashed border-gray-200 p-8 flex flex-col items-center justify-center cursor-pointer hover:border-apple-blue hover:bg-apple-blue/5 transition-all min-h-[200px]" onclick="openModal()">
+        <div class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-apple-gray text-xl mb-4">
             <i class="bi bi-plus-lg"></i>
         </div>
         <span class="text-apple-gray font-medium">Add New Vehicle</span>
@@ -150,116 +158,122 @@
 </div>
 
 <!-- Sessions Section -->
-<div class="flex justify-between items-center mb-6 mt-10">
-    <h3 class="text-xl font-bold text-apple-dark flex items-center gap-2">
-        <i class="bi bi-clock-history text-indigo-500"></i>Service History
+<div class="flex justify-between items-center mb-5 mt-10 animate-slide-up" style="animation-delay: 0.2s;">
+    <h3 class="text-lg font-semibold text-apple-dark flex items-center gap-2">
+        <i class="bi bi-clock-history text-apple-blue"></i>Service History
     </h3>
-    <span class="text-apple-gray text-sm">@Model.Sessions.Count() session(s)</span>
+    <span class="badge-apple-gray">@Model.Sessions.Count() session(s)</span>
 </div>
 
 @if (Model.Sessions.Any())
 {
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-gray-50 border-b border-gray-100">
-                <tr>
-                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Session</th>
-                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Vehicle</th>
-                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Status</th>
-                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Check-In</th>
-                    <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Progress</th>
-                    <th class="text-right py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @foreach (var session in Model.Sessions.OrderByDescending(s => s.CheckInAt))
-                {
-                    var statusColor = session.Status switch
-                    {
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-blue-100 text-blue-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bg-indigo-100 text-indigo-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Inspection => "bg-cyan-100 text-cyan-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "bg-orange-100 text-orange-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bg-purple-100 text-purple-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-amber-100 text-amber-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed => "bg-green-100 text-green-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-teal-100 text-teal-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-100 text-gray-700",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Cancelled => "bg-red-100 text-red-700",
-                        _ => "bg-gray-100 text-gray-700"
-                    };
-                    var statusIcon = session.Status switch
-                    {
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bi-box-arrow-in-right",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bi-chat-left-text",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Inspection => "bi-search",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "bi-speedometer2",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bi-hourglass-split",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bi-wrench-adjustable",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed => "bi-check-all",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bi-car-front",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bi-check-circle",
-                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Cancelled => "bi-x-circle",
-                        _ => "bi-question-circle"
-                    };
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="py-3 px-4">
-                            <a href="/Sessions/Details/@session.Id" class="font-semibold text-indigo-600 hover:text-indigo-800 no-underline">
-                                @session.SessionNumber
-                            </a>
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex items-center gap-2">
-                                <i class="bi bi-car-front text-apple-gray"></i>
-                                <span class="text-sm text-apple-dark">@session.VehicleDisplayName</span>
-                            </div>
-                            @if (!string.IsNullOrEmpty(session.VehicleLicensePlate))
-                            {
-                                <div class="text-xs text-apple-gray">@session.VehicleLicensePlate</div>
-                            }
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium @statusColor">
-                                <i class="bi @statusIcon"></i>
-                                @session.Status.ToString().Replace("InProgress", "In Progress").Replace("AwaitingApproval", "Awaiting Approval").Replace("WorkInProgress", "Work In Progress").Replace("QualityCheck", "Quality Check").Replace("ReadyForPickup", "Ready for Pickup")
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-sm text-apple-dark">
-                            <div>@session.CheckInAt.ToString("MMM dd, yyyy")</div>
-                            <div class="text-xs text-apple-gray">@session.CheckInAt.ToString("hh:mm tt")</div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <div class="flex gap-1">
-                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasCustomerRequest ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Customer Request">
-                                    <i class="bi bi-chat-left-text"></i>
-                                </span>
-                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasInspection ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Inspection">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasTestDrive ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Test Drive">
-                                    <i class="bi bi-speedometer2"></i>
-                                </span>
-                                <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs @(session.HasJobCard ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Job Card">
-                                    <i class="bi bi-card-checklist"></i>
-                                </span>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4 text-right">
-                            <a href="/Sessions/Details/@session.Id" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-sm hover:bg-indigo-100 transition-colors no-underline">
-                                <i class="bi bi-eye"></i> View
-                            </a>
-                        </td>
+    <div class="card-apple overflow-hidden animate-slide-up" style="animation-delay: 0.25s;">
+        <div class="overflow-x-auto">
+            <table class="table-apple">
+                <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Vehicle</th>
+                        <th>Status</th>
+                        <th>Check-In</th>
+                        <th>Progress</th>
+                        <th class="text-right">Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var session in Model.Sessions.OrderByDescending(s => s.CheckInAt))
+                    {
+                        var statusBadge = session.Status switch
+                        {
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "badge-apple-blue",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "badge-apple-indigo",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Inspection => "badge-apple-teal",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "badge-apple-orange",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "badge-apple-purple",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "badge-apple-orange",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed => "badge-apple-green",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "badge-apple-teal",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "badge-apple-gray",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Cancelled => "badge-apple-red",
+                            _ => "badge-apple-gray"
+                        };
+                        var statusIcon = session.Status switch
+                        {
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bi-box-arrow-in-right",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CustomerRequest => "bi-chat-left-text",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Inspection => "bi-search",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "bi-speedometer2",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "bi-hourglass-split",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bi-wrench-adjustable",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed => "bi-check-all",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bi-car-front",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bi-check-circle",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Cancelled => "bi-x-circle",
+                            _ => "bi-question-circle"
+                        };
+                        var statusText = session.Status.ToString()
+                            .Replace("InProgress", "In Progress")
+                            .Replace("AwaitingApproval", "Awaiting Approval")
+                            .Replace("ReadyForPickup", "Ready for Pickup");
+                        <tr class="group">
+                            <td>
+                                <a href="/Sessions/Details/@session.Id" class="font-semibold text-apple-blue hover:text-apple-dark no-underline transition-colors">
+                                    @session.SessionNumber
+                                </a>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-car-front text-apple-gray"></i>
+                                    <span class="text-sm text-apple-dark">@session.VehicleDisplayName</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(session.VehicleLicensePlate))
+                                {
+                                    <div class="text-xs text-apple-gray">@session.VehicleLicensePlate</div>
+                                }
+                            </td>
+                            <td>
+                                <span class="@statusBadge">
+                                    <i class="bi @statusIcon"></i>
+                                    @statusText
+                                </span>
+                            </td>
+                            <td>
+                                <div class="text-sm text-apple-dark">@session.CheckInAt.ToString("MMM dd, yyyy")</div>
+                                <div class="text-xs text-apple-gray">@session.CheckInAt.ToString("hh:mm tt")</div>
+                            </td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs @(session.HasCustomerRequest ? "bg-apple-green/15 text-apple-green" : "bg-gray-100 text-gray-400")" title="Customer Request">
+                                        <i class="bi bi-chat-left-text"></i>
+                                    </span>
+                                    <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs @(session.HasInspection ? "bg-apple-green/15 text-apple-green" : "bg-gray-100 text-gray-400")" title="Inspection">
+                                        <i class="bi bi-search"></i>
+                                    </span>
+                                    <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs @(session.HasTestDrive ? "bg-apple-green/15 text-apple-green" : "bg-gray-100 text-gray-400")" title="Test Drive">
+                                        <i class="bi bi-speedometer2"></i>
+                                    </span>
+                                    <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs @(session.HasJobCard ? "bg-apple-green/15 text-apple-green" : "bg-gray-100 text-gray-400")" title="Job Card">
+                                        <i class="bi bi-card-checklist"></i>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="text-right">
+                                <a href="/Sessions/Details/@session.Id" class="btn-apple-ghost text-sm py-1.5 px-3 opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <i class="bi bi-eye"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 }
 else
 {
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-            <i class="bi bi-clock-history text-3xl text-gray-400"></i>
+    <div class="card-apple p-12 text-center animate-slide-up" style="animation-delay: 0.25s;">
+        <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-clock-history text-2xl text-apple-gray"></i>
         </div>
         <h4 class="text-lg font-semibold text-apple-dark mb-2">No Service History</h4>
         <p class="text-apple-gray text-sm mb-4">This client hasn't had any service sessions yet.</p>
@@ -271,50 +285,50 @@ else
 }
 
 <!-- Add Vehicle Modal -->
-<div id="addVehicleModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto">
-        <div class="px-6 py-5 flex justify-between items-center">
-            <h5 class="text-xl font-bold text-apple-dark flex items-center gap-2">
-                <i class="bi bi-car-front-fill text-indigo-500"></i>Add New Vehicle
+<div id="addVehicleModal" class="modal-apple-overlay hidden">
+    <div class="modal-apple max-w-2xl">
+        <div class="border-b border-gray-100 px-6 py-5 flex justify-between items-center">
+            <h5 class="text-xl font-semibold text-apple-dark flex items-center gap-2">
+                <i class="bi bi-car-front-fill text-apple-blue"></i>Add New Vehicle
             </h5>
-            <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-gray hover:bg-gray-100 hover:text-apple-dark transition-all">
+            <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-gray hover:bg-gray-100 hover:text-apple-dark transition-colors">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
         <form method="post" asp-page-handler="AddVehicle" asp-route-id="@Model.Client.Id">
-            <div class="px-6 pb-6">
+            <div class="p-6 max-h-[60vh] overflow-y-auto">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Make <span class="text-red-500">*</span></label>
-                        <input type="text" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.Make" placeholder="e.g., Toyota" required>
+                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Make <span class="text-apple-red">*</span></label>
+                        <input type="text" class="input-apple-outlined" asp-for="NewVehicle.Make" placeholder="e.g., Toyota" required>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Model <span class="text-red-500">*</span></label>
-                        <input type="text" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.Model" placeholder="e.g., Camry" required>
+                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Model <span class="text-apple-red">*</span></label>
+                        <input type="text" class="input-apple-outlined" asp-for="NewVehicle.Model" placeholder="e.g., Camry" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Year</label>
-                        <input type="number" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.Year" placeholder="e.g., 2023" min="1900" max="2030">
+                        <input type="number" class="input-apple-outlined" asp-for="NewVehicle.Year" placeholder="e.g., 2023" min="1900" max="2030">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">License Plate <span class="text-red-500">*</span></label>
-                        <input type="text" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.LicensePlate" placeholder="e.g., ABC-1234" required>
+                        <label class="block text-sm font-medium text-apple-dark mb-1.5">License Plate <span class="text-apple-red">*</span></label>
+                        <input type="text" class="input-apple-outlined" asp-for="NewVehicle.LicensePlate" placeholder="e.g., ABC-1234" required>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Color</label>
-                        <input type="text" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.Color" placeholder="e.g., Silver">
+                        <input type="text" class="input-apple-outlined" asp-for="NewVehicle.Color" placeholder="e.g., Silver">
                     </div>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-apple-dark mb-1.5">VIN (Vehicle Identification Number)</label>
-                    <input type="text" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.Vin" placeholder="e.g., 1HGBH41JXMN109186" maxlength="17">
+                    <input type="text" class="input-apple-outlined" asp-for="NewVehicle.Vin" placeholder="e.g., 1HGBH41JXMN109186" maxlength="17">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Engine Type</label>
-                        <select class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-white" asp-for="NewVehicle.EngineType">
+                        <select class="input-apple-outlined bg-white" asp-for="NewVehicle.EngineType">
                             <option value="">Select...</option>
                             <option value="Gasoline">Gasoline</option>
                             <option value="Diesel">Diesel</option>
@@ -325,7 +339,7 @@ else
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Transmission</label>
-                        <select class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 bg-white" asp-for="NewVehicle.Transmission">
+                        <select class="input-apple-outlined bg-white" asp-for="NewVehicle.Transmission">
                             <option value="">Select...</option>
                             <option value="Automatic">Automatic</option>
                             <option value="Manual">Manual</option>
@@ -335,17 +349,17 @@ else
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Mileage</label>
-                        <input type="number" class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" asp-for="NewVehicle.Mileage" placeholder="e.g., 50000" min="0">
+                        <input type="number" class="input-apple-outlined" asp-for="NewVehicle.Mileage" placeholder="e.g., 50000" min="0">
                     </div>
                 </div>
-                <div class="mb-4">
+                <div>
                     <label class="block text-sm font-medium text-apple-dark mb-1.5">Notes</label>
-                    <textarea class="w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none" asp-for="NewVehicle.Notes" rows="2" placeholder="Any additional notes about the vehicle..."></textarea>
+                    <textarea class="input-apple-outlined resize-none" asp-for="NewVehicle.Notes" rows="2" placeholder="Any additional notes about the vehicle..."></textarea>
                 </div>
             </div>
-            <div class="border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
-                <button type="button" onclick="closeModal()" class="px-5 py-2.5 border border-gray-300 rounded-lg bg-white text-apple-dark text-sm cursor-pointer hover:bg-gray-50">Cancel</button>
-                <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg text-sm font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all">
+            <div class="border-t border-gray-100 px-6 py-4 flex justify-end gap-3 bg-gray-50">
+                <button type="button" onclick="closeModal()" class="btn-apple-secondary">Cancel</button>
+                <button type="submit" class="btn-apple-primary">
                     <i class="bi bi-plus-lg"></i>Add Vehicle
                 </button>
             </div>
@@ -356,23 +370,23 @@ else
 @section Scripts {
 <script>
     function openModal() {
-        document.getElementById('addVehicleModal').classList.remove('hidden');
-        document.getElementById('addVehicleModal').classList.add('flex');
+        const modal = document.getElementById('addVehicleModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
     }
     
     function closeModal() {
-        document.getElementById('addVehicleModal').classList.add('hidden');
-        document.getElementById('addVehicleModal').classList.remove('flex');
+        const modal = document.getElementById('addVehicleModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
         document.body.style.overflow = '';
     }
     
-    // Close modal on backdrop click
     document.getElementById('addVehicleModal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
     });
     
-    // Close modal on Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') closeModal();
     });

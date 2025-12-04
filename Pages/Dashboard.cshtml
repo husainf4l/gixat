@@ -5,190 +5,230 @@
     Layout = "_AppLayout";
 }
 
-<!-- Welcome Card -->
-<div class="bg-gradient-to-r from-indigo-600 to-purple-700 text-white rounded-2xl p-8 mb-8 shadow-lg animate-fade-in relative overflow-hidden">
-    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
-    <div class="absolute bottom-0 left-0 -mb-4 -ml-4 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
-    <div class="relative z-10">
-        <h2 class="text-3xl font-bold mb-2">Welcome back, @User.Identity?.Name! 👋</h2>
-        <p class="text-indigo-100 text-lg">Here's what's happening with your garage today.</p>
+<!-- Welcome Section -->
+<div class="mb-8 animate-fade-in">
+    <h1 class="text-2xl lg:text-3xl font-semibold text-apple-dark tracking-tight">
+        Good @(DateTime.Now.Hour < 12 ? "morning" : DateTime.Now.Hour < 17 ? "afternoon" : "evening"), @User.Identity?.Name 👋
+    </h1>
+    <p class="text-apple-gray mt-1">Here's what's happening with your garage today.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+    <!-- Active Sessions -->
+    <div class="card-apple p-5 animate-slide-up" style="animation-delay: 0.05s;">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-apple-blue/10 flex items-center justify-center">
+                <i class="bi bi-clipboard-check text-apple-blue text-lg"></i>
+            </div>
+            @if(Model.ActiveSessions > 0)
+            {
+                <span class="badge-apple-green">
+                    <i class="bi bi-arrow-up text-xxs"></i> Active
+                </span>
+            }
+        </div>
+        <p class="text-2xl lg:text-3xl font-semibold text-apple-dark">@Model.ActiveSessions</p>
+        <p class="text-sm text-apple-gray mt-1">Active Sessions</p>
+    </div>
+
+    <!-- In Progress -->
+    <div class="card-apple p-5 animate-slide-up" style="animation-delay: 0.1s;">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-apple-orange/10 flex items-center justify-center">
+                <i class="bi bi-wrench-adjustable text-apple-orange text-lg"></i>
+            </div>
+            <span class="badge-apple-orange">In Progress</span>
+        </div>
+        <p class="text-2xl lg:text-3xl font-semibold text-apple-dark">@Model.InProgressSessions</p>
+        <p class="text-sm text-apple-gray mt-1">Being Worked On</p>
+    </div>
+
+    <!-- Ready for Pickup -->
+    <div class="card-apple p-5 animate-slide-up" style="animation-delay: 0.15s;">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-apple-green/10 flex items-center justify-center">
+                <i class="bi bi-check2-circle text-apple-green text-lg"></i>
+            </div>
+            @if(Model.AwaitingPickup > 0)
+            {
+                <span class="badge-apple-red">
+                    <span class="w-1.5 h-1.5 rounded-full bg-apple-red animate-pulse-soft"></span>
+                    Action
+                </span>
+            }
+        </div>
+        <p class="text-2xl lg:text-3xl font-semibold text-apple-dark">@Model.AwaitingPickup</p>
+        <p class="text-sm text-apple-gray mt-1">Ready for Pickup</p>
+    </div>
+
+    <!-- Total Clients -->
+    <div class="card-apple p-5 animate-slide-up" style="animation-delay: 0.2s;">
+        <div class="flex items-center justify-between mb-4">
+            <div class="w-10 h-10 rounded-xl bg-apple-purple/10 flex items-center justify-center">
+                <i class="bi bi-people text-apple-purple text-lg"></i>
+            </div>
+        </div>
+        <p class="text-2xl lg:text-3xl font-semibold text-apple-dark">@Model.TotalClients</p>
+        <p class="text-sm text-apple-gray mt-1">Total Clients</p>
     </div>
 </div>
 
-<!-- Stats Row -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-slide-up" style="animation-delay: 0.1s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
-                <i class="bi bi-clipboard-check"></i>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up" style="animation-delay: 0.25s;">
+    <!-- Recent Sessions -->
+    <div class="lg:col-span-2 card-apple overflow-hidden">
+        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+            <div>
+                <h2 class="text-lg font-semibold text-apple-dark">Recent Sessions</h2>
+                <p class="text-sm text-apple-gray">Latest vehicle check-ins</p>
             </div>
-            <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+            <a href="/Sessions" class="btn-apple-ghost text-sm py-2 px-4">
+                View All
+                <i class="bi bi-arrow-right text-xs"></i>
+            </a>
         </div>
-        <h3 class="text-3xl font-bold text-apple-dark mb-1">@Model.ActiveSessions</h3>
-        <span class="text-sm text-apple-gray font-medium">Active Sessions</span>
-    </div>
-
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-slide-up" style="animation-delay: 0.2s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl">
-                <i class="bi bi-wrench-adjustable"></i>
-            </div>
-            <span class="text-xs font-medium text-apple-gray bg-gray-50 px-2 py-1 rounded-full">Busy</span>
-        </div>
-        <h3 class="text-3xl font-bold text-apple-dark mb-1">@Model.InProgressSessions</h3>
-        <span class="text-sm text-apple-gray font-medium">In Progress</span>
-    </div>
-
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-slide-up" style="animation-delay: 0.3s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
-                <i class="bi bi-check2-circle"></i>
-            </div>
-            <span class="text-xs font-medium text-rose-600 bg-rose-50 px-2 py-1 rounded-full">Action Needed</span>
-        </div>
-        <h3 class="text-3xl font-bold text-apple-dark mb-1">@Model.AwaitingPickup</h3>
-        <span class="text-sm text-apple-gray font-medium">Ready for Pickup</span>
-    </div>
-
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-slide-up" style="animation-delay: 0.4s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl">
-                <i class="bi bi-people"></i>
-            </div>
-            <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+5%</span>
-        </div>
-        <h3 class="text-3xl font-bold text-apple-dark mb-1">@Model.TotalClients</h3>
-        <span class="text-sm text-apple-gray font-medium">Total Clients</span>
-    </div>
-</div>
-
-<!-- Recent Activity -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-slide-up" style="animation-delay: 0.5s;">
-    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div class="flex justify-between items-center mb-6">
-            <h5 class="text-lg font-bold text-apple-dark flex items-center gap-2">
-                Recent Sessions
-            </h5>
-            <a href="/Sessions" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline">View All</a>
-        </div>
+        
         @if (Model.RecentSessions.Any())
         {
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b border-gray-100">
-                            <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Session</th>
-                            <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Vehicle</th>
-                            <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Status</th>
-                            <th class="text-left py-3 px-4 text-xs font-semibold text-apple-gray uppercase tracking-wider">Date</th>
-                            <th class="text-left py-3 px-4"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        @foreach (var session in Model.RecentSessions)
-                        {
-                            <tr class="hover:bg-gray-50/80 transition-colors group">
-                                <td class="py-4 px-4 font-semibold text-apple-dark">#@session.SessionNumber</td>
-                                <td class="py-4 px-4 text-gray-600">@session.VehicleDisplayName</td>
-                                <td class="py-4 px-4">
-                                    @{
-                                        var badgeClass = session.Status switch
-                                        {
-                                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-cyan-50 text-cyan-700 border-cyan-100",
-                                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-indigo-50 text-indigo-700 border-indigo-100",
-                                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed => "bg-green-50 text-green-700 border-green-100",
-                                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-amber-50 text-amber-700 border-amber-100",
-                                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-50 text-gray-700 border-gray-100",
-                                            _ => "bg-gray-50 text-gray-700 border-gray-100"
-                                        };
-                                    }
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium border @badgeClass">@session.Status</span>
-                                </td>
-                                <td class="py-4 px-4 text-sm text-apple-gray">@session.CheckInAt.ToString("MMM dd, HH:mm")</td>
-                                <td class="py-4 px-4 text-right">
-                                    <a href="/Sessions/Details/@session.Id" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                                        <i class="bi bi-arrow-right"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <div class="divide-y divide-gray-100">
+                @foreach (var session in Model.RecentSessions.Take(5))
+                {
+                    <a href="/Sessions/Details/@session.Id" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors group">
+                        <!-- Status Indicator -->
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                                <i class="bi bi-car-front text-apple-gray text-lg"></i>
+                            </div>
+                            @{
+                                var dotColor = session.Status switch
+                                {
+                                    Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-apple-orange",
+                                    Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed or Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-apple-green",
+                                    Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-apple-gray",
+                                    _ => "bg-apple-blue"
+                                };
+                            }
+                            <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 @dotColor rounded-full border-2 border-white"></span>
+                        </div>
+                        
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium text-apple-dark">@session.SessionNumber</span>
+                                @{
+                                    var badgeClass = session.Status switch
+                                    {
+                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "badge-apple-blue",
+                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "badge-apple-orange",
+                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed or Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "badge-apple-green",
+                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "badge-apple-gray",
+                                        _ => "badge-apple-gray"
+                                    };
+                                }
+                                <span class="@badgeClass">@session.Status</span>
+                            </div>
+                            <p class="text-sm text-apple-gray truncate">@session.VehicleDisplayName</p>
+                        </div>
+                        
+                        <!-- Time & Arrow -->
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm text-apple-gray">@session.CheckInAt.ToString("MMM dd, HH:mm")</span>
+                            <i class="bi bi-chevron-right text-apple-gray opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </div>
+                    </a>
+                }
             </div>
         }
         else
         {
-            <div class="text-center text-apple-gray py-16 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                    <i class="bi bi-inbox text-2xl text-gray-400"></i>
+            <div class="p-8 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-inbox text-2xl text-apple-gray"></i>
                 </div>
-                <p class="mb-4 font-medium">No active sessions found</p>
-                <a href="/Sessions/Create" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md">
-                    <i class="bi bi-plus-lg"></i>Create New Session
+                <h3 class="font-medium text-apple-dark mb-1">No active sessions</h3>
+                <p class="text-sm text-apple-gray mb-4">Get started by creating a new check-in</p>
+                <a href="/Sessions/Create" class="btn-apple-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    New Check-In
                 </a>
             </div>
         }
     </div>
+
+    <!-- Right Column -->
     <div class="space-y-6">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h5 class="text-lg font-bold text-apple-dark flex items-center gap-2 mb-6">
-                Quick Actions
-            </h5>
-            <div class="grid grid-cols-1 gap-3">
-                <a href="/Sessions/Create" class="flex items-center justify-between px-5 py-4 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-all group border border-indigo-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                            <i class="bi bi-car-front text-indigo-600"></i>
-                        </div>
-                        <span class="font-medium">New Check-In</span>
+        <!-- Quick Actions -->
+        <div class="card-apple p-5">
+            <h3 class="font-semibold text-apple-dark mb-4">Quick Actions</h3>
+            <div class="space-y-2">
+                <a href="/Sessions/Create" class="flex items-center gap-3 p-3 rounded-apple hover:bg-apple-blue/5 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-apple-blue/10 flex items-center justify-center group-hover:bg-apple-blue group-hover:text-white transition-colors">
+                        <i class="bi bi-plus-lg text-apple-blue group-hover:text-white"></i>
                     </div>
-                    <i class="bi bi-chevron-right text-indigo-400 group-hover:translate-x-1 transition-transform"></i>
+                    <div class="flex-1">
+                        <span class="font-medium text-apple-dark text-sm">New Check-In</span>
+                        <p class="text-xs text-apple-gray">Start a new service session</p>
+                    </div>
+                    <i class="bi bi-chevron-right text-apple-gray text-sm"></i>
                 </a>
-                <a href="/Clients/Create" class="flex items-center justify-between px-5 py-4 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all group border border-gray-200 hover:border-gray-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <i class="bi bi-person-plus text-gray-600"></i>
-                        </div>
-                        <span class="font-medium">Add Client</span>
+                
+                <a href="/Clients" class="flex items-center gap-3 p-3 rounded-apple hover:bg-gray-50 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <i class="bi bi-person-plus text-apple-gray"></i>
                     </div>
-                    <i class="bi bi-chevron-right text-gray-400 group-hover:translate-x-1 transition-transform"></i>
+                    <div class="flex-1">
+                        <span class="font-medium text-apple-dark text-sm">Add Client</span>
+                        <p class="text-xs text-apple-gray">Register a new customer</p>
+                    </div>
+                    <i class="bi bi-chevron-right text-apple-gray text-sm"></i>
                 </a>
-                <a href="/Sessions" class="flex items-center justify-between px-5 py-4 bg-white text-gray-700 rounded-xl hover:bg-gray-50 transition-all group border border-gray-200 hover:border-gray-300">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <i class="bi bi-list-ul text-gray-600"></i>
-                        </div>
-                        <span class="font-medium">All Sessions</span>
+                
+                <a href="/Sessions" class="flex items-center gap-3 p-3 rounded-apple hover:bg-gray-50 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                        <i class="bi bi-list-ul text-apple-gray"></i>
                     </div>
-                    <i class="bi bi-chevron-right text-gray-400 group-hover:translate-x-1 transition-transform"></i>
+                    <div class="flex-1">
+                        <span class="font-medium text-apple-dark text-sm">All Sessions</span>
+                        <p class="text-xs text-apple-gray">View and manage sessions</p>
+                    </div>
+                    <i class="bi bi-chevron-right text-apple-gray text-sm"></i>
                 </a>
             </div>
         </div>
-        <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 shadow-lg text-white relative overflow-hidden">
-            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-5 rounded-full blur-xl"></div>
-            <h5 class="text-lg font-bold flex items-center gap-2 mb-6 relative z-10">
+
+        <!-- Today's Overview -->
+        <div class="card-apple-elevated p-5 bg-gradient-to-br from-apple-gray-6 to-apple-gray-5 text-white">
+            <h3 class="font-semibold mb-5 flex items-center gap-2">
+                <i class="bi bi-calendar-check"></i>
                 Today's Overview
-            </h5>
-            <div class="space-y-4 relative z-10">
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-400">Sessions Today</span>
-                    <strong class="text-xl">@Model.TodaySessions</strong>
-                </div>
-                <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-indigo-500 h-full rounded-full" style="width: 75%"></div>
+            </h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-white/70 text-sm">Sessions Today</span>
+                        <span class="font-semibold text-lg">@Model.TodaySessions</span>
+                    </div>
+                    <div class="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                        <div class="h-full bg-apple-blue rounded-full transition-all" style="width: @(Math.Min(Model.TodaySessions * 10, 100))%"></div>
+                    </div>
                 </div>
                 
-                <div class="flex justify-between items-center pt-2">
-                    <span class="text-gray-400">Total Vehicles</span>
-                    <strong class="text-xl">@Model.TotalVehicles</strong>
-                </div>
-                <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-teal-500 h-full rounded-full" style="width: 60%"></div>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-white/70 text-sm">Total Vehicles</span>
+                        <span class="font-semibold text-lg">@Model.TotalVehicles</span>
+                    </div>
+                    <div class="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                        <div class="h-full bg-apple-teal rounded-full" style="width: 60%"></div>
+                    </div>
                 </div>
 
-                <div class="flex justify-between items-center pt-2">
-                    <span class="text-gray-400">VIP Clients</span>
-                    <strong class="text-xl">@Model.VipClients</strong>
+                <div class="pt-2 border-t border-white/10">
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/70 text-sm">VIP Clients</span>
+                        <span class="font-semibold text-lg text-apple-yellow">@Model.VipClients ⭐</span>
+                    </div>
                 </div>
             </div>
         </div>

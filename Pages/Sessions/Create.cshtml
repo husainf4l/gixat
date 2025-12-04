@@ -5,68 +5,101 @@
     Layout = "_AppLayout";
 }
 
-<div class="max-w-2xl mx-auto">
-    <div class="mb-6">
-        <a href="/Sessions" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
-            <i class="bi bi-arrow-left"></i>Back to Sessions
-        </a>
-    </div>
+<div class="max-w-2xl mx-auto animate-fade-in">
+    <!-- Back Button -->
+    <a href="/Sessions" class="inline-flex items-center gap-2 text-apple-gray hover:text-apple-dark mb-6 transition-colors">
+        <i class="bi bi-arrow-left"></i>
+        <span class="text-sm font-medium">Back to Sessions</span>
+    </a>
 
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="bg-indigo-500 text-white px-6 py-4">
-            <h4 class="text-xl font-semibold flex items-center gap-2">
-                <i class="bi bi-car-front"></i>New Vehicle Check-In
-            </h4>
+    <!-- Form Card -->
+    <div class="card-apple overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-apple-blue to-apple-indigo p-6 text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                    <i class="bi bi-car-front text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-semibold">New Vehicle Check-In</h1>
+                    <p class="text-white/80 text-sm">Start a new service session</p>
+                </div>
+            </div>
         </div>
+
+        <!-- Form Body -->
         <div class="p-6">
             <form method="post">
-                <div asp-validation-summary="All" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6" role="alert"></div>
+                <div asp-validation-summary="All" class="bg-apple-red/10 border border-apple-red/20 text-apple-red px-4 py-3 rounded-apple mb-6 text-sm" role="alert"></div>
 
                 <!-- Client Selection -->
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-apple-dark mb-2">Select Client <span class="text-red-500">*</span></label>
-                    <select class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white" asp-for="SelectedClientId" id="clientSelect">
-                        <option value="">-- Select a Client --</option>
-                        @foreach (var client in Model.Clients)
-                        {
-                            <option value="@client.Id">@client.FullName - @client.Phone</option>
-                        }
-                    </select>
+                    <label class="block text-sm font-medium text-apple-dark mb-2">
+                        Select Client <span class="text-apple-red">*</span>
+                    </label>
+                    <div class="relative">
+                        <select asp-for="SelectedClientId" id="clientSelect" 
+                                class="input-apple-outlined appearance-none pr-10 cursor-pointer">
+                            <option value="">Choose a client...</option>
+                            @foreach (var client in Model.Clients)
+                            {
+                                <option value="@client.Id">@client.FullName — @client.Phone</option>
+                            }
+                        </select>
+                        <i class="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-apple-gray pointer-events-none"></i>
+                    </div>
                     <p class="mt-2 text-sm text-apple-gray">
-                        Can't find the client? <a href="/Clients/Create" class="text-indigo-500 hover:text-indigo-600">Add new client</a>
+                        Can't find the client? <a href="/Clients" class="text-apple-blue hover:text-apple-blue-hover font-medium">Add new client →</a>
                     </p>
                 </div>
 
                 <!-- Vehicle Selection -->
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-apple-dark mb-2">Select Vehicle <span class="text-red-500">*</span></label>
-                    <select class="w-full px-4 py-3 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed" asp-for="SelectedVehicleId" id="vehicleSelect" disabled>
-                        <option value="">-- Select a Vehicle --</option>
-                    </select>
+                    <label class="block text-sm font-medium text-apple-dark mb-2">
+                        Select Vehicle <span class="text-apple-red">*</span>
+                    </label>
+                    <div class="relative">
+                        <select asp-for="SelectedVehicleId" id="vehicleSelect" 
+                                class="input-apple-outlined appearance-none pr-10 cursor-pointer disabled:bg-gray-50 disabled:text-apple-gray disabled:cursor-not-allowed" disabled>
+                            <option value="">Choose a vehicle...</option>
+                        </select>
+                        <i class="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-apple-gray pointer-events-none"></i>
+                    </div>
                     <p class="mt-2 text-sm text-apple-gray" id="vehicleHelp">Select a client first to see their vehicles</p>
                 </div>
 
+                <!-- Divider -->
+                <hr class="border-gray-100 my-6" />
+
                 <!-- Mileage -->
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-apple-dark mb-2">Mileage at Check-In</label>
+                    <label class="block text-sm font-medium text-apple-dark mb-2">
+                        Mileage at Check-In
+                    </label>
                     <div class="flex">
-                        <input type="number" class="flex-1 px-4 py-3 text-lg border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" asp-for="MileageIn" placeholder="Enter current mileage">
-                        <span class="inline-flex items-center px-4 bg-gray-100 border border-l-0 border-gray-300 rounded-r-lg text-apple-gray">km</span>
+                        <input type="number" asp-for="MileageIn" placeholder="e.g., 45000" 
+                               class="input-apple-outlined rounded-r-none border-r-0 flex-1" />
+                        <span class="inline-flex items-center px-4 bg-gray-50 border border-gray-200 border-l-0 rounded-r-apple text-apple-gray text-sm font-medium">
+                            km
+                        </span>
                     </div>
                 </div>
 
                 <!-- Notes -->
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-apple-dark mb-2">Initial Notes</label>
-                    <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" asp-for="Notes" rows="3" placeholder="Any initial observations or customer comments..."></textarea>
+                    <label class="block text-sm font-medium text-apple-dark mb-2">
+                        Initial Notes
+                    </label>
+                    <textarea asp-for="Notes" rows="3" placeholder="Any initial observations or customer comments..." 
+                              class="input-apple-outlined resize-none"></textarea>
                 </div>
 
-                <hr class="my-6 border-gray-200">
-
-                <div class="flex justify-end gap-3">
-                    <a href="/Sessions" class="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">Cancel</a>
-                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors text-lg">
-                        <i class="bi bi-check-lg"></i>Create Session
+                <!-- Actions -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <a href="/Sessions" class="btn-apple-secondary">Cancel</a>
+                    <button type="submit" class="btn-apple-primary">
+                        <i class="bi bi-check-lg"></i>
+                        Create Session
                     </button>
                 </div>
             </form>
@@ -81,7 +114,7 @@
             const vehicleSelect = document.getElementById('vehicleSelect');
             const vehicleHelp = document.getElementById('vehicleHelp');
             
-            vehicleSelect.innerHTML = '<option value="">-- Select a Vehicle --</option>';
+            vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
             
             if (!clientId) {
                 vehicleSelect.disabled = true;
@@ -90,12 +123,13 @@
             }
             
             try {
+                vehicleHelp.textContent = 'Loading vehicles...';
                 const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
                 const vehicles = await response.json();
                 
                 if (vehicles.length === 0) {
                     vehicleSelect.disabled = true;
-                    vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/Details/' + clientId + '" class="text-indigo-500 hover:text-indigo-600">Add a vehicle</a>';
+                    vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-apple-blue hover:text-apple-blue-hover font-medium">Add a vehicle →</a>';
                 } else {
                     vehicleSelect.disabled = false;
                     vehicleHelp.textContent = 'Select the vehicle being checked in';
@@ -109,7 +143,7 @@
                 }
             } catch (error) {
                 console.error('Error loading vehicles:', error);
-                vehicleHelp.textContent = 'Error loading vehicles';
+                vehicleHelp.textContent = 'Error loading vehicles. Please try again.';
             }
         });
     </script>

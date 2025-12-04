@@ -19,6 +19,7 @@ public interface ISessionService
     Task<SessionDto?> UpdateAsync(Guid id, UpdateSessionDto dto, Guid companyId);
     Task<bool> UpdateStatusAsync(Guid id, SessionStatus status, Guid companyId);
     Task<bool> CheckOutAsync(Guid id, int? mileageOut, Guid companyId);
+    Task<bool> CancelSessionAsync(Guid id, Guid companyId);
     Task<bool> DeleteAsync(Guid id, Guid companyId);
     
     // Session number generation

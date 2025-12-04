@@ -80,14 +80,16 @@ public class SessionService : BaseService, ISessionService
     {
         _logger.LogDebug("Getting session {SessionId} for company {CompanyId}", id, companyId);
         
-        return await GetSessionQuery(companyId)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        // Filter on entity BEFORE projection to avoid LINQ translation issues
+        var baseQuery = GetBaseQuery(companyId).Where(s => s.Id == id);
+        return await ProjectSessionsToDto(baseQuery).FirstOrDefaultAsync();
     }
 
     public async Task<SessionDto?> GetBySessionNumberAsync(string sessionNumber, Guid companyId)
     {
-        return await GetSessionQuery(companyId)
-            .FirstOrDefaultAsync(s => s.SessionNumber == sessionNumber);
+        // Filter on entity BEFORE projection
+        var baseQuery = GetBaseQuery(companyId).Where(s => s.SessionNumber == sessionNumber);
+        return await ProjectSessionsToDto(baseQuery).FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<SessionDto>> GetAllAsync(Guid companyId, SessionStatus? status = null)
@@ -272,6 +274,22 @@ public class SessionService : BaseService, ISessionService
         return true;
     }
 
+    public async Task<bool> CancelSessionAsync(Guid id, Guid companyId)
+    {
+        var session = await GarageSessions
+            .Where(s => s.Id == id && s.CompanyId == companyId)
+            .FirstOrDefaultAsync();
+
+        if (session == null) return false;
+
+        session.Status = SessionStatus.Cancelled;
+        session.UpdatedAt = DateTime.UtcNow;
+
+        await SaveChangesAsync();
+        _logger.LogInformation("Session {SessionId} cancelled", id);
+        return true;
+    }
+
     public async Task<bool> DeleteAsync(Guid id, Guid companyId)
     {
         var session = await GarageSessions
@@ -313,12 +331,14 @@ public class SessionService : BaseService, ISessionService
     {
         var term = searchTerm.ToLower();
 
-        return await GetSessionQuery(companyId)
+        // Filter on entity BEFORE projection
+        var baseQuery = GetBaseQuery(companyId)
             .Where(s => s.SessionNumber.ToLower().Contains(term) ||
                  (s.Notes != null && s.Notes.ToLower().Contains(term)))
             .OrderByDescending(s => s.CheckInAt)
-            .Take(50)
-            .ToListAsync();
+            .Take(50);
+
+        return await ProjectSessionsToDto(baseQuery).ToListAsync();
     }
 
     public async Task<SessionStatsDto> GetSessionStatsAsync(Guid companyId)

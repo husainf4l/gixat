@@ -73,4 +73,33 @@ public class DetailsModel : PageModel
 
         return Page();
     }
+
+    public async Task<IActionResult> OnPostCancelAsync(Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToPage("/Auth/Login");
+        }
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+
+        if (currentCompany == null)
+        {
+            return RedirectToPage("/Setup/Company");
+        }
+
+        CompanyId = currentCompany.CompanyId;
+
+        var session = await _sessionService.GetByIdAsync(id, CompanyId);
+        if (session == null)
+        {
+            return NotFound();
+        }
+
+        await _sessionService.CancelSessionAsync(id, CompanyId);
+
+        return RedirectToPage("/Sessions/Index");
+    }
 }
