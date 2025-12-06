@@ -6,9 +6,7 @@
             "type": "shell",
             "command": "dotnet",
             "args": [
-                "run",
-                "--project",
-                "src/Gixat.Web/Gixat.Web.csproj"
+                "watch"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

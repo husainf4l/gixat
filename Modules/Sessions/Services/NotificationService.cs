@@ -1,22 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Gixat.Shared.Services;
+using Gixat.Web.Shared.Services;
+using Gixat.Web.Shared.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Gixat.Modules.Sessions.Services;
+namespace Gixat.Web.Modules.Sessions.Services;
 
 /// <summary>
 /// Service for sending automated notifications related to sessions, appointments, and invoices
 /// </summary>
 public class NotificationService
 {
-    private readonly EmailService _emailService;
+    private readonly IEmailService _emailService;
     private readonly EmailTemplateService _templateService;
     private readonly ILogger<NotificationService> _logger;
 
     public NotificationService(
-        EmailService emailService,
+        IEmailService emailService,
         EmailTemplateService templateService,
         ILogger<NotificationService> logger)
     {
@@ -62,7 +63,7 @@ public class NotificationService
             var htmlBody = _templateService.RenderTemplate("AppointmentConfirmation.html", data);
 
             await _emailService.SendEmailAsync(
-                toEmail: clientEmail,
+                to: clientEmail,
                 subject: $"Appointment Confirmed - {appointmentDate:MMM dd} at {appointmentDate:h:mm tt}",
                 htmlBody: htmlBody
             );
@@ -109,7 +110,7 @@ public class NotificationService
             var htmlBody = _templateService.RenderTemplate("AppointmentReminder.html", data);
 
             await _emailService.SendEmailAsync(
-                toEmail: clientEmail,
+                to: clientEmail,
                 subject: $"Reminder: Your Appointment Tomorrow at {appointmentDate:h:mm tt}",
                 htmlBody: htmlBody
             );
@@ -159,7 +160,7 @@ public class NotificationService
             var htmlBody = _templateService.RenderTemplateWithLists("VehicleReady.html", data, listData);
 
             await _emailService.SendEmailAsync(
-                toEmail: clientEmail,
+                to: clientEmail,
                 subject: "Your Vehicle is Ready for Pickup! 🎉",
                 htmlBody: htmlBody
             );
@@ -237,7 +238,7 @@ public class NotificationService
             var htmlBody = _templateService.RenderTemplateWithLists("InvoiceEmail.html", data, listData);
 
             await _emailService.SendEmailAsync(
-                toEmail: clientEmail,
+                to: clientEmail,
                 subject: $"Invoice #{invoiceNumber} - {garageName}",
                 htmlBody: htmlBody
             );

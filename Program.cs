@@ -25,6 +25,7 @@ using Gixat.Web.Modules.Sessions;
 using Gixat.Web.Modules.Sessions.GraphQL.Queries;
 using Gixat.Web.Modules.Sessions.GraphQL.Mutations;
 using Gixat.Web.Modules.Sessions.GraphQL.Types;
+using Gixat.Web.Modules.Sessions.Services;
 using Gixat.Web.Modules.Appointments;
 using Gixat.Web.Modules.Invoices;
 using Gixat.Web.Modules.Inventory;
@@ -263,6 +264,9 @@ builder.Services.AddScoped<EmailTemplateService>();
 
 // Notification Service
 builder.Services.AddScoped<NotificationService>();
+
+// Background Services
+builder.Services.AddHostedService<AppointmentReminderBackgroundService>();
 
 // ====================================
 // HEALTH CHECKS CONFIGURATION

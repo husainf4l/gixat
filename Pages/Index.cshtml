@@ -11,8 +11,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gixat - AI-Powered Garage Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'apple-blue': '#0071e3',
+                        'apple-blue-hover': '#0077ED',
+                        'apple-gray': '#86868b',
+                        'apple-dark': '#1d1d1f',
+                        'apple-light': '#fbfbfd',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
             --apple-blue: #0071e3;
@@ -1914,55 +1930,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            
-            <h1 class="hero-title">
-                Revolutionize your<br>
-                <span class="gradient-text">garage operations.</span>
-            </h1>
-            
-            <p class="hero-subtitle">
-                The all-in-one platform that transforms how you manage your garage business. From seamless scheduling to intelligent inventory management — everything you need to scale and succeed.
-            </p>
-
-            <div class="hero-features">
-                <div class="hero-feature">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>30-day free trial</span>
-                </div>
-                <div class="hero-feature">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>No setup fees</span>
-                </div>
-                <div class="hero-feature">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>24/7 support</span>
-                </div>
-            </div>
-
-            <div class="hero-cta">
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <a href="/Dashboard" class="btn-primary-apple">
-                        Go to Dashboard
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                }
-                else
-                {
-                    <a href="/Auth/Register" class="btn-primary-apple">
-                        Get Started Free
-                        <i class="bi bi-rocket-takeoff"></i>
-                    </a>
-                    <a href="#features" class="btn-secondary-apple">
-                        See Features
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                }
-            </div>
-        </div>
-    </section>
+    <partial name="../Components/_Hero" />
 
     <!-- About Section -->
     <section class="about-section" id="about">

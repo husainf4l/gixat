@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Hosting;
 
-namespace Gixat.Shared.Services;
+namespace Gixat.Web.Shared.Services;
 
 /// <summary>
 /// Service for rendering HTML email templates with placeholder replacement
@@ -14,7 +15,7 @@ public class EmailTemplateService
 
     public EmailTemplateService(IWebHostEnvironment env)
     {
-        _templateBasePath = Path.Combine(env.ContentRootPath, "Shared", "EmailTemplates");
+        _templateBasePath = System.IO.Path.Combine(env.ContentRootPath, "Shared", "EmailTemplates");
     }
 
     /// <summary>
@@ -25,7 +26,7 @@ public class EmailTemplateService
     /// <returns>Rendered HTML string</returns>
     public string RenderTemplate(string templateName, Dictionary<string, string> data)
     {
-        var templatePath = Path.Combine(_templateBasePath, templateName);
+        var templatePath = System.IO.Path.Combine(_templateBasePath, templateName);
         
         if (!File.Exists(templatePath))
         {
@@ -52,7 +53,7 @@ public class EmailTemplateService
     /// <returns>Rendered HTML string</returns>
     public string RenderTemplateWithLists(string templateName, Dictionary<string, string> data, Dictionary<string, List<Dictionary<string, string>>> listItems)
     {
-        var templatePath = Path.Combine(_templateBasePath, templateName);
+        var templatePath = System.IO.Path.Combine(_templateBasePath, templateName);
         
         if (!File.Exists(templatePath))
         {
@@ -104,7 +105,7 @@ public class EmailTemplateService
     /// </summary>
     public string GetTemplatePath(string templateName)
     {
-        return Path.Combine(_templateBasePath, templateName);
+        return System.IO.Path.Combine(_templateBasePath, templateName);
     }
 
     /// <summary>
