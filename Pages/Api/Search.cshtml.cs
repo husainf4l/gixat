@@ -84,7 +84,7 @@ namespace Gixat.Web.Pages.Api
                         licensePlate = v.LicensePlate,
                         clientId = c.Id,
                         clientName = c.FullName
-                    }))
+                    }) ?? Enumerable.Empty<object>())
                 .Take(5);
 
             return new JsonResult(new
