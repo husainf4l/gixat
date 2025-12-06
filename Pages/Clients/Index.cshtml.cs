@@ -101,4 +101,27 @@ public class IndexModel : PageModel
 
         return RedirectToPage();
     }
+
+    /// <summary>
+    /// JSON endpoint for client autocomplete search
+    /// </summary>
+    public async Task<IActionResult> OnGetSearchAsync(string? term)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return new JsonResult(new { error = "Unauthorized" }) { StatusCode = 401 };
+        }
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+
+        if (currentCompany == null)
+        {
+            return new JsonResult(new { error = "No company found" }) { StatusCode = 400 };
+        }
+
+        var results = await _clientService.SearchForAutocompleteAsync(currentCompany.CompanyId, term);
+        return new JsonResult(results);
+    }
 }

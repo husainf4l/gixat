@@ -10,6 +10,7 @@ public interface IClientService
     Task<IEnumerable<Client>> GetByCompanyIdAsync(Guid companyId);
     Task<PagedResponse<Client>> GetByCompanyIdPagedAsync(Guid companyId, PagedRequest request);
     Task<IEnumerable<Client>> SearchAsync(Guid companyId, string? searchTerm);
+    Task<IEnumerable<ClientSearchDto>> SearchForAutocompleteAsync(Guid companyId, string? searchTerm);
     Task<Client> CreateAsync(Client client);
     Task<Client?> UpdateAsync(Client client);
     Task<bool> DeleteAsync(Guid id);

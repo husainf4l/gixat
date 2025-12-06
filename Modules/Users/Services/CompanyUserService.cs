@@ -27,7 +27,10 @@ public class CompanyUserService : BaseService, ICompanyUserService
         => await CompanyUsers.Where(u => u.CompanyId == companyId).ToListAsync();
 
     public async Task<IEnumerable<CompanyUser>> GetUserCompaniesAsync(Guid authUserId)
-        => await CompanyUsers.Where(u => u.AuthUserId == authUserId && u.IsActive).ToListAsync();
+        => await CompanyUsers
+            .Where(u => u.AuthUserId == authUserId && u.IsActive)
+            .OrderBy(u => u.CreatedAt)
+            .ToListAsync();
 
     public async Task<CompanyUser> CreateCompanyUserAsync(CompanyUser companyUser)
     {

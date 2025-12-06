@@ -2,8 +2,11 @@ using dotenv.net;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 using Gixat.Web.Data;
 using Gixat.Web.Middleware;
+using Gixat.Web.Shared.Options;
 using System.IO.Compression;
 using Gixat.Web.Modules.Auth;
 using Gixat.Web.Modules.Auth.Entities;
@@ -36,6 +39,31 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5));
 
 var builder = WebApplication.CreateBuilder(args);
+
+// ====================================
+// CONFIGURE SERILOG (Structured Logging)
+// ====================================
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "Gixat")
+    .WriteTo.Console(
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/gixat-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext} {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+try
+{
+    Log.Information("Starting Gixat application");
 
 // Add environment variables to configuration
 builder.Configuration.AddEnvironmentVariables();
@@ -79,6 +107,34 @@ builder.Configuration["Smtp:FromEmail"] =
 // Add services
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
+
+// ====================================
+// CONFIGURE OPTIONS PATTERN
+// ====================================
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
+builder.Services.Configure<AwsOptions>(builder.Configuration.GetSection(AwsOptions.SectionName));
+builder.Services.Configure<AdminUserOptions>(builder.Configuration.GetSection(AdminUserOptions.SectionName));
+builder.Services.Configure<GoogleAuthOptions>(builder.Configuration.GetSection(GoogleAuthOptions.SectionName));
+
+// Validate options on startup
+builder.Services.AddOptions<SmtpOptions>()
+    .Bind(builder.Configuration.GetSection(SmtpOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOptions<AwsOptions>()
+    .Bind(builder.Configuration.GetSection(AwsOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOptions<AdminUserOptions>()
+    .Bind(builder.Configuration.GetSection(AdminUserOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+// Google auth is optional, so no validation required
+builder.Services.AddOptions<GoogleAuthOptions>()
+    .Bind(builder.Configuration.GetSection(GoogleAuthOptions.SectionName));
 
 // Add Response Compression for faster page loads
 builder.Services.AddResponseCompression(options =>
@@ -159,15 +215,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // Configure Google Authentication
-var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
-var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+var googleAuth = builder.Configuration.GetSection(GoogleAuthOptions.SectionName).Get<GoogleAuthOptions>();
+if (googleAuth != null && !string.IsNullOrEmpty(googleAuth.ClientId) && !string.IsNullOrEmpty(googleAuth.ClientSecret))
 {
     builder.Services.AddAuthentication()
         .AddGoogle(options =>
         {
-            options.ClientId = googleClientId;
-            options.ClientSecret = googleClientSecret;
+            options.ClientId = googleAuth.ClientId;
+            options.ClientSecret = googleAuth.ClientSecret;
             options.CallbackPath = "/signin-google";
         });
 }
@@ -183,18 +238,25 @@ builder.Services.AddInvoicesModuleServices();
 builder.Services.AddInventoryModuleServices();
 builder.Services.AddAwsS3(builder.Configuration);
 
-// Register Email Service
+// Register Email Service (using SmtpOptions configured above)
 builder.Services.Configure<SmtpSettings>(options =>
 {
-    options.Host = builder.Configuration["Smtp:Host"] ?? "smtp.gmail.com";
-    options.Port = int.TryParse(builder.Configuration["Smtp:Port"], out var port) ? port : 465;
-    options.Secure = bool.TryParse(builder.Configuration["Smtp:Secure"], out var secure) ? secure : true;
-    options.User = builder.Configuration["Smtp:User"] ?? "";
-    options.Password = builder.Configuration["Smtp:Password"] ?? "";
-    options.FromName = builder.Configuration["Smtp:FromName"] ?? "Gixat";
-    options.FromEmail = builder.Configuration["Smtp:FromEmail"] ?? builder.Configuration["Smtp:User"] ?? "";
+    var smtpOptions = builder.Configuration.GetSection(SmtpOptions.SectionName).Get<SmtpOptions>();
+    if (smtpOptions != null)
+    {
+        options.Host = smtpOptions.Host;
+        options.Port = smtpOptions.Port;
+        options.Secure = smtpOptions.Secure;
+        options.User = smtpOptions.User;
+        options.Password = smtpOptions.Password;
+        options.FromName = smtpOptions.FromName;
+        options.FromEmail = smtpOptions.FromEmail;
+    }
 });
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+// Phone Number Service
+builder.Services.AddSingleton<PhoneNumberService>();
 
 // ====================================
 // HEALTH CHECKS CONFIGURATION
@@ -382,4 +444,15 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 app.MapRazorPages();
 app.MapGraphQL(); // GraphQL endpoint at /graphql
 
+Log.Information("Gixat application started successfully");
 app.Run();
+
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Gixat application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

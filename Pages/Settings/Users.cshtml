@@ -1,4 +1,4 @@
-@page
+@page "/Settings/Users"
 @model Gixat.Web.Pages.Settings.UsersModel
 @{
     Layout = "_AppLayout";
@@ -16,7 +16,7 @@
                 <p class="text-gray-600">Manage team members and invitations</p>
             </div>
             <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                <i class="fas fa-user-plus mr-2"></i>Invite User
+                <i class="bi bi-person-plus-fill mr-2"></i>Invite User
             </button>
         </div>
 
@@ -29,7 +29,7 @@
                         <p class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">@Model.Users.Count</p>
                     </div>
                     <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                        <i class="bi bi-people-fill text-blue-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -41,7 +41,7 @@
                         <p class="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">@Model.Users.Count(u => u.IsActive)</p>
                     </div>
                     <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-teal-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-check text-green-600 text-xl"></i>
+                        <i class="bi bi-person-check-fill text-green-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -52,8 +52,8 @@
                         <p class="text-sm font-medium text-gray-600 mb-1">Pending Invites</p>
                         <p class="text-3xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">@Model.PendingInvitations.Count</p>
                     </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-envelope text-orange-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-100 to-red-100 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-envelope-fill text-orange-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@
                         <p class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">@Model.Users.Count(u => u.Role <= Gixat.Web.Modules.Users.Entities.CompanyUserRole.Admin)</p>
                     </div>
                     <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-shield text-purple-600 text-xl"></i>
+                        <i class="bi bi-shield-fill-check text-purple-600 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -141,13 +141,13 @@
                                         @if (user.IsActive)
                                         {
                                             <button type="submit" asp-page-handler="Deactivate" class="text-orange-600 hover:text-orange-900 font-semibold mr-3">
-                                                <i class="fas fa-ban mr-1"></i>Deactivate
+                                                <i class="bi bi-x-circle mr-1"></i>Deactivate
                                             </button>
                                         }
                                         else
                                         {
                                             <button type="submit" asp-page-handler="Activate" class="text-green-600 hover:text-green-900 font-semibold mr-3">
-                                                <i class="fas fa-check mr-1"></i>Activate
+                                                <i class="bi bi-check-circle mr-1"></i>Activate
                                             </button>
                                         }
                                     </form>
@@ -181,7 +181,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
                                         <div class="w-10 h-10 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-full flex items-center justify-center mr-3">
-                                            <i class="fas fa-envelope text-orange-600"></i>
+                                            <i class="bi bi-envelope-fill text-orange-600"></i>
                                         </div>
                                         <div class="font-semibold text-gray-900">@invitation.Email</div>
                                     </div>
@@ -211,12 +211,12 @@
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-medium">
                                     <button onclick="copyInviteLink('@invitation.Token')" class="text-blue-600 hover:text-blue-900 font-semibold mr-3">
-                                        <i class="fas fa-copy mr-1"></i>Copy Link
+                                        <i class="bi bi-clipboard mr-1"></i>Copy Link
                                     </button>
                                     <form method="post" class="inline">
                                         <input type="hidden" name="InvitationId" value="@invitation.Id" />
                                         <button type="submit" asp-page-handler="CancelInvitation" class="text-red-600 hover:text-red-900 font-semibold">
-                                            <i class="fas fa-times mr-1"></i>Cancel
+                                            <i class="bi bi-x-lg mr-1"></i>Cancel
                                         </button>
                                     </form>
                                 </td>
@@ -236,7 +236,7 @@
             <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Invite User</h2>
                 <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
+                    <i class="bi bi-x-lg text-xl"></i>
                 </button>
             </div>
         </div>

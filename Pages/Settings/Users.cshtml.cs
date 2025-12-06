@@ -1,5 +1,6 @@
 using Gixat.Web.Data;
 using Gixat.Web.Modules.Users.Entities;
+using Gixat.Web.Modules.Users.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,10 +13,12 @@ namespace Gixat.Web.Pages.Settings;
 public class UsersModel : PageModel
 {
     private readonly AppDbContext _context;
+    private readonly ICompanyUserService _companyUserService;
 
-    public UsersModel(AppDbContext context)
+    public UsersModel(AppDbContext context, ICompanyUserService companyUserService)
     {
         _context = context;
+        _companyUserService = companyUserService;
     }
 
     public List<CompanyUser> Users { get; set; } = new();
@@ -23,13 +26,21 @@ public class UsersModel : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        var companyIdClaim = User.FindFirstValue("CompanyId");
-        if (string.IsNullOrEmpty(companyIdClaim))
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToPage("/Auth/Login");
+        }
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+
+        if (currentCompany == null)
         {
             return RedirectToPage("/Setup/Company");
         }
 
-        var companyId = Guid.Parse(companyIdClaim);
+        var companyId = currentCompany.CompanyId;
 
         Users = await _context.CompanyUsers
             .Where(u => u.CompanyId == companyId)
@@ -46,14 +57,22 @@ public class UsersModel : PageModel
 
     public async Task<IActionResult> OnPostInviteAsync(string Email, string? FirstName, string? LastName, int Role)
     {
-        var companyIdClaim = User.FindFirstValue("CompanyId");
-        if (string.IsNullOrEmpty(companyIdClaim))
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return RedirectToPage("/Auth/Login");
+        }
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+
+        if (currentCompany == null)
         {
             return RedirectToPage("/Setup/Company");
         }
 
-        var companyId = Guid.Parse(companyIdClaim);
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var companyId = currentCompany.CompanyId;
+        var userGuid = Guid.Parse(userId);
 
         // Check if already invited
         var existing = await _context.UserInvitations
@@ -77,7 +96,7 @@ public class UsersModel : PageModel
             Role = (CompanyUserRole)Role,
             Token = Guid.NewGuid().ToString("N"),
             ExpiresAt = DateTime.UtcNow.AddDays(7),
-            InvitedByUserId = userId,
+            InvitedByUserId = userGuid,
             Status = InvitationStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };

@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Gixat.Web.Modules.Auth.Entities;
 using Gixat.Web.Modules.Auth.Interfaces;
 using Gixat.Web.Modules.Auth.Services;
+using Gixat.Web.Shared.Options;
 
 namespace Gixat.Web.Modules.Auth;
 
@@ -41,9 +43,15 @@ public static class AuthModule
     public static async Task SeedAdminUserAsync(IServiceProvider serviceProvider, IConfiguration configuration)
     {
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var adminOptions = configuration.GetSection(AdminUserOptions.SectionName).Get<AdminUserOptions>();
 
-        var adminEmail = configuration["AdminUser:Email"] ?? "admin@gixat.com";
-        var adminPassword = configuration["AdminUser:Password"] ?? "Admin@123456";
+        if (adminOptions == null)
+        {
+            throw new InvalidOperationException("AdminUser configuration is missing or invalid.");
+        }
+
+        var adminEmail = adminOptions.Email;
+        var adminPassword = adminOptions.Password;
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
 

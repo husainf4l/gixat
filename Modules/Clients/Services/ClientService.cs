@@ -11,10 +11,12 @@ namespace Gixat.Web.Modules.Clients.Services;
 public class ClientService : BaseService, IClientService
 {
     private readonly ILogger<ClientService> _logger;
+    private readonly PhoneNumberService _phoneService;
 
-    public ClientService(DbContext context, ILogger<ClientService> logger) : base(context)
+    public ClientService(DbContext context, ILogger<ClientService> logger, PhoneNumberService phoneService) : base(context)
     {
         _logger = logger;
+        _phoneService = phoneService;
     }
 
     private DbSet<Client> Clients => Set<Client>();
@@ -83,9 +85,52 @@ public class ClientService : BaseService, IClientService
         return await query.OrderByDescending(c => c.CreatedAt).ToListAsync();
     }
 
+    /// <summary>
+    /// Fast search for autocomplete - returns lightweight DTOs
+    /// </summary>
+    public async Task<IEnumerable<ClientSearchDto>> SearchForAutocompleteAsync(Guid companyId, string? searchTerm)
+    {
+        var query = Clients
+            .Where(c => c.CompanyId == companyId && c.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchTerm = searchTerm.ToLower();
+            query = query.Where(c =>
+                c.FirstName.ToLower().Contains(searchTerm) ||
+                c.LastName.ToLower().Contains(searchTerm) ||
+                (c.Email != null && c.Email.ToLower().Contains(searchTerm)) ||
+                c.Phone.Contains(searchTerm));
+        }
+
+        return await query
+            .OrderByDescending(c => c.IsVip)
+            .ThenByDescending(c => c.LastVisitAt)
+            .Take(20) // Limit to 20 results for performance
+            .Select(c => new ClientSearchDto
+            {
+                Id = c.Id,
+                FullName = $"{c.FirstName} {c.LastName}".Trim(),
+                Phone = c.Phone,
+                Email = c.Email,
+                IsVip = c.IsVip,
+                VehicleCount = c.Vehicles.Count,
+                LastVisitAt = c.LastVisitAt
+            })
+            .ToListAsync();
+    }
+
     public async Task<Client> CreateAsync(Client client)
     {
         _logger.LogInformation("Creating new client for company {CompanyId}: {FirstName} {LastName}", client.CompanyId, client.FirstName, client.LastName);
+        
+        // Normalize phone numbers to E.164 format
+        client.Phone = _phoneService.FormatToE164(client.Phone);
+        if (!string.IsNullOrWhiteSpace(client.AlternatePhone))
+        {
+            client.AlternatePhone = _phoneService.FormatToE164(client.AlternatePhone);
+        }
+        
         Clients.Add(client);
         await SaveChangesAsync();
         _logger.LogInformation("Created client {ClientId}", client.Id);
@@ -100,8 +145,18 @@ public class ClientService : BaseService, IClientService
         existing.FirstName = client.FirstName;
         existing.LastName = client.LastName;
         existing.Email = client.Email;
-        existing.Phone = client.Phone;
-        existing.AlternatePhone = client.AlternatePhone;
+        
+        // Normalize phone numbers to E.164 format
+        existing.Phone = _phoneService.FormatToE164(client.Phone);
+        if (!string.IsNullOrWhiteSpace(client.AlternatePhone))
+        {
+            existing.AlternatePhone = _phoneService.FormatToE164(client.AlternatePhone);
+        }
+        else
+        {
+            existing.AlternatePhone = client.AlternatePhone;
+        }
+        
         existing.Address = client.Address;
         existing.City = client.City;
         existing.State = client.State;

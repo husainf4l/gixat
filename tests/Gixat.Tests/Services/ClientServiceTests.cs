@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Gixat.Web.Modules.Clients.Entities;
 using Gixat.Web.Modules.Clients.Services;
+using Gixat.Web.Shared.Services;
 
 namespace Gixat.Tests.Services;
 
@@ -15,7 +16,8 @@ public class ClientServiceTests
     {
         _context = TestDbContext.CreateInMemory();
         var logger = new Mock<ILogger<ClientService>>();
-        _service = new ClientService(_context, logger.Object);
+        var phoneService = new PhoneNumberService();
+        _service = new ClientService(_context, logger.Object, phoneService);
     }
 
     [Fact]

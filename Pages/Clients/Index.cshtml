@@ -153,7 +153,7 @@
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Phone <span class="text-apple-red">*</span></label>
-                        <input type="tel" name="Phone" class="input-apple-outlined" required />
+                        <input type="tel" id="phoneInput" name="Phone" class="input-apple-outlined" required />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-apple-dark mb-1.5">Email</label>
@@ -200,6 +200,63 @@
 
 @section Scripts {
 <script>
+    // Initialize International Phone Input
+    const phoneInput = document.querySelector("#phoneInput");
+    const iti = window.intlTelInput(phoneInput, {
+        initialCountry: "ae", // Default to UAE
+        preferredCountries: ["ae", "sa", "kw", "qa", "om", "bh"],
+        utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.11/build/js/utils.js",
+        formatOnDisplay: true,
+        autoPlaceholder: "aggressive",
+        separateDialCode: true,
+        customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+            return "e.g. " + selectedCountryPlaceholder;
+        }
+    });
+
+    // Custom styling for intl-tel-input to match Apple design
+    const style = document.createElement('style');
+    style.textContent = `
+        .iti {
+            display: block;
+            width: 100%;
+        }
+        .iti__flag-container {
+            padding: 0 12px;
+            background: white;
+        }
+        .iti__selected-flag {
+            padding: 0 12px 0 0;
+            border-right: 1px solid #e5e5e7;
+        }
+        .iti__country-list {
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e5e5e7;
+        }
+        .iti__country:hover {
+            background-color: #f5f5f7;
+        }
+        .iti__country.iti__highlight {
+            background-color: #007AFF;
+            color: white;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Validate phone number on form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!iti.isValidNumber()) {
+            e.preventDefault();
+            alert('Please enter a valid phone number');
+            phoneInput.focus();
+            return false;
+        }
+        
+        // Set the full international number before submitting
+        phoneInput.value = iti.getNumber();
+    });
+
     function openModal() {
         const modal = document.getElementById('addClientModal');
         modal.classList.remove('hidden');

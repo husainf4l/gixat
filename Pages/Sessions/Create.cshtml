@@ -32,26 +32,14 @@
             <form method="post">
                 <div asp-validation-summary="All" class="bg-apple-red/10 border border-apple-red/20 text-apple-red px-4 py-3 rounded-apple mb-6 text-sm" role="alert"></div>
 
-                <!-- Client Selection -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-apple-dark mb-2">
-                        Select Client <span class="text-apple-red">*</span>
-                    </label>
-                    <div class="relative">
-                        <select asp-for="SelectedClientId" id="clientSelect" 
-                                class="input-apple-outlined appearance-none pr-10 cursor-pointer">
-                            <option value="">Choose a client...</option>
-                            @foreach (var client in Model.Clients)
-                            {
-                                <option value="@client.Id">@client.FullName — @client.Phone</option>
-                            }
-                        </select>
-                        <i class="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-apple-gray pointer-events-none"></i>
-                    </div>
-                    <p class="mt-2 text-sm text-apple-gray">
-                        Can't find the client? <a href="/Clients" class="text-apple-blue hover:text-apple-blue-hover font-medium">Add new client →</a>
-                    </p>
-                </div>
+                <!-- Client Selection with Autocomplete -->
+                @{
+                    ViewData["InputId"] = "clientSelect";
+                    ViewData["InputName"] = "SelectedClientId";
+                    ViewData["Required"] = "True";
+                    ViewData["Placeholder"] = "Search by name, phone, or email...";
+                }
+                <partial name="_ClientSearch" />
 
                 <!-- Vehicle Selection -->
                 <div class="mb-6">
@@ -109,42 +97,53 @@
 
 @section Scripts {
     <script>
-        document.getElementById('clientSelect').addEventListener('change', async function() {
-            const clientId = this.value;
-            const vehicleSelect = document.getElementById('vehicleSelect');
-            const vehicleHelp = document.getElementById('vehicleHelp');
-            
-            vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
-            
-            if (!clientId) {
-                vehicleSelect.disabled = true;
-                vehicleHelp.textContent = 'Select a client first to see their vehicles';
-                return;
-            }
-            
-            try {
-                vehicleHelp.textContent = 'Loading vehicles...';
-                const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
-                const vehicles = await response.json();
-                
-                if (vehicles.length === 0) {
-                    vehicleSelect.disabled = true;
-                    vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-apple-blue hover:text-apple-blue-hover font-medium">Add a vehicle →</a>';
-                } else {
-                    vehicleSelect.disabled = false;
-                    vehicleHelp.textContent = 'Select the vehicle being checked in';
+        // This script handles vehicle loading when client is selected
+        // Note: The clientSelect is initialized by _ClientSearch.cshtml partial
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for Tom Select to initialize, then hook into its onChange
+            setTimeout(function() {
+                const clientSelectElement = document.getElementById('clientSelect');
+                if (clientSelectElement && clientSelectElement.tomselect) {
+                    const originalOnChange = clientSelectElement.tomselect.on;
                     
-                    vehicles.forEach(vehicle => {
-                        const option = document.createElement('option');
-                        option.value = vehicle.id;
-                        option.textContent = vehicle.displayName;
-                        vehicleSelect.appendChild(option);
+                    clientSelectElement.tomselect.on('change', async function(clientId) {
+                        const vehicleSelect = document.getElementById('vehicleSelect');
+                        const vehicleHelp = document.getElementById('vehicleHelp');
+                        
+                        vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
+                        
+                        if (!clientId) {
+                            vehicleSelect.disabled = true;
+                            vehicleHelp.textContent = 'Select a client first to see their vehicles';
+                            return;
+                        }
+                        
+                        try {
+                            vehicleHelp.textContent = 'Loading vehicles...';
+                            const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
+                            const vehicles = await response.json();
+                            
+                            if (vehicles.length === 0) {
+                                vehicleSelect.disabled = true;
+                                vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-apple-blue hover:text-apple-blue-hover font-medium">Add a vehicle →</a>';
+                            } else {
+                                vehicleSelect.disabled = false;
+                                vehicleHelp.textContent = 'Select the vehicle being checked in';
+                                
+                                vehicles.forEach(vehicle => {
+                                    const option = document.createElement('option');
+                                    option.value = vehicle.id;
+                                    option.textContent = vehicle.displayName;
+                                    vehicleSelect.appendChild(option);
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error loading vehicles:', error);
+                            vehicleHelp.textContent = 'Error loading vehicles. Please try again.';
+                        }
                     });
                 }
-            } catch (error) {
-                console.error('Error loading vehicles:', error);
-                vehicleHelp.textContent = 'Error loading vehicles. Please try again.';
-            }
+            }, 500); // Small delay to ensure Tom Select is initialized
         });
     </script>
 }

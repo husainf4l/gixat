@@ -1,0 +1,169 @@
+@*
+    Client Search Component with Autocomplete
+    Usage: Include this partial in any form that needs client selection
+    Example: <partial name="_ClientSearch" model="new { InputId = "clientSelect", InputName = "SelectedClientId", Required = true }" />
+*@
+
+@{
+    var inputId = ViewData["InputId"]?.ToString() ?? "clientSelect";
+    var inputName = ViewData["InputName"]?.ToString() ?? "SelectedClientId";
+    var required = ViewData["Required"]?.ToString() == "True";
+    var placeholder = ViewData["Placeholder"]?.ToString() ?? "Search by name, phone, or email...";
+    var selectedClientId = ViewData["SelectedClientId"]?.ToString();
+}
+
+<div class="client-search-wrapper">
+    <label for="@inputId" class="block text-sm font-medium text-apple-dark mb-2">
+        Select Client @if (required) { <span class="text-apple-red">*</span> }
+    </label>
+    
+    <select id="@inputId" name="@inputName" 
+            class="input-apple-outlined w-full"
+            @(required ? "required" : "")
+            placeholder="@placeholder">
+        @if (!string.IsNullOrEmpty(selectedClientId))
+        {
+            <option value="@selectedClientId" selected>Loading...</option>
+        }
+        else
+        {
+            <option value="">@placeholder</option>
+        }
+    </select>
+    
+    <!-- Client Summary Card (appears after selection) -->
+    <div id="@(inputId)_summary" class="hidden mt-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-apple border border-blue-100">
+        <div class="flex items-start gap-3">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-apple-blue to-apple-indigo flex items-center justify-center text-white font-semibold text-lg flex-shrink-0">
+                <span id="@(inputId)_initials">--</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                    <h4 id="@(inputId)_name" class="font-semibold text-apple-dark">--</h4>
+                    <span id="@(inputId)_vip_badge" class="hidden badge-apple-orange text-xs">
+                        <i class="bi bi-star-fill"></i> VIP
+                    </span>
+                </div>
+                <div class="text-sm text-apple-gray space-y-0.5">
+                    <div class="flex items-center gap-2">
+                        <i class="bi bi-telephone text-xs"></i>
+                        <span id="@(inputId)_phone">--</span>
+                    </div>
+                    <div id="@(inputId)_email_container" class="hidden flex items-center gap-2">
+                        <i class="bi bi-envelope text-xs"></i>
+                        <span id="@(inputId)_email">--</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-2 text-xs">
+                        <span>
+                            <i class="bi bi-car-front"></i>
+                            <span id="@(inputId)_vehicles">0</span> vehicle(s)
+                        </span>
+                        <span id="@(inputId)_last_visit_container" class="hidden">
+                            <i class="bi bi-clock"></i>
+                            Last visit: <span id="@(inputId)_last_visit">--</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <p class="mt-2 text-sm text-apple-gray">
+        Can't find the client? <a href="/Clients" class="text-apple-blue hover:text-apple-blue-hover font-medium">Add new client →</a>
+    </p>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            const selectElement = document.getElementById('@inputId');
+            if (!selectElement) return;
+            
+            // Initialize Tom Select
+            const tomSelect = new TomSelect(selectElement, {
+                valueField: 'id',
+                labelField: 'fullName',
+                searchField: ['fullName', 'phone', 'email'],
+                placeholder: '@placeholder',
+                maxOptions: 20,
+                loadThrottle: 300,
+                load: function(query, callback) {
+                    if (!query.length || query.length < 2) return callback();
+                    
+                    fetch(`/Clients/Index?handler=Search&term=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            callback(data);
+                        })
+                        .catch(() => {
+                            callback();
+                        });
+                },
+                render: {
+                    option: function(item, escape) {
+                        const vipBadge = item.isVip ? '<span class="badge-apple-orange text-xs ml-2"><i class="bi bi-star-fill"></i> VIP</span>' : '';
+                        const email = item.email ? `<div class="text-xs text-gray-500"><i class="bi bi-envelope"></i> ${escape(item.email)}</div>` : '';
+                        const lastVisit = item.lastVisitAt ? `<div class="text-xs text-gray-400 mt-1"><i class="bi bi-clock"></i> Last visit: ${new Date(item.lastVisitAt).toLocaleDateString()}</div>` : '';
+                        
+                        return `<div class="py-2">
+                            <div class="flex items-center justify-between">
+                                <div class="font-medium text-apple-dark">${escape(item.fullName)}${vipBadge}</div>
+                                <div class="text-xs text-gray-500"><i class="bi bi-car-front"></i> ${item.vehicleCount} vehicle(s)</div>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1"><i class="bi bi-telephone"></i> ${escape(item.phone)}</div>
+                            ${email}
+                            ${lastVisit}
+                        </div>`;
+                    },
+                    item: function(item, escape) {
+                        return `<div>${escape(item.fullName)}</div>`;
+                    }
+                },
+                onChange: function(value) {
+                    if (!value) {
+                        document.getElementById('@(inputId)_summary').classList.add('hidden');
+                        return;
+                    }
+                    
+                    // Get the selected item data
+                    const item = this.options[value];
+                    if (!item) return;
+                    
+                    // Update summary card
+                    const initials = item.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    document.getElementById('@(inputId)_initials').textContent = initials;
+                    document.getElementById('@(inputId)_name').textContent = item.fullName;
+                    document.getElementById('@(inputId)_phone').textContent = item.phone;
+                    document.getElementById('@(inputId)_vehicles').textContent = item.vehicleCount;
+                    
+                    // Handle optional fields
+                    const emailContainer = document.getElementById('@(inputId)_email_container');
+                    if (item.email) {
+                        document.getElementById('@(inputId)_email').textContent = item.email;
+                        emailContainer.classList.remove('hidden');
+                    } else {
+                        emailContainer.classList.add('hidden');
+                    }
+                    
+                    const vipBadge = document.getElementById('@(inputId)_vip_badge');
+                    if (item.isVip) {
+                        vipBadge.classList.remove('hidden');
+                    } else {
+                        vipBadge.classList.add('hidden');
+                    }
+                    
+                    const lastVisitContainer = document.getElementById('@(inputId)_last_visit_container');
+                    if (item.lastVisitAt) {
+                        document.getElementById('@(inputId)_last_visit').textContent = new Date(item.lastVisitAt).toLocaleDateString();
+                        lastVisitContainer.classList.remove('hidden');
+                    } else {
+                        lastVisitContainer.classList.add('hidden');
+                    }
+                    
+                    // Show summary card
+                    document.getElementById('@(inputId)_summary').classList.remove('hidden');
+                }
+            });
+        })();
+    </script>
+}
