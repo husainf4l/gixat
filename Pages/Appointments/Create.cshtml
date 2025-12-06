@@ -1,0 +1,199 @@
+@page
+@model Gixat.Web.Pages.Appointments.CreateModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "New Appointment";
+}
+
+<div class="mb-8">
+    <div class="flex items-center gap-3 mb-2">
+        <a href="/Appointments" class="text-apple-gray hover:text-apple-dark">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h1 class="text-2xl font-semibold text-apple-dark">New Appointment</h1>
+    </div>
+    <p class="text-apple-gray text-sm ml-10">Schedule a service appointment</p>
+</div>
+
+<form method="post" class="max-w-3xl">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <i class="bi bi-exclamation-triangle text-red-600 mt-0.5"></i>
+            <div>
+                <h4 class="font-semibold text-red-900 mb-1">Error</h4>
+                <p class="text-sm text-red-800">@Model.ErrorMessage</p>
+            </div>
+        </div>
+    }
+
+    <!-- Client Selection -->
+    <div class="card-apple mb-6">
+        <h3 class="text-lg font-semibold text-apple-dark mb-4">Client Information</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Client <span class="text-red-500">*</span>
+                </label>
+                <select asp-for="Input.ClientId" class="input-apple" required>
+                    <option value="">Select a client...</option>
+                    @foreach (var client in Model.Clients)
+                    {
+                        <option value="@client.Id">@client.FirstName @client.LastName</option>
+                    }
+                </select>
+                <span asp-validation-for="Input.ClientId" class="text-red-600 text-xs mt-1"></span>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Vehicle (Optional)
+                </label>
+                <select asp-for="Input.ClientVehicleId" class="input-apple">
+                    <option value="">No specific vehicle</option>
+                    @foreach (var vehicle in Model.Vehicles)
+                    {
+                        <option value="@vehicle.Id" data-client="@vehicle.ClientId">
+                            @vehicle.Make @vehicle.Model (@vehicle.LicensePlate)
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Contact Phone <span class="text-red-500">*</span>
+                </label>
+                <input asp-for="Input.ContactPhone" type="tel" class="input-apple" placeholder="+1234567890" required />
+                <span asp-validation-for="Input.ContactPhone" class="text-red-600 text-xs mt-1"></span>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Contact Email (Optional)
+                </label>
+                <input asp-for="Input.ContactEmail" type="email" class="input-apple" placeholder="client@example.com" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Date & Time Selection -->
+    <div class="card-apple mb-6">
+        <h3 class="text-lg font-semibold text-apple-dark mb-4">Schedule</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Date <span class="text-red-500">*</span>
+                </label>
+                <input asp-for="Input.ScheduledDate" type="date" class="input-apple" 
+                       min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                <span asp-validation-for="Input.ScheduledDate" class="text-red-600 text-xs mt-1"></span>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Time <span class="text-red-500">*</span>
+                </label>
+                <select asp-for="Input.ScheduledTime" class="input-apple" required>
+                    <option value="">Select time...</option>
+                    @for (int hour = 8; hour < 18; hour++)
+                    {
+                        for (int minute = 0; minute < 60; minute += 30)
+                        {
+                            var timeValue = $"{hour:D2}:{minute:D2}";
+                            <option value="@timeValue">@timeValue</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="Input.ScheduledTime" class="text-red-600 text-xs mt-1"></span>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                    Duration <span class="text-red-500">*</span>
+                </label>
+                <select asp-for="Input.DurationMinutes" class="input-apple" required>
+                    <option value="30">30 minutes</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="90">1.5 hours</option>
+                    <option value="120">2 hours</option>
+                    <option value="180">3 hours</option>
+                    <option value="240">4 hours</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Details -->
+    <div class="card-apple mb-6">
+        <h3 class="text-lg font-semibold text-apple-dark mb-4">Service Details</h3>
+        
+        <div class="mb-4">
+            <label class="block text-sm font-semibold text-apple-dark mb-2">
+                Service Type <span class="text-red-500">*</span>
+            </label>
+            <select asp-for="Input.ServiceType" class="input-apple" required>
+                <option value="">Select service type...</option>
+                <option value="Oil Change">Oil Change</option>
+                <option value="Brake Service">Brake Service</option>
+                <option value="Tire Service">Tire Service</option>
+                <option value="Engine Diagnostic">Engine Diagnostic</option>
+                <option value="Transmission Service">Transmission Service</option>
+                <option value="Electrical Repair">Electrical Repair</option>
+                <option value="AC Service">AC Service</option>
+                <option value="General Inspection">General Inspection</option>
+                <option value="Body Work">Body Work</option>
+                <option value="Detailing">Detailing</option>
+                <option value="Custom Work">Custom Work</option>
+                <option value="Other">Other</option>
+            </select>
+            <span asp-validation-for="Input.ServiceType" class="text-red-600 text-xs mt-1"></span>
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-apple-dark mb-2">
+                Notes (Optional)
+            </label>
+            <textarea asp-for="Input.Notes" rows="4" class="input-apple" 
+                      placeholder="Any additional details or special requirements..."></textarea>
+        </div>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="flex items-center justify-end gap-3">
+        <a href="/Appointments" class="btn-apple-secondary">
+            Cancel
+        </a>
+        <button type="submit" class="btn-apple-primary">
+            <i class="bi bi-calendar-check"></i>
+            Schedule Appointment
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Filter vehicles based on selected client
+        document.querySelector('[name="Input.ClientId"]').addEventListener('change', function(e) {
+            const clientId = e.target.value;
+            const vehicleSelect = document.querySelector('[name="Input.ClientVehicleId"]');
+            const options = vehicleSelect.querySelectorAll('option');
+            
+            options.forEach(option => {
+                if (option.value === '') {
+                    option.style.display = 'block';
+                } else {
+                    const vehicleClientId = option.getAttribute('data-client');
+                    option.style.display = vehicleClientId === clientId ? 'block' : 'none';
+                }
+            });
+            
+            vehicleSelect.value = '';
+        });
+    </script>
+}

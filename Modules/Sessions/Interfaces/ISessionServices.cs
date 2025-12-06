@@ -99,6 +99,27 @@ public interface IJobCardService
     Task<JobCardItemDto> CreateItemFromCustomerRequestAsync(Guid jobCardId, Guid customerRequestId, string title, string? description, Guid companyId);
     Task<JobCardItemDto> CreateItemFromInspectionAsync(Guid jobCardId, Guid inspectionItemId, string title, string? description, Guid companyId);
     Task<JobCardItemDto> CreateItemFromTestDriveAsync(Guid jobCardId, Guid testDriveId, string title, string? description, Guid companyId);
+    
+    // Comments
+    Task<JobCardCommentDto> AddCommentAsync(CreateJobCardCommentDto dto, Guid companyId);
+    Task<IEnumerable<JobCardCommentDto>> GetCommentsAsync(Guid jobCardId, Guid companyId);
+    Task<bool> ResolveCommentAsync(Guid commentId, Guid resolvedById, Guid companyId);
+    Task<bool> DeleteCommentAsync(Guid commentId, Guid companyId);
+    
+    // Time Entries
+    Task<JobCardTimeEntryDto> StartTimeEntryAsync(CreateJobCardTimeEntryDto dto, Guid companyId);
+    Task<JobCardTimeEntryDto?> StopTimeEntryAsync(Guid timeEntryId, Guid companyId);
+    Task<IEnumerable<JobCardTimeEntryDto>> GetActiveTimeEntriesAsync(Guid jobCardId, Guid companyId);
+    Task<IEnumerable<JobCardTimeEntryDto>> GetTimeHistoryAsync(Guid jobCardId, Guid companyId);
+    Task<decimal> GetTotalLaborCostAsync(Guid jobCardId, Guid companyId);
+    
+    // Parts
+    Task<JobCardPartDto> AddPartAsync(CreateJobCardPartDto dto, Guid companyId);
+    Task<JobCardPartDto?> UpdatePartAsync(Guid partId, UpdateJobCardPartDto dto, Guid companyId);
+    Task<bool> UpdatePartStatusAsync(Guid partId, PartStatus status, Guid companyId);
+    Task<IEnumerable<JobCardPartDto>> GetPartsAsync(Guid jobCardId, Guid companyId);
+    Task<decimal> GetTotalPartsCostAsync(Guid jobCardId, Guid companyId);
+    Task<bool> RemovePartAsync(Guid partId, Guid companyId);
 }
 
 public interface IReportService

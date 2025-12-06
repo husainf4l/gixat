@@ -22,6 +22,9 @@ using Gixat.Web.Modules.Sessions;
 using Gixat.Web.Modules.Sessions.GraphQL.Queries;
 using Gixat.Web.Modules.Sessions.GraphQL.Mutations;
 using Gixat.Web.Modules.Sessions.GraphQL.Types;
+using Gixat.Web.Modules.Appointments;
+using Gixat.Web.Modules.Invoices;
+using Gixat.Web.Modules.Inventory;
 using Gixat.Web.Shared.Interfaces;
 using Gixat.Web.Shared.Services;
 using Gixat.Web.HealthChecks;
@@ -175,6 +178,9 @@ builder.Services.AddCompaniesModuleServices();
 builder.Services.AddUsersModuleServices();
 builder.Services.AddClientsModuleServices();
 builder.Services.AddSessionsModuleServices();
+builder.Services.AddAppointmentsModuleServices();
+builder.Services.AddInvoicesModuleServices();
+builder.Services.AddInventoryModuleServices();
 builder.Services.AddAwsS3(builder.Configuration);
 
 // Register Email Service

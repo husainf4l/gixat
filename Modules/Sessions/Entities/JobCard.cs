@@ -57,4 +57,7 @@ public class JobCard : BaseEntity
     public virtual GarageSession Session { get; set; } = null!;
     public virtual ICollection<JobCardItem> Items { get; set; } = new List<JobCardItem>();
     public virtual ICollection<MediaItem> MediaItems { get; set; } = new List<MediaItem>();
+    public virtual ICollection<JobCardComment> Comments { get; set; } = new List<JobCardComment>();
+    public virtual ICollection<JobCardTimeEntry> TimeEntries { get; set; } = new List<JobCardTimeEntry>();
+    public virtual ICollection<JobCardPart> Parts { get; set; } = new List<JobCardPart>();
 }

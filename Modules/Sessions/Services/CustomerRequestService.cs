@@ -45,6 +45,28 @@ public class CustomerRequestService : BaseService, ICustomerRequestService
     public async Task<CustomerRequestDto> CreateAsync(CreateCustomerRequestDto dto, Guid companyId)
     {
         _logger.LogInformation("Creating customer request for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
+        
+        // Check if a request already exists for this session
+        var existingRequest = await CustomerRequests
+            .FirstOrDefaultAsync(r => r.SessionId == dto.SessionId && r.CompanyId == companyId);
+
+        if (existingRequest != null)
+        {
+            // Update existing request
+            _logger.LogInformation("Updating existing customer request {RequestId} for session {SessionId}", existingRequest.Id, dto.SessionId);
+            existingRequest.Title = dto.Title;
+            existingRequest.Description = dto.Description;
+            existingRequest.CustomerConcerns = dto.CustomerConcerns;
+            existingRequest.RequestedServices = dto.RequestedServices;
+            existingRequest.Priority = dto.Priority;
+            existingRequest.Notes = dto.Notes;
+            existingRequest.UpdatedAt = DateTime.UtcNow;
+            
+            await SaveChangesAsync();
+            return existingRequest.ToDto();
+        }
+
+        // Create new request
         var request = new CustomerRequest
         {
             SessionId = dto.SessionId,

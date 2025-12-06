@@ -3,6 +3,7 @@ using System;
 using Gixat.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gixat.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251206072948_AddInvoicesAndInventory")]
+    partial class AddInvoicesAndInventory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,7 +117,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Appointments", (string)null);
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Auth.Entities.ApplicationRole", b =>
@@ -686,7 +689,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InventoryItems", (string)null);
+                    b.ToTable("InventoryItems");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Inventory.Entities.StockMovement", b =>
@@ -751,7 +754,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasIndex("InventoryItemId");
 
-                    b.ToTable("StockMovements", (string)null);
+                    b.ToTable("StockMovements");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Invoices.Entities.Invoice", b =>
@@ -845,7 +848,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Invoices", (string)null);
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Invoices.Entities.InvoiceItem", b =>
@@ -895,7 +898,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("InvoiceItems", (string)null);
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Invoices.Entities.Payment", b =>
@@ -939,7 +942,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.CustomerRequest", b =>
@@ -1373,83 +1376,6 @@ namespace Gixat.Web.Migrations
                     b.ToTable("JobCards", (string)null);
                 });
 
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AttachmentName")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<string>("AttachmentUrl")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AuthorName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("HasAttachment")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsResolved")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("JobCardId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("MentionedUserIds")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<Guid?>("ParentCommentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("ResolvedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("Type")
-                        .HasMaxLength(50)
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("CreatedAt");
-
-                    b.HasIndex("JobCardId");
-
-                    b.HasIndex("ParentCommentId");
-
-                    b.ToTable("JobCardComments", (string)null);
-                });
-
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1548,213 +1474,6 @@ namespace Gixat.Web.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("JobCardItems", (string)null);
-                });
-
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardPart", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("AddedById")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<bool>("HasWarranty")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("InstalledAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("InventoryItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("JobCardId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("JobCardItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("Markup")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("numeric(5,2)");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTime?>("OrderedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("PartName")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.Property<string>("PartNumber")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<decimal>("QuantityUsed")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("numeric(10,3)");
-
-                    b.Property<DateTime?>("ReceivedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Source")
-                        .HasMaxLength(50)
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Supplier")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<string>("SupplierPartNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<decimal>("TotalCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<decimal>("UnitCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("WarrantyInfo")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("WarrantyMonths")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("InventoryItemId");
-
-                    b.HasIndex("JobCardId");
-
-                    b.HasIndex("JobCardItemId");
-
-                    b.HasIndex("PartNumber");
-
-                    b.HasIndex("Status");
-
-                    b.ToTable("JobCardParts", (string)null);
-                });
-
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardTimeEntry", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<decimal>("BreakMinutes")
-                        .HasColumnType("numeric");
-
-                    b.Property<Guid>("CompanyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
-                    b.Property<DateTime?>("EndTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("HourlyRate")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<decimal>("Hours")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsBillable")
-                        .HasColumnType("boolean");
-
-                    b.Property<Guid>("JobCardId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("JobCardItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("TechnicianId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("TechnicianName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.Property<decimal>("TotalCost")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompanyId");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("JobCardId");
-
-                    b.HasIndex("JobCardItemId");
-
-                    b.HasIndex("StartTime");
-
-                    b.HasIndex("TechnicianId");
-
-                    b.ToTable("JobCardTimeEntries", (string)null);
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.MediaItem", b =>
@@ -2335,24 +2054,6 @@ namespace Gixat.Web.Migrations
                     b.Navigation("Session");
                 });
 
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardComment", b =>
-                {
-                    b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCard", "JobCard")
-                        .WithMany("Comments")
-                        .HasForeignKey("JobCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCardComment", "ParentComment")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentCommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("JobCard");
-
-                    b.Navigation("ParentComment");
-                });
-
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardItem", b =>
                 {
                     b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCard", "JobCard")
@@ -2362,42 +2063,6 @@ namespace Gixat.Web.Migrations
                         .IsRequired();
 
                     b.Navigation("JobCard");
-                });
-
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardPart", b =>
-                {
-                    b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCard", "JobCard")
-                        .WithMany("Parts")
-                        .HasForeignKey("JobCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCardItem", "JobCardItem")
-                        .WithMany("Parts")
-                        .HasForeignKey("JobCardItemId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("JobCard");
-
-                    b.Navigation("JobCardItem");
-                });
-
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardTimeEntry", b =>
-                {
-                    b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCard", "JobCard")
-                        .WithMany("TimeEntries")
-                        .HasForeignKey("JobCardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCardItem", "JobCardItem")
-                        .WithMany("TimeEntries")
-                        .HasForeignKey("JobCardItemId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("JobCard");
-
-                    b.Navigation("JobCardItem");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.MediaItem", b =>
@@ -2547,29 +2212,14 @@ namespace Gixat.Web.Migrations
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCard", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("Items");
 
                     b.Navigation("MediaItems");
-
-                    b.Navigation("Parts");
-
-                    b.Navigation("TimeEntries");
-                });
-
-            modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardComment", b =>
-                {
-                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.JobCardItem", b =>
                 {
                     b.Navigation("MediaItems");
-
-                    b.Navigation("Parts");
-
-                    b.Navigation("TimeEntries");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.TestDrive", b =>

@@ -49,4 +49,6 @@ public class JobCardItem : BaseEntity
     // Navigation
     public virtual JobCard JobCard { get; set; } = null!;
     public virtual ICollection<MediaItem> MediaItems { get; set; } = new List<MediaItem>();
+    public virtual ICollection<JobCardTimeEntry> TimeEntries { get; set; } = new List<JobCardTimeEntry>();
+    public virtual ICollection<JobCardPart> Parts { get; set; } = new List<JobCardPart>();
 }

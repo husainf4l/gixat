@@ -3,6 +3,7 @@ using System;
 using Gixat.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Gixat.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251206081801_AddJobCardCollaboration")]
+    partial class AddJobCardCollaboration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,7 +117,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Appointments", (string)null);
+                    b.ToTable("Appointments");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Auth.Entities.ApplicationRole", b =>
@@ -686,7 +689,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InventoryItems", (string)null);
+                    b.ToTable("InventoryItems");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Inventory.Entities.StockMovement", b =>
@@ -751,7 +754,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasIndex("InventoryItemId");
 
-                    b.ToTable("StockMovements", (string)null);
+                    b.ToTable("StockMovements");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Invoices.Entities.Invoice", b =>
@@ -845,7 +848,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Invoices", (string)null);
+                    b.ToTable("Invoices");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Invoices.Entities.InvoiceItem", b =>
@@ -895,7 +898,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("InvoiceItems", (string)null);
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Invoices.Entities.Payment", b =>
@@ -939,7 +942,7 @@ namespace Gixat.Web.Migrations
 
                     b.HasIndex("InvoiceId");
 
-                    b.ToTable("Payments", (string)null);
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Gixat.Web.Modules.Sessions.Entities.CustomerRequest", b =>
@@ -1581,7 +1584,7 @@ namespace Gixat.Web.Migrations
                     b.Property<Guid>("JobCardId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("JobCardItemId")
+                    b.Property<Guid>("JobCardItemId")
                         .HasColumnType("uuid");
 
                     b.Property<decimal>("Markup")
@@ -1715,7 +1718,7 @@ namespace Gixat.Web.Migrations
                     b.Property<Guid>("JobCardId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("JobCardItemId")
+                    b.Property<Guid>("JobCardItemId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Notes")
@@ -2375,7 +2378,8 @@ namespace Gixat.Web.Migrations
                     b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCardItem", "JobCardItem")
                         .WithMany("Parts")
                         .HasForeignKey("JobCardItemId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("JobCard");
 
@@ -2393,7 +2397,8 @@ namespace Gixat.Web.Migrations
                     b.HasOne("Gixat.Web.Modules.Sessions.Entities.JobCardItem", "JobCardItem")
                         .WithMany("TimeEntries")
                         .HasForeignKey("JobCardItemId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("JobCard");
 

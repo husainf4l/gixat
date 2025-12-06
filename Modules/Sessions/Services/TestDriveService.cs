@@ -45,6 +45,26 @@ public class TestDriveService : BaseService, ITestDriveService
     public async Task<TestDriveDto> CreateAsync(CreateTestDriveDto dto, Guid companyId)
     {
         _logger.LogInformation("Creating test drive for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
+        
+        // Check if a test drive already exists for this session
+        var existingTestDrive = await TestDrives
+            .FirstOrDefaultAsync(t => t.SessionId == dto.SessionId && t.CompanyId == companyId);
+
+        if (existingTestDrive != null)
+        {
+            // Update existing test drive
+            _logger.LogInformation("Updating existing test drive {TestDriveId} for session {SessionId}", existingTestDrive.Id, dto.SessionId);
+            existingTestDrive.Title = dto.Title;
+            existingTestDrive.Description = dto.Description;
+            existingTestDrive.MileageStart = dto.MileageStart;
+            existingTestDrive.OverallPriority = dto.OverallPriority;
+            existingTestDrive.UpdatedAt = DateTime.UtcNow;
+            
+            await SaveChangesAsync();
+            return existingTestDrive.ToDto();
+        }
+
+        // Create new test drive
         var testDrive = new TestDrive
         {
             SessionId = dto.SessionId,

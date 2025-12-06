@@ -1,0 +1,391 @@
+@page
+@model Gixat.Web.Pages.Appointments.IndexModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Appointments";
+}
+
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-2xl font-semibold text-apple-dark">Appointments</h1>
+        <p class="text-apple-gray text-sm mt-1">Schedule and manage service appointments</p>
+    </div>
+    <a href="/Appointments/Create" class="btn-apple-primary">
+        <i class="bi bi-plus-lg"></i>
+        New Appointment
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="card-apple border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">Scheduled</p>
+                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled)</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-calendar-check text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="card-apple border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">Confirmed</p>
+                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed)</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-check-circle text-green-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="card-apple border-l-4 border-purple-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">In Progress</p>
+                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress)</p>
+            </div>
+            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-hourglass-split text-purple-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="card-apple border-l-4 border-gray-500">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">Total Today</p>
+                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count</p>
+            </div>
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="bi bi-calendar3 text-apple-gray text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Selector & Filters -->
+<div class="card-apple mb-6">
+    <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div class="flex gap-2">
+            <a href="?view=calendar&date=@Model.SelectedDate.ToString("yyyy-MM-dd")" 
+               class="@(Model.ViewMode == "calendar" ? "bg-apple-blue text-white shadow-sm" : "bg-white text-apple-dark border border-gray-200 hover:bg-gray-50") px-4 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
+                <i class="bi bi-calendar3"></i>
+                Calendar
+            </a>
+            <a href="?view=list" 
+               class="@(Model.ViewMode == "list" ? "bg-apple-blue text-white shadow-sm" : "bg-white text-apple-dark border border-gray-200 hover:bg-gray-50") px-4 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
+                <i class="bi bi-list-ul"></i>
+                List
+            </a>
+        </div>
+
+        @if (Model.ViewMode == "calendar")
+        {
+            <div class="flex items-center gap-2">
+                <a href="?view=calendar&date=@Model.SelectedDate.AddDays(-1).ToString("yyyy-MM-dd")" 
+                   class="p-2.5 bg-white text-apple-dark border border-gray-200 hover:bg-gray-50 rounded-lg transition-all">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <span class="px-6 py-2.5 bg-gradient-to-br from-apple-blue to-apple-indigo text-white rounded-lg text-sm font-semibold shadow-sm">
+                    @Model.SelectedDate.ToString("dddd, MMMM dd, yyyy")
+                </span>
+                <a href="?view=calendar&date=@Model.SelectedDate.AddDays(1).ToString("yyyy-MM-dd")" 
+                   class="p-2.5 bg-white text-apple-dark border border-gray-200 hover:bg-gray-50 rounded-lg transition-all">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+                <a href="?view=calendar&date=@DateTime.UtcNow.Date.ToString("yyyy-MM-dd")" 
+                   class="px-4 py-2.5 bg-white text-apple-blue border border-apple-blue hover:bg-apple-blue hover:text-white rounded-lg font-medium text-sm transition-all">
+                    Today
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.ViewMode == "calendar")
+{
+    <!-- Calendar View -->
+    <div class="card-apple overflow-hidden">
+        <!-- Calendar Header -->
+        <div class="bg-gradient-to-r from-apple-blue to-apple-indigo text-white p-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-bold">@Model.SelectedDate.ToString("MMMM yyyy")</h2>
+                <div class="flex gap-2">
+                    <a href="?view=calendar&date=@Model.SelectedDate.AddMonths(-1).ToString("yyyy-MM-dd")" 
+                       class="p-2 hover:bg-white/20 rounded-lg transition-all">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                    <a href="?view=calendar&date=@DateTime.UtcNow.Date.ToString("yyyy-MM-dd")" 
+                       class="px-4 py-2 hover:bg-white/20 rounded-lg transition-all font-semibold">
+                        Today
+                    </a>
+                    <a href="?view=calendar&date=@Model.SelectedDate.AddMonths(1).ToString("yyyy-MM-dd")" 
+                       class="p-2 hover:bg-white/20 rounded-lg transition-all">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day Headers -->
+        <div class="grid grid-cols-7 border-b border-gray-200 bg-gray-50">
+            @foreach (var day in new[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" })
+            {
+                <div class="p-3 text-center font-semibold text-sm text-apple-gray uppercase tracking-wide border-r border-gray-200 last:border-r-0">
+                    @day.Substring(0, 3)
+                </div>
+            }
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="grid grid-cols-7">
+            @{
+                var firstDayOfMonth = new DateTime(Model.SelectedDate.Year, Model.SelectedDate.Month, 1);
+                var daysInMonth = DateTime.DaysInMonth(Model.SelectedDate.Year, Model.SelectedDate.Month);
+                var startDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+                var today = DateTime.UtcNow.Date;
+                
+                // Previous month days
+                var prevMonth = firstDayOfMonth.AddMonths(-1);
+                var daysInPrevMonth = DateTime.DaysInMonth(prevMonth.Year, prevMonth.Month);
+                
+                for (int i = startDayOfWeek - 1; i >= 0; i--)
+                {
+                    var date = new DateTime(prevMonth.Year, prevMonth.Month, daysInPrevMonth - i);
+                    <div class="min-h-[120px] border-r border-b border-gray-200 bg-gray-50/50 p-2">
+                        <div class="text-sm text-apple-gray mb-1">@(daysInPrevMonth - i)</div>
+                    </div>
+                }
+                
+                // Current month days
+                for (int day = 1; day <= daysInMonth; day++)
+                {
+                    var date = new DateTime(Model.SelectedDate.Year, Model.SelectedDate.Month, day);
+                    var dateUtc = DateTime.SpecifyKind(date, DateTimeKind.Utc);
+                    var dayAppointments = Model.AllAppointments.Where(a => a.ScheduledDate.Date == dateUtc.Date).ToList();
+                    var isToday = date.Date == today;
+                    var isSelected = date.Date == Model.SelectedDate.Date;
+                    
+                    <div class="min-h-[120px] border-r border-b border-gray-200 @(isToday ? "bg-blue-50" : "bg-white") p-2 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between mb-2">
+                            <a href="?view=calendar&date=@date.ToString("yyyy-MM-dd")" 
+                               class="@(isToday ? "w-8 h-8 bg-apple-blue text-white rounded-full flex items-center justify-center font-bold text-sm" : isSelected ? "w-8 h-8 bg-gray-200 text-apple-dark rounded-full flex items-center justify-center font-semibold text-sm" : "text-sm font-semibold text-apple-dark hover:text-apple-blue")">
+                                @day
+                            </a>
+                            @if (dayAppointments.Any())
+                            {
+                                <span class="text-xs bg-apple-blue text-white px-2 py-0.5 rounded-full font-semibold">
+                                    @dayAppointments.Count
+                                </span>
+                            }
+                        </div>
+                        <div class="space-y-1">
+                            @foreach (var apt in dayAppointments.Take(3))
+                            {
+                                <a href="/Appointments/@apt.Id" 
+                                   class="block text-xs p-1.5 rounded @GetCalendarStatusClass(apt.Status) hover:shadow-sm transition-all truncate">
+                                    <div class="font-semibold truncate">@apt.ScheduledTime.ToString(@"hh\:mm")</div>
+                                    <div class="truncate opacity-90">@(string.IsNullOrEmpty(apt.ClientName) ? apt.ServiceType : apt.ClientName)</div>
+                                </a>
+                            }
+                            @if (dayAppointments.Count > 3)
+                            {
+                                <a href="?view=calendar&date=@date.ToString("yyyy-MM-dd")" 
+                                   class="block text-xs text-apple-blue hover:text-apple-indigo font-semibold text-center py-1">
+                                    +@(dayAppointments.Count - 3) more
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+                
+                // Next month days to fill the grid
+                var totalCells = startDayOfWeek + daysInMonth;
+                var remainingCells = totalCells % 7 == 0 ? 0 : 7 - (totalCells % 7);
+                
+                for (int i = 1; i <= remainingCells; i++)
+                {
+                    <div class="min-h-[120px] border-r border-b border-gray-200 bg-gray-50/50 p-2">
+                        <div class="text-sm text-apple-gray mb-1">@i</div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+    
+    <!-- Selected Day Details -->
+    @if (Model.Appointments.Any())
+    {
+        <div class="mt-6 card-apple">
+            <h3 class="text-lg font-bold text-apple-dark mb-4 flex items-center gap-2">
+                <i class="bi bi-calendar-day text-apple-blue"></i>
+                Appointments on @Model.SelectedDate.ToString("MMMM dd, yyyy")
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach (var apt in Model.Appointments.OrderBy(a => a.ScheduledTime))
+                {
+                    <a href="/Appointments/@apt.Id" class="group block p-4 rounded-xl border-2 @GetStatusBorderClass(apt.Status) bg-white hover:shadow-lg hover:scale-[1.02] transition-all">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-apple-blue to-apple-indigo flex items-center justify-center text-white text-xs font-bold">
+                                        @(string.IsNullOrEmpty(apt.ClientName) ? "?" : apt.ClientName.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <h4 class="font-bold text-apple-dark group-hover:text-apple-blue transition-colors">
+                                        @(string.IsNullOrEmpty(apt.ClientName) ? "Walk-in" : apt.ClientName)
+                                    </h4>
+                                </div>
+                                <p class="text-sm text-apple-gray font-medium">@apt.ServiceType</p>
+                            </div>
+                            <span class="@GetStatusBadgeClass(apt.Status) text-xs px-2.5 py-1 rounded-full font-semibold whitespace-nowrap">
+                                @apt.Status
+                            </span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3 text-xs text-apple-gray">
+                            <span class="inline-flex items-center gap-1">
+                                <i class="bi bi-clock"></i>
+                                <strong>@apt.ScheduledTime</strong>
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                                <i class="bi bi-hourglass-split"></i>
+                                @apt.DurationMinutes min
+                            </span>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+}
+else
+{
+    <!-- List View -->
+    @if (Model.Appointments.Any())
+    {
+        <div class="space-y-4">
+            @foreach (var apt in Model.Appointments)
+            {
+                <a href="/Appointments/@apt.Id" class="card-apple border-l-4 @GetStatusBorderClass(apt.Status) hover:shadow-lg transition-all block group">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+                        <!-- Date Badge -->
+                        <div class="flex-shrink-0 text-center md:w-24">
+                            <div class="inline-block md:block bg-gradient-to-br from-apple-blue to-apple-indigo text-white rounded-xl p-3 shadow-md">
+                                <div class="text-2xl font-bold">@apt.ScheduledDate.Day</div>
+                                <div class="text-xs uppercase tracking-wide">@apt.ScheduledDate.ToString("MMM")</div>
+                            </div>
+                        </div>
+
+                        <!-- Appointment Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-apple-purple to-apple-pink flex items-center justify-center text-white font-bold">
+                                        @(string.IsNullOrEmpty(apt.ClientName) ? "?" : apt.ClientName.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-apple-dark group-hover:text-apple-blue transition-colors text-lg">
+                                            @(string.IsNullOrEmpty(apt.ClientName) ? "Walk-in Customer" : apt.ClientName)
+                                        </h3>
+                                        <p class="text-sm text-apple-gray">@apt.ServiceType</p>
+                                    </div>
+                                </div>
+                                <span class="@GetStatusBadgeClass(apt.Status) px-3 py-1.5 rounded-full font-semibold text-xs whitespace-nowrap">
+                                    @apt.Status
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 text-sm">
+                                <div class="flex items-center gap-2 text-apple-gray">
+                                    <i class="bi bi-clock text-apple-blue"></i>
+                                    <span><strong>@apt.ScheduledTime</strong></span>
+                                </div>
+                                <div class="flex items-center gap-2 text-apple-gray">
+                                    <i class="bi bi-hourglass-split text-purple-500"></i>
+                                    <span>@apt.DurationMinutes min</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(apt.VehicleInfo))
+                                {
+                                    <div class="flex items-center gap-2 text-apple-gray">
+                                        <i class="bi bi-car-front text-green-500"></i>
+                                        <span class="truncate">@apt.VehicleInfo</span>
+                                    </div>
+                                }
+                                <div class="flex items-center gap-2 text-apple-gray">
+                                    <i class="bi bi-telephone text-orange-500"></i>
+                                    <span class="truncate">@apt.ContactPhone</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Arrow -->
+                        <div class="hidden md:flex items-center text-apple-gray group-hover:text-apple-blue group-hover:translate-x-1 transition-all">
+                            <i class="bi bi-chevron-right text-xl"></i>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-20">
+            <div class="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <i class="bi bi-calendar-check text-5xl text-apple-gray"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-apple-dark mb-2">No upcoming appointments</h3>
+            <p class="text-apple-gray mb-8 max-w-md mx-auto">Start scheduling appointments to manage your service bookings efficiently</p>
+            <a href="/Appointments/Create" class="btn-apple-primary inline-flex shadow-lg hover:shadow-xl">
+                <i class="bi bi-plus-lg"></i>
+                Schedule New Appointment
+            </a>
+        </div>
+    }
+}
+
+@functions {
+    string GetStatusBadgeClass(Gixat.Web.Modules.Appointments.Entities.AppointmentStatus status)
+    {
+        return status switch
+        {
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled => "bg-blue-100 text-blue-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed => "bg-green-100 text-green-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress => "bg-purple-100 text-purple-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Completed => "bg-gray-100 text-apple-gray",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Cancelled => "bg-red-100 text-red-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.NoShow => "bg-orange-100 text-orange-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Rescheduled => "bg-yellow-100 text-yellow-700",
+            _ => "bg-gray-100 text-gray-700"
+        };
+    }
+
+    string GetStatusBorderClass(Gixat.Web.Modules.Appointments.Entities.AppointmentStatus status)
+    {
+        return status switch
+        {
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled => "border-blue-300",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed => "border-green-300",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress => "border-purple-300",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Completed => "border-gray-300",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Cancelled => "border-red-300",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.NoShow => "border-orange-300",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Rescheduled => "border-yellow-300",
+            _ => "border-gray-300"
+        };
+    }
+
+    string GetCalendarStatusClass(Gixat.Web.Modules.Appointments.Entities.AppointmentStatus status)
+    {
+        return status switch
+        {
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled => "bg-blue-100 text-blue-800 border-l-2 border-blue-500",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed => "bg-green-100 text-green-800 border-l-2 border-green-500",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress => "bg-purple-100 text-purple-800 border-l-2 border-purple-500",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Completed => "bg-gray-100 text-gray-800 border-l-2 border-gray-500",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Cancelled => "bg-red-100 text-red-800 border-l-2 border-red-500",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.NoShow => "bg-orange-100 text-orange-800 border-l-2 border-orange-500",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Rescheduled => "bg-yellow-100 text-yellow-800 border-l-2 border-yellow-500",
+            _ => "bg-gray-100 text-gray-800 border-l-2 border-gray-500"
+        };
+    }
+}

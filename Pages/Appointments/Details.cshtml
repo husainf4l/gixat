@@ -1,0 +1,326 @@
+@page "{id:guid}"
+@model Gixat.Web.Pages.Appointments.DetailsModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = $"Appointment {Model.Appointment?.AppointmentNumber}";
+}
+
+@if (Model.Appointment == null)
+{
+    <div class="text-center py-16">
+        <div class="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-exclamation-triangle text-3xl text-red-600"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-apple-dark mb-2">Appointment not found</h3>
+        <a href="/Appointments" class="btn-apple-primary mt-4 inline-flex">
+            <i class="bi bi-arrow-left"></i>
+            Back to Appointments
+        </a>
+    </div>
+}
+else
+{
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-4">
+                <a href="/Appointments" class="p-2 text-apple-gray hover:text-apple-dark hover:bg-gray-100 rounded-lg transition-all">
+                    <i class="bi bi-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h1 class="text-3xl font-bold text-apple-dark">@Model.Appointment.AppointmentNumber</h1>
+                        <span class="@GetStatusBadgeClass(Model.Appointment.Status) px-4 py-2 rounded-full font-bold text-sm shadow-sm">
+                            @Model.Appointment.Status
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-4 text-apple-gray">
+                        <span class="inline-flex items-center gap-2">
+                            <i class="bi bi-calendar3"></i>
+                            <strong>@Model.Appointment.ScheduledDate.ToString("dddd, MMMM dd, yyyy")</strong>
+                        </span>
+                        <span class="inline-flex items-center gap-2">
+                            <i class="bi bi-clock"></i>
+                            <strong>@Model.Appointment.ScheduledTime.ToString()</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg flex items-start gap-3 shadow-sm">
+            <i class="bi bi-check-circle-fill text-green-600 text-xl mt-0.5"></i>
+            <div>
+                <h4 class="font-semibold text-green-900 mb-1">Success</h4>
+                <p class="text-sm text-green-800">@Model.SuccessMessage</p>
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-start gap-3 shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill text-red-600 text-xl mt-0.5"></i>
+            <div>
+                <h4 class="font-semibold text-red-900 mb-1">Error</h4>
+                <p class="text-sm text-red-800">@Model.ErrorMessage</p>
+            </div>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Contact Info -->
+            <div class="card-apple border-l-4 border-blue-500">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-person-circle text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-apple-dark">Contact Information</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <label class="text-xs text-apple-gray uppercase tracking-wide font-semibold mb-2 block">Phone Number</label>
+                        <div class="flex items-center gap-2 text-apple-dark">
+                            <i class="bi bi-telephone-fill text-blue-500"></i>
+                            <a href="tel:@Model.Appointment.ContactPhone" class="font-semibold hover:text-blue-500 transition-colors">@Model.Appointment.ContactPhone</a>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Appointment.ContactEmail))
+                    {
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <label class="text-xs text-apple-gray uppercase tracking-wide font-semibold mb-2 block">Email Address</label>
+                            <div class="flex items-center gap-2 text-apple-dark">
+                                <i class="bi bi-envelope-fill text-blue-500"></i>
+                                <a href="mailto:@Model.Appointment.ContactEmail" class="font-semibold hover:text-blue-500 transition-colors truncate">@Model.Appointment.ContactEmail</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Service Details -->
+            <div class="card-apple border-l-4 border-purple-500">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-tools text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-apple-dark">Service Details</h3>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <label class="text-xs text-purple-600 uppercase tracking-wide font-semibold mb-1 block">Service Type</label>
+                        <p class="text-apple-dark font-bold text-lg">@Model.Appointment.ServiceType</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <label class="text-xs text-purple-600 uppercase tracking-wide font-semibold mb-1 block">Duration</label>
+                        <p class="text-apple-dark font-bold text-lg">@Model.Appointment.DurationMinutes min</p>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <label class="text-xs text-purple-600 uppercase tracking-wide font-semibold mb-1 block">Scheduled Time</label>
+                        <p class="text-apple-dark font-bold text-lg">@Model.Appointment.ScheduledTime.ToString()</p>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Appointment.CustomerNotes))
+                {
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <label class="text-xs text-apple-gray uppercase tracking-wide font-semibold mb-2 block flex items-center gap-2">
+                            <i class="bi bi-chat-left-text"></i>
+                            Customer Notes
+                        </label>
+                        <p class="text-apple-dark">@Model.Appointment.CustomerNotes</p>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Appointment.InternalNotes))
+                {
+                    <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200 mt-3">
+                        <label class="text-xs text-yellow-700 uppercase tracking-wide font-semibold mb-2 block flex items-center gap-2">
+                            <i class="bi bi-sticky"></i>
+                            Internal Notes
+                        </label>
+                        <p class="text-apple-dark">@Model.Appointment.InternalNotes</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Timeline -->
+            <div class="card-apple border-l-4 border-green-500">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-clock-history text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-apple-dark">Timeline</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex gap-4 relative">
+                        <div class="flex flex-col items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full ring-4 ring-blue-100"></div>
+                            @if (Model.Appointment.ConfirmedAt.HasValue || Model.Appointment.ReminderSentAt.HasValue || Model.Appointment.CancelledAt.HasValue)
+                            {
+                                <div class="w-0.5 h-full bg-gray-200 mt-2"></div>
+                            }
+                        </div>
+                        <div class="pb-6">
+                            <p class="text-sm font-bold text-apple-dark">Appointment Created</p>
+                            <p class="text-xs text-apple-gray mt-1">@Model.Appointment.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</p>
+                        </div>
+                    </div>
+                    @if (Model.Appointment.ConfirmedAt.HasValue)
+                    {
+                        <div class="flex gap-4 relative">
+                            <div class="flex flex-col items-center">
+                                <div class="w-3 h-3 bg-green-500 rounded-full ring-4 ring-green-100"></div>
+                                @if (Model.Appointment.ReminderSentAt.HasValue || Model.Appointment.CancelledAt.HasValue)
+                                {
+                                    <div class="w-0.5 h-full bg-gray-200 mt-2"></div>
+                                }
+                            </div>
+                            <div class="pb-6">
+                                <p class="text-sm font-bold text-green-700">Confirmed</p>
+                                <p class="text-xs text-apple-gray mt-1">@Model.Appointment.ConfirmedAt.Value.ToString("MMM dd, yyyy h:mm tt")</p>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.Appointment.ReminderSentAt.HasValue)
+                    {
+                        <div class="flex gap-4 relative">
+                            <div class="flex flex-col items-center">
+                                <div class="w-3 h-3 bg-purple-500 rounded-full ring-4 ring-purple-100"></div>
+                                @if (Model.Appointment.CancelledAt.HasValue)
+                                {
+                                    <div class="w-0.5 h-full bg-gray-200 mt-2"></div>
+                                }
+                            </div>
+                            <div class="pb-6">
+                                <p class="text-sm font-bold text-purple-700">Reminder Sent</p>
+                                <p class="text-xs text-apple-gray mt-1">@Model.Appointment.ReminderSentAt.Value.ToString("MMM dd, yyyy h:mm tt")</p>
+                            </div>
+                        </div>
+                    }
+                    @if (Model.Appointment.CancelledAt.HasValue)
+                    {
+                        <div class="flex gap-4">
+                            <div class="w-3 h-3 bg-red-500 rounded-full ring-4 ring-red-100"></div>
+                            <div>
+                                <p class="text-sm font-bold text-red-700">Cancelled</p>
+                                <p class="text-xs text-apple-gray mt-1">@Model.Appointment.CancelledAt.Value.ToString("MMM dd, yyyy h:mm tt")</p>
+                                @if (!string.IsNullOrEmpty(Model.Appointment.CancellationReason))
+                                {
+                                    <p class="text-xs text-red-600 mt-2 p-2 bg-red-50 rounded inline-block">@Model.Appointment.CancellationReason</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Sidebar -->
+        <div class="space-y-4">
+            @if (Model.Appointment.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled)
+            {
+                <div class="card-apple bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+                    <h4 class="font-bold text-apple-dark mb-4 flex items-center gap-2">
+                        <i class="bi bi-lightning-charge-fill text-blue-600"></i>
+                        Quick Actions
+                    </h4>
+                    <form method="post" class="space-y-3">
+                        <button type="submit" asp-page-handler="Confirm" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
+                            <i class="bi bi-check-circle-fill text-xl"></i>
+                            Confirm Appointment
+                        </button>
+                        <button type="submit" asp-page-handler="Cancel" class="w-full bg-white hover:bg-red-50 text-red-600 border-2 border-red-300 hover:border-red-400 font-semibold py-3 px-4 rounded-xl transition-all inline-flex items-center justify-center gap-2">
+                            <i class="bi bi-x-circle-fill text-xl"></i>
+                            Cancel Appointment
+                        </button>
+                    </form>
+                </div>
+            }
+
+            @if (Model.Appointment.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed)
+            {
+                <div class="card-apple bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
+                    <h4 class="font-bold text-apple-dark mb-4 flex items-center gap-2">
+                        <i class="bi bi-lightning-charge-fill text-green-600"></i>
+                        Actions
+                    </h4>
+                    <form method="post" class="space-y-3">
+                        @if (Model.Appointment.ClientVehicleId.HasValue)
+                        {
+                            <button type="submit" asp-page-handler="StartSession" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
+                                <i class="bi bi-play-circle-fill text-xl"></i>
+                                Start Service Session
+                            </button>
+                        }
+                        <button type="submit" asp-page-handler="NoShow" class="w-full bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-300 hover:border-orange-400 font-semibold py-3 px-4 rounded-xl transition-all inline-flex items-center justify-center gap-2">
+                            <i class="bi bi-person-x-fill text-xl"></i>
+                            Mark as No-Show
+                        </button>
+                        <button type="submit" asp-page-handler="Cancel" class="w-full bg-white hover:bg-red-50 text-red-600 border-2 border-red-300 hover:border-red-400 font-semibold py-3 px-4 rounded-xl transition-all inline-flex items-center justify-center gap-2">
+                            <i class="bi bi-x-circle-fill text-xl"></i>
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+            }
+
+            @if (Model.Appointment.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Completed && Model.Appointment.SessionId.HasValue)
+            {
+                <div class="card-apple bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200">
+                    <h4 class="font-bold text-apple-dark mb-4 flex items-center gap-2">
+                        <i class="bi bi-link-45deg text-purple-600"></i>
+                        Related Session
+                    </h4>
+                    <a href="/Sessions/Details/@Model.Appointment.SessionId" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center justify-center gap-2">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        View Service Session
+                    </a>
+                </div>
+            }
+
+            <div class="card-apple bg-gray-50">
+                <h4 class="font-bold text-apple-dark mb-4 flex items-center gap-2">
+                    <i class="bi bi-info-circle-fill text-gray-600"></i>
+                    Details
+                </h4>
+                <dl class="space-y-3 text-sm">
+                    <div class="p-3 bg-white rounded-lg">
+                        <dt class="text-apple-gray text-xs uppercase tracking-wide mb-1">Appointment Number</dt>
+                        <dd class="font-mono text-apple-dark font-semibold">@Model.Appointment.AppointmentNumber</dd>
+                    </div>
+                    <div class="p-3 bg-white rounded-lg">
+                        <dt class="text-apple-gray text-xs uppercase tracking-wide mb-1">Created</dt>
+                        <dd class="text-apple-dark font-semibold">@Model.Appointment.CreatedAt.ToString("MMM dd, yyyy")</dd>
+                    </div>
+                    @if (Model.Appointment.UpdatedAt.HasValue)
+                    {
+                        <div class="p-3 bg-white rounded-lg">
+                            <dt class="text-apple-gray text-xs uppercase tracking-wide mb-1">Last Updated</dt>
+                            <dd class="text-apple-dark font-semibold">@Model.Appointment.UpdatedAt.Value.ToString("MMM dd, yyyy")</dd>
+                        </div>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+}
+
+@functions {
+    string GetStatusBadgeClass(Gixat.Web.Modules.Appointments.Entities.AppointmentStatus status)
+    {
+        return status switch
+        {
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled => "bg-blue-100 text-blue-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed => "bg-green-100 text-green-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress => "bg-purple-100 text-purple-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Completed => "bg-gray-100 text-apple-gray",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Cancelled => "bg-red-100 text-red-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.NoShow => "bg-orange-100 text-orange-700",
+            Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Rescheduled => "bg-yellow-100 text-yellow-700",
+            _ => "bg-gray-100 text-gray-700"
+        };
+    }
+}

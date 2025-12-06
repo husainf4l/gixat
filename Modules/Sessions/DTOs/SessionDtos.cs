@@ -1,4 +1,5 @@
 using Gixat.Web.Modules.Sessions.Enums;
+using Gixat.Web.Modules.Sessions.Entities;
 
 namespace Gixat.Web.Modules.Sessions.DTOs;
 
@@ -352,6 +353,140 @@ public record UpdateJobCardItemDto(
     decimal? ActualHours,
     string? WorkPerformed,
     string? TechnicianNotes,
+    string? Notes
+);
+
+// ============================================
+// Job Card Comments DTOs
+// ============================================
+
+public record JobCardCommentDto(
+    Guid Id,
+    Guid JobCardId,
+    Guid AuthorId,
+    string AuthorName,
+    string Content,
+    CommentType Type,
+    string? MentionedUserIds,
+    bool HasAttachment,
+    string? AttachmentUrl,
+    string? AttachmentName,
+    bool IsResolved,
+    DateTime? ResolvedAt,
+    Guid? ResolvedById,
+    Guid? ParentCommentId,
+    IEnumerable<JobCardCommentDto>? Replies,
+    DateTime CreatedAt
+);
+
+public record CreateJobCardCommentDto(
+    Guid JobCardId,
+    string Content,
+    CommentType Type = CommentType.General,
+    string? MentionedUserIds = null,
+    Guid? ParentCommentId = null,
+    string? AttachmentUrl = null,
+    string? AttachmentName = null
+);
+
+// ============================================
+// Job Card Time Entries DTOs
+// ============================================
+
+public record JobCardTimeEntryDto(
+    Guid Id,
+    Guid JobCardId,
+    Guid? JobCardItemId,
+    Guid TechnicianId,
+    string TechnicianName,
+    DateTime StartTime,
+    DateTime? EndTime,
+    decimal Hours,
+    bool IsActive,
+    string? Description,
+    string? Notes,
+    bool IsBillable,
+    decimal HourlyRate,
+    decimal TotalCost,
+    decimal BreakMinutes,
+    DateTime CreatedAt
+);
+
+public record CreateJobCardTimeEntryDto(
+    Guid JobCardId,
+    Guid? JobCardItemId = null,
+    string? Description = null,
+    bool IsBillable = true,
+    decimal HourlyRate = 0
+);
+
+// ============================================
+// Job Card Parts DTOs
+// ============================================
+
+public record JobCardPartDto(
+    Guid Id,
+    Guid JobCardId,
+    Guid? JobCardItemId,
+    Guid? InventoryItemId,
+    string PartNumber,
+    string PartName,
+    string? Description,
+    decimal QuantityUsed,
+    string Unit,
+    decimal UnitCost,
+    decimal UnitPrice,
+    decimal Markup,
+    decimal TotalCost,
+    decimal TotalPrice,
+    PartSource Source,
+    string? Supplier,
+    string? SupplierPartNumber,
+    PartStatus Status,
+    DateTime? OrderedAt,
+    DateTime? ReceivedAt,
+    DateTime? InstalledAt,
+    bool HasWarranty,
+    int WarrantyMonths,
+    string? WarrantyInfo,
+    string? Notes,
+    Guid? AddedById,
+    DateTime CreatedAt
+);
+
+public record CreateJobCardPartDto(
+    Guid JobCardId,
+    Guid? JobCardItemId = null,
+    Guid? InventoryItemId = null,
+    string PartNumber = "",
+    string PartName = "",
+    string? Description = null,
+    decimal QuantityUsed = 1,
+    string Unit = "pcs",
+    decimal UnitCost = 0,
+    decimal UnitPrice = 0,
+    decimal Markup = 0,
+    PartSource Source = PartSource.InStock,
+    string? Supplier = null,
+    string? SupplierPartNumber = null,
+    bool HasWarranty = false,
+    int WarrantyMonths = 0,
+    string? WarrantyInfo = null,
+    string? Notes = null
+);
+
+public record UpdateJobCardPartDto(
+    decimal? QuantityUsed,
+    decimal? UnitCost,
+    decimal? UnitPrice,
+    decimal? Markup,
+    PartSource? Source,
+    string? Supplier,
+    string? SupplierPartNumber,
+    PartStatus? Status,
+    bool? HasWarranty,
+    int? WarrantyMonths,
+    string? WarrantyInfo,
     string? Notes
 );
 

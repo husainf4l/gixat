@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 using Gixat.Web.Modules.Sessions.DTOs;
 using Gixat.Web.Modules.Sessions.Entities;
 using Gixat.Web.Modules.Sessions.Enums;
@@ -11,10 +12,12 @@ namespace Gixat.Web.Modules.Sessions.Services;
 public class JobCardService : BaseService, IJobCardService
 {
     private readonly ILogger<JobCardService> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public JobCardService(DbContext context, ILogger<JobCardService> logger) : base(context)
+    public JobCardService(DbContext context, ILogger<JobCardService> logger, IHttpContextAccessor httpContextAccessor) : base(context)
     {
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     private DbSet<JobCard> JobCards => Set<JobCard>();
@@ -379,6 +382,265 @@ public class JobCardService : BaseService, IJobCardService
 
     #endregion
 
+    #region Comments
+
+    public async Task<JobCardCommentDto> AddCommentAsync(CreateJobCardCommentDto dto, Guid companyId)
+    {
+        var jobCard = await JobCards.FindAsync(dto.JobCardId);
+        if (jobCard == null || jobCard.CompanyId != companyId)
+            throw new InvalidOperationException("Job card not found");
+
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userGuid = string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId);
+        var user = userGuid != Guid.Empty ? await Context.Set<Gixat.Web.Modules.Auth.Entities.ApplicationUser>().FindAsync(userGuid) : null;
+
+        var comment = new JobCardComment
+        {
+            JobCardId = dto.JobCardId,
+            CompanyId = companyId,
+            AuthorId = user?.Id ?? Guid.Empty,
+            AuthorName = user?.FullName ?? "System",
+            Content = dto.Content,
+            Type = dto.Type,
+            MentionedUserIds = dto.MentionedUserIds,
+            ParentCommentId = dto.ParentCommentId,
+            AttachmentUrl = dto.AttachmentUrl,
+            AttachmentName = dto.AttachmentName,
+            HasAttachment = !string.IsNullOrWhiteSpace(dto.AttachmentUrl)
+        };
+
+        Set<JobCardComment>().Add(comment);
+        await SaveChangesAsync();
+        return comment.ToDto();
+    }
+
+    public async Task<IEnumerable<JobCardCommentDto>> GetCommentsAsync(Guid jobCardId, Guid companyId)
+    {
+        return await Set<JobCardComment>()
+            .Where(c => c.JobCardId == jobCardId && c.CompanyId == companyId)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => c.ToDto())
+            .ToListAsync();
+    }
+
+    public async Task<bool> ResolveCommentAsync(Guid commentId, Guid resolvedById, Guid companyId)
+    {
+        var comment = await Set<JobCardComment>().FindAsync(commentId);
+        if (comment == null || comment.CompanyId != companyId)
+            return false;
+
+        comment.IsResolved = true;
+        comment.ResolvedAt = DateTime.UtcNow;
+        comment.ResolvedById = resolvedById;
+        await SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteCommentAsync(Guid commentId, Guid companyId)
+    {
+        var comment = await Set<JobCardComment>().FindAsync(commentId);
+        if (comment == null || comment.CompanyId != companyId)
+            return false;
+
+        Set<JobCardComment>().Remove(comment);
+        await SaveChangesAsync();
+        return true;
+    }
+
+    #endregion
+
+    #region Time Entries
+
+    public async Task<JobCardTimeEntryDto> StartTimeEntryAsync(CreateJobCardTimeEntryDto dto, Guid companyId)
+    {
+        var jobCard = await JobCards.FindAsync(dto.JobCardId);
+        if (jobCard == null || jobCard.CompanyId != companyId)
+            throw new InvalidOperationException("Job card not found");
+
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userGuid = string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId);
+        var user = userGuid != Guid.Empty ? await Context.Set<Gixat.Web.Modules.Auth.Entities.ApplicationUser>().FindAsync(userGuid) : null;
+
+        var timeEntry = new JobCardTimeEntry
+        {
+            JobCardId = dto.JobCardId,
+            JobCardItemId = dto.JobCardItemId,
+            CompanyId = companyId,
+            TechnicianId = userGuid,
+            TechnicianName = user?.FullName ?? "Unknown",
+            StartTime = DateTime.UtcNow,
+            IsActive = true,
+            Description = dto.Description,
+            IsBillable = dto.IsBillable,
+            HourlyRate = dto.HourlyRate
+        };
+
+        Set<JobCardTimeEntry>().Add(timeEntry);
+        await SaveChangesAsync();
+        return timeEntry.ToDto();
+    }
+
+    public async Task<JobCardTimeEntryDto?> StopTimeEntryAsync(Guid timeEntryId, Guid companyId)
+    {
+        var timeEntry = await Set<JobCardTimeEntry>().FindAsync(timeEntryId);
+        if (timeEntry == null || timeEntry.CompanyId != companyId)
+            return null;
+
+        if (!timeEntry.IsActive)
+            return null;
+
+        timeEntry.EndTime = DateTime.UtcNow;
+        timeEntry.IsActive = false;
+        timeEntry.Hours = (decimal)(timeEntry.EndTime.Value - timeEntry.StartTime).TotalHours - (timeEntry.BreakMinutes / 60m);
+        timeEntry.TotalCost = timeEntry.Hours * timeEntry.HourlyRate;
+        await SaveChangesAsync();
+        return timeEntry.ToDto();
+    }
+
+    public async Task<IEnumerable<JobCardTimeEntryDto>> GetActiveTimeEntriesAsync(Guid jobCardId, Guid companyId)
+    {
+        return await Set<JobCardTimeEntry>()
+            .Where(t => t.JobCardId == jobCardId && t.CompanyId == companyId && t.IsActive)
+            .OrderBy(t => t.StartTime)
+            .Select(t => t.ToDto())
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<JobCardTimeEntryDto>> GetTimeHistoryAsync(Guid jobCardId, Guid companyId)
+    {
+        return await Set<JobCardTimeEntry>()
+            .Where(t => t.JobCardId == jobCardId && t.CompanyId == companyId)
+            .OrderByDescending(t => t.StartTime)
+            .Select(t => t.ToDto())
+            .ToListAsync();
+    }
+
+    public async Task<decimal> GetTotalLaborCostAsync(Guid jobCardId, Guid companyId)
+    {
+        return await Set<JobCardTimeEntry>()
+            .Where(t => t.JobCardId == jobCardId && t.CompanyId == companyId && t.IsBillable)
+            .SumAsync(t => t.TotalCost);
+    }
+
+    #endregion
+
+    #region Parts
+
+    public async Task<JobCardPartDto> AddPartAsync(CreateJobCardPartDto dto, Guid companyId)
+    {
+        var jobCard = await JobCards.FindAsync(dto.JobCardId);
+        if (jobCard == null || jobCard.CompanyId != companyId)
+            throw new InvalidOperationException("Job card not found");
+
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userGuid = string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId);
+        var user = userGuid != Guid.Empty ? await Context.Set<Gixat.Web.Modules.Auth.Entities.ApplicationUser>().FindAsync(userGuid) : null;
+
+        var part = new JobCardPart
+        {
+            JobCardId = dto.JobCardId,
+            JobCardItemId = dto.JobCardItemId,
+            CompanyId = companyId,
+            InventoryItemId = dto.InventoryItemId,
+            PartNumber = dto.PartNumber,
+            PartName = dto.PartName,
+            Description = dto.Description,
+            QuantityUsed = dto.QuantityUsed,
+            Unit = dto.Unit,
+            UnitCost = dto.UnitCost,
+            UnitPrice = dto.UnitPrice,
+            Markup = dto.Markup,
+            TotalCost = dto.QuantityUsed * dto.UnitCost,
+            TotalPrice = dto.QuantityUsed * dto.UnitPrice,
+            Source = dto.Source,
+            Supplier = dto.Supplier,
+            SupplierPartNumber = dto.SupplierPartNumber,
+            Status = PartStatus.Pending,
+            HasWarranty = dto.HasWarranty,
+            WarrantyMonths = dto.WarrantyMonths,
+            WarrantyInfo = dto.WarrantyInfo,
+            Notes = dto.Notes,
+            AddedById = user?.Id
+        };
+
+        Set<JobCardPart>().Add(part);
+        await SaveChangesAsync();
+        return part.ToDto();
+    }
+
+    public async Task<JobCardPartDto?> UpdatePartAsync(Guid partId, UpdateJobCardPartDto dto, Guid companyId)
+    {
+        var part = await Set<JobCardPart>().FindAsync(partId);
+        if (part == null || part.CompanyId != companyId)
+            return null;
+
+        if (dto.QuantityUsed.HasValue) part.QuantityUsed = dto.QuantityUsed.Value;
+        if (dto.UnitCost.HasValue) part.UnitCost = dto.UnitCost.Value;
+        if (dto.UnitPrice.HasValue) part.UnitPrice = dto.UnitPrice.Value;
+        if (dto.Markup.HasValue) part.Markup = dto.Markup.Value;
+        if (dto.Source.HasValue) part.Source = dto.Source.Value;
+        if (dto.Supplier != null) part.Supplier = dto.Supplier;
+        if (dto.SupplierPartNumber != null) part.SupplierPartNumber = dto.SupplierPartNumber;
+        if (dto.Status.HasValue) part.Status = dto.Status.Value;
+        if (dto.HasWarranty.HasValue) part.HasWarranty = dto.HasWarranty.Value;
+        if (dto.WarrantyMonths.HasValue) part.WarrantyMonths = dto.WarrantyMonths.Value;
+        if (dto.WarrantyInfo != null) part.WarrantyInfo = dto.WarrantyInfo;
+        if (dto.Notes != null) part.Notes = dto.Notes;
+
+        part.TotalCost = part.QuantityUsed * part.UnitCost;
+        part.TotalPrice = part.QuantityUsed * part.UnitPrice;
+        await SaveChangesAsync();
+        return part.ToDto();
+    }
+
+    public async Task<bool> UpdatePartStatusAsync(Guid partId, PartStatus status, Guid companyId)
+    {
+        var part = await Set<JobCardPart>().FindAsync(partId);
+        if (part == null || part.CompanyId != companyId)
+            return false;
+
+        part.Status = status;
+        
+        if (status == PartStatus.Ordered)
+            part.OrderedAt = DateTime.UtcNow;
+        else if (status == PartStatus.Received)
+            part.ReceivedAt = DateTime.UtcNow;
+        else if (status == PartStatus.Installed)
+            part.InstalledAt = DateTime.UtcNow;
+
+        await SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<IEnumerable<JobCardPartDto>> GetPartsAsync(Guid jobCardId, Guid companyId)
+    {
+        return await Set<JobCardPart>()
+            .Where(p => p.JobCardId == jobCardId && p.CompanyId == companyId)
+            .OrderBy(p => p.CreatedAt)
+            .Select(p => p.ToDto())
+            .ToListAsync();
+    }
+
+    public async Task<decimal> GetTotalPartsCostAsync(Guid jobCardId, Guid companyId)
+    {
+        return await Set<JobCardPart>()
+            .Where(p => p.JobCardId == jobCardId && p.CompanyId == companyId)
+            .SumAsync(p => p.TotalPrice);
+    }
+
+    public async Task<bool> RemovePartAsync(Guid partId, Guid companyId)
+    {
+        var part = await Set<JobCardPart>().FindAsync(partId);
+        if (part == null || part.CompanyId != companyId)
+            return false;
+
+        Set<JobCardPart>().Remove(part);
+        await SaveChangesAsync();
+        return true;
+    }
+
+    #endregion
+
     private async Task UpdateSessionStatus(Guid sessionId, SessionStatus status)
     {
         var session = await GarageSessions.FindAsync(sessionId);
@@ -470,5 +732,73 @@ file static class JobCardMappingExtensions
             SortOrder: m.SortOrder,
             CreatedAt: m.CreatedAt
         )) ?? []
+    );
+    
+    public static JobCardCommentDto ToDto(this JobCardComment c) => new(
+        Id: c.Id,
+        JobCardId: c.JobCardId,
+        AuthorId: c.AuthorId,
+        AuthorName: c.AuthorName,
+        Content: c.Content,
+        Type: c.Type,
+        MentionedUserIds: c.MentionedUserIds,
+        HasAttachment: c.HasAttachment,
+        AttachmentUrl: c.AttachmentUrl,
+        AttachmentName: c.AttachmentName,
+        IsResolved: c.IsResolved,
+        ResolvedAt: c.ResolvedAt,
+        ResolvedById: c.ResolvedById,
+        ParentCommentId: c.ParentCommentId,
+        Replies: c.Replies?.Select(r => r.ToDto()),
+        CreatedAt: c.CreatedAt
+    );
+
+    public static JobCardTimeEntryDto ToDto(this JobCardTimeEntry t) => new(
+        Id: t.Id,
+        JobCardId: t.JobCardId,
+        JobCardItemId: t.JobCardItemId,
+        TechnicianId: t.TechnicianId,
+        TechnicianName: t.TechnicianName,
+        StartTime: t.StartTime,
+        EndTime: t.EndTime,
+        Hours: t.Hours,
+        IsActive: t.IsActive,
+        Description: t.Description,
+        Notes: t.Notes,
+        IsBillable: t.IsBillable,
+        HourlyRate: t.HourlyRate,
+        TotalCost: t.TotalCost,
+        BreakMinutes: t.BreakMinutes,
+        CreatedAt: t.CreatedAt
+    );
+
+    public static JobCardPartDto ToDto(this JobCardPart p) => new(
+        Id: p.Id,
+        JobCardId: p.JobCardId,
+        JobCardItemId: p.JobCardItemId,
+        InventoryItemId: p.InventoryItemId,
+        PartNumber: p.PartNumber,
+        PartName: p.PartName,
+        Description: p.Description,
+        QuantityUsed: p.QuantityUsed,
+        Unit: p.Unit,
+        UnitCost: p.UnitCost,
+        UnitPrice: p.UnitPrice,
+        Markup: p.Markup,
+        TotalCost: p.TotalCost,
+        TotalPrice: p.TotalPrice,
+        Source: p.Source,
+        Supplier: p.Supplier,
+        SupplierPartNumber: p.SupplierPartNumber,
+        Status: p.Status,
+        OrderedAt: p.OrderedAt,
+        ReceivedAt: p.ReceivedAt,
+        InstalledAt: p.InstalledAt,
+        HasWarranty: p.HasWarranty,
+        WarrantyMonths: p.WarrantyMonths,
+        WarrantyInfo: p.WarrantyInfo,
+        Notes: p.Notes,
+        AddedById: p.AddedById,
+        CreatedAt: p.CreatedAt
     );
 }

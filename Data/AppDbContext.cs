@@ -6,6 +6,9 @@ using Gixat.Web.Modules.Companies.Entities;
 using Gixat.Web.Modules.Clients.Entities;
 using Gixat.Web.Modules.Users.Entities;
 using Gixat.Web.Modules.Sessions.Entities;
+using Gixat.Web.Modules.Appointments.Entities;
+using Gixat.Web.Modules.Invoices.Entities;
+using Gixat.Web.Modules.Inventory.Entities;
 
 namespace Gixat.Web.Data;
 
@@ -39,7 +42,22 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     public DbSet<TestDrive> TestDrives => Set<TestDrive>();
     public DbSet<JobCard> JobCards => Set<JobCard>();
     public DbSet<JobCardItem> JobCardItems => Set<JobCardItem>();
+    public DbSet<JobCardComment> JobCardComments => Set<JobCardComment>();
+    public DbSet<JobCardTimeEntry> JobCardTimeEntries => Set<JobCardTimeEntry>();
+    public DbSet<JobCardPart> JobCardParts => Set<JobCardPart>();
     public DbSet<MediaItem> MediaItems => Set<MediaItem>();
+
+    // Appointments Module
+    public DbSet<Appointment> Appointments => Set<Appointment>();
+
+    // Invoices Module
+    public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
+    public DbSet<Payment> Payments => Set<Payment>();
+
+    // Inventory Module
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -417,6 +435,105 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
             entity.HasMany(e => e.MediaItems)
                 .WithOne(m => m.JobCardItem)
                 .HasForeignKey(m => m.JobCardItemId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<JobCardComment>(entity =>
+        {
+            entity.ToTable("JobCardComments");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.Type).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.AuthorName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Content).HasMaxLength(4000).IsRequired();
+            entity.Property(e => e.MentionedUserIds).HasMaxLength(1000);
+            entity.Property(e => e.AttachmentUrl).HasMaxLength(2000);
+            entity.Property(e => e.AttachmentName).HasMaxLength(500);
+            
+            entity.HasIndex(e => e.JobCardId);
+            entity.HasIndex(e => e.CompanyId);
+            entity.HasIndex(e => e.AuthorId);
+            entity.HasIndex(e => e.ParentCommentId);
+            entity.HasIndex(e => e.CreatedAt);
+            
+            entity.HasOne(e => e.JobCard)
+                .WithMany(j => j.Comments)
+                .HasForeignKey(e => e.JobCardId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasOne(e => e.ParentComment)
+                .WithMany(c => c.Replies)
+                .HasForeignKey(e => e.ParentCommentId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<JobCardTimeEntry>(entity =>
+        {
+            entity.ToTable("JobCardTimeEntries");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.TechnicianName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Notes).HasMaxLength(2000);
+            entity.Property(e => e.Hours).HasPrecision(10, 2);
+            entity.Property(e => e.HourlyRate).HasPrecision(10, 2);
+            entity.Property(e => e.TotalCost).HasPrecision(10, 2);
+            
+            entity.HasIndex(e => e.JobCardId);
+            entity.HasIndex(e => e.JobCardItemId);
+            entity.HasIndex(e => e.CompanyId);
+            entity.HasIndex(e => e.TechnicianId);
+            entity.HasIndex(e => e.StartTime);
+            entity.HasIndex(e => e.IsActive);
+            
+            entity.HasOne(e => e.JobCard)
+                .WithMany(j => j.TimeEntries)
+                .HasForeignKey(e => e.JobCardId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasOne(e => e.JobCardItem)
+                .WithMany(i => i.TimeEntries)
+                .HasForeignKey(e => e.JobCardItemId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<JobCardPart>(entity =>
+        {
+            entity.ToTable("JobCardParts");
+            entity.HasKey(e => e.Id);
+            
+            entity.Property(e => e.PartNumber).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.PartName).HasMaxLength(300).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Unit).HasMaxLength(50);
+            entity.Property(e => e.QuantityUsed).HasPrecision(10, 3);
+            entity.Property(e => e.UnitCost).HasPrecision(10, 2);
+            entity.Property(e => e.UnitPrice).HasPrecision(10, 2);
+            entity.Property(e => e.Markup).HasPrecision(5, 2);
+            entity.Property(e => e.TotalCost).HasPrecision(10, 2);
+            entity.Property(e => e.TotalPrice).HasPrecision(10, 2);
+            entity.Property(e => e.Source).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Supplier).HasMaxLength(200);
+            entity.Property(e => e.SupplierPartNumber).HasMaxLength(100);
+            entity.Property(e => e.WarrantyInfo).HasMaxLength(500);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+            
+            entity.HasIndex(e => e.JobCardId);
+            entity.HasIndex(e => e.JobCardItemId);
+            entity.HasIndex(e => e.CompanyId);
+            entity.HasIndex(e => e.InventoryItemId);
+            entity.HasIndex(e => e.PartNumber);
+            entity.HasIndex(e => e.Status);
+            
+            entity.HasOne(e => e.JobCard)
+                .WithMany(j => j.Parts)
+                .HasForeignKey(e => e.JobCardId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            entity.HasOne(e => e.JobCardItem)
+                .WithMany(i => i.Parts)
+                .HasForeignKey(e => e.JobCardItemId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 

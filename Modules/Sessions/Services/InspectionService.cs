@@ -48,6 +48,25 @@ public class InspectionService : BaseService, IInspectionService
     public async Task<InspectionDto> CreateAsync(CreateInspectionDto dto, Guid companyId)
     {
         _logger.LogInformation("Creating inspection for session {SessionId}, company {CompanyId}", dto.SessionId, companyId);
+        
+        // Check if an inspection already exists for this session
+        var existingInspection = await Inspections
+            .FirstOrDefaultAsync(i => i.SessionId == dto.SessionId && i.CompanyId == companyId);
+
+        if (existingInspection != null)
+        {
+            // Update existing inspection
+            _logger.LogInformation("Updating existing inspection {InspectionId} for session {SessionId}", existingInspection.Id, dto.SessionId);
+            existingInspection.Title = dto.Title;
+            existingInspection.Description = dto.Description;
+            existingInspection.OverallPriority = dto.OverallPriority;
+            existingInspection.UpdatedAt = DateTime.UtcNow;
+            
+            await SaveChangesAsync();
+            return existingInspection.ToDto();
+        }
+
+        // Create new inspection
         var inspection = new Inspection
         {
             SessionId = dto.SessionId,
