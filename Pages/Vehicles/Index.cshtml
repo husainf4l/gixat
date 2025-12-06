@@ -1,0 +1,204 @@
+@page
+@model Gixat.Web.Pages.Vehicles.IndexModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Vehicles";
+}
+
+<div class="flex items-center justify-between mb-8">
+    <div>
+        <h1 class="text-2xl font-semibold text-apple-dark">Vehicles</h1>
+        <p class="text-apple-gray text-sm mt-1">Manage all vehicles in the garage</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card-apple mb-6">
+    <form method="get" class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+            <input type="text" name="SearchTerm" value="@Model.SearchTerm" 
+                   placeholder="Search by plate, VIN, make, model..." 
+                   class="input-apple-outlined w-full" />
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="btn-apple-primary">
+                <i class="bi bi-search"></i>
+                Search
+            </button>
+            <a href="/Vehicles" class="btn-apple-secondary">
+                <i class="bi bi-arrow-clockwise"></i>
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+@if (Model.Vehicles.Any())
+{
+    <!-- Vehicles Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var vehicle in Model.Vehicles)
+        {
+            <div class="card-apple hover:shadow-lg transition-shadow duration-200">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-apple-dark text-lg mb-1">
+                            @vehicle.Year @vehicle.Make @vehicle.Model
+                        </h3>
+                        @if (!string.IsNullOrEmpty(vehicle.LicensePlate))
+                        {
+                            <p class="text-sm text-apple-gray flex items-center gap-1">
+                                <i class="bi bi-credit-card-2-front"></i>
+                                @vehicle.LicensePlate
+                            </p>
+                        }
+                    </div>
+                    @if (vehicle.IsPrimary)
+                    {
+                        <span class="bg-apple-blue/10 text-apple-blue px-2 py-1 rounded-full text-xs font-semibold">
+                            Primary
+                        </span>
+                    }
+                </div>
+
+                <div class="space-y-2 mb-4 text-sm">
+                    @if (!string.IsNullOrEmpty(vehicle.Color))
+                    {
+                        <div class="flex items-center gap-2 text-apple-gray">
+                            <i class="bi bi-palette w-4"></i>
+                            <span>@vehicle.Color</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(vehicle.Vin))
+                    {
+                        <div class="flex items-center gap-2 text-apple-gray">
+                            <i class="bi bi-upc w-4"></i>
+                            <span class="font-mono text-xs">@vehicle.Vin</span>
+                        </div>
+                    }
+                    @if (vehicle.Mileage.HasValue)
+                    {
+                        <div class="flex items-center gap-2 text-apple-gray">
+                            <i class="bi bi-speedometer2 w-4"></i>
+                            <span>@vehicle.Mileage.Value.ToString("N0") km</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(vehicle.EngineType))
+                    {
+                        <div class="flex items-center gap-2 text-apple-gray">
+                            <i class="bi bi-gear w-4"></i>
+                            <span>@vehicle.EngineType</span>
+                        </div>
+                    }
+                </div>
+
+                <!-- Owner Info -->
+                <div class="pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs text-apple-gray uppercase">Owner</span>
+                        @if (vehicle.ActiveSessionCount > 0)
+                        {
+                            <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                In Service
+                            </span>
+                        }
+                        else if (!vehicle.IsActive)
+                        {
+                            <span class="bg-gray-100 text-apple-gray px-2 py-0.5 rounded-full text-xs font-semibold">
+                                Inactive
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                Available
+                            </span>
+                        }
+                    </div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-apple-blue to-apple-purple flex items-center justify-center text-white text-xs font-semibold">
+                            @vehicle.ClientName.Substring(0, 2).ToUpper()
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-apple-dark text-sm truncate">@vehicle.ClientName</p>
+                            @if (!string.IsNullOrEmpty(vehicle.ClientPhone))
+                            {
+                                <p class="text-xs text-apple-gray">@vehicle.ClientPhone</p>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <a href="/Clients/@vehicle.ClientId" class="btn-apple-secondary text-xs flex-1">
+                            <i class="bi bi-person"></i>
+                            View Client
+                        </a>
+                        @if (vehicle.ActiveSessionCount > 0)
+                        {
+                            <a href="/Sessions?vehicleId=@vehicle.Id" class="btn-apple-primary text-xs flex-1">
+                                <i class="bi bi-clipboard-check"></i>
+                                View Session
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div class="flex justify-center mt-8 gap-2">
+            @if (Model.CurrentPage > 1)
+            {
+                <a href="?page=@(Model.CurrentPage - 1)&searchTerm=@Model.SearchTerm" class="btn-apple-secondary">
+                    <i class="bi bi-chevron-left"></i>
+                    Previous
+                </a>
+            }
+            
+            <div class="flex items-center gap-1">
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <a href="?page=@i&searchTerm=@Model.SearchTerm" 
+                       class="@(i == Model.CurrentPage ? "btn-apple-primary" : "btn-apple-secondary") min-w-[40px] text-center">
+                        @i
+                    </a>
+                }
+            </div>
+
+            @if (Model.CurrentPage < Model.TotalPages)
+            {
+                <a href="?page=@(Model.CurrentPage + 1)&searchTerm=@Model.SearchTerm" class="btn-apple-secondary">
+                    Next
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            }
+        </div>
+    }
+}
+else
+{
+    <!-- Empty State -->
+    <div class="text-center py-16">
+        <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-car-front text-3xl text-apple-gray"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-apple-dark mb-2">No vehicles found</h3>
+        <p class="text-apple-gray mb-6 max-w-sm mx-auto">
+            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <text>No vehicles match your search criteria. Try adjusting your filters.</text>
+            }
+            else
+            {
+                <text>No vehicles registered yet. Add clients and their vehicles to get started.</text>
+            }
+        </p>
+        <a href="/Clients" class="btn-apple-primary inline-flex">
+            <i class="bi bi-people"></i>
+            Go to Clients
+        </a>
+    </div>
+}
