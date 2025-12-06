@@ -1,40 +1,50 @@
 <!-- Final CTA Section -->
-<section class="final-cta-section">
-    <div class="container">
-        <div class="final-cta-content">
-            <h2>Ready to transform your garage?</h2>
-            <p>Join hundreds of garage owners who have already revolutionized their businesses with Gixat.</p>
-            <div class="final-cta-buttons">
+<section class="relative py-32 bg-gradient-to-br from-primary-600 to-purple-600 overflow-hidden">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="container mx-auto px-6 relative z-10">
+        <div class="text-center max-w-4xl mx-auto">
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-5 leading-tight">
+                Ready to transform your garage?
+            </h2>
+            <p class="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed">
+                Join hundreds of garage owners who have already revolutionized their businesses with Gixat.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a href="/Dashboard" class="btn-primary-apple">
+                    <a href="/Dashboard" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold rounded-full bg-white text-primary-600 hover:bg-slate-50 hover:-translate-y-1 transition-all duration-300 shadow-xl hover:shadow-2xl">
                         Go to Dashboard
                         <i class="bi bi-arrow-right"></i>
                     </a>
                 }
                 else
                 {
-                    <a href="/Auth/Register" class="btn-primary-apple">
+                    <a href="/Auth/Register" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold rounded-full bg-white text-primary-600 hover:bg-slate-50 hover:-translate-y-1 transition-all duration-300 shadow-xl hover:shadow-2xl">
                         Start Free Trial Today
                         <i class="bi bi-rocket-takeoff"></i>
                     </a>
-                    <a href="#features" class="btn-secondary-apple">
+                    <a href="#features" class="inline-flex items-center justify-center gap-2 px-8 py-4 text-lg font-semibold rounded-full bg-transparent text-white border-2 border-white/30 hover:bg-white/10 hover:border-white/50 transition-all duration-300">
                         Learn More
                         <i class="bi bi-chevron-right"></i>
                     </a>
                 }
             </div>
-            <div class="final-cta-features">
-                <div class="cta-feature">
-                    <i class="bi bi-shield-check"></i>
+            <div class="flex flex-col sm:flex-row gap-8 sm:gap-10 justify-center">
+                <div class="flex items-center justify-center gap-3 text-white text-base font-medium">
+                    <i class="bi bi-shield-check text-green-400 text-xl"></i>
                     <span>Enterprise-grade security</span>
                 </div>
-                <div class="cta-feature">
-                    <i class="bi bi-headset"></i>
+                <div class="flex items-center justify-center gap-3 text-white text-base font-medium">
+                    <i class="bi bi-headset text-green-400 text-xl"></i>
                     <span>24/7 expert support</span>
                 </div>
-                <div class="cta-feature">
-                    <i class="bi bi-graph-up"></i>
+                <div class="flex items-center justify-center gap-3 text-white text-base font-medium">
+                    <i class="bi bi-graph-up text-green-400 text-xl"></i>
                     <span>Proven results</span>
                 </div>
             </div>

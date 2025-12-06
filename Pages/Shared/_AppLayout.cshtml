@@ -22,12 +22,18 @@
 
         <!-- Center: Search (Desktop) -->
         <div class="hidden md:flex flex-1 max-w-md mx-8">
-            <div class="relative w-full">
-                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="relative w-full" id="searchContainer">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" placeholder="Search sessions, clients, vehicles..." 
-                       class="w-full pl-9 pr-4 py-1.5 bg-slate-100 border-0 rounded-lg text-[13px] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-600/30 focus:bg-white transition-all" />
+                <input type="text" id="globalSearch" placeholder="Search sessions, clients, vehicles..." 
+                       class="w-full pl-9 pr-4 py-1.5 bg-slate-100 border-0 rounded-lg text-[13px] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-600/30 focus:bg-white transition-all" 
+                       autocomplete="off" />
+                
+                <!-- Search Results Dropdown -->
+                <div id="searchResults" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden max-h-[400px] overflow-y-auto">
+                    <!-- Results will be populated here -->
+                </div>
             </div>
         </div>
 
@@ -43,7 +49,7 @@
             
             <!-- User Menu -->
             <div class="flex items-center gap-2 pl-2 ml-2 border-l border-slate-200">
-                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white text-[11px] font-medium">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-blue-600 flex items-center justify-center text-white text-[11px] font-medium">
                     @(User.Identity?.Name?.Substring(0, 2).ToUpper() ?? "U")
                 </div>
                 <span class="hidden sm:block text-[13px] font-medium text-slate-900 max-w-[100px] truncate">
@@ -79,38 +85,38 @@
             <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
-            <input type="text" placeholder="Search..." class="w-full pl-9 pr-3 py-2 bg-slate-100 border-0 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-sky-600/30" />
+            <input type="text" placeholder="Search..." class="w-full pl-9 pr-3 py-2 bg-slate-100 border-0 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-primary-600/30" />
         </div>
     </div>
     
     <nav class="p-3 overflow-y-auto h-[calc(100%-122px)]">
         <p class="px-2 pb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Main</p>
         <div class="space-y-0.5">
-            <a href="/Dashboard" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath == "/dashboard" ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Dashboard" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath == "/dashboard" ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 12a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/>
                 </svg>
                 Dashboard
             </a>
-            <a href="/Sessions" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/sessions") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Sessions" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/sessions") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                 </svg>
                 Sessions
             </a>
-            <a href="/Clients" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/clients") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Clients" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/clients") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
                 Clients
             </a>
-            <a href="/Appointments" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/appointments") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Appointments" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/appointments") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 Appointments
             </a>
-            <a href="/JobCards" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/jobcards") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/JobCards" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/jobcards") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -120,13 +126,13 @@
         
         <p class="px-2 pt-5 pb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Business</p>
         <div class="space-y-0.5">
-            <a href="/Invoices" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/invoices") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Invoices" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/invoices") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                 </svg>
                 Invoices
             </a>
-            <a href="/Inventory" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/inventory") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Inventory" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/inventory") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
@@ -136,7 +142,7 @@
         
         <p class="px-2 pt-5 pb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Settings</p>
         <div class="space-y-0.5">
-            <a href="/Settings/Users" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/settings") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+            <a href="/Settings/Users" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/settings") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -153,31 +159,31 @@
         <nav class="flex-1 p-3">
             <p class="px-2 pb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Main</p>
             <div class="space-y-0.5">
-                <a href="/Dashboard" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath == "/dashboard" ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Dashboard" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath == "/dashboard" ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 16a1 1 0 011-1h4a1 1 0 011 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3zM14 12a1 1 0 011-1h4a1 1 0 011 1v7a1 1 0 01-1 1h-4a1 1 0 01-1-1v-7z"/>
                     </svg>
                     Dashboard
                 </a>
-                <a href="/Sessions" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/sessions") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Sessions" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/sessions") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                     Sessions
                 </a>
-                <a href="/Clients" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/clients") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Clients" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/clients") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                     Clients
                 </a>
-                <a href="/Appointments" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/appointments") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Appointments" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/appointments") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     Appointments
                 </a>
-                <a href="/JobCards" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/jobcards") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/JobCards" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/jobcards") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -187,13 +193,13 @@
             
             <p class="px-2 pt-5 pb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Business</p>
             <div class="space-y-0.5">
-                <a href="/Invoices" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/invoices") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Invoices" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/invoices") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                     </svg>
                     Invoices
                 </a>
-                <a href="/Inventory" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/inventory") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Inventory" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/inventory") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
@@ -203,7 +209,7 @@
             
             <p class="px-2 pt-5 pb-2 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Settings</p>
             <div class="space-y-0.5">
-                <a href="/Settings/Users" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/settings") ? "bg-sky-600 text-white" : "text-slate-700 hover:bg-slate-100")">
+                <a href="/Settings/Users" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 @(currentPath.StartsWith("/settings") ? "bg-primary-600 text-white" : "text-slate-700 hover:bg-slate-100")">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -251,5 +257,160 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeMenu();
         });
+        
+        // Global Search Functionality
+        const searchInput = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+        
+        if (searchInput && searchResults) {
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+                
+                clearTimeout(searchTimeout);
+                
+                if (query.length < 2) {
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+                
+                searchTimeout = setTimeout(() => performSearch(query), 300);
+            });
+            
+            searchInput.addEventListener('focus', function(e) {
+                if (e.target.value.trim().length >= 2) {
+                    performSearch(e.target.value.trim());
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#searchContainer')) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+        
+        async function performSearch(query) {
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Search error:', error);
+                displayResults({ sessions: [], clients: [], vehicles: [] });
+            }
+        }
+        
+        function displayResults(data) {
+            const results = searchResults;
+            const hasResults = (data.sessions?.length > 0) || (data.clients?.length > 0) || (data.vehicles?.length > 0);
+            
+            if (!hasResults) {
+                results.innerHTML = `
+                    <div class="p-8 text-center">
+                        <svg class="w-12 h-12 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <p class="text-sm text-slate-600">No results found</p>
+                    </div>
+                `;
+                results.classList.remove('hidden');
+                return;
+            }
+            
+            let html = '<div class="py-2">';
+            
+            // Sessions
+            if (data.sessions?.length > 0) {
+                html += `
+                    <div class="px-3 py-2">
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sessions</div>
+                    </div>
+                `;
+                data.sessions.forEach(session => {
+                    const statusColor = getStatusColor(session.status);
+                    html += `
+                        <a href="/Sessions/Details/${session.id}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors group">
+                            <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-medium text-slate-900">#${session.sessionNumber}</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full ${statusColor}">
+                                        ${session.status}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-slate-600 truncate">${session.clientName} • ${session.vehicleName}</div>
+                            </div>
+                        </a>
+                    `;
+                });
+            }
+            
+            // Clients
+            if (data.clients?.length > 0) {
+                html += `
+                    <div class="px-3 py-2 mt-2 border-t border-slate-100">
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Clients</div>
+                    </div>
+                `;
+                data.clients.forEach(client => {
+                    html += `
+                        <a href="/Clients/${client.id}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors group">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0">
+                                ${client.initials}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium text-slate-900">${client.name}</div>
+                                <div class="text-xs text-slate-600 truncate">${client.phone}${client.email ? ' • ' + client.email : ''}</div>
+                            </div>
+                        </a>
+                    `;
+                });
+            }
+            
+            // Vehicles
+            if (data.vehicles?.length > 0) {
+                html += `
+                    <div class="px-3 py-2 mt-2 border-t border-slate-100">
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Vehicles</div>
+                    </div>
+                `;
+                data.vehicles.forEach(vehicle => {
+                    html += `
+                        <a href="/Clients/${vehicle.clientId}" class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors group">
+                            <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-medium text-slate-900">${vehicle.make} ${vehicle.model}</div>
+                                <div class="text-xs text-slate-600 truncate">${vehicle.licensePlate} • ${vehicle.clientName}</div>
+                            </div>
+                        </a>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+            results.innerHTML = html;
+            results.classList.remove('hidden');
+        }
+        
+        function getStatusColor(status) {
+            const colors = {
+                'CheckedIn': 'bg-cyan-100 text-cyan-700',
+                'InProgress': 'bg-primary-100 text-primary-700',
+                'Completed': 'bg-green-100 text-green-700',
+                'Closed': 'bg-slate-100 text-slate-700',
+                'Cancelled': 'bg-red-100 text-red-700'
+            };
+            return colors[status] || 'bg-slate-100 text-slate-700';
+        }
     });
 </script>

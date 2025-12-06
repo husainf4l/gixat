@@ -7,14 +7,14 @@
 }
 
 <!-- Back Navigation -->
-<a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-sky-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
+<a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
     <i class="bi bi-arrow-left"></i>
     Back to Session
 </a>
 
 <!-- Header Card -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6 animate-slide-up">
-    <div class="bg-gradient-to-r from-cyan-600 to-sky-600 p-6 text-white">
+    <div class="bg-gradient-to-r from-cyan-600 to-primary-600 p-6 text-white">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -35,7 +35,7 @@
 <!-- Inspection Details -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.1s;">
     <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
-        <i class="bi bi-file-text text-sky-600"></i>Inspection Details
+        <i class="bi bi-file-text text-primary-600"></i>Inspection Details
     </h2>
     <div class="space-y-4">
         <div>
@@ -77,7 +77,7 @@
 <!-- Condition Summary -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.15s;">
     <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
-        <i class="bi bi-speedometer2 text-sky-600"></i>Condition Summary
+        <i class="bi bi-speedometer2 text-primary-600"></i>Condition Summary
     </h2>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         @{
@@ -120,7 +120,7 @@
 {
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.2s;">
         <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
-            <i class="bi bi-list-check text-sky-600"></i>Inspection Items
+            <i class="bi bi-list-check text-primary-600"></i>Inspection Items
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700 ml-2">@Model.Inspection.Items.Count()</span>
         </h2>
         <div class="space-y-3">
@@ -130,7 +130,7 @@
                 {
                     Priority.Urgent => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700",
                     Priority.High => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700",
-                    Priority.Normal => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700",
+                    Priority.Normal => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700",
                     _ => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700"
                 };
                 
@@ -169,7 +169,7 @@
 {
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.25s;">
         <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
-            <i class="bi bi-lightbulb text-sky-600"></i>Findings & Recommendations
+            <i class="bi bi-lightbulb text-primary-600"></i>Findings & Recommendations
         </h2>
         <div class="space-y-4">
             @if (!string.IsNullOrEmpty(Model.Inspection.Findings))
@@ -184,10 +184,10 @@
             }
             @if (!string.IsNullOrEmpty(Model.Inspection.Recommendations))
             {
-                <div class="p-4 bg-sky-100 border border-sky-600/20 rounded-xl">
+                <div class="p-4 bg-primary-100 border border-primary-600/20 rounded-xl">
                     <div class="flex items-center gap-2 mb-2">
-                        <i class="bi bi-arrow-right-circle text-sky-600"></i>
-                        <span class="text-sm font-medium text-sky-600">Recommendations</span>
+                        <i class="bi bi-arrow-right-circle text-primary-600"></i>
+                        <span class="text-sm font-medium text-primary-600">Recommendations</span>
                     </div>
                     <p class="text-slate-900">@Model.Inspection.Recommendations</p>
                 </div>
@@ -200,18 +200,18 @@
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.3s;">
     <div class="flex items-center justify-between mb-5">
         <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
-            <i class="bi bi-images text-sky-600"></i>Photos & Videos
+            <i class="bi bi-images text-primary-600"></i>Photos & Videos
         </h2>
-        <label class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors text-sm py-2 px-3 cursor-pointer">
+        <label class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3 cursor-pointer">
             <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
             <i class="bi bi-plus-lg"></i>Upload
         </label>
     </div>
 
     <div id="uploadProgress" class="hidden mb-4">
-        <div class="flex items-center gap-3 p-4 bg-sky-600/10 rounded-xl">
-            <div class="animate-spin rounded-full h-5 w-5 border-2 border-sky-600 border-t-transparent"></div>
-            <span class="text-sm font-medium text-sky-600">Uploading and compressing...</span>
+        <div class="flex items-center gap-3 p-4 bg-primary-600/10 rounded-xl">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent"></div>
+            <span class="text-sm font-medium text-primary-600">Uploading and compressing...</span>
         </div>
     </div>
 

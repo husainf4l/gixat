@@ -7,7 +7,7 @@
     
     var statusBadge = Model.Session!.Status switch
     {
-        SessionStatus.CheckedIn => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700",
+        SessionStatus.CheckedIn => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700",
         SessionStatus.CustomerRequest => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-700",
         SessionStatus.Inspection => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-cyan-100 text-cyan-700",
         SessionStatus.TestDrive => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700",
@@ -22,14 +22,14 @@
 }
 
 <!-- Back Navigation -->
-<a href="/Sessions" class="inline-flex items-center gap-2 text-slate-600 hover:text-sky-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
+<a href="/Sessions" class="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
     <i class="bi bi-arrow-left"></i>
     Back to Sessions
 </a>
 
 <!-- Header Card -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8 animate-slide-up">
-    <div class="bg-gradient-to-r from-sky-600 to-purple-600 p-6 text-white">
+    <div class="bg-gradient-to-r from-primary-600 to-purple-600 p-6 text-white">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-2">
@@ -86,7 +86,7 @@
 <!-- Workflow Progress -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 animate-slide-up" style="animation-delay: 0.1s;">
     <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-        <i class="bi bi-diagram-3 text-sky-600"></i>Workflow Progress
+        <i class="bi bi-diagram-3 text-primary-600"></i>Workflow Progress
     </h2>
     
     <div class="flex items-center justify-between relative px-4">
@@ -171,7 +171,7 @@
             </div>
             @if (Model.CustomerRequest == null)
             {
-                <a href="/Sessions/@Model.Session.Id/CustomerRequest/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors text-sm py-2 px-3">
+                <a href="/Sessions/@Model.Session.Id/CustomerRequest/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
                     <i class="bi bi-plus-lg"></i>Add
                 </a>
             }
@@ -218,7 +218,7 @@
             </div>
             @if (Model.Inspection == null && Model.CustomerRequest != null)
             {
-                <a href="/Sessions/@Model.Session.Id/Inspection/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors text-sm py-2 px-3">
+                <a href="/Sessions/@Model.Session.Id/Inspection/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
                     <i class="bi bi-plus-lg"></i>Start
                 </a>
             }
@@ -234,7 +234,7 @@
             <div class="space-y-2.5">
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-slate-600">Status</span>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700 text-xs">@Model.Inspection.Status</span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700 text-xs">@Model.Inspection.Status</span>
                 </div>
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-slate-600">Title</span>
@@ -270,7 +270,7 @@
             </div>
             @if (Model.TestDrive == null && Model.Inspection != null)
             {
-                <a href="/Sessions/@Model.Session.Id/TestDrive/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors text-sm py-2 px-3">
+                <a href="/Sessions/@Model.Session.Id/TestDrive/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
                     <i class="bi bi-plus-lg"></i>Record
                 </a>
             }
@@ -286,7 +286,7 @@
             <div class="space-y-2.5">
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-slate-600">Status</span>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700 text-xs">@Model.TestDrive.Status</span>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700 text-xs">@Model.TestDrive.Status</span>
                 </div>
                 @if (Model.TestDrive.MileageStart.HasValue && Model.TestDrive.MileageEnd.HasValue)
                 {
@@ -325,7 +325,7 @@
             </div>
             @if (Model.JobCard == null && Model.Inspection != null)
             {
-                <a href="/Sessions/@Model.Session.Id/JobCard/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors text-sm py-2 px-3">
+                <a href="/Sessions/@Model.Session.Id/JobCard/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
                     <i class="bi bi-plus-lg"></i>Create
                 </a>
             }
@@ -341,7 +341,7 @@
             <div class="space-y-2.5">
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-slate-600">Status</span>
-                    <span class="@(Model.JobCard.Status == JobCardStatus.Completed ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700" : Model.JobCard.Status == JobCardStatus.InProgress ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700" : "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700") text-xs">
+                    <span class="@(Model.JobCard.Status == JobCardStatus.Completed ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700" : Model.JobCard.Status == JobCardStatus.InProgress ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700" : "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700") text-xs">
                         @Model.JobCard.Status
                     </span>
                 </div>
@@ -372,13 +372,13 @@
 <!-- Reports Section -->
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 animate-slide-up" style="animation-delay: 0.2s;">
     <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
-        <i class="bi bi-file-earmark-text text-sky-600"></i>Reports
+        <i class="bi bi-file-earmark-text text-primary-600"></i>Reports
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <a href="/Sessions/@Model.Session.Id/Reports/Initial" 
-           class="flex items-center p-4 border border-gray-200 rounded-xl hover:border-sky-600 hover:bg-sky-100 transition-all group">
-            <div class="w-12 h-12 bg-sky-600/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-sky-600/20 transition-colors">
-                <i class="bi bi-file-earmark-text text-sky-600 text-xl"></i>
+           class="flex items-center p-4 border border-gray-200 rounded-xl hover:border-primary-600 hover:bg-primary-100 transition-all group">
+            <div class="w-12 h-12 bg-primary-600/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-primary-600/20 transition-colors">
+                <i class="bi bi-file-earmark-text text-primary-600 text-xl"></i>
             </div>
             <div>
                 <h4 class="font-medium text-slate-900">Initial Report</h4>
@@ -411,7 +411,7 @@
         <div class="flex gap-3">
             @if (Model.JobCard != null && Model.JobCard.Status == JobCardStatus.Completed)
             {
-                <a href="/Sessions/@Model.Session.Id/Checkout" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors bg-green-600 hover:bg-green-600/90">
+                <a href="/Sessions/@Model.Session.Id/Checkout" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors bg-green-600 hover:bg-green-600/90">
                     <i class="bi bi-check-circle"></i>
                     Complete & Check Out
                 </a>
