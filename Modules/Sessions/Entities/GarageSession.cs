@@ -36,6 +36,10 @@ public class GarageSession : BaseEntity
     public string? Notes { get; set; }
     public string? InternalNotes { get; set; }
     
+    // Notifications
+    public bool ReminderSent { get; set; }
+    public bool ReadyNotificationSent { get; set; }
+    
     // Navigation properties
     public virtual CustomerRequest? CustomerRequest { get; set; }
     public virtual Inspection? Inspection { get; set; }

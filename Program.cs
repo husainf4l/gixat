@@ -258,6 +258,12 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 // Phone Number Service
 builder.Services.AddSingleton<PhoneNumberService>();
 
+// Email Template Service
+builder.Services.AddScoped<EmailTemplateService>();
+
+// Notification Service
+builder.Services.AddScoped<NotificationService>();
+
 // ====================================
 // HEALTH CHECKS CONFIGURATION
 // ====================================

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Reminder</title>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f7; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+        .header { background: linear-gradient(135deg, #FF9500 0%, #FF3B30 100%); padding: 40px 30px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 28px; font-weight: 600; }
+        .content { padding: 40px 30px; }
+        .reminder-badge { background: #FF9500; color: #ffffff; display: inline-block; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+        .appointment-card { background: #fff3e0; border-left: 4px solid #FF9500; border-radius: 12px; padding: 24px; margin: 24px 0; }
+        .cta-button { display: inline-block; background: linear-gradient(135deg, #FF9500 0%, #FF3B30 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; margin: 24px 0; }
+        .footer { background-color: #f5f5f7; padding: 30px; text-align: center; color: #8e8e93; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Appointment Reminder</h1>
+        </div>
+        
+        <div class="content">
+            <div class="reminder-badge">Tomorrow at {{AppointmentTime}}</div>
+            
+            <p style="font-size: 16px; color: #1d1d1f; line-height: 1.6;">
+                Hi <strong>{{ClientName}}</strong>,
+            </p>
+            
+            <p style="font-size: 16px; color: #1d1d1f; line-height: 1.6;">
+                This is a friendly reminder about your upcoming appointment tomorrow.
+            </p>
+            
+            <div class="appointment-card">
+                <h3 style="margin-top: 0; color: #FF9500;">Your Appointment Details</h3>
+                <p><strong>📅 Date:</strong> {{AppointmentDate}}</p>
+                <p><strong>🕐 Time:</strong> {{AppointmentTime}}</p>
+                <p><strong>🚗 Vehicle:</strong> {{VehicleMake}} {{VehicleModel}} ({{LicensePlate}})</p>
+                <p><strong>📋 Service:</strong> {{ServiceType}}</p>
+            </div>
+            
+            <p style="font-size: 16px; color: #1d1d1f; line-height: 1.6;">
+                <strong>What to bring:</strong>
+            </p>
+            <ul style="color: #1d1d1f; line-height: 1.8;">
+                <li>Vehicle registration documents</li>
+                <li>Previous service records (if any)</li>
+                <li>List of any concerns about your vehicle</li>
+            </ul>
+            
+            <center>
+                <a href="tel:{{GaragePhone}}" class="cta-button">Call to Confirm</a>
+            </center>
+            
+            <p style="font-size: 14px; color: #8e8e93; text-align: center; margin-top: 32px;">
+                See you tomorrow! 👋
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{GarageName}}</strong></p>
+            <p>{{GarageAddress}}</p>
+            <p>Phone: <a href="tel:{{GaragePhone}}">{{GaragePhone}}</a></p>
+        </div>
+    </div>
+</body>
+</html>
