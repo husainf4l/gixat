@@ -403,8 +403,11 @@ if (!app.Environment.IsDevelopment())
 // Add global exception handling
 app.UseGlobalExceptionHandler();
 
-// Enable response compression
-app.UseResponseCompression();
+// Enable response compression (disabled in dev for hot reload)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseResponseCompression();
+}
 
 // Only use HTTPS redirection in production
 if (!app.Environment.IsDevelopment())

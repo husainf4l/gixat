@@ -43,7 +43,7 @@
                     </label>
                     <label class="relative cursor-pointer">
                         <input type="radio" name="Input.Priority" value="@Priority.Normal" class="peer sr-only" checked />
-                        <div class="p-3 text-center rounded-2xl border-2 border-gray-200 peer-checked:border-sky-600 peer-checked:bg-sky-100 transition-all">
+                        <div class="p-3 text-center rounded-2xl border-2 border-gray-200 peer-checked:border-primary-600 peer-checked:bg-primary-100 transition-all">
                             <span class="text-sm font-medium">Normal</span>
                         </div>
                     </label>
@@ -116,7 +116,7 @@
                 </div>
 
                 <!-- Drag & Drop Zone -->
-                <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-sky-600 hover:bg-sky-100 transition-all cursor-pointer">
+                <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-primary-600 hover:bg-primary-100 transition-all cursor-pointer">
                     <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
                     <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
                         <i class="bi bi-cloud-arrow-up text-2xl text-slate-600"></i>
@@ -129,7 +129,7 @@
                 <div id="uploadProgress" class="hidden mt-4">
                     <div class="flex items-center gap-3 p-3 bg-apple-blue/5 rounded-apple">
                         <div class="animate-spin rounded-full h-5 w-5 border-2 border-apple-blue border-t-transparent"></div>
-                        <span class="text-sm text-sky-600 font-medium">Uploading and processing...</span>
+                        <span class="text-sm text-primary-600 font-medium">Uploading and processing...</span>
                     </div>
                 </div>
 
@@ -143,7 +143,7 @@
             <!-- Actions -->
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">Cancel</a>
-                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                     <i class="bi bi-check-lg"></i>
                     Save Customer Request
                 </button>

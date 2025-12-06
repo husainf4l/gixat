@@ -8,24 +8,24 @@
 <!-- Page Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 animate-fade-in">
     <div>
-        <h1 class="text-2xl font-semibold text-apple-dark tracking-tight">Clients</h1>
-        <p class="text-apple-gray text-sm mt-1">Manage your garage clients and their vehicles</p>
+        <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Clients</h1>
+        <p class="text-slate-600 text-sm mt-1">Manage your garage clients and their vehicles</p>
     </div>
-    <button onclick="openModal()" class="btn-apple-primary">
+    <button onclick="openModal()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
         <i class="bi bi-plus-lg"></i>
         Add Client
     </button>
 </div>
 
 <!-- Search & Filter -->
-<div class="card-apple p-4 mb-6 animate-slide-up">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 animate-slide-up">
     <form method="get" class="flex flex-wrap gap-3 items-center">
         <div class="flex-1 min-w-[200px] max-w-md relative">
-            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-apple-gray text-sm"></i>
+            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-sm"></i>
             <input type="text" name="search" value="@Model.SearchTerm" placeholder="Search clients by name, phone, email..." 
-                   class="input-apple pl-9" />
+                   class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors pl-9" />
         </div>
-        <button type="submit" class="btn-apple-secondary">
+        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">
             <i class="bi bi-search"></i>
             Search
         </button>
@@ -33,11 +33,11 @@
 </div>
 
 <!-- Clients Table -->
-<div class="card-apple overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
     @if (Model.Clients.Any())
     {
         <div class="overflow-x-auto">
-            <table class="table-apple">
+            <table class="w-full">
                 <thead>
                     <tr>
                         <th>Client</th>
@@ -55,53 +55,53 @@
                         <tr class="group">
                             <td>
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-apple-blue to-apple-purple flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary-600 to-purple-600 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
                                         @client.FirstName[0]@client.LastName[0]
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <span class="font-medium text-apple-dark">@client.FullName</span>
+                                            <span class="font-medium text-slate-900">@client.FullName</span>
                                             @if (client.IsVip)
                                             {
-                                                <span class="badge-apple bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xxs px-2 py-0.5">
+                                                <span class="inline-flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
                                                     ⭐ VIP
                                                 </span>
                                             }
                                         </div>
                                         @if (!string.IsNullOrEmpty(client.Email))
                                         {
-                                            <p class="text-xs text-apple-gray">@client.Email</p>
+                                            <p class="text-xs text-slate-600">@client.Email</p>
                                         }
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="text-apple-dark">@client.Phone</span>
+                                <span class="text-slate-900">@client.Phone</span>
                             </td>
                             <td>
-                                <span class="badge-apple-gray">@client.Vehicles.Count vehicles</span>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">@client.Vehicles.Count vehicles</span>
                             </td>
                             <td>
-                                <span class="text-apple-dark">@client.TotalVisits</span>
+                                <span class="text-slate-900">@client.TotalVisits</span>
                             </td>
                             <td>
-                                <span class="font-medium text-apple-dark">$@client.TotalSpent.ToString("N0")</span>
+                                <span class="font-medium text-slate-900">$@client.TotalSpent.ToString("N0")</span>
                             </td>
                             <td>
-                                <span class="@(client.IsActive ? "badge-apple-green" : "badge-apple-gray")">
+                                <span class="@(client.IsActive ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700" : "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700")">
                                     <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
                                     @(client.IsActive ? "Active" : "Inactive")
                                 </span>
                             </td>
                             <td class="text-right">
                                 <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                    <a href="/Clients/@client.Id" class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-blue hover:bg-apple-blue/10 transition-colors" title="View">
+                                    <a href="/Clients/@client.Id" class="w-8 h-8 flex items-center justify-center rounded-lg text-primary-600 hover:bg-primary-100 transition-colors" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-gray hover:bg-gray-100 hover:text-apple-dark transition-colors" title="Edit">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-gray hover:bg-gray-100 hover:text-apple-dark transition-colors" title="More">
+                                    <button class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors" title="More">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
                                 </div>
@@ -116,11 +116,11 @@
     {
         <div class="p-12 text-center">
             <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
-                <i class="bi bi-people text-3xl text-apple-gray"></i>
+                <i class="bi bi-people text-3xl text-slate-600"></i>
             </div>
-            <h3 class="text-xl font-semibold text-apple-dark mb-2">No clients yet</h3>
-            <p class="text-apple-gray mb-6 max-w-sm mx-auto">Start by adding your first client to manage their vehicles and services.</p>
-            <button onclick="openModal()" class="btn-apple-primary">
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">No clients yet</h3>
+            <p class="text-slate-600 mb-6 max-w-sm mx-auto">Start by adding your first client to manage their vehicles and services.</p>
+            <button onclick="openModal()" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                 <i class="bi bi-plus-lg"></i>
                 Add Your First Client
             </button>
@@ -129,11 +129,11 @@
 </div>
 
 <!-- Add Client Modal -->
-<div id="addClientModal" class="modal-apple-overlay hidden">
-    <div class="modal-apple">
+<div id="addClientModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
         <div class="border-b border-gray-100 px-6 py-5 flex justify-between items-center">
-            <h2 class="text-xl font-semibold text-apple-dark">Add New Client</h2>
-            <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-gray hover:bg-gray-100 hover:text-apple-dark transition-colors">
+            <h2 class="text-xl font-semibold text-slate-900">Add New Client</h2>
+            <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
@@ -142,54 +142,54 @@
             <div class="p-6 max-h-[60vh] overflow-y-auto">
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">First Name <span class="text-apple-red">*</span></label>
-                        <input type="text" name="FirstName" class="input-apple-outlined" required />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">First Name <span class="text-red-600">*</span></label>
+                        <input type="text" name="FirstName" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" required />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Last Name <span class="text-apple-red">*</span></label>
-                        <input type="text" name="LastName" class="input-apple-outlined" required />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">Last Name <span class="text-red-600">*</span></label>
+                        <input type="text" name="LastName" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" required />
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Phone <span class="text-apple-red">*</span></label>
-                        <input type="tel" id="phoneInput" name="Phone" class="input-apple-outlined" required />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">Phone <span class="text-red-600">*</span></label>
+                        <input type="tel" id="phoneInput" name="Phone" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" required />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Email</label>
-                        <input type="email" name="Email" class="input-apple-outlined" />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">Email</label>
+                        <input type="email" name="Email" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" />
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-apple-dark mb-1.5">Address</label>
-                    <input type="text" name="Address" class="input-apple-outlined" />
+                    <label class="block text-sm font-medium text-slate-900 mb-1.5">Address</label>
+                    <input type="text" name="Address" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" />
                 </div>
                 <div class="grid grid-cols-3 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">City</label>
-                        <input type="text" name="City" class="input-apple-outlined" />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">City</label>
+                        <input type="text" name="City" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">State</label>
-                        <input type="text" name="State" class="input-apple-outlined" />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">State</label>
+                        <input type="text" name="State" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-apple-dark mb-1.5">Postal Code</label>
-                        <input type="text" name="PostalCode" class="input-apple-outlined" />
+                        <label class="block text-sm font-medium text-slate-900 mb-1.5">Postal Code</label>
+                        <input type="text" name="PostalCode" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors" />
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-apple-dark mb-1.5">Notes</label>
-                    <textarea name="Notes" rows="2" class="input-apple-outlined resize-none"></textarea>
+                    <label class="block text-sm font-medium text-slate-900 mb-1.5">Notes</label>
+                    <textarea name="Notes" rows="2" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors resize-none"></textarea>
                 </div>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="IsVip" class="w-4 h-4 text-apple-blue border-gray-300 rounded focus:ring-apple-blue" />
-                    <span class="text-sm text-apple-dark">Mark as VIP client</span>
+                    <input type="checkbox" name="IsVip" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" />
+                    <span class="text-sm text-slate-900">Mark as VIP client</span>
                 </label>
             </div>
             <div class="border-t border-gray-100 px-6 py-4 flex justify-end gap-3 bg-gray-50">
-                <button type="button" onclick="closeModal()" class="btn-apple-secondary">Cancel</button>
-                <button type="submit" class="btn-apple-primary">
+                <button type="button" onclick="closeModal()" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">Cancel</button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
                     <i class="bi bi-check-lg"></i>
                     Add Client
                 </button>

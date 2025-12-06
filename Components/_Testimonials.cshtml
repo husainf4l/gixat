@@ -1,77 +1,65 @@
+@{
+    var testimonials = new[]
+    {
+        new
+        {
+            Quote = "Gixat has completely transformed how we run our garage. Our scheduling is now seamless, and we've seen a 40% increase in customer satisfaction. The automated invoicing alone saves us hours every week.",
+            AuthorName = "Mike Johnson",
+            AuthorTitle = "Owner, Downtown Auto Repair",
+            AuthorInitials = "MJ",
+            Rating = 5
+        },
+        new
+        {
+            Quote = "The inventory tracking feature is a game-changer. We never run out of parts anymore, and our technicians can see real-time stock levels. Our revenue has increased by 35% since switching to Gixat.",
+            AuthorName = "Sarah Anderson",
+            AuthorTitle = "Manager, Anderson's Garage",
+            AuthorInitials = "SA",
+            Rating = 5
+        },
+        new
+        {
+            Quote = "Customer management has never been easier. The CRM system helps us track service history, send automated reminders, and provide personalized service. Our customers love it!",
+            AuthorName = "David Rodriguez",
+            AuthorTitle = "Owner, Rodriguez Auto Service",
+            AuthorInitials = "DR",
+            Rating = 5
+        }
+    };
+}
+
 <!-- Testimonials Section -->
-<section class="testimonials-section">
-    <div class="container">
-        <div class="testimonials-header">
-            <h2>What garage owners say</h2>
-            <p>Real stories from real garage owners who've transformed their businesses</p>
+<section class="py-32 bg-white">
+    <div class="container mx-auto px-6 max-w-7xl">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">What garage owners say</h2>
+            <p class="text-xl text-slate-600">Real stories from real garage owners who've transformed their businesses</p>
         </div>
 
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="testimonial-stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach (var testimonial in testimonials)
+            {
+                <div class="bg-gradient-to-br from-slate-50 to-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 border border-slate-100">
+                    <div class="mb-6">
+                        <div class="flex gap-1 mb-4">
+                            @for (int i = 0; i < testimonial.Rating; i++)
+                            {
+                                <i class="bi bi-star-fill text-yellow-400 text-lg"></i>
+                            }
+                        </div>
+                        <p class="text-slate-700 leading-relaxed italic">"@testimonial.Quote"</p>
                     </div>
-                    <p>"Gixat has completely transformed how we run our garage. Our scheduling is now seamless, and we've seen a 40% increase in customer satisfaction. The automated invoicing alone saves us hours every week."</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">
-                        <span>MJ</span>
-                    </div>
-                    <div class="author-info">
-                        <h4>Mike Johnson</h4>
-                        <p>Owner, Downtown Auto Repair</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="testimonial-stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p>"The inventory tracking feature is a game-changer. We never run out of parts anymore, and our technicians can see real-time stock levels. Our revenue has increased by 35% since switching to Gixat."</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">
-                        <span>SA</span>
-                    </div>
-                    <div class="author-info">
-                        <h4>Sarah Anderson</h4>
-                        <p>Manager, Anderson's Garage</p>
+                    <div class="flex items-center gap-4 mt-6 pt-6 border-t border-slate-200">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-600 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                            @testimonial.AuthorInitials
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-slate-900">@testimonial.AuthorName</h4>
+                            <p class="text-sm text-slate-600">@testimonial.AuthorTitle</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="testimonial-card">
-                <div class="testimonial-content">
-                    <div class="testimonial-stars">
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                        <i class="bi bi-star-fill"></i>
-                    </div>
-                    <p>"Customer management has never been easier. The CRM system helps us track service history, send automated reminders, and provide personalized service. Our customers love it!"</p>
-                </div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">
-                        <span>DR</span>
-                    </div>
-                    <div class="author-info">
-                        <h4>David Rodriguez</h4>
-                        <p>Owner, Rodriguez Auto Service</p>
-                    </div>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>

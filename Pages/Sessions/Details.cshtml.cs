@@ -50,7 +50,7 @@ public class DetailsModel : PageModel
         }
 
         var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
-        var currentCompany = userCompanies.FirstOrDefault();
+        var currentCompany = userCompanies.OrderBy(x => x.CompanyId).FirstOrDefault();
 
         if (currentCompany == null)
         {
