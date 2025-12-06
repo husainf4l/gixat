@@ -5,21 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Gixat</title>
     
-    <!-- Preconnect to external domains for faster loading -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com" />
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-    
-    <!-- Critical CSS inline for faster FCP -->
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif; background: #f5f5f7; margin: 0; -webkit-font-smoothing: antialiased; }
-        .min-h-screen { min-height: 100vh; }
-    </style>
-    
     <!-- Load TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
     
     <!-- Tom Select - Modern Autocomplete -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
@@ -28,58 +15,20 @@
     <!-- International Telephone Input -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.11/build/css/intlTelInput.css">
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.11/build/js/intlTelInput.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        apple: {
-                            blue: '#007AFF',
-                            'blue-hover': '#0051D5',
-                            'blue-light': '#E3F2FD',
-                            gray: '#8E8E93',
-                            'gray-2': '#636366',
-                            'gray-3': '#48484A',
-                            'gray-4': '#3A3A3C',
-                            'gray-5': '#2C2C2E',
-                            'gray-6': '#1C1C1E',
-                            dark: '#1D1D1F',
-                            light: '#F5F5F7',
-                            green: '#34C759',
-                            red: '#FF3B30',
-                            orange: '#FF9500',
-                            yellow: '#FFCC00',
-                            teal: '#5AC8FA',
-                            purple: '#AF52DE',
-                            pink: '#FF2D55',
-                            indigo: '#5856D6',
-                        }
-                    },
                     fontFamily: {
-                        'sf': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                        'sans': ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
                     },
                     fontSize: {
                         'xxs': ['0.625rem', { lineHeight: '0.875rem' }],
                     },
-                    boxShadow: {
-                        'apple': '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)',
-                        'apple-md': '0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04)',
-                        'apple-lg': '0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06)',
-                        'apple-xl': '0 16px 48px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.08)',
-                        'inner-apple': 'inset 0 1px 2px rgba(0, 0, 0, 0.06)',
-                    },
-                    borderRadius: {
-                        'apple': '12px',
-                        'apple-lg': '16px',
-                        'apple-xl': '20px',
-                        'apple-2xl': '24px',
-                    },
                     animation: {
                         'fade-in': 'fadeIn 0.4s ease-out',
                         'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'slide-down': 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'scale-in': 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'blur-in': 'blurIn 0.3s ease-out',
                         'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
@@ -91,247 +40,58 @@
                             '0%': { transform: 'translateY(16px)', opacity: '0' },
                             '100%': { transform: 'translateY(0)', opacity: '1' },
                         },
-                        slideDown: {
-                            '0%': { transform: 'translateY(-8px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' },
-                        },
-                        scaleIn: {
-                            '0%': { transform: 'scale(0.95)', opacity: '0' },
-                            '100%': { transform: 'scale(1)', opacity: '1' },
-                        },
-                        blurIn: {
-                            '0%': { filter: 'blur(4px)', opacity: '0' },
-                            '100%': { filter: 'blur(0)', opacity: '1' },
-                        },
                         pulseSoft: {
                             '0%, 100%': { opacity: '1' },
                             '50%': { opacity: '0.7' },
                         },
                     },
-                    transitionTimingFunction: {
-                        'apple': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
-                        'apple-spring': 'cubic-bezier(0.16, 1, 0.3, 1)',
-                    },
-                    backdropBlur: {
-                        'apple': '20px',
-                    }
                 }
             }
         }
     </script>
-    <style type="text/tailwindcss">
-        @@layer base {
-            body {
-                @@apply font-sf bg-apple-light text-apple-dark antialiased;
-            }
-            /* Custom Scrollbar - Apple Style */
-            ::-webkit-scrollbar {
-                width: 8px;
-                height: 8px;
-            }
-            ::-webkit-scrollbar-track {
-                @@apply bg-transparent;
-            }
-            ::-webkit-scrollbar-thumb {
-                @@apply bg-gray-300/60 rounded-full;
-                transition: background-color 0.2s;
-            }
-            ::-webkit-scrollbar-thumb:hover {
-                @@apply bg-gray-400/80;
-            }
-            /* Hide scrollbar when not scrolling */
-            ::-webkit-scrollbar-thumb:window-inactive {
-                @@apply bg-transparent;
-            }
+    
+    <style>
+        /* Custom Scrollbar - Apple Style */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        @@layer components {
-            /* Apple-style Cards */
-            .card-apple {
-                @@apply bg-white rounded-apple-lg shadow-apple border border-gray-100/50;
-                @@apply transition-all duration-300 ease-apple;
-            }
-            .card-apple:hover {
-                @@apply shadow-apple-md;
-            }
-            .card-apple-elevated {
-                @@apply bg-white rounded-apple-lg shadow-apple-md border-0;
-            }
-            
-            /* Apple-style Buttons */
-            .btn-apple {
-                @@apply inline-flex items-center justify-center gap-2 px-5 py-2.5;
-                @@apply text-sm font-semibold rounded-apple;
-                @@apply transition-all duration-200 ease-apple;
-                @@apply focus:outline-none focus:ring-2 focus:ring-offset-2;
-            }
-            .btn-apple-primary {
-                @@apply btn-apple bg-apple-blue text-white;
-                @@apply hover:bg-apple-blue-hover active:scale-[0.98];
-                @@apply focus:ring-apple-blue/50;
-            }
-            .btn-apple-secondary {
-                @@apply btn-apple bg-gray-100 text-apple-dark;
-                @@apply hover:bg-gray-200 active:scale-[0.98];
-                @@apply focus:ring-gray-300;
-            }
-            .btn-apple-ghost {
-                @@apply btn-apple bg-transparent text-apple-blue;
-                @@apply hover:bg-apple-blue/10 active:scale-[0.98];
-            }
-            .btn-apple-danger {
-                @@apply btn-apple bg-apple-red/10 text-apple-red;
-                @@apply hover:bg-apple-red/20 active:scale-[0.98];
-                @@apply focus:ring-apple-red/30;
-            }
-            
-            /* Apple-style Inputs */
-            .input-apple {
-                @@apply w-full px-4 py-3 text-base;
-                @@apply bg-gray-100 border-0 rounded-apple;
-                @@apply placeholder:text-apple-gray;
-                @@apply transition-all duration-200 ease-apple;
-                @@apply focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:bg-white;
-            }
-            .input-apple-outlined {
-                @@apply w-full px-4 py-3 text-base;
-                @@apply bg-white border border-gray-200 rounded-apple;
-                @@apply placeholder:text-apple-gray;
-                @@apply transition-all duration-200 ease-apple;
-                @@apply focus:outline-none focus:ring-2 focus:ring-apple-blue/30 focus:border-apple-blue;
-            }
-            
-            /* Apple-style Badges/Pills */
-            .badge-apple {
-                @@apply inline-flex items-center gap-1.5 px-2.5 py-1;
-                @@apply text-xs font-medium rounded-full;
-            }
-            .badge-apple-gray {
-                @@apply badge-apple bg-gray-100 text-apple-gray-2;
-            }
-            .badge-apple-blue {
-                @@apply badge-apple bg-apple-blue/10 text-apple-blue;
-            }
-            .badge-apple-green {
-                @@apply badge-apple bg-apple-green/10 text-apple-green;
-            }
-            .badge-apple-red {
-                @@apply badge-apple bg-apple-red/10 text-apple-red;
-            }
-            .badge-apple-orange {
-                @@apply badge-apple bg-apple-orange/10 text-apple-orange;
-            }
-            .badge-apple-purple {
-                @@apply badge-apple bg-apple-purple/10 text-apple-purple;
-            }
-            .badge-apple-teal {
-                @@apply badge-apple bg-apple-teal/10 text-apple-teal;
-            }
-            
-            /* Apple-style Table */
-            .table-apple {
-                @@apply w-full;
-            }
-            .table-apple thead {
-                @@apply bg-gray-50/80;
-            }
-            .table-apple th {
-                @@apply text-left py-3 px-5 text-xs font-semibold text-apple-gray uppercase tracking-wider;
-            }
-            .table-apple tbody tr {
-                @@apply border-b border-gray-100 transition-colors duration-150;
-            }
-            .table-apple tbody tr:hover {
-                @@apply bg-gray-50/60;
-            }
-            .table-apple tbody tr:last-child {
-                @@apply border-b-0;
-            }
-            .table-apple td {
-                @@apply py-4 px-5;
-            }
-            
-            /* Apple-style Modal */
-            .modal-apple-overlay {
-                @@apply fixed inset-0 bg-black/40 backdrop-blur-sm z-50;
-                @@apply flex items-center justify-center p-4;
-            }
-            .modal-apple {
-                @@apply bg-white rounded-apple-xl shadow-apple-xl;
-                @@apply w-full max-w-lg max-h-[90vh] overflow-auto;
-                @@apply animate-scale-in;
-            }
-            
-            /* Glass Effect */
-            .glass-apple {
-                @@apply bg-white/70 backdrop-blur-apple;
-                @@apply border border-white/20;
-            }
-            
-            /* Link styles */
-            .link-apple {
-                @@apply text-apple-blue hover:text-apple-blue-hover;
-                @@apply transition-colors duration-150;
-            }
-            
-            /* Section headers */
-            .section-title {
-                @@apply text-xl font-semibold text-apple-dark tracking-tight;
-            }
-            .section-subtitle {
-                @@apply text-sm text-apple-gray mt-1;
-            }
-            
-            /* Mobile Touch Optimizations */
-            @@media (max-width: 768px) {
-                .btn-apple-primary,
-                .btn-apple-secondary {
-                    @@apply min-h-[44px] px-5 text-base;
-                }
-                
-                .input-apple,
-                .input-apple-outlined {
-                    @@apply min-h-[44px] text-base;
-                }
-                
-                select.input-apple,
-                select.input-apple-outlined {
-                    @@apply min-h-[44px];
-                }
-                
-                /* Tom Select mobile optimization */
-                .ts-control {
-                    min-height: 44px !important;
-                    font-size: 16px !important; /* Prevents zoom on iOS */
-                }
-                
-                .ts-dropdown {
-                    font-size: 16px !important;
-                }
-                
-                .ts-dropdown-content .option {
-                    padding: 12px 16px !important;
-                    min-height: 44px !important;
-                }
-                
-                /* International Tel Input mobile */
-                .iti__selected-flag {
-                    min-height: 44px !important;
-                }
-                
-                input[type="tel"] {
-                    font-size: 16px !important; /* Prevents zoom on iOS */
-                }
-            }
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
-        @@layer utilities {
-            .text-balance {
-                text-wrap: balance;
+        ::-webkit-scrollbar-thumb {
+            background: rgba(209, 213, 219, 0.6);
+            border-radius: 9999px;
+            transition: background-color 0.2s;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.8);
+        }
+        
+        /* Mobile Touch Optimizations */
+        @@media (max-width: 768px) {
+            .ts-control {
+                min-height: 44px !important;
+                font-size: 16px !important;
+            }
+            .ts-dropdown {
+                font-size: 16px !important;
+            }
+            .ts-dropdown-content .option {
+                padding: 12px 16px !important;
+                min-height: 44px !important;
+            }
+            .iti__selected-flag {
+                min-height: 44px !important;
+            }
+            input[type="tel"] {
+                font-size: 16px !important;
             }
         }
     </style>
     @RenderSection("Styles", required: false)
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen bg-slate-50 antialiased">
     @RenderBody()
     @RenderSection("Scripts", required: false)
 </body>

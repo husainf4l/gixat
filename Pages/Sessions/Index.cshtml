@@ -8,27 +8,27 @@
 <!-- Page Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 animate-fade-in">
     <div>
-        <h1 class="text-2xl font-semibold text-apple-dark tracking-tight">Sessions</h1>
-        <p class="text-apple-gray text-sm mt-1">Manage garage sessions and vehicle check-ins</p>
+        <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Sessions</h1>
+        <p class="text-slate-600 text-sm mt-1">Manage garage sessions and vehicle check-ins</p>
     </div>
-    <a href="/Sessions/Create" class="btn-apple-primary">
+    <a href="/Sessions/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors">
         <i class="bi bi-plus-lg"></i>
         New Check-In
     </a>
 </div>
 
 <!-- Filters Card -->
-<div class="card-apple p-4 mb-6 animate-slide-up">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 animate-slide-up">
     <form method="get" class="flex flex-wrap gap-3 items-center">
         <!-- Search -->
         <div class="flex-1 min-w-[200px] max-w-md relative">
-            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-apple-gray text-sm"></i>
+            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-sm"></i>
             <input type="text" name="SearchTerm" value="@Model.SearchTerm" placeholder="Search by session #, client, vehicle..." 
-                   class="input-apple pl-9" />
+                   class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors pl-9" />
         </div>
         
         <!-- Status Filter -->
-        <select name="StatusFilter" class="input-apple w-auto min-w-[160px]">
+        <select name="StatusFilter" class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-colors w-auto min-w-[160px]">
             <option value="">All Status</option>
             <option value="CheckedIn" selected="@(Model.StatusFilter == "CheckedIn")">Checked In</option>
             <option value="CustomerRequest" selected="@(Model.StatusFilter == "CustomerRequest")">Customer Request</option>
@@ -41,11 +41,11 @@
         </select>
         
         <!-- Actions -->
-        <button type="submit" class="btn-apple-secondary">
+        <button type="submit" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">
             <i class="bi bi-funnel"></i>
             Filter
         </button>
-        <a href="/Sessions" class="btn-apple-ghost">
+        <a href="/Sessions" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors">
             <i class="bi bi-x-lg"></i>
             Clear
         </a>
@@ -53,11 +53,11 @@
 </div>
 
 <!-- Sessions Table -->
-<div class="card-apple overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden animate-slide-up" style="animation-delay: 0.1s;">
     @if (Model.Sessions.Any())
     {
         <div class="overflow-x-auto">
-            <table class="table-apple">
+            <table class="w-full">
                 <thead>
                     <tr>
                         <th>Session</th>
@@ -74,33 +74,33 @@
                     {
                         var badgeClass = session.Status switch
                         {
-                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "badge-apple-teal",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-cyan-100 text-cyan-700",
                             Gixat.Web.Modules.Sessions.Enums.SessionStatus.CustomerRequest or
                             Gixat.Web.Modules.Sessions.Enums.SessionStatus.Inspection or
-                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "badge-apple-purple",
-                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "badge-apple-orange",
-                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "badge-apple-blue",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.TestDrive => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.AwaitingApproval => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700",
                             Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed or
-                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "badge-apple-green",
-                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "badge-apple-gray",
-                            _ => "badge-apple-gray"
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700",
+                            Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700",
+                            _ => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700"
                         };
                         
                         <tr class="group">
                             <td>
-                                <a href="/Sessions/Details/@session.Id" class="font-semibold text-apple-blue hover:text-apple-blue-hover transition-colors">
+                                <a href="/Sessions/Details/@session.Id" class="font-semibold text-sky-600 hover:text-sky-700 transition-colors">
                                     @session.SessionNumber
                                 </a>
                             </td>
                             <td>
-                                <span class="text-apple-dark">@session.ClientName</span>
+                                <span class="text-slate-900">@session.ClientName</span>
                             </td>
                             <td>
                                 <div>
-                                    <span class="text-apple-dark">@session.VehicleDisplayName</span>
+                                    <span class="text-slate-900">@session.VehicleDisplayName</span>
                                     @if (!string.IsNullOrEmpty(session.VehicleLicensePlate))
                                     {
-                                        <p class="text-xs text-apple-gray mt-0.5">@session.VehicleLicensePlate</p>
+                                        <p class="text-xs text-slate-600 mt-0.5">@session.VehicleLicensePlate</p>
                                     }
                                 </div>
                             </td>
@@ -109,32 +109,32 @@
                             </td>
                             <td>
                                 <div class="flex gap-1">
-                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasCustomerRequest ? "bg-apple-green/10 text-apple-green" : "bg-gray-100 text-gray-400")" title="Customer Request">
+                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasCustomerRequest ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Customer Request">
                                         <i class="bi bi-chat-dots"></i>
                                     </span>
-                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasInspection ? "bg-apple-green/10 text-apple-green" : "bg-gray-100 text-gray-400")" title="Inspection">
+                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasInspection ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Inspection">
                                         <i class="bi bi-clipboard-check"></i>
                                     </span>
-                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasTestDrive ? "bg-apple-green/10 text-apple-green" : "bg-gray-100 text-gray-400")" title="Test Drive">
+                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasTestDrive ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Test Drive">
                                         <i class="bi bi-speedometer2"></i>
                                     </span>
-                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasJobCard ? "bg-apple-green/10 text-apple-green" : "bg-gray-100 text-gray-400")" title="Job Card">
+                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs @(session.HasJobCard ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400")" title="Job Card">
                                         <i class="bi bi-wrench"></i>
                                     </span>
                                 </div>
                             </td>
                             <td>
                                 <div>
-                                    <span class="text-apple-dark text-sm">@session.CheckInAt.ToString("MMM dd, yyyy")</span>
-                                    <p class="text-xs text-apple-gray">@session.CheckInAt.ToString("HH:mm")</p>
+                                    <span class="text-slate-900 text-sm">@session.CheckInAt.ToString("MMM dd, yyyy")</span>
+                                    <p class="text-xs text-slate-600">@session.CheckInAt.ToString("HH:mm")</p>
                                 </div>
                             </td>
                             <td class="text-right">
                                 <div class="flex justify-end gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                    <a href="/Sessions/Details/@session.Id" class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-blue hover:bg-apple-blue/10 transition-colors" title="View">
+                                    <a href="/Sessions/Details/@session.Id" class="w-8 h-8 flex items-center justify-center rounded-lg text-sky-600 hover:bg-sky-100 transition-colors" title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="/Sessions/Edit/@session.Id" class="w-8 h-8 flex items-center justify-center rounded-lg text-apple-gray hover:bg-gray-100 hover:text-apple-dark transition-colors" title="Edit">
+                                    <a href="/Sessions/Edit/@session.Id" class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </div>
@@ -149,11 +149,11 @@
     {
         <div class="p-12 text-center">
             <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5">
-                <i class="bi bi-inbox text-3xl text-apple-gray"></i>
+                <i class="bi bi-inbox text-3xl text-slate-600"></i>
             </div>
-            <h3 class="text-xl font-semibold text-apple-dark mb-2">No sessions found</h3>
-            <p class="text-apple-gray mb-6 max-w-sm mx-auto">Get started by creating a new check-in for a vehicle</p>
-            <a href="/Sessions/Create" class="btn-apple-primary">
+            <h3 class="text-xl font-semibold text-slate-900 mb-2">No sessions found</h3>
+            <p class="text-slate-600 mb-6 max-w-sm mx-auto">Get started by creating a new check-in for a vehicle</p>
+            <a href="/Sessions/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors">
                 <i class="bi bi-plus-lg"></i>
                 New Check-In
             </a>

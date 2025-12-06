@@ -349,9 +349,12 @@ builder.Services
 
 var app = builder.Build();
 
-// Apply migrations only in Development or when APPLY_MIGRATIONS=true
-var applyMigrations = app.Environment.IsDevelopment() || 
-    Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
+// NOTE: Migrations should be applied manually using:
+// dotnet ef database update
+// 
+// Automatic migrations on startup are disabled as they are not a best practice.
+// Only enable in production deployments via APPLY_MIGRATIONS=true environment variable.
+var applyMigrations = Environment.GetEnvironmentVariable("APPLY_MIGRATIONS")?.ToLower() == "true";
 
 if (applyMigrations)
 {

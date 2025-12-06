@@ -7,14 +7,14 @@
 }
 
 <!-- Back Navigation -->
-<a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center gap-2 text-apple-gray hover:text-apple-blue no-underline mb-6 text-sm transition-colors animate-fade-in">
+<a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-sky-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
     <i class="bi bi-arrow-left"></i>
     Back to Session
 </a>
 
 <!-- Header Card -->
-<div class="card-apple overflow-hidden mb-6 animate-slide-up">
-    <div class="bg-gradient-to-r from-apple-teal to-apple-blue p-6 text-white">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6 animate-slide-up">
+    <div class="bg-gradient-to-r from-cyan-600 to-sky-600 p-6 text-white">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -25,7 +25,7 @@
                     <p class="text-sm opacity-90">Session #@Model.Session.SessionNumber • @Model.Session.VehicleDisplayName</p>
                 </div>
             </div>
-            <span class="@(Model.Inspection.Status == RequestStatus.Completed ? "bg-apple-green/20" : Model.Inspection.Status == RequestStatus.InProgress ? "bg-white/20" : "bg-apple-orange/20") px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur self-start md:self-center">
+            <span class="@(Model.Inspection.Status == RequestStatus.Completed ? "bg-green-600/20" : Model.Inspection.Status == RequestStatus.InProgress ? "bg-white/20" : "bg-orange-600/20") px-4 py-1.5 rounded-full text-sm font-medium backdrop-blur self-start md:self-center">
                 @Model.Inspection.Status
             </span>
         </div>
@@ -33,41 +33,41 @@
 </div>
 
 <!-- Inspection Details -->
-<div class="card-apple p-6 mb-6 animate-slide-up" style="animation-delay: 0.1s;">
-    <h2 class="text-lg font-semibold text-apple-dark mb-5 flex items-center gap-2">
-        <i class="bi bi-file-text text-apple-blue"></i>Inspection Details
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.1s;">
+    <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
+        <i class="bi bi-file-text text-sky-600"></i>Inspection Details
     </h2>
     <div class="space-y-4">
         <div>
-            <span class="block text-xs text-apple-gray uppercase tracking-wide mb-1">Title</span>
-            <p class="text-apple-dark font-medium">@Model.Inspection.Title</p>
+            <span class="block text-xs text-slate-600 uppercase tracking-wide mb-1">Title</span>
+            <p class="text-slate-900 font-medium">@Model.Inspection.Title</p>
         </div>
         @if (!string.IsNullOrEmpty(Model.Inspection.Description))
         {
             <div>
-                <span class="block text-xs text-apple-gray uppercase tracking-wide mb-1">Description</span>
-                <p class="text-apple-dark">@Model.Inspection.Description</p>
+                <span class="block text-xs text-slate-600 uppercase tracking-wide mb-1">Description</span>
+                <p class="text-slate-900">@Model.Inspection.Description</p>
             </div>
         }
         <div class="flex flex-wrap gap-6 pt-2">
             <div>
-                <span class="block text-xs text-apple-gray uppercase tracking-wide mb-1">Priority</span>
-                <span class="@(Model.Inspection.OverallPriority == Priority.High || Model.Inspection.OverallPriority == Priority.Urgent ? "badge-apple-red" : Model.Inspection.OverallPriority == Priority.Normal ? "badge-apple-orange" : "badge-apple-green")">
+                <span class="block text-xs text-slate-600 uppercase tracking-wide mb-1">Priority</span>
+                <span class="@(Model.Inspection.OverallPriority == Priority.High || Model.Inspection.OverallPriority == Priority.Urgent ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700" : Model.Inspection.OverallPriority == Priority.Normal ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700" : "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700")">
                     @Model.Inspection.OverallPriority
                 </span>
             </div>
             @if (Model.Inspection.InspectionStartedAt.HasValue)
             {
                 <div>
-                    <span class="block text-xs text-apple-gray uppercase tracking-wide mb-1">Started</span>
-                    <p class="text-sm text-apple-dark">@Model.Inspection.InspectionStartedAt.Value.ToString("MMM dd, yyyy • h:mm tt")</p>
+                    <span class="block text-xs text-slate-600 uppercase tracking-wide mb-1">Started</span>
+                    <p class="text-sm text-slate-900">@Model.Inspection.InspectionStartedAt.Value.ToString("MMM dd, yyyy • h:mm tt")</p>
                 </div>
             }
             @if (Model.Inspection.InspectionCompletedAt.HasValue)
             {
                 <div>
-                    <span class="block text-xs text-apple-gray uppercase tracking-wide mb-1">Completed</span>
-                    <p class="text-sm text-apple-dark">@Model.Inspection.InspectionCompletedAt.Value.ToString("MMM dd, yyyy • h:mm tt")</p>
+                    <span class="block text-xs text-slate-600 uppercase tracking-wide mb-1">Completed</span>
+                    <p class="text-sm text-slate-900">@Model.Inspection.InspectionCompletedAt.Value.ToString("MMM dd, yyyy • h:mm tt")</p>
                 </div>
             }
         </div>
@@ -75,9 +75,9 @@
 </div>
 
 <!-- Condition Summary -->
-<div class="card-apple p-6 mb-6 animate-slide-up" style="animation-delay: 0.15s;">
-    <h2 class="text-lg font-semibold text-apple-dark mb-5 flex items-center gap-2">
-        <i class="bi bi-speedometer2 text-apple-blue"></i>Condition Summary
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.15s;">
+    <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
+        <i class="bi bi-speedometer2 text-sky-600"></i>Condition Summary
     </h2>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         @{
@@ -98,10 +98,10 @@
             {
                 var conditionClass = condition.ToLower() switch
                 {
-                    "good" or "excellent" => "bg-apple-green/10 text-apple-green border-apple-green/20",
-                    "fair" or "average" => "bg-apple-orange/10 text-apple-orange border-apple-orange/20",
-                    "poor" or "bad" or "needs attention" => "bg-apple-red/10 text-apple-red border-apple-red/20",
-                    _ => "bg-gray-100 text-apple-gray border-gray-200"
+                    "good" or "excellent" => "bg-green-100 text-green-600 border-green-600/20",
+                    "fair" or "average" => "bg-orange-100 text-orange-600 border-orange-600/20",
+                    "poor" or "bad" or "needs attention" => "bg-red-100 text-red-600 border-red-600/20",
+                    _ => "bg-gray-100 text-slate-600 border-gray-200"
                 };
                 <div class="p-4 rounded-xl border @conditionClass">
                     <div class="flex items-center gap-2 mb-1">
@@ -118,35 +118,35 @@
 <!-- Inspection Items -->
 @if (Model.Inspection.Items?.Any() == true)
 {
-    <div class="card-apple p-6 mb-6 animate-slide-up" style="animation-delay: 0.2s;">
-        <h2 class="text-lg font-semibold text-apple-dark mb-5 flex items-center gap-2">
-            <i class="bi bi-list-check text-apple-blue"></i>Inspection Items
-            <span class="badge-apple-gray ml-2">@Model.Inspection.Items.Count()</span>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.2s;">
+        <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
+            <i class="bi bi-list-check text-sky-600"></i>Inspection Items
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700 ml-2">@Model.Inspection.Items.Count()</span>
         </h2>
         <div class="space-y-3">
             @foreach (var item in Model.Inspection.Items.OrderBy(i => i.SortOrder))
             {
                 var priorityBadge = item.Priority switch
                 {
-                    Priority.Urgent => "badge-apple-red",
-                    Priority.High => "badge-apple-orange",
-                    Priority.Normal => "badge-apple-blue",
-                    _ => "badge-apple-gray"
+                    Priority.Urgent => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700",
+                    Priority.High => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700",
+                    Priority.Normal => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-sky-100 text-sky-700",
+                    _ => "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700"
                 };
                 
                 <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                    <div class="w-10 h-10 rounded-xl @(item.RequiresAttention ? "bg-apple-orange/15 text-apple-orange" : "bg-apple-green/15 text-apple-green") flex items-center justify-center flex-shrink-0">
+                    <div class="w-10 h-10 rounded-xl @(item.RequiresAttention ? "bg-orange-100 text-orange-600" : "bg-green-100 text-green-600") flex items-center justify-center flex-shrink-0">
                         <i class="bi @(item.RequiresAttention ? "bi-exclamation-triangle" : "bi-check-lg")"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="font-medium text-apple-dark">@item.ItemName</p>
+                        <p class="font-medium text-slate-900">@item.ItemName</p>
                         @if (!string.IsNullOrEmpty(item.Description))
                         {
-                            <p class="text-sm text-apple-gray mt-0.5">@item.Description</p>
+                            <p class="text-sm text-slate-600 mt-0.5">@item.Description</p>
                         }
                         @if (!string.IsNullOrEmpty(item.Notes))
                         {
-                            <p class="text-sm text-apple-gray italic mt-1 flex items-start gap-1">
+                            <p class="text-sm text-slate-600 italic mt-1 flex items-start gap-1">
                                 <i class="bi bi-sticky mt-0.5"></i>@item.Notes
                             </p>
                         }
@@ -155,7 +155,7 @@
                         <span class="@priorityBadge text-xs">@item.Priority</span>
                         @if (!string.IsNullOrEmpty(item.Condition))
                         {
-                            <p class="text-xs text-apple-gray mt-1">@item.Condition</p>
+                            <p class="text-xs text-slate-600 mt-1">@item.Condition</p>
                         }
                     </div>
                 </div>
@@ -167,29 +167,29 @@
 <!-- Findings & Recommendations -->
 @if (!string.IsNullOrEmpty(Model.Inspection.Findings) || !string.IsNullOrEmpty(Model.Inspection.Recommendations))
 {
-    <div class="card-apple p-6 mb-6 animate-slide-up" style="animation-delay: 0.25s;">
-        <h2 class="text-lg font-semibold text-apple-dark mb-5 flex items-center gap-2">
-            <i class="bi bi-lightbulb text-apple-blue"></i>Findings & Recommendations
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.25s;">
+        <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
+            <i class="bi bi-lightbulb text-sky-600"></i>Findings & Recommendations
         </h2>
         <div class="space-y-4">
             @if (!string.IsNullOrEmpty(Model.Inspection.Findings))
             {
-                <div class="p-4 bg-apple-orange/10 border border-apple-orange/20 rounded-xl">
+                <div class="p-4 bg-orange-100 border border-orange-600/20 rounded-xl">
                     <div class="flex items-center gap-2 mb-2">
-                        <i class="bi bi-exclamation-circle text-apple-orange"></i>
-                        <span class="text-sm font-medium text-apple-orange">Key Findings</span>
+                        <i class="bi bi-exclamation-circle text-orange-600"></i>
+                        <span class="text-sm font-medium text-orange-600">Key Findings</span>
                     </div>
-                    <p class="text-apple-dark">@Model.Inspection.Findings</p>
+                    <p class="text-slate-900">@Model.Inspection.Findings</p>
                 </div>
             }
             @if (!string.IsNullOrEmpty(Model.Inspection.Recommendations))
             {
-                <div class="p-4 bg-apple-blue/10 border border-apple-blue/20 rounded-xl">
+                <div class="p-4 bg-sky-100 border border-sky-600/20 rounded-xl">
                     <div class="flex items-center gap-2 mb-2">
-                        <i class="bi bi-arrow-right-circle text-apple-blue"></i>
-                        <span class="text-sm font-medium text-apple-blue">Recommendations</span>
+                        <i class="bi bi-arrow-right-circle text-sky-600"></i>
+                        <span class="text-sm font-medium text-sky-600">Recommendations</span>
                     </div>
-                    <p class="text-apple-dark">@Model.Inspection.Recommendations</p>
+                    <p class="text-slate-900">@Model.Inspection.Recommendations</p>
                 </div>
             }
         </div>
@@ -197,21 +197,21 @@
 }
 
 <!-- Media Section -->
-<div class="card-apple p-6 mb-6 animate-slide-up" style="animation-delay: 0.3s;">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 animate-slide-up" style="animation-delay: 0.3s;">
     <div class="flex items-center justify-between mb-5">
-        <h2 class="text-lg font-semibold text-apple-dark flex items-center gap-2">
-            <i class="bi bi-images text-apple-blue"></i>Photos & Videos
+        <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+            <i class="bi bi-images text-sky-600"></i>Photos & Videos
         </h2>
-        <label class="btn-apple-primary text-sm py-2 px-3 cursor-pointer">
+        <label class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors text-sm py-2 px-3 cursor-pointer">
             <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
             <i class="bi bi-plus-lg"></i>Upload
         </label>
     </div>
 
     <div id="uploadProgress" class="hidden mb-4">
-        <div class="flex items-center gap-3 p-4 bg-apple-blue/10 rounded-xl">
-            <div class="animate-spin rounded-full h-5 w-5 border-2 border-apple-blue border-t-transparent"></div>
-            <span class="text-sm font-medium text-apple-blue">Uploading and compressing...</span>
+        <div class="flex items-center gap-3 p-4 bg-sky-600/10 rounded-xl">
+            <div class="animate-spin rounded-full h-5 w-5 border-2 border-sky-600 border-t-transparent"></div>
+            <span class="text-sm font-medium text-sky-600">Uploading and compressing...</span>
         </div>
     </div>
 
@@ -245,16 +245,16 @@
 
     <div id="emptyMedia" class="@(Model.Inspection.MediaItems?.Any() == true ? "hidden" : "") text-center py-10">
         <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-            <i class="bi bi-images text-2xl text-apple-gray"></i>
+            <i class="bi bi-images text-2xl text-slate-600"></i>
         </div>
-        <p class="text-apple-dark font-medium mb-1">No photos or videos yet</p>
-        <p class="text-sm text-apple-gray">Upload images to document inspection findings</p>
+        <p class="text-slate-900 font-medium mb-1">No photos or videos yet</p>
+        <p class="text-sm text-slate-600">Upload images to document inspection findings</p>
     </div>
 </div>
 
 <!-- Back Button -->
 <div class="animate-slide-up" style="animation-delay: 0.35s;">
-    <a href="/Sessions/Details/@Model.Session.Id" class="btn-apple-ghost">
+    <a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors">
         <i class="bi bi-arrow-left"></i>Back to Session
     </a>
 </div>

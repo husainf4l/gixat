@@ -8,14 +8,14 @@
 
 <div class="max-w-3xl mx-auto">
     <!-- Back Navigation -->
-    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center gap-2 text-apple-gray hover:text-apple-blue no-underline mb-6 text-sm transition-colors animate-fade-in">
+    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-sky-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
         <i class="bi bi-arrow-left"></i>
         Back to Session
     </a>
 
     <!-- Header Card -->
-    <div class="card-apple overflow-hidden mb-6 animate-slide-up">
-        <div class="bg-gradient-to-r from-apple-teal to-apple-blue p-6 text-white">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6 animate-slide-up">
+        <div class="bg-gradient-to-r from-cyan-600 to-sky-600 p-6 text-white">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
                     <i class="bi bi-search text-xl"></i>
@@ -29,41 +29,41 @@
     </div>
 
     <!-- Form Card -->
-    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.1s;">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 animate-slide-up" style="animation-delay: 0.1s;">
         <form method="post" id="inspectionForm">
             <div class="space-y-5">
                 <!-- Title -->
                 <div>
-                    <label asp-for="Input.Title" class="block text-sm font-medium text-apple-dark mb-1.5">Inspection Title <span class="text-apple-red">*</span></label>
+                    <label asp-for="Input.Title" class="block text-sm font-medium text-slate-900 mb-1.5">Inspection Title <span class="text-red-600">*</span></label>
                     <input asp-for="Input.Title" class="input-apple-outlined" placeholder="e.g., Full Vehicle Inspection" required />
-                    <span asp-validation-for="Input.Title" class="text-apple-red text-xs mt-1"></span>
+                    <span asp-validation-for="Input.Title" class="text-red-600 text-xs mt-1"></span>
                 </div>
 
                 <!-- Priority -->
                 <div>
-                    <label asp-for="Input.OverallPriority" class="block text-sm font-medium text-apple-dark mb-3">Priority</label>
+                    <label asp-for="Input.OverallPriority" class="block text-sm font-medium text-slate-900 mb-3">Priority</label>
                     <div class="flex flex-wrap gap-3">
                         <label class="priority-option">
                             <input type="radio" name="Input.OverallPriority" value="@Priority.Low" class="hidden peer" />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-apple-gray peer-checked:border-apple-green peer-checked:bg-apple-green/10 peer-checked:text-apple-green transition-all">
+                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-green-600 peer-checked:bg-green-100 peer-checked:text-green-600 transition-all">
                                 <i class="bi bi-arrow-down-short"></i> Low
                             </div>
                         </label>
                         <label class="priority-option">
                             <input type="radio" name="Input.OverallPriority" value="@Priority.Normal" class="hidden peer" checked />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-apple-gray peer-checked:border-apple-blue peer-checked:bg-apple-blue/10 peer-checked:text-apple-blue transition-all">
+                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-sky-600 peer-checked:bg-sky-100 peer-checked:text-sky-600 transition-all">
                                 <i class="bi bi-dash"></i> Normal
                             </div>
                         </label>
                         <label class="priority-option">
                             <input type="radio" name="Input.OverallPriority" value="@Priority.High" class="hidden peer" />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-apple-gray peer-checked:border-apple-orange peer-checked:bg-apple-orange/10 peer-checked:text-apple-orange transition-all">
+                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-orange-600 peer-checked:bg-orange-100 peer-checked:text-orange-600 transition-all">
                                 <i class="bi bi-arrow-up-short"></i> High
                             </div>
                         </label>
                         <label class="priority-option">
                             <input type="radio" name="Input.OverallPriority" value="@Priority.Urgent" class="hidden peer" />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-apple-gray peer-checked:border-apple-red peer-checked:bg-apple-red/10 peer-checked:text-apple-red transition-all">
+                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-red-600 peer-checked:bg-red-100 peer-checked:text-red-600 transition-all">
                                 <i class="bi bi-exclamation-triangle"></i> Urgent
                             </div>
                         </label>
@@ -72,26 +72,26 @@
 
                 <!-- Description -->
                 <div>
-                    <label asp-for="Input.Description" class="block text-sm font-medium text-apple-dark mb-1.5">Description</label>
+                    <label asp-for="Input.Description" class="block text-sm font-medium text-slate-900 mb-1.5">Description</label>
                     <textarea asp-for="Input.Description" rows="3" class="input-apple-outlined resize-none" placeholder="Describe the scope of the inspection..."></textarea>
                 </div>
 
                 <!-- Media Upload Section -->
                 <div>
-                    <label class="block text-sm font-medium text-apple-dark mb-3">Photos & Videos</label>
-                    <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-apple-blue hover:bg-apple-blue/5 transition-all cursor-pointer group">
+                    <label class="block text-sm font-medium text-slate-900 mb-3">Photos & Videos</label>
+                    <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-sky-600 hover:bg-sky-100 transition-all cursor-pointer group">
                         <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
-                        <div class="w-14 h-14 rounded-2xl bg-gray-100 group-hover:bg-apple-blue/10 flex items-center justify-center mx-auto mb-4 transition-colors">
-                            <i class="bi bi-cloud-arrow-up text-2xl text-apple-gray group-hover:text-apple-blue transition-colors"></i>
+                        <div class="w-14 h-14 rounded-2xl bg-gray-100 group-hover:bg-sky-600/10 flex items-center justify-center mx-auto mb-4 transition-colors">
+                            <i class="bi bi-cloud-arrow-up text-2xl text-slate-600 group-hover:text-sky-600 transition-colors"></i>
                         </div>
-                        <p class="text-sm font-medium text-apple-dark mb-1">Drop photos or videos here</p>
-                        <p class="text-xs text-apple-gray">or click to browse • Images will be compressed automatically</p>
+                        <p class="text-sm font-medium text-slate-900 mb-1">Drop photos or videos here</p>
+                        <p class="text-xs text-slate-600">or click to browse • Images will be compressed automatically</p>
                     </div>
 
                     <div id="uploadProgress" class="hidden mt-4">
-                        <div class="flex items-center gap-3 p-4 bg-apple-blue/10 rounded-xl">
-                            <div class="animate-spin rounded-full h-5 w-5 border-2 border-apple-blue border-t-transparent"></div>
-                            <span class="text-sm font-medium text-apple-blue">Uploading and compressing...</span>
+                        <div class="flex items-center gap-3 p-4 bg-sky-600/10 rounded-xl">
+                            <div class="animate-spin rounded-full h-5 w-5 border-2 border-sky-600 border-t-transparent"></div>
+                            <span class="text-sm font-medium text-sky-600">Uploading and compressing...</span>
                         </div>
                     </div>
 
@@ -100,12 +100,12 @@
                 </div>
 
                 <!-- Info Box -->
-                <div class="bg-apple-blue/10 border border-apple-blue/20 rounded-xl p-4">
+                <div class="bg-sky-600/10 border border-sky-600/20 rounded-xl p-4">
                     <div class="flex gap-3">
-                        <i class="bi bi-info-circle text-apple-blue text-lg flex-shrink-0"></i>
+                        <i class="bi bi-info-circle text-sky-600 text-lg flex-shrink-0"></i>
                         <div>
-                            <h4 class="text-sm font-medium text-apple-dark">What happens next?</h4>
-                            <p class="text-sm text-apple-gray mt-1">After creating the inspection, you'll be able to add inspection items, record conditions, and upload more photos.</p>
+                            <h4 class="text-sm font-medium text-slate-900">What happens next?</h4>
+                            <p class="text-sm text-slate-600 mt-1">After creating the inspection, you'll be able to add inspection items, record conditions, and upload more photos.</p>
                         </div>
                     </div>
                 </div>
@@ -113,8 +113,8 @@
 
             <!-- Actions -->
             <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-                <a href="/Sessions/Details/@Model.Session?.Id" class="btn-apple-secondary">Cancel</a>
-                <button type="submit" class="btn-apple-primary bg-gradient-to-r from-apple-teal to-apple-blue">
+                <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">Cancel</a>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors bg-gradient-to-r from-cyan-600 to-sky-600">
                     <i class="bi bi-search"></i>Start Inspection
                 </button>
             </div>
@@ -245,16 +245,16 @@
             div.innerHTML = `
                 <img src="${media.s3Url}" class="w-full h-24 object-cover" />
                 <button type="button" onclick="deleteMedia('${media.id}')" 
-                        class="absolute top-2 right-2 w-6 h-6 bg-apple-red text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg">
+                        class="absolute top-2 right-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg">
                     <i class="bi bi-x text-sm"></i>
                 </button>`;
         } else {
             div.innerHTML = `
                 <div class="w-full h-24 bg-gray-100 flex items-center justify-center">
-                    <i class="bi bi-play-circle text-2xl text-apple-gray"></i>
+                    <i class="bi bi-play-circle text-2xl text-slate-600"></i>
                 </div>
                 <button type="button" onclick="deleteMedia('${media.id}')" 
-                        class="absolute top-2 right-2 w-6 h-6 bg-apple-red text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg">
+                        class="absolute top-2 right-2 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg">
                     <i class="bi bi-x text-sm"></i>
                 </button>`;
         }
