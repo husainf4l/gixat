@@ -69,7 +69,7 @@ public class IndexModel : PageModel
                 ClientName = $"{v.Client!.FirstName} {v.Client.LastName}",
                 ClientPhone = v.Client.Phone,
                 ActiveSessionCount = _context.GarageSessions
-                    .Count(s => s.VehicleId == v.Id && 
+                    .Count(s => s.ClientVehicleId == v.Id && 
                                s.Status != Modules.Sessions.Enums.SessionStatus.Completed &&
                                s.Status != Modules.Sessions.Enums.SessionStatus.Cancelled)
             })
