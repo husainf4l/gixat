@@ -4,7 +4,7 @@
         <div class="flex items-center justify-between h-14">
             <!-- Logo -->
             <a href="/" class="flex items-center gap-2">
-                <img src="/avatars/gixat-logo(3).png" alt="Gixat Logo" class="h-6 w-auto">
+                <img src="/avatars/gixat-logo(3).png" alt="Gixat Logo" class="h-8 w-auto">
             </a>
 
             <!-- Desktop Navigation -->
@@ -43,9 +43,9 @@
                 <a href="#features" class="text-[13px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3 py-2 rounded-lg transition-all duration-150">Features</a>
                 <a href="#pricing" class="text-[13px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3 py-2 rounded-lg transition-all duration-150">Pricing</a>
                 <a href="#about" class="text-[13px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3 py-2 rounded-lg transition-all duration-150">About</a>
-                
+
                 <div class="border-t border-slate-200 my-2"></div>
-                
+
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <a href="/Dashboard" class="text-[13px] text-slate-600 hover:text-slate-900 hover:bg-slate-50 px-3 py-2 rounded-lg transition-all duration-150">Dashboard</a>
@@ -67,7 +67,7 @@
         const mobileMenu = document.getElementById('mobile-menu');
         const menuIcon = document.getElementById('menu-icon');
         const closeIcon = document.getElementById('close-icon');
-        
+
         menuButton.addEventListener('click', function() {
             mobileMenu.classList.toggle('hidden');
             menuIcon.classList.toggle('hidden');

@@ -19,8 +19,28 @@
                 extend: {
                     colors: {
                         primary: {
-                            600: '#2d80c1',
-                            700: '#2670ad'
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
                         }
                     },
                     fontFamily: {
@@ -122,43 +142,43 @@
 
                 statsGrid.innerHTML = `
                     <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all relative overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">${stats.totalClients.toLocaleString()}</div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-primary-600"></div>
+                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-primary-600 mb-2">${stats.totalClients.toLocaleString()}</div>
                         <div class="text-sm text-slate-600 font-medium uppercase tracking-wider mb-4">Total Clients</div>
                         <div class="text-sm text-slate-600">Active customers across all garages</div>
                         <div class="flex items-center gap-2 text-green-600 text-xs font-semibold mt-3"><i class="bi bi-arrow-up"></i> Growing platform</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all relative overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">${stats.totalCompanies}</div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-primary-600"></div>
+                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-primary-600 mb-2">${stats.totalCompanies}</div>
                         <div class="text-sm text-slate-600 font-medium uppercase tracking-wider mb-4">Partner Garages</div>
                         <div class="text-sm text-slate-600">Trusted garage partners</div>
                         <div class="flex items-center gap-2 text-green-600 text-xs font-semibold mt-3"><i class="bi bi-building"></i> Nationwide network</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all relative overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">$${stats.totalRevenue.toLocaleString()}</div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-primary-600"></div>
+                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-primary-600 mb-2">$${stats.totalRevenue.toLocaleString()}</div>
                         <div class="text-sm text-slate-600 font-medium uppercase tracking-wider mb-4">Platform Revenue</div>
                         <div class="text-sm text-slate-600">Total revenue generated</div>
                         <div class="flex items-center gap-2 text-green-600 text-xs font-semibold mt-3"><i class="bi bi-graph-up"></i> Strong growth</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all relative overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">$${stats.averageRevenuePerClient.toFixed(0)}</div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-primary-600"></div>
+                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-primary-600 mb-2">$${stats.averageRevenuePerClient.toFixed(0)}</div>
                         <div class="text-sm text-slate-600 font-medium uppercase tracking-wider mb-4">Avg Revenue/Client</div>
                         <div class="text-sm text-slate-600">Average spending per customer</div>
                         <div class="flex items-center gap-2 text-slate-600 text-xs font-semibold mt-3"><i class="bi bi-cash-stack"></i> Industry standard</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all relative overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">99.9%</div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-primary-600"></div>
+                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-primary-600 mb-2">99.9%</div>
                         <div class="text-sm text-slate-600 font-medium uppercase tracking-wider mb-4">Uptime</div>
                         <div class="text-sm text-slate-600">Platform reliability</div>
                         <div class="flex items-center gap-2 text-green-600 text-xs font-semibold mt-3"><i class="bi bi-shield-check"></i> Enterprise-grade</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-8 border border-blue-100 hover:shadow-lg transition-all relative overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">24/7</div>
+                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 to-primary-600"></div>
+                        <div class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-primary-600 mb-2">24/7</div>
                         <div class="text-sm text-slate-600 font-medium uppercase tracking-wider mb-4">Support</div>
                         <div class="text-sm text-slate-600">Always available assistance</div>
                         <div class="flex items-center gap-2 text-green-600 text-xs font-semibold mt-3"><i class="bi bi-headset"></i> Expert help</div>

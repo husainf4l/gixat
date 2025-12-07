@@ -10,4 +10,5 @@ public interface IAuthService
     Task LogoutAsync();
     Task<UserDto?> GetCurrentUserAsync();
     Task<bool> IsEmailConfirmedAsync(string email);
+    Task<ApplicationUser?> GetUserByEmailAsync(string email);
 }

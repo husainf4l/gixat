@@ -1,17 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Identity;
 using Gixat.Web.Modules.Auth.DTOs;
 using Gixat.Web.Modules.Auth.Interfaces;
+using Gixat.Web.Modules.Auth.Entities;
 
 namespace Gixat.Web.Pages.Auth;
 
 public class RegisterModel : PageModel
 {
     private readonly IAuthService _authService;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public RegisterModel(IAuthService authService)
+    public RegisterModel(IAuthService authService, SignInManager<ApplicationUser> signInManager)
     {
         _authService = authService;
+        _signInManager = signInManager;
     }
 
     [BindProperty]
@@ -34,9 +38,12 @@ public class RegisterModel : PageModel
 
         if (success)
         {
-            // Auto-login after registration and redirect to Dashboard
-            var loginDto = new LoginDto { Email = Input.Email, Password = Input.Password };
-            await _authService.LoginAsync(loginDto);
+            // Find the newly created user and sign them in directly
+            var user = await _authService.GetUserByEmailAsync(Input.Email);
+            if (user != null)
+            {
+                await _signInManager.SignInAsync(user, isPersistent: false);
+            }
             return Redirect("/Dashboard");
         }
 

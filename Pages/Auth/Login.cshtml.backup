@@ -1,0 +1,153 @@
+@page "/Auth/Login"
+@model Gixat.Web.Pages.Auth.LoginModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gixat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'gixat-blue': '#2563eb',
+                        'gixat-blue-hover': '#1d4ed8',
+                        'gixat-gray': '#64748b',
+                        'gixat-dark': '#0f172a',
+                        'gixat-light': '#f8fafc',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans bg-gixat-light min-h-screen antialiased">
+    <a href="/" class="absolute top-5 left-5 text-gixat-gray text-sm flex items-center gap-1.5 no-underline hover:text-gixat-dark transition-colors z-20">
+        <i class="bi bi-arrow-left"></i>
+        Back to home
+    </a>
+
+    <div class="min-h-screen flex">
+        <!-- Left Side - Sign In Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-12">
+            <div class="w-full max-w-md">
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <img src="/avatars/gixat-logo(3).png" alt="Gixat Logo" class="w-10 h-10">
+                    </div>
+                    <h1 class="text-3xl font-bold text-gixat-dark mb-2">Welcome back</h1>
+                    <p class="text-gixat-gray">Sign in to your <span class="text-blue-600 font-semibold">Gixat</span> account</p>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3.5 rounded-xl mb-6 text-sm flex items-center gap-2">
+                        <i class="bi bi-exclamation-circle"></i>@Model.ErrorMessage
+                    </div>
+                }
+
+                <form method="post" class="space-y-6">
+                    @Html.AntiForgeryToken()
+
+                    <div>
+                        <label asp-for="Input.Email" class="block text-sm font-semibold text-gixat-dark mb-2">Email address</label>
+                        <input asp-for="Input.Email" class="w-full py-3.5 px-4 text-base border border-gray-300 rounded-xl bg-white text-gixat-dark outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all placeholder:text-gixat-gray" placeholder="you@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-red-600 text-xs mt-1.5 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.Password" class="block text-sm font-semibold text-gixat-dark mb-2">Password</label>
+                        <input asp-for="Input.Password" class="w-full py-3.5 px-4 text-base border border-gray-300 rounded-xl bg-white text-gixat-dark outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-100 transition-all placeholder:text-gixat-gray" placeholder="Enter your password" />
+                        <span asp-validation-for="Input.Password" class="text-red-600 text-xs mt-1.5 block"></span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2.5">
+                            <input asp-for="Input.RememberMe" class="w-4.5 h-4.5 border border-gray-300 rounded cursor-pointer accent-blue-600" />
+                            <label asp-for="Input.RememberMe" class="text-sm text-gixat-dark cursor-pointer">Remember me</label>
+                        </div>
+                        <a href="#" class="text-blue-600 text-sm no-underline hover:underline font-medium">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 px-6 text-base font-semibold text-white bg-blue-600 border-none rounded-xl cursor-pointer hover:bg-blue-700 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg hover:shadow-xl">
+                        Sign in
+                    </button>
+                </form>
+
+                <div class="flex items-center my-6 text-gixat-gray text-xs">
+                    <div class="flex-1 h-px bg-gray-300"></div>
+                    <span class="px-4">or continue with</span>
+                    <div class="flex-1 h-px bg-gray-300"></div>
+                </div>
+
+                <div class="flex gap-3">
+                    <form action="/Auth/ExternalLogin?handler=Post" method="post" class="flex-1">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="provider" value="Google" />
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                        <button type="submit" class="w-full py-3 px-4 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm font-medium text-gixat-dark">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Google
+                        </button>
+                    </form>
+                </div>
+
+                <p class="text-center text-gixat-gray text-sm mt-6">
+                    Don't have an account?
+                    <a href="/Auth/Register" class="text-blue-600 font-semibold no-underline hover:underline">Sign up</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Side - Image -->
+        <div class="hidden lg:block lg:w-1/2 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
+            <img src="/images/hero/gixathero-1.webp" alt="Gixat Garage Management" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+            <div class="absolute bottom-12 left-12 right-12 text-white">
+                <h2 class="text-3xl font-bold mb-4">Streamline Your Garage Operations</h2>
+                <p class="text-lg opacity-90">Join thousands of garage owners who trust <span class="text-blue-400 font-semibold">Gixat</span> to manage their business efficiently.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+                    <button type="submit" class="w-full py-3 border border-gray-300 rounded-xl bg-white flex items-center justify-center gap-2 text-sm text-apple-dark cursor-pointer hover:bg-apple-light hover:border-apple-gray transition-all">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Google
+                    </button>
+                </form>
+                <button type="button" disabled class="flex-1 py-3 border border-gray-300 rounded-xl bg-gray-100 flex items-center justify-center gap-2 text-sm text-gray-400 cursor-not-allowed">
+                    <i class="bi bi-apple text-xl"></i>
+                    Apple
+                </button>
+            </div>
+
+            <div class="text-center text-apple-gray text-sm">
+                Don't have an account? <a href="/Auth/Register" class="text-apple-blue font-medium no-underline hover:underline">Create one</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

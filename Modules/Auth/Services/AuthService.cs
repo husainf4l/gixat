@@ -10,15 +10,18 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
+        RoleManager<ApplicationRole> roleManager,
         IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
         _httpContextAccessor = httpContextAccessor;
     }
 
@@ -37,6 +40,12 @@ public class AuthService : IAuthService
 
         if (result.Succeeded)
         {
+            // Ensure the "User" role exists
+            if (!await _roleManager.RoleExistsAsync("User"))
+            {
+                await _roleManager.CreateAsync(new ApplicationRole { Name = "User" });
+            }
+
             // Assign default role
             await _userManager.AddToRoleAsync(user, "User");
             return (true, []);
@@ -125,5 +134,10 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByEmailAsync(email);
         return user?.EmailConfirmed ?? false;
+    }
+
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
+    {
+        return await _userManager.FindByEmailAsync(email);
     }
 }
