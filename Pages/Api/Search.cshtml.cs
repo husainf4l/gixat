@@ -69,13 +69,14 @@ namespace Gixat.Web.Pages.Api
                 email = c.Email
             });
 
-            // Search vehicles through clients
-            var allClients = await _clientService.SearchAsync(companyId, query);
+            // Search vehicles through all clients
+            var allClients = await _clientService.GetByCompanyIdAsync(companyId);
             var vehicleResults = allClients
-                .SelectMany(c => c.Vehicles?.Where(v => 
-                    v.Make.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    v.Model.Contains(query, StringComparison.OrdinalIgnoreCase) ||
-                    v.LicensePlate.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .Where(c => c.Vehicles != null)
+                .SelectMany(c => c.Vehicles!.Where(v => 
+                    (v.Make?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (v.Model?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (v.LicensePlate?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false))
                     .Select(v => new
                     {
                         id = v.Id,
@@ -84,7 +85,7 @@ namespace Gixat.Web.Pages.Api
                         licensePlate = v.LicensePlate,
                         clientId = c.Id,
                         clientName = c.FullName
-                    }) ?? Enumerable.Empty<object>())
+                    }))
                 .Take(5);
 
             return new JsonResult(new
