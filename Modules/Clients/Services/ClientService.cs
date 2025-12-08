@@ -90,9 +90,14 @@ public class ClientService : BaseService, IClientService
     /// </summary>
     public async Task<IEnumerable<ClientSearchDto>> SearchForAutocompleteAsync(Guid companyId, string? searchTerm)
     {
+        Console.WriteLine($"[DEBUG ClientService] SearchForAutocompleteAsync called - CompanyId: {companyId}, SearchTerm: '{searchTerm}'");
+        
         var query = Clients
             .Where(c => c.CompanyId == companyId && c.IsActive);
 
+        var allClients = await query.ToListAsync();
+        Console.WriteLine($"[DEBUG ClientService] Total active clients for company: {allClients.Count}");
+        
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             searchTerm = searchTerm.ToLower();
@@ -103,7 +108,7 @@ public class ClientService : BaseService, IClientService
                 c.Phone.Contains(searchTerm));
         }
 
-        return await query
+        var results = await query
             .OrderByDescending(c => c.IsVip)
             .ThenByDescending(c => c.LastVisitAt)
             .Take(20) // Limit to 20 results for performance
@@ -118,6 +123,14 @@ public class ClientService : BaseService, IClientService
                 LastVisitAt = c.LastVisitAt
             })
             .ToListAsync();
+            
+        Console.WriteLine($"[DEBUG ClientService] Search results count: {results.Count}");
+        foreach (var r in results.Take(5))
+        {
+            Console.WriteLine($"[DEBUG ClientService] Result: {r.FullName} - {r.Phone}");
+        }
+        
+        return results;
     }
 
     public async Task<Client> CreateAsync(Client client)

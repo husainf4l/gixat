@@ -52,6 +52,9 @@ public class IndexModel : PageModel
             Clients = await _clientService.GetByCompanyIdAsync(CurrentCompanyId);
         }
 
+        Console.WriteLine($"[DEBUG] Loading clients for CompanyId: {CurrentCompanyId}");
+        Console.WriteLine($"[DEBUG] Number of clients loaded: {Clients.Count()}");
+
         return Page();
     }
 
@@ -97,8 +100,14 @@ public class IndexModel : PageModel
             IsActive = true
         };
 
+        Console.WriteLine($"[DEBUG] Creating client for CompanyId: {currentCompany.CompanyId}, Name: {firstName} {lastName}");
+        
         await _clientService.CreateAsync(client);
+        
+        Console.WriteLine($"[DEBUG] Client created with ID: {client.Id}");
 
+        TempData["SuccessMessage"] = $"Client {firstName} {lastName} added successfully!";
+        
         return RedirectToPage();
     }
 
@@ -107,6 +116,8 @@ public class IndexModel : PageModel
     /// </summary>
     public async Task<IActionResult> OnGetSearchAsync(string? term)
     {
+        Console.WriteLine($"[DEBUG] Search endpoint called with term: {term}");
+        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
         {
@@ -121,7 +132,12 @@ public class IndexModel : PageModel
             return new JsonResult(new { error = "No company found" }) { StatusCode = 400 };
         }
 
+        Console.WriteLine($"[DEBUG] Searching for clients in CompanyId: {currentCompany.CompanyId}");
+        
         var results = await _clientService.SearchForAutocompleteAsync(currentCompany.CompanyId, term);
+        
+        Console.WriteLine($"[DEBUG] Search returned {results.Count()} results");
+        
         return new JsonResult(results);
     }
 }
