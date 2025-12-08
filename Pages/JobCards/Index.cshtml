@@ -5,205 +5,226 @@
     Layout = "_AppLayout";
 }
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-8">
-    <!-- Header -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    Job Cards
-                </h1>
-                <p class="mt-2 text-sm text-gray-600">Manage work orders and service tasks</p>
-            </div>
-            <a href="/Sessions" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                New Job Card
-            </a>
+<style>
+    .apple-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .apple-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    
+    .apple-btn {
+        background: #007AFF;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .apple-btn:hover {
+        background: #0051D5;
+        transform: scale(1.02);
+    }
+    
+    .kanban-column {
+        background: #F5F5F7;
+        border-radius: 12px;
+        padding: 16px;
+        min-height: 500px;
+    }
+    
+    .job-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: all 0.2s;
+    }
+    
+    .job-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-4xl font-semibold text-gray-900 mb-1">Job Cards</h1>
+            <p class="text-gray-500 text-sm">Manage work orders and service tasks</p>
+        </div>
+        <a href="/Sessions" class="apple-btn flex items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>New Job Card</span>
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Total Active</p>
+            <i class="bi bi-file-earmark-text text-blue-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.TotalActive</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">In Progress</p>
+            <i class="bi bi-lightning text-green-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.InProgress</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">On Hold</p>
+            <i class="bi bi-clock text-orange-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.WaitingParts</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Completed Today</p>
+            <i class="bi bi-check-circle text-purple-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.CompletedToday</p>
+    </div>
+</div>
+
+<!-- Kanban Board -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <!-- Draft Column -->
+    <div class="kanban-column">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Draft</h3>
+            <span class="px-2.5 py-1 text-xs font-medium text-gray-600 bg-gray-200 rounded-full">
+                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Draft)
+            </span>
+        </div>
+        <div class="space-y-3">
+            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Draft))
+            {
+                <a href="/JobCards/Details?id=@job.Id" class="job-card block">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
+                        <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
+                            @job.Priority
+                        </span>
+                    </div>
+                    <h4 class="font-medium text-gray-900 text-sm mb-3">@job.Title</h4>
+                    <div class="flex items-center text-xs text-gray-600 mb-2">
+                        <i class="bi bi-clock mr-1"></i>
+                        @job.EstimatedHours hrs
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        @job.Items.Count() tasks
+                    </div>
+                </a>
+            }
         </div>
     </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Total Active</p>
-                            <p class="mt-2 text-3xl font-bold text-gray-900">@Model.TotalActive</p>
-                        </div>
-                        <div class="p-3 bg-blue-100 rounded-xl">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">In Progress</p>
-                            <p class="mt-2 text-3xl font-bold text-green-600">@Model.InProgress</p>
-                        </div>
-                        <div class="p-3 bg-green-100 rounded-xl">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                            </svg>
-                        </div>
+    <!-- In Progress Column -->
+    <div class="kanban-column">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">In Progress</h3>
+            <span class="px-2.5 py-1 text-xs font-medium text-green-600 bg-green-100 rounded-full">
+                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.InProgress)
+            </span>
+        </div>
+        <div class="space-y-3">
+            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.InProgress))
+            {
+                <a href="/JobCards/Details?id=@job.Id" class="job-card block border-l-4 border-green-500">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
+                        <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
+                            @job.Priority
+                        </span>
                     </div>
-                </div>
+                    <h4 class="font-medium text-gray-900 text-sm mb-3">@job.Title</h4>
+                    <div class="flex items-center text-xs text-gray-600 mb-2">
+                        <i class="bi bi-clock mr-1"></i>
+                        @job.ActualHours / @job.EstimatedHours hrs
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        @job.Items.Count(i => i.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.Completed) / @job.Items.Count() complete
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
 
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">On Hold</p>
-                            <p class="mt-2 text-3xl font-bold text-orange-600">@Model.WaitingParts</p>
-                        </div>
-                        <div class="p-3 bg-orange-100 rounded-xl">
-                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
+    <!-- Waiting Parts Column -->
+    <div class="kanban-column">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Waiting Parts</h3>
+            <span class="px-2.5 py-1 text-xs font-medium text-orange-600 bg-orange-100 rounded-full">
+                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.OnHold)
+            </span>
+        </div>
+        <div class="space-y-3">
+            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.OnHold))
+            {
+                <a href="/JobCards/Details?id=@job.Id" class="job-card block border-l-4 border-orange-500">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
+                        <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
+                            @job.Priority
+                        </span>
                     </div>
-                </div>
+                    <h4 class="font-medium text-gray-900 text-sm mb-3">@job.Title</h4>
+                    <div class="flex items-center text-xs text-gray-600">
+                        <i class="bi bi-box-seam mr-1"></i>
+                        Waiting for parts
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
 
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-sm">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Completed Today</p>
-                            <p class="mt-2 text-3xl font-bold text-purple-600">@Model.CompletedToday</p>
-                        </div>
-                        <div class="p-3 bg-purple-100 rounded-xl">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                        </div>
+    <!-- Completed Column -->
+    <div class="kanban-column">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Quality Check</h3>
+            <span class="px-2.5 py-1 text-xs font-medium text-purple-600 bg-purple-100 rounded-full">
+                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Approved || j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Completed)
+            </span>
+        </div>
+        <div class="space-y-3">
+            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Approved || j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Completed))
+            {
+                <a href="/JobCards/Details?id=@job.Id" class="job-card block border-l-4 border-purple-500">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
+                        <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
+                            @job.Priority
+                        </span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Kanban Board -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <!-- Draft Column -->
-                <div class="bg-gray-100/50 rounded-2xl p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-gray-700">Draft</h3>
-                        <span class="px-2 py-1 text-xs font-medium text-gray-600 bg-gray-200 rounded-full">@Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Draft)</span>
+                    <h4 class="font-medium text-gray-900 text-sm mb-3">@job.Title</h4>
+                    <div class="flex items-center text-xs text-gray-600">
+                        <i class="bi bi-check-circle text-green-600 mr-1"></i>
+                        @job.Status
                     </div>
-                    <div class="space-y-3">
-                        @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Draft))
-                        {
-                            <a href="/JobCards/Details?id=@job.Id" class="block bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-gray-200">
-                                <div class="flex items-start justify-between mb-2">
-                                    <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
-                                    <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
-                                        @job.Priority
-                                    </span>
-                                </div>
-                                <h4 class="font-semibold text-gray-900 text-sm mb-2">@job.Title</h4>
-                                <div class="flex items-center text-xs text-gray-600 mb-2">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    @job.EstimatedHours hrs
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    @job.Items.Count() tasks
-                                </div>
-                            </a>
-                        }
-                    </div>
-                </div>
-
-                <!-- In Progress Column -->
-                <div class="bg-green-100/50 rounded-2xl p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-green-700">In Progress</h3>
-                        <span class="px-2 py-1 text-xs font-medium text-green-600 bg-green-200 rounded-full">@Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.InProgress)</span>
-                    </div>
-                    <div class="space-y-3">
-                        @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.InProgress))
-                        {
-                            <a href="/JobCards/Details?id=@job.Id" class="block bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-green-200">
-                                <div class="flex items-start justify-between mb-2">
-                                    <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
-                                    <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
-                                        @job.Priority
-                                    </span>
-                                </div>
-                                <h4 class="font-semibold text-gray-900 text-sm mb-2">@job.Title</h4>
-                                <div class="flex items-center text-xs text-gray-600 mb-2">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    @job.ActualHours / @job.EstimatedHours hrs
-                                </div>
-                                <div class="text-xs text-gray-500">
-                                    @job.Items.Count(i => i.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.Completed) / @job.Items.Count() complete
-                                </div>
-                            </a>
-                        }
-                    </div>
-                </div>
-
-                <!-- Waiting Parts Column -->
-                <div class="bg-orange-100/50 rounded-2xl p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-orange-700">Waiting Parts</h3>
-                        <span class="px-2 py-1 text-xs font-medium text-orange-600 bg-orange-200 rounded-full">@Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.OnHold)</span>
-                    </div>
-                    <div class="space-y-3">
-                        @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.OnHold))
-                        {
-                            <a href="/JobCards/Details?id=@job.Id" class="block bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-orange-200">
-                                <div class="flex items-start justify-between mb-2">
-                                    <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
-                                    <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
-                                        @job.Priority
-                                    </span>
-                                </div>
-                                <h4 class="font-semibold text-gray-900 text-sm mb-2">@job.Title</h4>
-                                <div class="flex items-center text-xs text-gray-600">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                    </svg>
-                                    Waiting for parts
-                                </div>
-                            </a>
-                        }
-                    </div>
-                </div>
-
-                <!-- Completed Column -->
-                <div class="bg-purple-100/50 rounded-2xl p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-semibold text-purple-700">Quality Check</h3>
-                        <span class="px-2 py-1 text-xs font-medium text-purple-600 bg-purple-200 rounded-full">@Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Approved || j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Completed)</span>
-                    </div>
-                    <div class="space-y-3">
-                        @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Approved || j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Completed))
-                        {
-                            <a href="/JobCards/Details?id=@job.Id" class="block bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-purple-200">
-                                <div class="flex items-start justify-between mb-2">
-                                    <span class="text-xs font-mono text-gray-500">@job.JobCardNumber</span>
-                                    <span class="px-2 py-1 text-xs font-medium @GetPriorityBadge(job.Priority) rounded-full">
-                                        @job.Priority
-                                    </span>
-                                </div>
-                                <h4 class="font-semibold text-gray-900 text-sm mb-2">@job.Title</h4>
-                                <div class="flex items-center text-xs text-gray-600">
-                                    <svg class="w-4 h-4 mr-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                    </svg>
-                                    @job.Status
-                                </div>
-                            </a>
-                        }
-                    </div>
-                </div>
-            </div>
+                </a>
+            }
         </div>
     </div>
 </div>
+
 
 @functions {
     string GetPriorityBadge(Gixat.Web.Modules.Sessions.Enums.Priority priority)

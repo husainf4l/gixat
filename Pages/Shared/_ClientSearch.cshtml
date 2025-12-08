@@ -1,5 +1,5 @@
 @*
-    Client Search Component with Autocomplete
+    Client Search Component - Simple Dropdown
     Usage: Include this partial in any form that needs client selection
     Example: <partial name="_ClientSearch" model="new { InputId = "clientSelect", InputName = "SelectedClientId", Required = true }" />
 *@
@@ -8,7 +8,7 @@
     var inputId = ViewData["InputId"]?.ToString() ?? "clientSelect";
     var inputName = ViewData["InputName"]?.ToString() ?? "SelectedClientId";
     var required = ViewData["Required"]?.ToString() == "True";
-    var placeholder = ViewData["Placeholder"]?.ToString() ?? "Search by name, phone, or email...";
+    var placeholder = ViewData["Placeholder"]?.ToString() ?? "Select a client...";
     var selectedClientId = ViewData["SelectedClientId"]?.ToString();
 }
 
@@ -19,16 +19,9 @@
     
     <select id="@inputId" name="@inputName" 
             class="input-apple-outlined w-full"
-            @(required ? "required" : "")
-            placeholder="@placeholder">
-        @if (!string.IsNullOrEmpty(selectedClientId))
-        {
-            <option value="@selectedClientId" selected>Loading...</option>
-        }
-        else
-        {
-            <option value="">@placeholder</option>
-        }
+            @(required ? "required" : "")>
+        <option value="">@placeholder</option>
+        <!-- Options will be loaded via JavaScript -->
     </select>
     
     <!-- Client Summary Card (appears after selection) -->
@@ -73,97 +66,160 @@
     </p>
 </div>
 
-@section Scripts {
-    <script>
-        (function() {
-            const selectElement = document.getElementById('@inputId');
-            if (!selectElement) return;
+<script>
+(function() {
+    console.log('[ClientSearch] Initializing simple dropdown for client selection...');
+    const selectElement = document.getElementById('@inputId');
+    const summaryCard = document.getElementById('@(inputId)_summary');
+    
+    if (!selectElement) {
+        console.error('[ClientSearch] Select element not found with ID:', '@inputId');
+        return;
+    }
+    
+    console.log('[ClientSearch] Loading all clients...');
+    
+    // Load all clients
+    fetch('/Clients?handler=Search&term=', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+        .then(response => {
+            console.log('[ClientSearch] Response status:', response.status);
+            console.log('[ClientSearch] Response headers:', response.headers);
             
-            // Initialize Tom Select
-            const tomSelect = new TomSelect(selectElement, {
-                valueField: 'id',
-                labelField: 'fullName',
-                searchField: ['fullName', 'phone', 'email'],
-                placeholder: '@placeholder',
-                maxOptions: 20,
-                loadThrottle: 300,
-                load: function(query, callback) {
-                    if (!query.length || query.length < 2) return callback();
-                    
-                    fetch(`/Clients/Index?handler=Search&term=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            callback(data);
-                        })
-                        .catch(() => {
-                            callback();
-                        });
-                },
-                render: {
-                    option: function(item, escape) {
-                        const vipBadge = item.isVip ? '<span class="badge-apple-orange text-xs ml-2"><i class="bi bi-star-fill"></i> VIP</span>' : '';
-                        const email = item.email ? `<div class="text-xs text-gray-500"><i class="bi bi-envelope"></i> ${escape(item.email)}</div>` : '';
-                        const lastVisit = item.lastVisitAt ? `<div class="text-xs text-gray-400 mt-1"><i class="bi bi-clock"></i> Last visit: ${new Date(item.lastVisitAt).toLocaleDateString()}</div>` : '';
-                        
-                        return `<div class="py-2">
-                            <div class="flex items-center justify-between">
-                                <div class="font-medium text-apple-dark">${escape(item.fullName)}${vipBadge}</div>
-                                <div class="text-xs text-gray-500"><i class="bi bi-car-front"></i> ${item.vehicleCount} vehicle(s)</div>
-                            </div>
-                            <div class="text-sm text-gray-600 mt-1"><i class="bi bi-telephone"></i> ${escape(item.phone)}</div>
-                            ${email}
-                            ${lastVisit}
-                        </div>`;
-                    },
-                    item: function(item, escape) {
-                        return `<div>${escape(item.fullName)}</div>`;
-                    }
-                },
-                onChange: function(value) {
-                    if (!value) {
-                        document.getElementById('@(inputId)_summary').classList.add('hidden');
-                        return;
-                    }
-                    
-                    // Get the selected item data
-                    const item = this.options[value];
-                    if (!item) return;
-                    
-                    // Update summary card
-                    const initials = item.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                    document.getElementById('@(inputId)_initials').textContent = initials;
-                    document.getElementById('@(inputId)_name').textContent = item.fullName;
-                    document.getElementById('@(inputId)_phone').textContent = item.phone;
-                    document.getElementById('@(inputId)_vehicles').textContent = item.vehicleCount;
-                    
-                    // Handle optional fields
-                    const emailContainer = document.getElementById('@(inputId)_email_container');
-                    if (item.email) {
-                        document.getElementById('@(inputId)_email').textContent = item.email;
-                        emailContainer.classList.remove('hidden');
-                    } else {
-                        emailContainer.classList.add('hidden');
-                    }
-                    
-                    const vipBadge = document.getElementById('@(inputId)_vip_badge');
-                    if (item.isVip) {
-                        vipBadge.classList.remove('hidden');
-                    } else {
-                        vipBadge.classList.add('hidden');
-                    }
-                    
-                    const lastVisitContainer = document.getElementById('@(inputId)_last_visit_container');
-                    if (item.lastVisitAt) {
-                        document.getElementById('@(inputId)_last_visit').textContent = new Date(item.lastVisitAt).toLocaleDateString();
-                        lastVisitContainer.classList.remove('hidden');
-                    } else {
-                        lastVisitContainer.classList.add('hidden');
-                    }
-                    
-                    // Show summary card
-                    document.getElementById('@(inputId)_summary').classList.remove('hidden');
-                }
+            if (response.status === 401) {
+                console.error('[ClientSearch] Unauthorized - user not logged in');
+                alert('You need to be logged in to view clients. Please log in and try again.');
+                window.location.href = '/Auth/Login';
+                return Promise.reject('Unauthorized');
+            }
+            
+            if (response.status === 400) {
+                console.error('[ClientSearch] No company found for user');
+                alert('No company found. Please complete the setup wizard.');
+                window.location.href = '/Setup/Company';
+                return Promise.reject('No company');
+            }
+            
+            if (!response.ok) {
+                console.error('[ClientSearch] HTTP error:', response.status, response.statusText);
+                return response.text().then(text => {
+                    console.error('[ClientSearch] Error response body:', text);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                });
+            }
+            
+            return response.json();
+        })
+        .then(clients => {
+            if (!clients) return; // Handle rejected promises
+            
+            console.log('[ClientSearch] Loaded clients:', clients);
+            console.log('[ClientSearch] Number of clients:', clients.length);
+            
+            // Clear existing options except the first placeholder
+            while (selectElement.options.length > 1) {
+                selectElement.remove(1);
+            }
+            
+            if (clients.length === 0) {
+                console.warn('[ClientSearch] No clients found!');
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No clients available - Add one first';
+                option.disabled = true;
+                selectElement.appendChild(option);
+                return;
+            }
+            
+            // Add all clients to dropdown
+            clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = `${client.fullName} - ${client.phone}`;
+                option.dataset.client = JSON.stringify(client);
+                selectElement.appendChild(option);
+                console.log('[ClientSearch] Added client:', client.fullName);
             });
-        })();
-    </script>
-}
+            
+            console.log('[ClientSearch] Dropdown populated with', clients.length, 'clients');
+        })
+        .catch(error => {
+            console.error('[ClientSearch] Error loading clients:', error);
+            if (error !== 'Unauthorized' && error !== 'No company') {
+                alert('Failed to load clients: ' + error.message + '\n\nPlease check the browser console for details.');
+            }
+        });
+    
+    // Handle selection change
+    selectElement.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        console.log('[ClientSearch] Client selected:', selectedOption.value);
+        
+        if (!selectedOption.value || !selectedOption.dataset.client) {
+            if (summaryCard) summaryCard.classList.add('hidden');
+            return;
+        }
+        
+        try {
+            const client = JSON.parse(selectedOption.dataset.client);
+            console.log('[ClientSearch] Client data:', client);
+            updateSummaryCard(client);
+        } catch (error) {
+            console.error('[ClientSearch] Error parsing client data:', error);
+        }
+    });
+    
+    function updateSummaryCard(client) {
+        if (!summaryCard) return;
+        
+        // Update initials
+        const initials = client.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        document.getElementById('@(inputId)_initials').textContent = initials;
+        
+        // Update name
+        document.getElementById('@(inputId)_name').textContent = client.fullName;
+        
+        // Update phone
+        document.getElementById('@(inputId)_phone').textContent = client.phone || '--';
+        
+        // Update email
+        const emailContainer = document.getElementById('@(inputId)_email_container');
+        if (client.email) {
+            document.getElementById('@(inputId)_email').textContent = client.email;
+            emailContainer.classList.remove('hidden');
+        } else {
+            emailContainer.classList.add('hidden');
+        }
+        
+        // Update VIP badge
+        const vipBadge = document.getElementById('@(inputId)_vip_badge');
+        if (client.isVip) {
+            vipBadge.classList.remove('hidden');
+        } else {
+            vipBadge.classList.add('hidden');
+        }
+        
+        // Update vehicle count
+        document.getElementById('@(inputId)_vehicles').textContent = client.vehicleCount || 0;
+        
+        // Update last visit
+        const lastVisitContainer = document.getElementById('@(inputId)_last_visit_container');
+        if (client.lastVisitAt) {
+            const lastVisitDate = new Date(client.lastVisitAt).toLocaleDateString();
+            document.getElementById('@(inputId)_last_visit').textContent = lastVisitDate;
+            lastVisitContainer.classList.remove('hidden');
+        } else {
+            lastVisitContainer.classList.add('hidden');
+        }
+        
+        // Show summary card
+        summaryCard.classList.remove('hidden');
+        
+        console.log('[ClientSearch] Summary card updated');
+    }
+})();
+</script>

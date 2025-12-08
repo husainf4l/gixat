@@ -5,76 +5,173 @@
     ViewData["Title"] = "Appointments";
 }
 
-<div class="flex items-center justify-between mb-8">
-    <div>
-        <h1 class="text-2xl font-semibold text-apple-dark">Appointments</h1>
-        <p class="text-apple-gray text-sm mt-1">Schedule and manage service appointments</p>
+<style>
+    .apple-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .apple-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    
+    .apple-btn {
+        background: #007AFF;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .apple-btn:hover {
+        background: #0051D5;
+        transform: scale(1.02);
+    }
+    
+    .apple-input {
+        background: #F5F5F7;
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    
+    .apple-input:focus {
+        outline: none;
+        background: white;
+        border-color: #007AFF;
+        box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+</style>
+
+<!-- Clean Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-4xl font-semibold text-gray-900 mb-1">Appointments</h1>
+            <p class="text-gray-500 text-sm">Manage your schedule</p>
+        </div>
+        <a href="/Appointments/Create" class="apple-btn flex items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>New Appointment</span>
+        </a>
     </div>
-    <a href="/Appointments/Create" class="btn-apple-primary">
-        <i class="bi bi-plus-lg"></i>
-        New Appointment
-    </a>
+    
+    <!-- Search -->
+    <div class="relative max-w-md">
+        <i class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <input type="text" 
+               id="appointmentSearch"
+               placeholder="Search appointments..." 
+               class="apple-input w-full pl-11"
+               oninput="filterAppointments()">
+    </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="card-apple border-l-4 border-blue-500">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">Scheduled</p>
-                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled)</p>
-            </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <i class="bi bi-calendar-check text-blue-600 text-xl"></i>
-            </div>
+<script>
+    let currentFilter = 'all';
+    
+    function filterByStatus(status) {
+        currentFilter = status;
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.closest('.filter-btn').classList.add('active');
+        
+        filterAppointments();
+    }
+    
+    function filterAppointments() {
+        const searchTerm = document.getElementById('appointmentSearch').value.toLowerCase();
+        const appointmentCards = document.querySelectorAll('[data-appointment-card]');
+        
+        appointmentCards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            const status = card.dataset.status;
+            
+            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+            const matchesFilter = currentFilter === 'all' || status === currentFilter;
+            
+            if (matchesSearch && matchesFilter) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+<!-- Simple Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    @{
+        var scheduledCount = Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled);
+        var confirmedCount = Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed);
+        var inProgressCount = Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress);
+        var totalCount = Model.Appointments.Count;
+    }
+    
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Scheduled</p>
+            <i class="bi bi-calendar text-blue-500"></i>
         </div>
+        <p class="text-3xl font-semibold text-gray-900">@scheduledCount</p>
     </div>
-    <div class="card-apple border-l-4 border-green-500">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">Confirmed</p>
-                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed)</p>
-            </div>
-            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="bi bi-check-circle text-green-600 text-xl"></i>
-            </div>
+    
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Confirmed</p>
+            <i class="bi bi-check-circle text-green-500"></i>
         </div>
+        <p class="text-3xl font-semibold text-gray-900">@confirmedCount</p>
     </div>
-    <div class="card-apple border-l-4 border-purple-500">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">In Progress</p>
-                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.InProgress)</p>
-            </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <i class="bi bi-hourglass-split text-purple-600 text-xl"></i>
-            </div>
+    
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">In Progress</p>
+            <i class="bi bi-hourglass-split text-purple-500"></i>
         </div>
+        <p class="text-3xl font-semibold text-gray-900">@inProgressCount</p>
     </div>
-    <div class="card-apple border-l-4 border-gray-500">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-xs text-apple-gray uppercase tracking-wide font-semibold">Total Today</p>
-                <p class="text-2xl font-bold text-apple-dark mt-1">@Model.Appointments.Count</p>
-            </div>
-            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                <i class="bi bi-calendar3 text-apple-gray text-xl"></i>
-            </div>
+    
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Total</p>
+            <i class="bi bi-calendar-event text-gray-500"></i>
         </div>
+        <p class="text-3xl font-semibold text-gray-900">@totalCount</p>
     </div>
 </div>
 
-<!-- View Selector & Filters -->
-<div class="card-apple mb-6">
+<!-- View Selector -->
+<div class="apple-card mb-6">
     <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="flex gap-2">
+        <div class="flex gap-2 bg-gray-100 rounded-xl p-1">
             <a href="?view=calendar&date=@Model.SelectedDate.ToString("yyyy-MM-dd")" 
-               class="@(Model.ViewMode == "calendar" ? "bg-apple-blue text-white shadow-sm" : "bg-white text-apple-dark border border-gray-200 hover:bg-gray-50") px-4 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
+               class="@(Model.ViewMode == "calendar" ? "bg-blue-500 text-white" : "text-gray-600") px-5 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
                 <i class="bi bi-calendar3"></i>
                 Calendar
             </a>
             <a href="?view=list" 
-               class="@(Model.ViewMode == "list" ? "bg-apple-blue text-white shadow-sm" : "bg-white text-apple-dark border border-gray-200 hover:bg-gray-50") px-4 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
+               class="@(Model.ViewMode == "list" ? "bg-blue-500 text-white" : "text-gray-600") px-5 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
                 <i class="bi bi-list-ul"></i>
                 List
             </a>
@@ -82,47 +179,60 @@
 
         @if (Model.ViewMode == "calendar")
         {
-            <div class="flex items-center gap-2">
-                <a href="?view=calendar&date=@Model.SelectedDate.AddDays(-1).ToString("yyyy-MM-dd")" 
-                   class="p-2.5 bg-white text-apple-dark border border-gray-200 hover:bg-gray-50 rounded-lg transition-all">
+            <div class="flex items-center gap-3">
+                <button onclick="navigateDate(-1)" class="apple-btn p-2 bg-gray-100 text-gray-700">
                     <i class="bi bi-chevron-left"></i>
-                </a>
-                <span class="px-6 py-2.5 bg-gradient-to-br from-apple-blue to-apple-indigo text-white rounded-lg text-sm font-semibold shadow-sm">
-                    @Model.SelectedDate.ToString("dddd, MMMM dd, yyyy")
+                </button>
+                <span class="text-sm font-medium text-gray-900 px-4">
+                    @Model.SelectedDate.ToString("MMMM dd, yyyy")
                 </span>
-                <a href="?view=calendar&date=@Model.SelectedDate.AddDays(1).ToString("yyyy-MM-dd")" 
-                   class="p-2.5 bg-white text-apple-dark border border-gray-200 hover:bg-gray-50 rounded-lg transition-all">
+                <button onclick="navigateDate(1)" class="apple-btn p-2 bg-gray-100 text-gray-700">
                     <i class="bi bi-chevron-right"></i>
-                </a>
-                <a href="?view=calendar&date=@DateTime.UtcNow.Date.ToString("yyyy-MM-dd")" 
-                   class="px-4 py-2.5 bg-white text-apple-blue border border-apple-blue hover:bg-apple-blue hover:text-white rounded-lg font-medium text-sm transition-all">
+                </button>
+                <button onclick="goToToday()" class="apple-btn bg-gray-100 text-gray-700">
                     Today
-                </a>
+                </button>
             </div>
         }
     </div>
 </div>
 
+<script>
+function navigateDate(days) {
+    const currentDate = new Date('@Model.SelectedDate.ToString("yyyy-MM-dd")');
+    currentDate.setDate(currentDate.getDate() + days);
+    const newDate = currentDate.toISOString().split('T')[0];
+    window.location.href = `?view=calendar&date=${newDate}`;
+}
+
+function goToToday() {
+    const today = new Date().toISOString().split('T')[0];
+    window.location.href = `?view=calendar&date=${today}`;
+}
+</script>
+
 @if (Model.ViewMode == "calendar")
 {
     <!-- Calendar View -->
-    <div class="card-apple overflow-hidden">
+    <div class="apple-card overflow-hidden">
         <!-- Calendar Header -->
-        <div class="bg-gradient-to-r from-apple-blue to-apple-indigo text-white p-4">
+        <div class="bg-gray-50 border-b border-gray-200 p-6">
             <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold">@Model.SelectedDate.ToString("MMMM yyyy")</h2>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-900">@Model.SelectedDate.ToString("MMMM yyyy")</h2>
+                </div>
                 <div class="flex gap-2">
                     <a href="?view=calendar&date=@Model.SelectedDate.AddMonths(-1).ToString("yyyy-MM-dd")" 
-                       class="p-2 hover:bg-white/20 rounded-lg transition-all">
+                       class="p-2 hover:bg-gray-200 rounded-lg transition-all">
                         <i class="bi bi-chevron-left"></i>
                     </a>
                     <a href="?view=calendar&date=@DateTime.UtcNow.Date.ToString("yyyy-MM-dd")" 
-                       class="px-4 py-2 hover:bg-white/20 rounded-lg transition-all font-semibold">
+                       class="px-4 py-2 hover:bg-gray-200 rounded-lg transition-all font-medium text-sm">
                         Today
                     </a>
                     <a href="?view=calendar&date=@Model.SelectedDate.AddMonths(1).ToString("yyyy-MM-dd")" 
-                       class="p-2 hover:bg-white/20 rounded-lg transition-all">
-                        <i class="bi bi-chevron-right"></i>
+                       class="p-2 hover:bg-gray-200 rounded-lg transition-all">
+                        <i class="bi bi-chevron-right text-xl group-hover:animate-pulse"></i>
                     </a>
                 </div>
             </div>
@@ -214,47 +324,76 @@
         </div>
     </div>
     
-    <!-- Selected Day Details -->
+    <!-- Selected Day Appointments -->
     @if (Model.Appointments.Any())
     {
-        <div class="mt-6 card-apple">
-            <h3 class="text-lg font-bold text-apple-dark mb-4 flex items-center gap-2">
-                <i class="bi bi-calendar-day text-apple-blue"></i>
-                Appointments on @Model.SelectedDate.ToString("MMMM dd, yyyy")
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="mt-6 apple-card">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    @Model.SelectedDate.ToString("MMMM dd, yyyy")
+                </h3>
+                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
+                    @Model.Appointments.Count @(Model.Appointments.Count == 1 ? "Appointment" : "Appointments")
+                </span>
+            </div>
+            <div class="space-y-3">
                 @foreach (var apt in Model.Appointments.OrderBy(a => a.ScheduledTime))
                 {
-                    <a href="/Appointments/@apt.Id" class="group block p-4 rounded-xl border-2 @GetStatusBorderClass(apt.Status) bg-white hover:shadow-lg hover:scale-[1.02] transition-all">
-                        <div class="flex items-start justify-between mb-3">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-apple-blue to-apple-indigo flex items-center justify-center text-white text-xs font-bold">
-                                        @(string.IsNullOrEmpty(apt.ClientName) ? "?" : apt.ClientName.Substring(0, 1).ToUpper())
-                                    </div>
-                                    <h4 class="font-bold text-apple-dark group-hover:text-apple-blue transition-colors">
-                                        @(string.IsNullOrEmpty(apt.ClientName) ? "Walk-in" : apt.ClientName)
-                                    </h4>
-                                </div>
-                                <p class="text-sm text-apple-gray font-medium">@apt.ServiceType</p>
+                    var statusClass = apt.Status.ToString().ToLower();
+                    <a href="/Appointments/@apt.Id" 
+                       data-appointment-card 
+                       data-status="@statusClass"
+                       class="group flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all">
+                        
+                        <!-- Time -->
+                        <div class="flex-shrink-0 text-center">
+                            <div class="text-sm font-semibold text-gray-900">@apt.ScheduledTime</div>
+                            <div class="text-xs text-gray-500">@apt.DurationMinutes min</div>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="w-px h-12 bg-gray-200"></div>
+                        
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-medium text-gray-900 truncate">
+                                    @(string.IsNullOrEmpty(apt.ClientName) ? "Walk-in Customer" : apt.ClientName)
+                                </h4>
                             </div>
-                            <span class="@GetStatusBadgeClass(apt.Status) text-xs px-2.5 py-1 rounded-full font-semibold whitespace-nowrap">
-                                @apt.Status
-                            </span>
+                            <p class="text-sm text-gray-500 truncate">@apt.ServiceType</p>
+                            @if (!string.IsNullOrEmpty(apt.VehicleInfo))
+                            {
+                                <p class="text-xs text-gray-400 truncate mt-1">
+                                    <i class="bi bi-car-front"></i> @apt.VehicleInfo
+                                </p>
+                            }
                         </div>
-                        <div class="flex flex-wrap items-center gap-3 text-xs text-apple-gray">
-                            <span class="inline-flex items-center gap-1">
-                                <i class="bi bi-clock"></i>
-                                <strong>@apt.ScheduledTime</strong>
-                            </span>
-                            <span class="inline-flex items-center gap-1">
-                                <i class="bi bi-hourglass-split"></i>
-                                @apt.DurationMinutes min
-                            </span>
-                        </div>
+                        
+                        <!-- Status -->
+                        <span class="status-badge @GetStatusBadgeClass(apt.Status)">
+                            @apt.Status
+                        </span>
+                        
+                        <!-- Arrow -->
+                        <i class="bi bi-chevron-right text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all"></i>
                     </a>
                 }
             </div>
+        </div>
+    }
+    else
+    {
+        <div class="apple-card text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-calendar-x text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Appointments</h3>
+            <p class="text-sm text-gray-500 mb-6">No appointments scheduled for this date</p>
+            <a href="/Appointments/Create" class="apple-btn inline-flex items-center gap-2">
+                <i class="bi bi-plus-lg"></i>
+                New Appointment
+            </a>
         </div>
     }
 }
@@ -263,85 +402,65 @@ else
     <!-- List View -->
     @if (Model.Appointments.Any())
     {
-        <div class="space-y-4">
+        <div class="space-y-3">
             @foreach (var apt in Model.Appointments)
             {
-                <a href="/Appointments/@apt.Id" class="card-apple border-l-4 @GetStatusBorderClass(apt.Status) hover:shadow-lg transition-all block group">
-                    <div class="flex flex-col md:flex-row md:items-center gap-4">
-                        <!-- Date Badge -->
-                        <div class="flex-shrink-0 text-center md:w-24">
-                            <div class="inline-block md:block bg-gradient-to-br from-apple-blue to-apple-indigo text-white rounded-xl p-3 shadow-md">
-                                <div class="text-2xl font-bold">@apt.ScheduledDate.Day</div>
-                                <div class="text-xs uppercase tracking-wide">@apt.ScheduledDate.ToString("MMM")</div>
-                            </div>
-                        </div>
+                <a href="/Appointments/@apt.Id" 
+                   data-appointment-card 
+                   data-status="@apt.Status.ToString().ToLower()"
+                   class="apple-card group flex items-center gap-4 p-4 hover:bg-gray-50 transition-all">
+                    
+                    <!-- Date Badge -->
+                    <div class="flex-shrink-0 text-center bg-blue-50 rounded-xl p-3 min-w-[60px]">
+                        <div class="text-xl font-semibold text-blue-600">@apt.ScheduledDate.Day</div>
+                        <div class="text-xs text-blue-500 uppercase">@apt.ScheduledDate.ToString("MMM")</div>
+                    </div>
 
-                        <!-- Appointment Info -->
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-apple-purple to-apple-pink flex items-center justify-center text-white font-bold">
-                                        @(string.IsNullOrEmpty(apt.ClientName) ? "?" : apt.ClientName.Substring(0, 1).ToUpper())
-                                    </div>
-                                    <div>
-                                        <h3 class="font-bold text-apple-dark group-hover:text-apple-blue transition-colors text-lg">
-                                            @(string.IsNullOrEmpty(apt.ClientName) ? "Walk-in Customer" : apt.ClientName)
-                                        </h3>
-                                        <p class="text-sm text-apple-gray">@apt.ServiceType</p>
-                                    </div>
-                                </div>
-                                <span class="@GetStatusBadgeClass(apt.Status) px-3 py-1.5 rounded-full font-semibold text-xs whitespace-nowrap">
-                                    @apt.Status
-                                </span>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 text-sm">
-                                <div class="flex items-center gap-2 text-apple-gray">
-                                    <i class="bi bi-clock text-apple-blue"></i>
-                                    <span><strong>@apt.ScheduledTime</strong></span>
-                                </div>
-                                <div class="flex items-center gap-2 text-apple-gray">
-                                    <i class="bi bi-hourglass-split text-purple-500"></i>
-                                    <span>@apt.DurationMinutes min</span>
-                                </div>
-                                @if (!string.IsNullOrEmpty(apt.VehicleInfo))
-                                {
-                                    <div class="flex items-center gap-2 text-apple-gray">
-                                        <i class="bi bi-car-front text-green-500"></i>
-                                        <span class="truncate">@apt.VehicleInfo</span>
-                                    </div>
-                                }
-                                <div class="flex items-center gap-2 text-apple-gray">
-                                    <i class="bi bi-telephone text-orange-500"></i>
-                                    <span class="truncate">@apt.ContactPhone</span>
-                                </div>
-                            </div>
+                    <!-- Info -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <h3 class="font-medium text-gray-900 truncate">
+                                @(string.IsNullOrEmpty(apt.ClientName) ? "Walk-in Customer" : apt.ClientName)
+                            </h3>
                         </div>
-
-                        <!-- Arrow -->
-                        <div class="hidden md:flex items-center text-apple-gray group-hover:text-apple-blue group-hover:translate-x-1 transition-all">
-                            <i class="bi bi-chevron-right text-xl"></i>
+                        <p class="text-sm text-gray-500">@apt.ServiceType</p>
+                        <div class="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                            <span><i class="bi bi-clock"></i> @apt.ScheduledTime</span>
+                            <span><i class="bi bi-hourglass-split"></i> @apt.DurationMinutes min</span>
+                            @if (!string.IsNullOrEmpty(apt.VehicleInfo))
+                            {
+                                <span class="truncate"><i class="bi bi-car-front"></i> @apt.VehicleInfo</span>
+                            }
                         </div>
                     </div>
+                    
+                    <!-- Status -->
+                    <span class="status-badge @GetStatusBadgeClass(apt.Status)">
+                        @apt.Status
+                    </span>
+                    
+                    <!-- Arrow -->
+                    <i class="bi bi-chevron-right text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 transition-all"></i>
                 </a>
             }
         </div>
     }
     else
     {
-        <div class="text-center py-20">
-            <div class="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <i class="bi bi-calendar-check text-5xl text-apple-gray"></i>
+        <div class="apple-card text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-calendar-x text-gray-400 text-2xl"></i>
             </div>
-            <h3 class="text-2xl font-bold text-apple-dark mb-2">No upcoming appointments</h3>
-            <p class="text-apple-gray mb-8 max-w-md mx-auto">Start scheduling appointments to manage your service bookings efficiently</p>
-            <a href="/Appointments/Create" class="btn-apple-primary inline-flex shadow-lg hover:shadow-xl">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Appointments</h3>
+            <p class="text-sm text-gray-500 mb-6">Start scheduling appointments to manage your service bookings</p>
+            <a href="/Appointments/Create" class="apple-btn inline-flex items-center gap-2">
                 <i class="bi bi-plus-lg"></i>
-                Schedule New Appointment
+                New Appointment
             </a>
         </div>
     }
 }
+
 
 @functions {
     string GetStatusBadgeClass(Gixat.Web.Modules.Appointments.Entities.AppointmentStatus status)

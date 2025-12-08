@@ -5,225 +5,256 @@
     ViewData["Title"] = "Invoices";
 }
 
-<div class="bg-gradient-to-br from-gray-50 via-white to-gray-50">
-    <div class="px-4 py-8">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent mb-2">
-                    Invoices
-                </h1>
-                <p class="text-gray-600">Manage billing and payments</p>
-            </div>
-            <a asp-page="Create" class="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                <i class="fas fa-plus mr-2"></i>New Invoice
-            </a>
+<style>
+    .apple-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .apple-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    
+    .apple-btn {
+        background: #007AFF;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .apple-btn:hover {
+        background: #0051D5;
+        transform: scale(1.02);
+    }
+    
+    .filter-btn {
+        padding: 8px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.2s;
+        color: #6B7280;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .filter-btn:hover {
+        background: #F3F4F6;
+    }
+    
+    .filter-btn.active {
+        background: #007AFF;
+        color: white;
+    }
+</style>
+
+<!-- Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-4xl font-semibold text-gray-900 mb-1">Invoices</h1>
+            <p class="text-gray-500 text-sm">Manage billing and payments</p>
         </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 mb-1">Total</p>
-                        <p class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">@Model.AllInvoices.Count</p>
-                    </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-file-invoice text-blue-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 mb-1">Draft</p>
-                        <p class="text-3xl font-bold text-gray-600">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Draft)</p>
-                    </div>
-                    <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-file-alt text-gray-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 mb-1">Sent</p>
-                        <p class="text-3xl font-bold text-yellow-600">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Sent)</p>
-                    </div>
-                    <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-paper-plane text-yellow-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 mb-1">Paid</p>
-                        <p class="text-3xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Paid)</p>
-                    </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-green-100 to-teal-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 mb-1">Overdue</p>
-                        <p class="text-3xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue)</p>
-                    </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Revenue Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl shadow-sm p-6 border border-green-100">
-                <p class="text-sm font-medium text-green-700 mb-2">Total Revenue</p>
-                <p class="text-4xl font-bold text-green-800">@Model.AllInvoices.Sum(i => i.Total).ToString("C0")</p>
-            </div>
-            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-sm p-6 border border-blue-100">
-                <p class="text-sm font-medium text-blue-700 mb-2">Collected</p>
-                <p class="text-4xl font-bold text-blue-800">@Model.AllInvoices.Sum(i => i.PaidAmount).ToString("C0")</p>
-            </div>
-            <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl shadow-sm p-6 border border-orange-100">
-                <p class="text-sm font-medium text-orange-700 mb-2">Outstanding</p>
-                <p class="text-4xl font-bold text-orange-800">@Model.AllInvoices.Sum(i => i.BalanceDue).ToString("C0")</p>
-            </div>
-        </div>
-
-        <!-- Filter Tabs -->
-        <div class="bg-white rounded-2xl shadow-sm p-2 mb-6 inline-flex gap-2">
-            <button onclick="filterByStatus('all')" id="btnAll" class="px-6 py-2 rounded-xl font-semibold transition-all duration-200 bg-gradient-to-r from-green-500 to-teal-600 text-white">
-                All
-            </button>
-            <button onclick="filterByStatus('draft')" id="btnDraft" class="px-6 py-2 rounded-xl font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-100">
-                Draft
-            </button>
-            <button onclick="filterByStatus('sent')" id="btnSent" class="px-6 py-2 rounded-xl font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-100">
-                Sent
-            </button>
-            <button onclick="filterByStatus('paid')" id="btnPaid" class="px-6 py-2 rounded-xl font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-100">
-                Paid
-            </button>
-            <button onclick="filterByStatus('overdue')" id="btnOverdue" class="px-6 py-2 rounded-xl font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-100">
-                Overdue
-            </button>
-        </div>
-
-        <!-- Overdue Alert -->
-        @if (Model.AllInvoices.Any(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue))
-        {
-            <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded-xl p-4 mb-6">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl mr-3"></i>
-                    <div>
-                        <h3 class="font-bold text-red-800">Payment Overdue</h3>
-                        <p class="text-red-700">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue) invoice(s) are overdue</p>
-                    </div>
-                </div>
-            </div>
-        }
-
-        <!-- Invoices Table -->
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Invoice</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Client</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Date</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Amount</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Paid</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Balance</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach (var invoice in Model.AllInvoices)
-                        {
-                            var statusClass = invoice.Status switch
-                            {
-                                Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Draft => "bg-gray-100 text-gray-800",
-                                Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Sent => "bg-yellow-100 text-yellow-800",
-                                Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Paid => "bg-green-100 text-green-800",
-                                Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.PartiallyPaid => "bg-blue-100 text-blue-800",
-                                Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue => "bg-red-100 text-red-800",
-                                Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Voided => "bg-gray-100 text-gray-800",
-                                _ => "bg-gray-100 text-gray-800"
-                            };
-
-                            <tr class="invoice-row status-@invoice.Status.ToString().ToLower() hover:bg-gray-50 transition-colors duration-150">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-teal-100 rounded-lg flex items-center justify-center mr-3">
-                                            <i class="fas fa-file-invoice text-green-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="font-semibold text-gray-900">@invoice.InvoiceNumber</div>
-                                            <div class="text-sm text-gray-500">Due: @invoice.DueDate.ToString("MMM dd, yyyy")</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-semibold text-gray-900">@invoice.ClientName</div>
-                                    @if (!string.IsNullOrEmpty(invoice.VehicleInfo))
-                                    {
-                                        <div class="text-sm text-gray-500">@invoice.VehicleInfo</div>
-                                    }
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-900">
-                                    @invoice.InvoiceDate.ToString("MMM dd, yyyy")
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-semibold text-gray-900">@invoice.Total.ToString("C")</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-semibold text-green-600">@invoice.PaidAmount.ToString("C")</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="font-semibold @(invoice.BalanceDue > 0 ? "text-orange-600" : "text-gray-400")">
-                                        @invoice.BalanceDue.ToString("C")
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-3 py-1 inline-flex text-xs font-semibold rounded-full @statusClass">
-                                        @invoice.Status
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-right text-sm font-medium space-x-2">
-                                    <a asp-page="Details" asp-route-id="@invoice.Id" class="text-green-600 hover:text-green-900 font-semibold">
-                                        <i class="fas fa-eye mr-1"></i>View
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        @if (!Model.AllInvoices.Any())
-        {
-            <div class="text-center py-12">
-                <i class="fas fa-file-invoice text-gray-300 text-6xl mb-4"></i>
-                <p class="text-gray-500 text-lg mb-4">No invoices found</p>
-                <a asp-page="Create" class="inline-block px-6 py-3 bg-gradient-to-r from-green-500 to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
-                    <i class="fas fa-plus mr-2"></i>Create First Invoice
-                </a>
-            </div>
-        }
+        <a asp-page="Create" class="apple-btn flex items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>New Invoice</span>
+        </a>
     </div>
 </div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Total</p>
+            <i class="bi bi-file-earmark-text text-blue-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Draft</p>
+            <i class="bi bi-file-earmark text-gray-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Draft)</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Sent</p>
+            <i class="bi bi-send text-yellow-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Sent)</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Paid</p>
+            <i class="bi bi-check-circle text-green-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Paid)</p>
+    </div>
+
+    <div class="apple-card p-6">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-sm text-gray-500 font-medium">Overdue</p>
+            <i class="bi bi-exclamation-circle text-red-500"></i>
+        </div>
+        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue)</p>
+    </div>
+</div>
+
+<!-- Revenue Summary -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="apple-card p-6">
+        <p class="text-sm font-medium text-gray-500 mb-2">Total Revenue</p>
+        <p class="text-4xl font-semibold text-gray-900">@Model.AllInvoices.Sum(i => i.Total).ToString("C0")</p>
+    </div>
+    <div class="apple-card p-6">
+        <p class="text-sm font-medium text-gray-500 mb-2">Collected</p>
+        <p class="text-4xl font-semibold text-green-600">@Model.AllInvoices.Sum(i => i.PaidAmount).ToString("C0")</p>
+    </div>
+    <div class="apple-card p-6">
+        <p class="text-sm font-medium text-gray-500 mb-2">Outstanding</p>
+        <p class="text-4xl font-semibold text-orange-600">@Model.AllInvoices.Sum(i => i.BalanceDue).ToString("C0")</p>
+    </div>
+</div>
+
+<!-- Filter Tabs -->
+<div class="apple-card mb-6 inline-flex gap-1 p-1">
+    <button onclick="filterByStatus('all')" id="btnAll" class="filter-btn active">
+        All
+    </button>
+    <button onclick="filterByStatus('draft')" id="btnDraft" class="filter-btn">
+        Draft
+    </button>
+    <button onclick="filterByStatus('sent')" id="btnSent" class="filter-btn">
+        Sent
+    </button>
+    <button onclick="filterByStatus('paid')" id="btnPaid" class="filter-btn">
+        Paid
+    </button>
+    <button onclick="filterByStatus('overdue')" id="btnOverdue" class="filter-btn">
+        Overdue
+    </button>
+</div>
+
+<!-- Overdue Alert -->
+@if (Model.AllInvoices.Any(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue))
+{
+    <div class="apple-card border-l-4 border-red-500 p-4 mb-6">
+        <div class="flex items-center gap-3">
+            <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+            <div>
+                <h3 class="font-semibold text-gray-900">Payment Overdue</h3>
+                <p class="text-sm text-gray-600">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue) invoice(s) are overdue</p>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Invoices Table -->
+<div class="apple-card overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @foreach (var invoice in Model.AllInvoices)
+                {
+                    var statusClass = invoice.Status switch
+                    {
+                        Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Draft => "bg-gray-100 text-gray-700",
+                        Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Sent => "bg-yellow-100 text-yellow-700",
+                        Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Paid => "bg-green-100 text-green-700",
+                        Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.PartiallyPaid => "bg-blue-100 text-blue-700",
+                        Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue => "bg-red-100 text-red-700",
+                        Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Voided => "bg-gray-100 text-gray-700",
+                        _ => "bg-gray-100 text-gray-700"
+                    };
+
+                    <tr class="invoice-row status-@invoice.Status.ToString().ToLower() hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-file-earmark-text text-blue-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-900">@invoice.InvoiceNumber</div>
+                                    <div class="text-xs text-gray-500">Due: @invoice.DueDate.ToString("MMM dd, yyyy")</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-900">@invoice.ClientName</div>
+                            @if (!string.IsNullOrEmpty(invoice.VehicleInfo))
+                            {
+                                <div class="text-xs text-gray-500">@invoice.VehicleInfo</div>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            @invoice.InvoiceDate.ToString("MMM dd, yyyy")
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-900">@invoice.Total.ToString("C")</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-green-600">@invoice.PaidAmount.ToString("C")</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-medium @(invoice.BalanceDue > 0 ? "text-orange-600" : "text-gray-400")">
+                                @invoice.BalanceDue.ToString("C")
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-1 inline-flex text-xs font-medium rounded-full @statusClass">
+                                @invoice.Status
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm font-medium">
+                            <a asp-page="Details" asp-route-id="@invoice.Id" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <i class="bi bi-eye mr-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@if (!Model.AllInvoices.Any())
+{
+    <div class="apple-card text-center py-12">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-file-earmark-text text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Invoices</h3>
+        <p class="text-sm text-gray-500 mb-6">Get started by creating your first invoice</p>
+        <a asp-page="Create" class="apple-btn inline-flex items-center gap-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>Create First Invoice</span>
+        </a>
+    </div>
+}
 
 @section Scripts {
     <script>
@@ -243,9 +274,9 @@
             ['btnAll', 'btnDraft', 'btnSent', 'btnPaid', 'btnOverdue'].forEach(id => {
                 const btn = document.getElementById(id);
                 if (id === activeId) {
-                    btn.className = 'px-6 py-2 rounded-xl font-semibold transition-all duration-200 bg-gradient-to-r from-green-500 to-teal-600 text-white';
+                    btn.classList.add('active');
                 } else {
-                    btn.className = 'px-6 py-2 rounded-xl font-semibold transition-all duration-200 text-gray-600 hover:bg-gray-100';
+                    btn.classList.remove('active');
                 }
             });
         }

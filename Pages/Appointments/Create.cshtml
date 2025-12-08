@@ -5,20 +5,113 @@
     ViewData["Title"] = "New Appointment";
 }
 
-<div class="mb-8">
+<!-- Timestamp: @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") -->
+
+<style>
+    /* Apple-style Card - v2.0 */
+    div.apple-card {
+        background-color: #ffffff !important;
+        border-radius: 16px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        padding: 32px !important;
+        margin-bottom: 24px !important;
+        border: 1px solid #e5e7eb !important;
+    }
+    
+    /* Apple-style Inputs - v2.0 */
+    select.apple-input,
+    input[type="date"].apple-input,
+    input[type="tel"].apple-input,
+    input[type="email"].apple-input,
+    textarea.apple-input {
+        width: 100% !important;
+        padding: 14px 16px !important;
+        border: 1.5px solid #d1d5db !important;
+        border-radius: 12px !important;
+        font-size: 16px !important;
+        line-height: 1.5 !important;
+        transition: all 0.2s ease !important;
+        background-color: #ffffff !important;
+        color: #1f2937 !important;
+    }
+    
+    select.apple-input:focus,
+    input[type="date"].apple-input:focus,
+    input[type="tel"].apple-input:focus,
+    input[type="email"].apple-input:focus,
+    textarea.apple-input:focus {
+        outline: none !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+        background-color: #ffffff !important;
+    }
+    
+    /* Apple-style Primary Button - v2.0 */
+    button.apple-btn {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 28px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        border: none !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    button.apple-btn:hover {
+        background-color: #2563eb !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Apple-style Secondary Button - v2.0 */
+    a.apple-btn-secondary {
+        background-color: #f3f4f6 !important;
+        color: #374151 !important;
+        border-radius: 12px !important;
+        padding: 14px 28px !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-decoration: none !important;
+        border: 1px solid #e5e7eb !important;
+    }
+    
+    a.apple-btn-secondary:hover {
+        background-color: #e5e7eb !important;
+        border-color: #d1d5db !important;
+    }
+    
+    textarea.apple-input {
+        resize: vertical !important;
+        min-height: 120px !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    }
+</style>
+
+<div class="mb-6">
     <div class="flex items-center gap-3 mb-2">
-        <a href="/Appointments" class="text-apple-gray hover:text-apple-dark">
-            <i class="bi bi-arrow-left"></i>
+        <a href="/Appointments" class="text-gray-600 hover:text-gray-900">
+            <i class="bi bi-arrow-left text-xl"></i>
         </a>
-        <h1 class="text-2xl font-semibold text-apple-dark">New Appointment</h1>
+        <h1 class="text-3xl font-semibold text-gray-900">New Appointment</h1>
     </div>
-    <p class="text-apple-gray text-sm ml-10">Schedule a service appointment</p>
+    <p class="text-gray-600 ml-10">Schedule a service appointment</p>
 </div>
 
 <form method="post" class="max-w-3xl">
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
             <i class="bi bi-exclamation-triangle text-red-600 mt-0.5"></i>
             <div>
                 <h4 class="font-semibold text-red-900 mb-1">Error</h4>
@@ -28,15 +121,19 @@
     }
 
     <!-- Client Selection -->
-    <div class="card-apple mb-6">
-        <h3 class="text-lg font-semibold text-apple-dark mb-4">Client Information</h3>
+    <div class="apple-card">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="bi bi-person-circle text-blue-600"></i>
+            Client Information
+        </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-person text-gray-500"></i>
                     Client <span class="text-red-500">*</span>
                 </label>
-                <select asp-for="Input.ClientId" class="input-apple" required>
+                <select asp-for="Input.ClientId" class="apple-input" required>
                     <option value="">Select a client...</option>
                     @foreach (var client in Model.Clients)
                     {
@@ -47,10 +144,11 @@
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-car-front text-gray-500"></i>
                     Vehicle (Optional)
                 </label>
-                <select asp-for="Input.ClientVehicleId" class="input-apple">
+                <select asp-for="Input.ClientVehicleId" class="apple-input">
                     <option value="">No specific vehicle</option>
                     @foreach (var vehicle in Model.Vehicles)
                     {
@@ -64,111 +162,134 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-telephone text-gray-500"></i>
                     Contact Phone <span class="text-red-500">*</span>
                 </label>
-                <input asp-for="Input.ContactPhone" type="tel" class="input-apple" placeholder="+1234567890" required />
+                <input asp-for="Input.ContactPhone" type="tel" class="apple-input" placeholder="+1234567890" required />
                 <span asp-validation-for="Input.ContactPhone" class="text-red-600 text-xs mt-1"></span>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-envelope text-gray-500"></i>
                     Contact Email (Optional)
                 </label>
-                <input asp-for="Input.ContactEmail" type="email" class="input-apple" placeholder="client@example.com" />
+                <input asp-for="Input.ContactEmail" type="email" class="apple-input" placeholder="client@example.com" />
             </div>
         </div>
     </div>
 
     <!-- Date & Time Selection -->
-    <div class="card-apple mb-6">
-        <h3 class="text-lg font-semibold text-apple-dark mb-4">Schedule</h3>
+    <div class="apple-card">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="bi bi-calendar-event text-blue-600"></i>
+            Schedule
+        </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-calendar3 text-gray-500"></i>
                     Date <span class="text-red-500">*</span>
                 </label>
-                <input asp-for="Input.ScheduledDate" type="date" class="input-apple" 
-                       min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                <div class="relative">
+                    <input asp-for="Input.ScheduledDate" type="date" class="apple-input" 
+                           min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                </div>
                 <span asp-validation-for="Input.ScheduledDate" class="text-red-600 text-xs mt-1"></span>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-clock text-gray-500"></i>
                     Time <span class="text-red-500">*</span>
                 </label>
-                <select asp-for="Input.ScheduledTime" class="input-apple" required>
-                    <option value="">Select time...</option>
-                    @for (int hour = 8; hour < 18; hour++)
-                    {
-                        for (int minute = 0; minute < 60; minute += 30)
+                <div class="relative">
+                    <select asp-for="Input.ScheduledTime" class="apple-input" required>
+                        <option value="">Select time...</option>
+                        @for (int hour = 8; hour < 18; hour++)
                         {
-                            var timeValue = $"{hour:D2}:{minute:D2}";
-                            <option value="@timeValue">@timeValue</option>
+                            for (int minute = 0; minute < 60; minute += 30)
+                            {
+                                var timeValue = $"{hour:D2}:{minute:D2}";
+                                <option value="@timeValue">@timeValue</option>
+                            }
                         }
-                    }
-                </select>
+                    </select>
+                </div>
                 <span asp-validation-for="Input.ScheduledTime" class="text-red-600 text-xs mt-1"></span>
             </div>
 
             <div>
-                <label class="block text-sm font-semibold text-apple-dark mb-2">
+                <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                    <i class="bi bi-hourglass-split text-gray-500"></i>
                     Duration <span class="text-red-500">*</span>
                 </label>
-                <select asp-for="Input.DurationMinutes" class="input-apple" required>
-                    <option value="30">30 minutes</option>
-                    <option value="60" selected>1 hour</option>
-                    <option value="90">1.5 hours</option>
-                    <option value="120">2 hours</option>
-                    <option value="180">3 hours</option>
-                    <option value="240">4 hours</option>
-                </select>
+                <div class="relative">
+                    <select asp-for="Input.DurationMinutes" class="apple-input" required>
+                        <option value="30">30 minutes</option>
+                        <option value="60" selected>1 hour</option>
+                        <option value="90">1.5 hours</option>
+                        <option value="120">2 hours</option>
+                        <option value="180">3 hours</option>
+                        <option value="240">4 hours</option>
+                    </select>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Service Details -->
-    <div class="card-apple mb-6">
-        <h3 class="text-lg font-semibold text-apple-dark mb-4">Service Details</h3>
+    <div class="apple-card">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="bi bi-tools text-blue-600"></i>
+            Service Details
+        </h3>
         
         <div class="mb-4">
-            <label class="block text-sm font-semibold text-apple-dark mb-2">
+            <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                <i class="bi bi-wrench-adjustable text-gray-500"></i>
                 Service Type <span class="text-red-500">*</span>
             </label>
-            <select asp-for="Input.ServiceType" class="input-apple" required>
-                <option value="">Select service type...</option>
-                <option value="Oil Change">Oil Change</option>
-                <option value="Brake Service">Brake Service</option>
-                <option value="Tire Service">Tire Service</option>
-                <option value="Engine Diagnostic">Engine Diagnostic</option>
-                <option value="Transmission Service">Transmission Service</option>
-                <option value="Electrical Repair">Electrical Repair</option>
-                <option value="AC Service">AC Service</option>
-                <option value="General Inspection">General Inspection</option>
-                <option value="Body Work">Body Work</option>
-                <option value="Detailing">Detailing</option>
-                <option value="Custom Work">Custom Work</option>
-                <option value="Other">Other</option>
-            </select>
+            <div class="relative">
+                <select asp-for="Input.ServiceType" class="apple-input" required>
+                    <option value="">Select service type...</option>
+                    <option value="Oil Change">🛢️ Oil Change</option>
+                    <option value="Brake Service">🔧 Brake Service</option>
+                    <option value="Tire Service">🛞 Tire Service</option>
+                    <option value="Engine Diagnostic">⚙️ Engine Diagnostic</option>
+                    <option value="Transmission Service">🔩 Transmission Service</option>
+                    <option value="Electrical Repair">⚡ Electrical Repair</option>
+                    <option value="AC Service">❄️ AC Service</option>
+                    <option value="General Inspection">🔍 General Inspection</option>
+                    <option value="Body Work">🔨 Body Work</option>
+                    <option value="Detailing">✨ Detailing</option>
+                    <option value="Custom Work">🎨 Custom Work</option>
+                    <option value="Other">📋 Other</option>
+                </select>
+            </div>
             <span asp-validation-for="Input.ServiceType" class="text-red-600 text-xs mt-1"></span>
         </div>
 
         <div>
-            <label class="block text-sm font-semibold text-apple-dark mb-2">
+            <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
+                <i class="bi bi-chat-left-text text-gray-500"></i>
                 Notes (Optional)
             </label>
-            <textarea asp-for="Input.Notes" rows="4" class="input-apple" 
-                      placeholder="Any additional details or special requirements..."></textarea>
+            <div class="relative">
+                <textarea asp-for="Input.Notes" rows="4" class="apple-input" 
+                          placeholder="Any additional details or special requirements..."></textarea>
+            </div>
         </div>
     </div>
 
     <!-- Submit Buttons -->
     <div class="flex items-center justify-end gap-3">
-        <a href="/Appointments" class="btn-apple-secondary">
+        <a href="/Appointments" class="apple-btn-secondary">
             Cancel
         </a>
-        <button type="submit" class="btn-apple-primary">
+        <button type="submit" class="apple-btn">
             <i class="bi bi-calendar-check"></i>
             Schedule Appointment
         </button>
@@ -197,3 +318,4 @@
         });
     </script>
 }
+TEST-FILE-1765201169

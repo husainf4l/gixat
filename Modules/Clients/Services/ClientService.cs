@@ -90,6 +90,7 @@ public class ClientService : BaseService, IClientService
     /// </summary>
     public async Task<IEnumerable<ClientSearchDto>> SearchForAutocompleteAsync(Guid companyId, string? searchTerm)
     {
+        Console.WriteLine($"[DEBUG ClientService] ========== SEARCH START ==========");
         Console.WriteLine($"[DEBUG ClientService] SearchForAutocompleteAsync called - CompanyId: {companyId}, SearchTerm: '{searchTerm}'");
         
         var query = Clients
@@ -98,20 +99,52 @@ public class ClientService : BaseService, IClientService
         var allClients = await query.ToListAsync();
         Console.WriteLine($"[DEBUG ClientService] Total active clients for company: {allClients.Count}");
         
+        if (allClients.Any())
+        {
+            Console.WriteLine($"[DEBUG ClientService] Listing all active clients:");
+            foreach (var client in allClients)
+            {
+                Console.WriteLine($"[DEBUG ClientService]   - {client.FirstName} {client.LastName} (ID: {client.Id}, Phone: {client.Phone}, Email: {client.Email})");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"[DEBUG ClientService] WARNING: No active clients found for CompanyId: {companyId}");
+        }
+        
+        // Apply search filter if provided
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
+            var originalSearchTerm = searchTerm;
             searchTerm = searchTerm.ToLower();
+            Console.WriteLine($"[DEBUG ClientService] Applying search filter for term: '{searchTerm}'");
+            
+            var beforeFilterCount = await query.CountAsync();
+            Console.WriteLine($"[DEBUG ClientService] Clients before filter: {beforeFilterCount}");
+            
+            // VERY PERMISSIVE SEARCH - matching ANY part of ANY field
             query = query.Where(c =>
-                c.FirstName.ToLower().Contains(searchTerm) ||
-                c.LastName.ToLower().Contains(searchTerm) ||
+                (c.FirstName != null && c.FirstName.ToLower().Contains(searchTerm)) ||
+                (c.LastName != null && c.LastName.ToLower().Contains(searchTerm)) ||
                 (c.Email != null && c.Email.ToLower().Contains(searchTerm)) ||
-                c.Phone.Contains(searchTerm));
+                (c.Phone != null && c.Phone.ToLower().Contains(searchTerm)) ||
+                (c.Phone != null && c.Phone.Replace("+", "").Replace(" ", "").Replace("-", "").Contains(searchTerm)));
+                
+            var afterFilterCount = await query.CountAsync();
+            Console.WriteLine($"[DEBUG ClientService] Clients after filter: {afterFilterCount}");
+            
+            // If still no results, let's just return ALL clients for debugging
+            if (afterFilterCount == 0 && beforeFilterCount > 0)
+            {
+                Console.WriteLine($"[DEBUG ClientService] WARNING: Search filtered out all {beforeFilterCount} clients! Returning all for debugging...");
+                query = Clients.Where(c => c.CompanyId == companyId && c.IsActive);
+            }
         }
 
         var results = await query
             .OrderByDescending(c => c.IsVip)
             .ThenByDescending(c => c.LastVisitAt)
-            .Take(20) // Limit to 20 results for performance
+            .Take(20)
             .Select(c => new ClientSearchDto
             {
                 Id = c.Id,
@@ -124,11 +157,19 @@ public class ClientService : BaseService, IClientService
             })
             .ToListAsync();
             
-        Console.WriteLine($"[DEBUG ClientService] Search results count: {results.Count}");
-        foreach (var r in results.Take(5))
+        Console.WriteLine($"[DEBUG ClientService] Final search results count: {results.Count}");
+        if (results.Any())
         {
-            Console.WriteLine($"[DEBUG ClientService] Result: {r.FullName} - {r.Phone}");
+            foreach (var r in results)
+            {
+                Console.WriteLine($"[DEBUG ClientService] Result: ID={r.Id}, FullName='{r.FullName}', Phone='{r.Phone}', Email='{r.Email}', VehicleCount={r.VehicleCount}");
+            }
         }
+        else
+        {
+            Console.WriteLine($"[DEBUG ClientService] WARNING: No results returned!");
+        }
+        Console.WriteLine($"[DEBUG ClientService] ========== SEARCH END ==========");
         
         return results;
     }

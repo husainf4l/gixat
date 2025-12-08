@@ -5,124 +5,152 @@
     Layout = "_AppLayout";
 }
 
+<style>
+    .apple-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .apple-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transform: translateY(-2px);
+    }
+    
+    .apple-btn {
+        background: #007AFF;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .apple-btn:hover {
+        background: #0051D5;
+        transform: scale(1.02);
+    }
+</style>
+
 <!-- Welcome Section -->
-<div class="mb-8 animate-fade-in">
-    <h1 class="text-2xl lg:text-3xl font-semibold text-slate-900 tracking-tight">
-        Good @(DateTime.Now.Hour < 12 ? "morning" : DateTime.Now.Hour < 17 ? "afternoon" : "evening"), @User.Identity?.Name 👋
-    </h1>
-    <p class="text-slate-600 text-sm mt-1">Here's what's happening with your garage today.</p>
+<div class="mb-6 lg:mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-semibold text-gray-900">
+                Good @(DateTime.Now.Hour < 12 ? "morning" : DateTime.Now.Hour < 17 ? "afternoon" : "evening"), @User.Identity?.Name 👋
+            </h1>
+            <p class="text-gray-600 mt-1">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</p>
+        </div>
+        <a href="/Sessions/Create" class="apple-btn">
+            <i class="bi bi-plus-lg"></i>
+            New Check-In
+        </a>
+    </div>
 </div>
 
 <!-- Stats Grid -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
     <!-- Active Sessions -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 animate-slide-up" style="animation-delay: 0.05s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
+    <div class="apple-card p-6 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                <i class="bi bi-clipboard-check text-xl"></i>
             </div>
             @if(Model.ActiveSessions > 0)
             {
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                    </svg>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                     Active
                 </span>
             }
         </div>
-        <p class="text-2xl lg:text-3xl font-semibold text-slate-900">@Model.ActiveSessions</p>
-        <p class="text-sm text-slate-600 mt-1">Active Sessions</p>
+        <p class="text-3xl font-semibold text-gray-900 mb-1">@Model.ActiveSessions</p>
+        <p class="text-sm font-medium text-gray-600">Active Sessions</p>
     </div>
 
     <!-- In Progress -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 animate-slide-up" style="animation-delay: 0.1s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
+    <div class="apple-card p-6 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600">
+                <i class="bi bi-gear text-xl"></i>
             </div>
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">In Progress</span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">Working</span>
         </div>
-        <p class="text-2xl lg:text-3xl font-semibold text-slate-900">@Model.InProgressSessions</p>
-        <p class="text-sm text-slate-600 mt-1">Being Worked On</p>
+        <p class="text-3xl font-semibold text-gray-900 mb-1">@Model.InProgressSessions</p>
+        <p class="text-sm font-medium text-gray-600">Being Worked On</p>
     </div>
 
     <!-- Ready for Pickup -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 animate-slide-up" style="animation-delay: 0.15s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+    <div class="apple-card p-6 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+                <i class="bi bi-check-circle text-xl"></i>
             </div>
             @if(Model.AwaitingPickup > 0)
             {
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
-                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-soft"></span>
-                    Action
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    Notify
                 </span>
             }
         </div>
-        <p class="text-2xl lg:text-3xl font-semibold text-slate-900">@Model.AwaitingPickup</p>
-        <p class="text-sm text-slate-600 mt-1">Ready for Pickup</p>
+        <p class="text-3xl font-semibold text-gray-900 mb-1">@Model.AwaitingPickup</p>
+        <p class="text-sm font-medium text-gray-600">Ready for Pickup</p>
     </div>
 
     <!-- Total Clients -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 animate-slide-up" style="animation-delay: 0.2s;">
-        <div class="flex items-center justify-between mb-4">
-            <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
+    <div class="apple-card p-6 cursor-pointer">
+        <div class="flex items-center justify-between mb-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                <i class="bi bi-people text-xl"></i>
             </div>
+            <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
+                <i class="bi bi-star-fill text-xs"></i>
+                +@Model.VipClients VIP
+            </span>
         </div>
-        <p class="text-2xl lg:text-3xl font-semibold text-slate-900">@Model.TotalClients</p>
-        <p class="text-sm text-slate-600 mt-1">Total Clients</p>
+        <p class="text-3xl font-semibold text-gray-900 mb-1">@Model.TotalClients</p>
+        <p class="text-sm font-medium text-gray-600">Total Clients</p>
     </div>
 </div>
 
 <!-- Main Content Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-slide-up" style="animation-delay: 0.25s;">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Recent Sessions -->
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="flex items-center justify-between p-5 border-b border-slate-100">
+    <div class="lg:col-span-2 apple-card overflow-hidden">
+        <div class="flex items-center justify-between p-5 border-b border-gray-100">
             <div>
-                <h2 class="text-lg font-semibold text-slate-900">Recent Sessions</h2>
-                <p class="text-sm text-slate-600">Latest vehicle check-ins</p>
+                <h2 class="text-lg font-semibold text-gray-900">Recent Sessions</h2>
+                <p class="text-sm text-gray-600">Latest vehicle check-ins</p>
             </div>
-            <a href="/Sessions" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 hover:bg-sky-50 rounded-lg transition-all duration-150">
+            <a href="/Sessions" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-150">
                 View All
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+                <i class="bi bi-arrow-right"></i>
             </a>
         </div>
         
         @if (Model.RecentSessions.Any())
         {
-            <div class="divide-y divide-slate-100">
+            <div class="divide-y divide-gray-100">
                 @foreach (var session in Model.RecentSessions.Take(5))
                 {
-                    <a href="/Sessions/Details/@session.Id" class="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors group">
+                    <a href="/Sessions/Details/@session.Id" class="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors group">
                         <!-- Status Indicator -->
                         <div class="relative">
-                            <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
-                                </svg>
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
+                                <i class="bi bi-clipboard-check text-xl text-gray-600"></i>
                             </div>
                             @{
                                 var dotColor = session.Status switch
                                 {
                                     Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-orange-500",
                                     Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed or Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-green-500",
-                                    Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-slate-400",
-                                    _ => "bg-primary-500"
+                                    Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-400",
+                                    _ => "bg-blue-500"
                                 };
                             }
                             <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 @dotColor rounded-full border-2 border-white"></span>
@@ -131,28 +159,26 @@
                         <!-- Info -->
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <span class="font-medium text-slate-900">@session.SessionNumber</span>
+                                <span class="font-medium text-gray-900">@session.SessionNumber</span>
                                 @{
                                     var badgeClass = session.Status switch
                                     {
-                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-primary-100 text-primary-700",
+                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.CheckedIn => "bg-blue-100 text-blue-700",
                                         Gixat.Web.Modules.Sessions.Enums.SessionStatus.InProgress => "bg-orange-100 text-orange-700",
                                         Gixat.Web.Modules.Sessions.Enums.SessionStatus.Completed or Gixat.Web.Modules.Sessions.Enums.SessionStatus.ReadyForPickup => "bg-green-100 text-green-700",
-                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-slate-100 text-slate-700",
-                                        _ => "bg-slate-100 text-slate-700"
+                                        Gixat.Web.Modules.Sessions.Enums.SessionStatus.Closed => "bg-gray-100 text-gray-700",
+                                        _ => "bg-gray-100 text-gray-700"
                                     };
                                 }
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full @badgeClass">@session.Status</span>
                             </div>
-                            <p class="text-sm text-slate-600 truncate">@session.VehicleDisplayName</p>
+                            <p class="text-sm text-gray-600 truncate">@session.VehicleDisplayName</p>
                         </div>
                         
                         <!-- Time & Arrow -->
                         <div class="flex items-center gap-3">
-                            <span class="text-sm text-slate-600">@session.CheckInAt.ToString("MMM dd, HH:mm")</span>
-                            <svg class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
+                            <span class="text-sm text-gray-600">@session.CheckInAt.ToString("MMM dd, HH:mm")</span>
+                            <i class="bi bi-chevron-right text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                         </div>
                     </a>
                 }
@@ -161,17 +187,13 @@
         else
         {
             <div class="p-8 text-center">
-                <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                    </svg>
+                <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-inbox text-3xl text-gray-400"></i>
                 </div>
-                <h3 class="font-medium text-slate-900 mb-1">No active sessions</h3>
-                <p class="text-sm text-slate-600 mb-4">Get started by creating a new check-in</p>
-                <a href="/Sessions/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-all duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
+                <h3 class="font-medium text-gray-900 mb-1">No active sessions</h3>
+                <p class="text-sm text-gray-600 mb-4">Get started by creating a new check-in</p>
+                <a href="/Sessions/Create" class="apple-btn">
+                    <i class="bi bi-plus-lg"></i>
                     New Check-In
                 </a>
             </div>
@@ -181,89 +203,101 @@
     <!-- Right Column -->
     <div class="space-y-6">
         <!-- Quick Actions -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-            <h3 class="font-semibold text-slate-900 mb-4">Quick Actions</h3>
+        <div class="apple-card p-5">
+            <h3 class="font-semibold text-gray-900 mb-4">Quick Actions</h3>
             <div class="space-y-2">
-                <a href="/Sessions/Create" class="flex items-center gap-3 p-3 rounded-xl hover:bg-sky-50 transition-colors group">
-                    <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center group-hover:bg-primary-600 transition-colors">
-                        <svg class="w-5 h-5 text-primary-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
+                <a href="/Sessions/Create" class="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="bi bi-plus-lg"></i>
                     </div>
                     <div class="flex-1">
-                        <span class="font-medium text-slate-900 text-sm">New Check-In</span>
-                        <p class="text-xs text-slate-600">Start a new service session</p>
+                        <span class="font-medium text-gray-900 text-sm">New Check-In</span>
+                        <p class="text-xs text-gray-600">Start a new service session</p>
                     </div>
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <i class="bi bi-chevron-right text-gray-400"></i>
                 </a>
                 
-                <a href="/Clients" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group">
-                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                        </svg>
+                <a href="/Clients" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+                        <i class="bi bi-person-plus"></i>
                     </div>
                     <div class="flex-1">
-                        <span class="font-medium text-slate-900 text-sm">Add Client</span>
-                        <p class="text-xs text-slate-600">Register a new customer</p>
+                        <span class="font-medium text-gray-900 text-sm">Add Client</span>
+                        <p class="text-xs text-gray-600">Register a new customer</p>
                     </div>
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <i class="bi bi-chevron-right text-gray-400"></i>
                 </a>
                 
-                <a href="/Sessions" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group">
-                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                        </svg>
+                <a href="/Sessions" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+                        <i class="bi bi-list-ul"></i>
                     </div>
                     <div class="flex-1">
-                        <span class="font-medium text-slate-900 text-sm">All Sessions</span>
-                        <p class="text-xs text-slate-600">View and manage sessions</p>
+                        <span class="font-medium text-gray-900 text-sm">All Sessions</span>
+                        <p class="text-xs text-gray-600">View and manage sessions</p>
                     </div>
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                    <i class="bi bi-chevron-right text-gray-400"></i>
                 </a>
             </div>
         </div>
 
         <!-- Today's Overview -->
-        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-lg p-5 text-white">
-            <h3 class="font-semibold mb-5 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                Today's Overview
-            </h3>
-            <div class="space-y-4">
+        <div class="apple-card bg-gray-900 text-white p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-white bg-opacity-10 flex items-center justify-center">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    Today's Overview
+                </h3>
+                <span class="text-xs font-medium text-white text-opacity-60">@DateTime.Now.ToString("MMM dd")</span>
+            </div>
+            
+            <div class="space-y-5">
+                <!-- Sessions Today -->
                 <div>
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-white/70 text-sm">Sessions Today</span>
-                        <span class="font-semibold text-lg">@Model.TodaySessions</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span class="text-white text-opacity-80 text-sm font-medium">Sessions Today</span>
+                        </div>
+                        <span class="font-semibold text-xl">@Model.TodaySessions</span>
                     </div>
-                    <div class="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                        <div class="h-full bg-primary-500 rounded-full transition-all" style="width: @(Math.Min(Model.TodaySessions * 10, 100))%"></div>
+                    <div class="h-2 bg-white bg-opacity-10 rounded-full overflow-hidden">
+                        <div class="h-full bg-blue-500 rounded-full transition-all duration-700 ease-out" style="width: @(Math.Min(Model.TodaySessions * 10, 100))%"></div>
                     </div>
                 </div>
                 
+                <!-- Total Vehicles -->
                 <div>
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-white/70 text-sm">Total Vehicles</span>
-                        <span class="font-semibold text-lg">@Model.TotalVehicles</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-teal-400"></div>
+                            <span class="text-white text-opacity-80 text-sm font-medium">Total Vehicles</span>
+                        </div>
+                        <span class="font-semibold text-xl">@Model.TotalVehicles</span>
                     </div>
-                    <div class="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                        <div class="h-full bg-teal-400 rounded-full" style="width: 60%"></div>
+                    <div class="h-2 bg-white bg-opacity-10 rounded-full overflow-hidden">
+                        <div class="h-full bg-teal-400 rounded-full" style="width: @(Math.Min(Model.TotalVehicles * 5, 100))%"></div>
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-white/10">
-                    <div class="flex justify-between items-center">
-                        <span class="text-white/70 text-sm">VIP Clients</span>
-                        <span class="font-semibold text-lg text-yellow-400">@Model.VipClients ⭐</span>
+                <!-- VIP Clients -->
+                <div class="pt-4 border-t border-white border-opacity-10">
+                    <div class="flex items-center justify-between p-4 bg-yellow-500 bg-opacity-10 rounded-xl border border-yellow-400 border-opacity-30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center">
+                                <i class="bi bi-star-fill text-white"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-white text-opacity-60 font-medium">VIP Clients</p>
+                                <p class="text-xl font-semibold text-yellow-300">@Model.VipClients</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-white text-opacity-60">Premium</p>
+                            <p class="text-sm font-semibold text-yellow-300">Members ⭐</p>
+                        </div>
                     </div>
                 </div>
             </div>

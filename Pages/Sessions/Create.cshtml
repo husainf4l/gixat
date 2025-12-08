@@ -5,130 +5,289 @@
     Layout = "_AppLayout";
 }
 
-<div class="max-w-2xl mx-auto animate-fade-in">
+<div class="max-w-4xl mx-auto animate-fade-in">
     <!-- Back Button -->
-    <a href="/Sessions" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors">
-        <i class="bi bi-arrow-left"></i>
+    <a href="/Sessions" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors group">
+        <i class="bi bi-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
         <span class="text-sm font-medium">Back to Sessions</span>
     </a>
 
-    <!-- Form Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <!-- Header -->
-        <div class="bg-gradient-to-r from-primary-600 to-indigo-600 p-6 text-white">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                    <i class="bi bi-car-front text-2xl"></i>
+    <!-- Progress Steps -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between max-w-2xl mx-auto">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full bg-primary-600 text-white flex items-center justify-center font-semibold shadow-lg shadow-primary-600/30">
+                    1
                 </div>
-                <div>
-                    <h1 class="text-xl font-semibold">New Vehicle Check-In</h1>
-                    <p class="text-white/80 text-sm">Start a new service session</p>
+                <span class="text-sm font-medium text-slate-900">Select Client</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-slate-200 mx-4"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-semibold" id="step2">
+                    2
+                </div>
+                <span class="text-sm font-medium text-slate-600" id="step2-label">Choose Vehicle</span>
+            </div>
+            <div class="flex-1 h-0.5 bg-slate-200 mx-4"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-semibold" id="step3">
+                    3
+                </div>
+                <span class="text-sm font-medium text-slate-600" id="step3-label">Add Details</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-primary-600 via-blue-600 to-indigo-600 p-8 text-white relative overflow-hidden">
+            <!-- Background Pattern -->
+            <div class="absolute inset-0 opacity-10">
+                <svg class="w-full h-full" viewBox="0 0 100 100">
+                    <pattern id="checkin-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <circle cx="10" cy="10" r="1" fill="white"/>
+                    </pattern>
+                    <rect width="100" height="100" fill="url(#checkin-pattern)" />
+                </svg>
+            </div>
+            
+            <div class="relative flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                        <i class="bi bi-car-front text-3xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">New Vehicle Check-In</h1>
+                        <p class="text-white/90 text-sm">Start a new service session for your customer</p>
+                    </div>
+                </div>
+                <div class="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                    <i class="bi bi-clock text-lg"></i>
+                    <span class="text-sm font-medium">@DateTime.Now.ToString("HH:mm")</span>
                 </div>
             </div>
         </div>
 
         <!-- Form Body -->
-        <div class="p-6">
-            <form method="post">
-                <div asp-validation-summary="All" class="bg-red-600/10 border border-red-600/20 text-red-600 px-4 py-3 rounded-2xl mb-6 text-sm" role="alert"></div>
+        <div class="p-8">
+            <form method="post" id="checkInForm">
+                <div asp-validation-summary="All" class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl mb-6 text-sm flex items-start gap-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill text-lg"></i>
+                    <div class="flex-1"></div>
+                </div>
 
-                <!-- Client Selection with Autocomplete -->
-                @{
-                    ViewData["InputId"] = "clientSelect";
-                    ViewData["InputName"] = "SelectedClientId";
-                    ViewData["Required"] = "True";
-                    ViewData["Placeholder"] = "Search by name, phone, or email...";
-                }
-                <partial name="_ClientSearch" />
-
-                <!-- Vehicle Selection -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-900 mb-2">
-                        Select Vehicle <span class="text-red-600">*</span>
-                    </label>
-                    <div class="relative">
-                        <select asp-for="SelectedVehicleId" id="vehicleSelect" 
-                                class="input-apple-outlined appearance-none pr-10 cursor-pointer disabled:bg-gray-50 disabled:text-slate-600 disabled:cursor-not-allowed" disabled>
-                            <option value="">Choose a vehicle...</option>
-                        </select>
-                        <i class="bi bi-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none"></i>
+                <!-- Step 1: Client Selection -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-primary-100 flex items-center justify-center">
+                            <i class="bi bi-person-fill text-primary-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900">Client Information</h3>
+                            <p class="text-sm text-slate-600">Search and select the customer</p>
+                        </div>
                     </div>
-                    <p class="mt-2 text-sm text-slate-600" id="vehicleHelp">Select a client first to see their vehicles</p>
+                    
+                    @{
+                        ViewData["InputId"] = "clientSelect";
+                        ViewData["InputName"] = "SelectedClientId";
+                        ViewData["Required"] = "True";
+                        ViewData["Placeholder"] = "Search by name, phone, or email...";
+                    }
+                    <partial name="_ClientSearch" />
                 </div>
 
                 <!-- Divider -->
-                <hr class="border-gray-100 my-6" />
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="px-4 text-sm text-slate-500 bg-white">Vehicle Details</span>
+                    </div>
+                </div>
 
-                <!-- Mileage -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-900 mb-2">
-                        Mileage at Check-In
-                    </label>
-                    <div class="flex">
-                        <input type="number" asp-for="MileageIn" placeholder="e.g., 45000" 
-                               class="input-apple-outlined rounded-r-none border-r-0 flex-1" />
-                        <span class="inline-flex items-center px-4 bg-gray-50 border border-gray-200 border-l-0 rounded-r-2xl text-slate-600 text-sm font-medium">
-                            km
-                        </span>
+                <!-- Step 2: Vehicle Selection -->
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+                            <i class="bi bi-car-front-fill text-orange-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900">Vehicle Selection</h3>
+                            <p class="text-sm text-slate-600">Choose which vehicle is being serviced</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <select asp-for="SelectedVehicleId" id="vehicleSelect" 
+                                class="w-full px-4 py-3.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all appearance-none pr-10 cursor-pointer disabled:bg-gray-50 disabled:text-slate-400 disabled:cursor-not-allowed" disabled>
+                            <option value="">Choose a vehicle...</option>
+                        </select>
+                        <i class="bi bi-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    <div class="mt-3 flex items-center gap-2 text-sm" id="vehicleHelpContainer">
+                        <i class="bi bi-info-circle text-slate-400"></i>
+                        <p class="text-slate-600" id="vehicleHelp">Select a client first to see their vehicles</p>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="relative my-8">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-slate-200"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="px-4 text-sm text-slate-500 bg-white">Service Information</span>
+                    </div>
+                </div>
+
+                <!-- Step 3: Additional Details -->
+                <div class="mb-8">
+                    <!-- Mileage -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                                <i class="bi bi-speedometer2 text-green-600"></i>
+                            </div>
+                            <label class="block text-sm font-medium text-slate-900">
+                                Current Mileage (Optional)
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="number" asp-for="MileageIn" placeholder="e.g., 45000" 
+                                   class="flex-1 px-4 py-3.5 text-sm border border-slate-200 rounded-l-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all border-r-0" />
+                            <span class="inline-flex items-center px-5 py-3.5 bg-slate-50 border border-slate-200 border-l-0 rounded-r-xl text-slate-600 text-sm font-medium">
+                                <i class="bi bi-speedometer mr-2"></i>
+                                km
+                            </span>
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500">Record the odometer reading for service history tracking</p>
                     </div>
                 </div>
 
                 <!-- Notes -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-slate-900 mb-2">
-                        Initial Notes
-                    </label>
-                    <textarea asp-for="Notes" rows="3" placeholder="Any initial observations or customer comments..." 
-                              class="input-apple-outlined resize-none"></textarea>
+                <div class="mb-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="bi bi-chat-left-text text-blue-600"></i>
+                        </div>
+                        <label class="block text-sm font-medium text-slate-900">
+                            Initial Notes & Observations
+                        </label>
+                    </div>
+                    <textarea asp-for="Notes" rows="4" placeholder="Describe customer complaints, visible damage, or any initial observations..." 
+                              class="w-full px-4 py-3.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all resize-none"></textarea>
+                    <p class="mt-2 text-xs text-slate-500">Document any customer requests or vehicle condition notes</p>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <a href="/Sessions" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">Cancel</a>
-                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
-                        <i class="bi bi-check-lg"></i>
-                        Create Session
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t border-slate-200">
+                    <a href="/Sessions" class="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-medium rounded-xl bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all w-full sm:w-auto">
+                        <i class="bi bi-x-lg"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary-600 to-blue-600 text-white hover:from-primary-700 hover:to-blue-700 shadow-lg shadow-primary-600/30 transition-all w-full sm:w-auto group">
+                        <i class="bi bi-check-circle-fill text-lg group-hover:scale-110 transition-transform"></i>
+                        Create Check-In Session
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Helper Card -->
+    <div class="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+        <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+                <i class="bi bi-lightbulb text-white"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-slate-900 mb-2">Quick Tip</h4>
+                <p class="text-sm text-slate-600 mb-3">Make sure to:</p>
+                <ul class="text-sm text-slate-600 space-y-1.5">
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check2 text-blue-600 mt-0.5"></i>
+                        <span>Record accurate mileage for service history tracking</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check2 text-blue-600 mt-0.5"></i>
+                        <span>Document all customer complaints in the notes section</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check2 text-blue-600 mt-0.5"></i>
+                        <span>Take photos of any visible damage or issues</span>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
+        // Step indicator updates
+        function updateStep(stepNumber, active = false) {
+            const step = document.getElementById(`step${stepNumber}`);
+            const label = document.getElementById(`step${stepNumber}-label`);
+            
+            if (active) {
+                step.classList.remove('bg-slate-200', 'text-slate-600');
+                step.classList.add('bg-primary-600', 'text-white', 'shadow-lg', 'shadow-primary-600/30');
+                label.classList.remove('text-slate-600');
+                label.classList.add('text-slate-900', 'font-semibold');
+            } else {
+                step.classList.remove('bg-primary-600', 'text-white', 'shadow-lg', 'shadow-primary-600/30');
+                step.classList.add('bg-slate-200', 'text-slate-600');
+                label.classList.remove('text-slate-900', 'font-semibold');
+                label.classList.add('text-slate-600');
+            }
+        }
+
         // This script handles vehicle loading when client is selected
-        // Note: The clientSelect is initialized by _ClientSearch.cshtml partial
         document.addEventListener('DOMContentLoaded', function() {
             // Wait for Tom Select to initialize, then hook into its onChange
             setTimeout(function() {
                 const clientSelectElement = document.getElementById('clientSelect');
                 if (clientSelectElement && clientSelectElement.tomselect) {
-                    const originalOnChange = clientSelectElement.tomselect.on;
                     
                     clientSelectElement.tomselect.on('change', async function(clientId) {
                         const vehicleSelect = document.getElementById('vehicleSelect');
                         const vehicleHelp = document.getElementById('vehicleHelp');
+                        const vehicleHelpContainer = document.getElementById('vehicleHelpContainer');
                         
                         vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
                         
                         if (!clientId) {
                             vehicleSelect.disabled = true;
-                            vehicleHelp.textContent = 'Select a client first to see their vehicles';
+                            vehicleHelp.innerHTML = 'Select a client first to see their vehicles';
+                            vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm';
+                            updateStep(2, false);
+                            updateStep(3, false);
                             return;
                         }
                         
+                        // Client selected - activate step 2
+                        updateStep(2, true);
+                        
                         try {
-                            vehicleHelp.textContent = 'Loading vehicles...';
+                            vehicleHelp.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-1"></i>Loading vehicles...';
+                            vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-primary-600';
+                            
                             const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
                             const vehicles = await response.json();
                             
                             if (vehicles.length === 0) {
                                 vehicleSelect.disabled = true;
-                                vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-primary-600 hover:text-primary-700 font-medium">Add a vehicle →</a>';
+                                vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-primary-600 hover:text-primary-700 font-semibold hover:underline">Add a vehicle →</a>';
+                                vehicleHelpContainer.className = 'mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-sm';
+                                vehicleHelp.innerHTML = '<i class="bi bi-exclamation-triangle text-amber-600"></i><div>' + vehicleHelp.innerHTML + '</div>';
                             } else {
                                 vehicleSelect.disabled = false;
-                                vehicleHelp.textContent = 'Select the vehicle being checked in';
+                                vehicleHelp.textContent = vehicles.length + ' vehicle(s) available for selection';
+                                vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-green-600';
+                                vehicleHelp.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>' + vehicleHelp.textContent + '</span>';
                                 
                                 vehicles.forEach(vehicle => {
                                     const option = document.createElement('option');
@@ -139,10 +298,21 @@
                             }
                         } catch (error) {
                             console.error('Error loading vehicles:', error);
-                            vehicleHelp.textContent = 'Error loading vehicles. Please try again.';
+                            vehicleHelp.innerHTML = '<i class="bi bi-x-circle"></i>Error loading vehicles. Please try again.';
+                            vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-red-600';
                         }
                     });
                 }
+                
+                // Vehicle selection listener
+                const vehicleSelect = document.getElementById('vehicleSelect');
+                vehicleSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        updateStep(3, true);
+                    } else {
+                        updateStep(3, false);
+                    }
+                });
             }, 500); // Small delay to ensure Tom Select is initialized
         });
     </script>
