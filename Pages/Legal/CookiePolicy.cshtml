@@ -1,0 +1,318 @@
+@page
+@model Gixat.Pages.Legal.CookiePolicyModel
+@{
+    ViewData["Title"] = "Cookie Policy - Gixat";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .cookie-card {
+            transition: all 0.3s ease;
+        }
+        .cookie-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-primary-50 via-white to-accent-50 min-h-screen scroll-smooth">
+    <!-- Navigation -->
+    <partial name="../Components/_Navbar" />
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-2xl border border-gray-100 p-8 md:p-12 fade-in">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <div class="w-20 h-20 bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transform hover:rotate-12 transition-transform duration-300">
+                    <i class="bi bi-cookie text-white text-4xl"></i>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent mb-4">Cookie Policy</h1>
+                <div class="flex items-center justify-center gap-4 text-gray-600 mb-6">
+                    <span class="flex items-center gap-2">
+                        <i class="bi bi-calendar-check text-primary-600"></i>
+                        Last Updated: December 2025
+                    </span>
+                </div>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Learn how Gixat uses cookies to improve your experience and enhance platform functionality.
+                </p>
+            </div>
+
+            <!-- Content -->
+            <div class="prose prose-lg max-w-none">
+                <!-- What Are Cookies -->
+                <section class="mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 text-sm font-bold">1</span>
+                        What Are Cookies?
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        Cookies are small files stored on your device to help websites function and improve user experience.
+                    </p>
+                </section>
+
+                <!-- Types of Cookies -->
+                <section class="mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 text-sm font-bold">2</span>
+                        Types of Cookies Used by Gixat
+                    </h2>
+                    
+                    <!-- Essential Cookies -->
+                    <div class="cookie-card bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 mb-6 shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-shield-fill-check text-white"></i>
+                            </div>
+                            <span>2.1 Essential Cookies</span>
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">Required for:</p>
+                        <ul class="space-y-2 mb-3">
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-check-circle-fill text-green-600"></i>
+                                <span>Login & Authentication</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-check-circle-fill text-green-600"></i>
+                                <span>Navigation & Routing</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-check-circle-fill text-green-600"></i>
+                                <span>Security & Data Protection</span>
+                            </li>
+                        </ul>
+                        <div class="bg-green-100 border-l-4 border-green-600 p-3 rounded-r-lg">
+                            <p class="text-green-900 text-sm font-semibold">
+                                <i class="bi bi-exclamation-circle-fill mr-2"></i>
+                                Critical: Without these cookies, Gixat will not function properly.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Cookies -->
+                    <div class="cookie-card bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-6 mb-6 shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-graph-up text-white"></i>
+                            </div>
+                            <span>2.2 Analytics Cookies</span>
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">Used to understand how users:</p>
+                        <ul class="space-y-2 mb-3">
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-arrow-right-circle-fill text-blue-600"></i>
+                                <span>Navigate the platform</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-arrow-right-circle-fill text-blue-600"></i>
+                                <span>Use features and tools</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-arrow-right-circle-fill text-blue-600"></i>
+                                <span>Identify performance issues</span>
+                            </li>
+                        </ul>
+                        <p class="text-gray-600 text-sm italic">
+                            <i class="bi bi-info-circle mr-2"></i>
+                            Tools may include Google Analytics or similar services.
+                        </p>
+                    </div>
+
+                    <!-- Functional Cookies -->
+                    <div class="cookie-card bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-6 mb-6 shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-gear-fill text-white"></i>
+                            </div>
+                            <span>2.3 Functional Cookies</span>
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed mb-3">These remember your preferences, such as:</p>
+                        <ul class="space-y-2">
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-star-fill text-purple-600"></i>
+                                <span>Language preferences</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-star-fill text-purple-600"></i>
+                                <span>Saved filters & searches</span>
+                            </li>
+                            <li class="flex items-center gap-2 text-gray-700">
+                                <i class="bi bi-star-fill text-purple-600"></i>
+                                <span>Dashboard layout customization</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Marketing Cookies -->
+                    <div class="cookie-card bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-2xl p-6 mb-6 shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <div class="w-10 h-10 bg-orange-600 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-megaphone-fill text-white"></i>
+                            </div>
+                            <span>2.4 Marketing Cookies</span>
+                        </h3>
+                        <div class="bg-orange-100 border-l-4 border-orange-600 p-4 rounded-r-lg mb-3">
+                            <p class="text-orange-900 font-semibold text-sm">
+                                <i class="bi bi-hand-thumbs-up-fill mr-2"></i>
+                                Used only with your consent
+                            </p>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">
+                            These cookies help personalize advertisements and measure campaign performance to provide you with relevant content.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Why We Use Cookies -->
+                <section class="mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 text-sm font-bold">3</span>
+                        Why We Use Cookies
+                    </h2>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                        <li>Improve platform performance</li>
+                        <li>Provide a personalized experience</li>
+                        <li>Analyze usage behavior</li>
+                        <li>Maintain login sessions</li>
+                        <li>Prevent fraud</li>
+                    </ul>
+                </section>
+
+                <!-- Managing Cookies -->
+                <section class="mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 text-sm font-bold">4</span>
+                        Managing Cookies
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed mb-3">
+                        You may disable cookies through your browser settings.
+                    </p>
+                    <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6">
+                        <p class="text-amber-900 leading-relaxed flex items-start gap-2">
+                            <i class="bi bi-exclamation-triangle-fill text-amber-600 mt-1"></i>
+                            <span>
+                                <strong>Warning:</strong> Disabling essential cookies may affect Gixat functionality.
+                            </span>
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Third-Party Cookies -->
+                <section class="mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 text-sm font-bold">5</span>
+                        Third-Party Cookies
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed mb-3">We may use cookies from:</p>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4 mb-4">
+                        <li>Analytics providers</li>
+                        <li>Payment processors</li>
+                    </ul>
+                    <p class="text-gray-700 leading-relaxed">
+                        Each third party follows its own privacy policy.
+                    </p>
+                </section>
+
+                <!-- Updates -->
+                <section class="mb-10">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600 text-sm font-bold">6</span>
+                        Updates to This Policy
+                    </h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        We may update this Cookie Policy as needed.
+                    </p>
+                </section>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <a href="/" class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold transition-colors group">
+                        <i class="bi bi-arrow-left transform group-hover:-translate-x-1 transition-transform"></i>
+                        Back to Home
+                    </a>
+                    <div class="flex items-center gap-4">
+                        <a href="/Legal/PrivacyPolicy" class="text-sm text-gray-600 hover:text-primary-600 transition-colors">Privacy Policy</a>
+                        <span class="text-gray-300">|</span>
+                        <a href="/Legal/TermsOfService" class="text-sm text-gray-600 hover:text-primary-600 transition-colors">Terms of Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTop" class="fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-br from-primary-600 to-accent-600 text-white rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:scale-110 flex items-center justify-center z-40">
+        <i class="bi bi-arrow-up text-xl"></i>
+    </button>
+
+    <script>
+        // Scroll to Top Button
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.getElementById('scrollTop');
+            if (window.pageYOffset > 300) {
+                scrollTop.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                scrollTop.classList.add('opacity-0', 'pointer-events-none');
+            }
+        });
+
+        document.getElementById('scrollTop').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

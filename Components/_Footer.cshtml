@@ -1,126 +1,80 @@
 @{
     var currentYear = DateTime.Now.Year;
     
-    var socialLinks = new[]
-    {
-        new { Icon = "bi-facebook", Url = "#" },
-        new { Icon = "bi-twitter", Url = "#" },
-        new { Icon = "bi-linkedin", Url = "#" },
-        new { Icon = "bi-instagram", Url = "#" }
-    };
-    
     var productLinks = new[]
     {
         new { Text = "Features", Url = "#features" },
         new { Text = "Pricing", Url = "#pricing" },
-        new { Text = "Integrations", Url = "#" },
-        new { Text = "Updates", Url = "#" }
-    };
-    
-    var companyLinks = new[]
-    {
-        new { Text = "About", Url = "#about" },
-        new { Text = "Blog", Url = "#" },
-        new { Text = "Careers", Url = "#" },
-        new { Text = "Contact", Url = "#" }
-    };
-    
-    var supportLinks = new[]
-    {
-        new { Text = "Help Center", Url = "#" },
-        new { Text = "Documentation", Url = "#" },
-        new { Text = "API Reference", Url = "#" },
-        new { Text = "Status", Url = "#" }
+        new { Text = "About", Url = "#about" }
     };
     
     var legalLinks = new[]
     {
-        new { Text = "Privacy Policy", Url = "#" },
-        new { Text = "Terms of Service", Url = "#" },
-        new { Text = "Cookie Policy", Url = "#" }
+        new { Text = "Privacy Policy", Url = "/Legal/PrivacyPolicy" },
+        new { Text = "Terms of Service", Url = "/Legal/TermsOfService" },
+        new { Text = "Cookie Policy", Url = "/Legal/CookiePolicy" }
     };
 }
 
 <!-- Footer Section -->
 <footer class="bg-gradient-to-b from-slate-900 to-slate-950 text-white py-20">
     <div class="container mx-auto px-6 max-w-7xl">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
             <!-- Company Info -->
-            <div class="lg:col-span-4">
+            <div class="lg:col-span-1">
                 <div class="mb-6">
                     <img src="/avatars/gixat-logo(3).png" alt="Gixat Logo" class="h-10 w-auto mb-4">
-                    <p class="text-white/70 text-sm leading-relaxed mb-6">
+                    <p class="text-white/70 text-sm leading-relaxed">
                         The all-in-one platform for modern garage management. Streamline operations, boost efficiency, and grow your business.
                     </p>
-                    <!-- Social Links -->
-                    <div class="flex gap-4">
-                        @foreach (var social in socialLinks)
-                        {
-                            <a href="@social.Url" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-primary-600 transition-colors duration-300">
-                                <i class="bi @social.Icon"></i>
-                            </a>
-                        }
-                    </div>
                 </div>
             </div>
 
-            <!-- Product Links -->
-            <div class="lg:col-span-2">
-                <h6 class="text-sm font-semibold text-white mb-5 uppercase tracking-wider">Product</h6>
+            <!-- Quick Links -->
+            <div class="lg:col-span-1">
+                <h6 class="text-sm font-semibold text-white mb-5 uppercase tracking-wider">Quick Links</h6>
                 <ul class="space-y-3">
                     @foreach (var link in productLinks)
                     {
-                        <li><a href="@link.Url" class="text-white/70 text-sm hover:text-white transition-colors duration-300">@link.Text</a></li>
+                        <li><a href="@link.Url" class="text-white/70 text-sm hover:text-white transition-colors duration-300 flex items-center gap-2">
+                            <i class="bi bi-arrow-right-short"></i>
+                            @link.Text
+                        </a></li>
                     }
                 </ul>
             </div>
 
-            <!-- Company Links -->
-            <div class="lg:col-span-2">
-                <h6 class="text-sm font-semibold text-white mb-5 uppercase tracking-wider">Company</h6>
+            <!-- Legal -->
+            <div class="lg:col-span-1">
+                <h6 class="text-sm font-semibold text-white mb-5 uppercase tracking-wider">Legal</h6>
                 <ul class="space-y-3">
-                    @foreach (var link in companyLinks)
+                    @foreach (var link in legalLinks)
                     {
-                        <li><a href="@link.Url" class="text-white/70 text-sm hover:text-white transition-colors duration-300">@link.Text</a></li>
+                        <li><a href="@link.Url" class="text-white/70 text-sm hover:text-white transition-colors duration-300 flex items-center gap-2">
+                            <i class="bi bi-arrow-right-short"></i>
+                            @link.Text
+                        </a></li>
                     }
                 </ul>
-            </div>
-
-            <!-- Support Links -->
-            <div class="lg:col-span-2">
-                <h6 class="text-sm font-semibold text-white mb-5 uppercase tracking-wider">Support</h6>
-                <ul class="space-y-3">
-                    @foreach (var link in supportLinks)
-                    {
-                        <li><a href="@link.Url" class="text-white/70 text-sm hover:text-white transition-colors duration-300">@link.Text</a></li>
-                    }
-                </ul>
-            </div>
-
-            <!-- Newsletter -->
-            <div class="lg:col-span-2">
-                <h6 class="text-sm font-semibold text-white mb-5 uppercase tracking-wider">Newsletter</h6>
-                <p class="text-white/70 text-sm mb-4">Stay updated with the latest features and news.</p>
-                <div id="newsletter-status" class="mt-3 text-sm"></div>
             </div>
         </div>
 
         <!-- Live Stats from GraphQL -->
         <div class="border-t border-white/10 pt-10 mb-10">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                <div>
+                <div class="transform hover:scale-105 transition-transform duration-300">
                     <div id="footer-clients" class="text-3xl font-bold text-white mb-1">0</div>
                     <div class="text-white/60 text-xs uppercase tracking-wider">Total Clients</div>
                 </div>
-                <div>
+                <div class="transform hover:scale-105 transition-transform duration-300">
                     <div id="footer-garages" class="text-3xl font-bold text-white mb-1">0</div>
                     <div class="text-white/60 text-xs uppercase tracking-wider">Active Garages</div>
                 </div>
-                <div>
+                <div class="transform hover:scale-105 transition-transform duration-300">
                     <div id="footer-revenue" class="text-3xl font-bold text-white mb-1">$0</div>
                     <div class="text-white/60 text-xs uppercase tracking-wider">Total Revenue</div>
                 </div>
-                <div>
+                <div class="transform hover:scale-105 transition-transform duration-300">
                     <div class="text-3xl font-bold text-white mb-1">24/7</div>
                     <div class="text-white/60 text-xs uppercase tracking-wider">Support</div>
                 </div>
@@ -133,12 +87,9 @@
                 <p class="text-white/50 text-sm text-center md:text-left">
                     &copy; @currentYear Gixat. All rights reserved.
                 </p>
-                <ul class="flex gap-6 text-center md:text-right">
-                    @foreach (var link in legalLinks)
-                    {
-                        <li><a href="@link.Url" class="text-white/50 text-sm hover:text-white transition-colors duration-300">@link.Text</a></li>
-                    }
-                </ul>
+                <div class="text-white/50 text-sm text-center md:text-right">
+                    Made with <i class="bi bi-heart-fill text-red-500 mx-1"></i> for automotive professionals
+                </div>
             </div>
         </div>
     </div>
