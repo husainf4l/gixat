@@ -155,6 +155,9 @@
 
     async function handleFiles(files) {
         uploadProgress.classList.remove('hidden');
+        
+        // Get CSRF token
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
         for (const file of files) {
             try {
@@ -165,39 +168,47 @@
 
                 const formData = new FormData();
                 formData.append('file', processedFile);
+                formData.append('__RequestVerificationToken', token);
 
                 const response = await fetch(`/Sessions/${sessionId}/Inspection/Create?handler=Upload`, {
                     method: 'POST',
-                    body: formData,
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    }
+                    body: formData
                 });
 
+                if (!response.ok) {
+                    console.error('Upload failed:', response.statusText);
+                    alert('Upload failed: ' + response.statusText);
+                    continue;
+                }
+                
                 const result = await response.json();
-                if (!result.success) continue;
+                if (!result.success) {
+                    console.error('Upload failed:', result);
+                    alert('Upload failed: ' + (result.error || 'Unknown error'));
+                    continue;
+                }
 
-                await fetch(result.uploadUrl, {
-                    method: 'PUT',
-                    body: processedFile,
-                    headers: { 'Content-Type': processedFile.type }
-                });
-
+                // File is saved locally, skip S3 upload
+                // Use the local URL directly
+                const confirmFormData = new FormData();
+                confirmFormData.append('__RequestVerificationToken', token);
+                
                 const confirmResponse = await fetch(`/Sessions/${sessionId}/Inspection/Create?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
                     method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    }
+                    body: confirmFormData
                 });
 
                 const confirmResult = await confirmResponse.json();
                 if (confirmResult.success) {
                     uploadedIds.push(confirmResult.media.id);
                     mediaItemIds.value = uploadedIds.join(',');
+                    // Use the public URL from the upload response
+                    confirmResult.media.s3Url = result.publicUrl || result.uploadUrl;
                     addMediaToGrid(confirmResult.media);
                 }
             } catch (error) {
                 console.error('Upload error:', error);
+                alert('Failed to upload file: ' + file.name + ' - ' + error.message);
             }
         }
 
@@ -262,10 +273,15 @@
     }
 
     async function deleteMedia(mediaId) {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', token);
+        
         const response = await fetch(`/Sessions/${sessionId}/Inspection/Create?handler=DeleteMedia&mediaId=${mediaId}`, {
             method: 'POST',
-            headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || '' }
+            body: formData
         });
+        
         const result = await response.json();
         if (result.success) {
             document.querySelector(`[data-media-id="${mediaId}"]`)?.remove();

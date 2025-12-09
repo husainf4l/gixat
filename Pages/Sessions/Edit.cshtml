@@ -1,0 +1,75 @@
+@page "{id:guid}"
+@model Gixat.Web.Pages.Sessions.EditModel
+@{
+    ViewData["Title"] = "Edit Session";
+    Layout = "_AppLayout";
+}
+
+<!-- Back Navigation -->
+<a href="/Sessions/Details/@Model.Input.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 no-underline mb-6 text-sm transition-colors">
+    <i class="bi bi-arrow-left"></i>
+    Back to Session
+</a>
+
+<!-- Header -->
+<div class="mb-8">
+    <div class="flex items-center gap-4 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+            <i class="bi bi-pencil-square text-2xl"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent">Edit Session</h1>
+            <p class="text-slate-600 text-sm mt-1">Session #@Model.SessionNumber</p>
+        </div>
+    </div>
+</div>
+
+<!-- Form Card -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 max-w-3xl">
+    <form method="post">
+        <input type="hidden" asp-for="Input.Id" />
+        
+        <div class="space-y-6">
+            <!-- Client -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-900 mb-2">Client</label>
+                <input type="text" value="@Model.ClientName" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50" disabled />
+            </div>
+
+            <!-- Vehicle -->
+            <div>
+                <label class="block text-sm font-semibold text-slate-900 mb-2">Vehicle</label>
+                <input type="text" value="@Model.VehicleDisplayName" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl bg-slate-50" disabled />
+            </div>
+
+            <!-- Mileage -->
+            <div>
+                <label asp-for="Input.MileageIn" class="block text-sm font-semibold text-slate-900 mb-2">Mileage In</label>
+                <input asp-for="Input.MileageIn" type="number" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:border-slate-300" />
+                <span asp-validation-for="Input.MileageIn" class="text-red-600 text-xs mt-1"></span>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label asp-for="Input.Notes" class="block text-sm font-semibold text-slate-900 mb-2">Notes</label>
+                <textarea asp-for="Input.Notes" rows="4" class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:border-slate-300 resize-none" placeholder="Add any notes about this session..."></textarea>
+                <span asp-validation-for="Input.Notes" class="text-red-600 text-xs mt-1"></span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+            <a href="/Sessions/Details/@Model.Input.Id" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <i class="bi bi-check-lg"></i>
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

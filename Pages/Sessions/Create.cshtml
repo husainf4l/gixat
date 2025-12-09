@@ -72,9 +72,14 @@
         <!-- Form Body -->
         <div class="p-8">
             <form method="post" id="checkInForm">
-                <div asp-validation-summary="All" class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl mb-6 text-sm flex items-start gap-3" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill text-lg"></i>
-                    <div class="flex-1"></div>
+                <div asp-validation-summary="ModelOnly" class="hidden bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl mb-6 text-sm" role="alert">
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-exclamation-triangle-fill text-lg"></i>
+                        <div class="flex-1">
+                            <p class="font-semibold mb-2">Please correct the following errors:</p>
+                            <ul class="list-disc list-inside space-y-1"></ul>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Step 1: Client Selection -->
@@ -114,10 +119,14 @@
                         <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
                             <i class="bi bi-car-front-fill text-orange-600 text-lg"></i>
                         </div>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="font-semibold text-slate-900">Vehicle Selection</h3>
                             <p class="text-sm text-slate-600">Choose which vehicle is being serviced</p>
                         </div>
+                        <button type="button" id="refreshVehicles" class="hidden text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            <span>Refresh</span>
+                        </button>
                     </div>
                     
                     <div class="relative">
@@ -247,73 +256,110 @@
 
         // This script handles vehicle loading when client is selected
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait for Tom Select to initialize, then hook into its onChange
-            setTimeout(function() {
-                const clientSelectElement = document.getElementById('clientSelect');
-                if (clientSelectElement && clientSelectElement.tomselect) {
-                    
-                    clientSelectElement.tomselect.on('change', async function(clientId) {
-                        const vehicleSelect = document.getElementById('vehicleSelect');
-                        const vehicleHelp = document.getElementById('vehicleHelp');
-                        const vehicleHelpContainer = document.getElementById('vehicleHelpContainer');
-                        
-                        vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
-                        
-                        if (!clientId) {
-                            vehicleSelect.disabled = true;
-                            vehicleHelp.innerHTML = 'Select a client first to see their vehicles';
-                            vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm';
-                            updateStep(2, false);
-                            updateStep(3, false);
-                            return;
-                        }
-                        
-                        // Client selected - activate step 2
-                        updateStep(2, true);
-                        
-                        try {
-                            vehicleHelp.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-1"></i>Loading vehicles...';
-                            vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-primary-600';
-                            
-                            const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
-                            const vehicles = await response.json();
-                            
-                            if (vehicles.length === 0) {
-                                vehicleSelect.disabled = true;
-                                vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-primary-600 hover:text-primary-700 font-semibold hover:underline">Add a vehicle →</a>';
-                                vehicleHelpContainer.className = 'mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-sm';
-                                vehicleHelp.innerHTML = '<i class="bi bi-exclamation-triangle text-amber-600"></i><div>' + vehicleHelp.innerHTML + '</div>';
-                            } else {
-                                vehicleSelect.disabled = false;
-                                vehicleHelp.textContent = vehicles.length + ' vehicle(s) available for selection';
-                                vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-green-600';
-                                vehicleHelp.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>' + vehicleHelp.textContent + '</span>';
-                                
-                                vehicles.forEach(vehicle => {
-                                    const option = document.createElement('option');
-                                    option.value = vehicle.id;
-                                    option.textContent = vehicle.displayName;
-                                    vehicleSelect.appendChild(option);
-                                });
-                            }
-                        } catch (error) {
-                            console.error('Error loading vehicles:', error);
-                            vehicleHelp.innerHTML = '<i class="bi bi-x-circle"></i>Error loading vehicles. Please try again.';
-                            vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-red-600';
-                        }
-                    });
+            const vehicleSelect = document.getElementById('vehicleSelect');
+            const vehicleHelp = document.getElementById('vehicleHelp');
+            const vehicleHelpContainer = document.getElementById('vehicleHelpContainer');
+            const refreshVehiclesBtn = document.getElementById('refreshVehicles');
+            let currentClientId = null;
+
+            // Function to load vehicles for a client
+            async function loadVehicles(clientId) {
+                if (!clientId) {
+                    vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
+                    vehicleSelect.disabled = true;
+                    vehicleHelp.innerHTML = 'Select a client first to see their vehicles';
+                    vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm';
+                    refreshVehiclesBtn.classList.add('hidden');
+                    updateStep(2, false);
+                    updateStep(3, false);
+                    return;
                 }
+
+                currentClientId = clientId;
                 
-                // Vehicle selection listener
-                const vehicleSelect = document.getElementById('vehicleSelect');
-                vehicleSelect.addEventListener('change', function() {
-                    if (this.value) {
-                        updateStep(3, true);
+                // Client selected - activate step 2
+                updateStep(2, true);
+                
+                // Show refresh button
+                refreshVehiclesBtn.classList.remove('hidden');
+                
+                // Show loading state
+                const refreshIcon = refreshVehiclesBtn.querySelector('i');
+                refreshIcon.classList.add('animate-spin');
+                refreshVehiclesBtn.disabled = true;
+                
+                try {
+                    vehicleHelp.innerHTML = '<i class="bi bi-hourglass-split animate-spin mr-1"></i>Loading vehicles...';
+                    vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-primary-600';
+                    
+                    const response = await fetch(`/Sessions/Create?handler=Vehicles&clientId=${clientId}`);
+                    const vehicles = await response.json();
+                    
+                    // Store current selection
+                    const currentValue = vehicleSelect.value;
+                    
+                    vehicleSelect.innerHTML = '<option value="">Choose a vehicle...</option>';
+                    
+                    if (vehicles.length === 0) {
+                        vehicleSelect.disabled = true;
+                        vehicleHelp.innerHTML = 'No vehicles found. <a href="/Clients/' + clientId + '" class="text-primary-600 hover:text-primary-700 font-semibold hover:underline">Add a vehicle →</a>';
+                        vehicleHelpContainer.className = 'mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-sm';
+                        vehicleHelp.innerHTML = '<i class="bi bi-exclamation-triangle text-amber-600"></i><div>' + vehicleHelp.innerHTML + '</div>';
                     } else {
-                        updateStep(3, false);
+                        vehicleSelect.disabled = false;
+                        vehicleHelp.textContent = vehicles.length + ' vehicle(s) available for selection';
+                        vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-green-600';
+                        vehicleHelp.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>' + vehicleHelp.textContent + '</span>';
+                        
+                        vehicles.forEach(vehicle => {
+                            const option = document.createElement('option');
+                            option.value = vehicle.id;
+                            option.textContent = vehicle.displayName;
+                            vehicleSelect.appendChild(option);
+                        });
+                        
+                        // Restore selection if it still exists
+                        if (currentValue) {
+                            vehicleSelect.value = currentValue;
+                        }
                     }
+                } catch (error) {
+                    console.error('Error loading vehicles:', error);
+                    vehicleHelp.innerHTML = '<i class="bi bi-x-circle"></i>Error loading vehicles. Please try again.';
+                    vehicleHelpContainer.className = 'mt-3 flex items-center gap-2 text-sm text-red-600';
+                } finally {
+                    // Remove loading state
+                    refreshIcon.classList.remove('animate-spin');
+                    refreshVehiclesBtn.disabled = false;
+                }
+            }
+
+            // Refresh button click handler
+            refreshVehiclesBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentClientId) {
+                    loadVehicles(currentClientId);
+                }
+            });
+
+            // Hook into client select change event
+            const clientSelectElement = document.getElementById('clientSelect');
+            if (clientSelectElement) {
+                clientSelectElement.addEventListener('change', async function() {
+                    const clientId = this.value;
+                    console.log('[Sessions/Create] Client selected:', clientId);
+                    await loadVehicles(clientId);
                 });
-            }, 500); // Small delay to ensure Tom Select is initialized
+            }
+            
+            // Vehicle selection listener
+            vehicleSelect.addEventListener('change', function() {
+                if (this.value) {
+                    updateStep(3, true);
+                } else {
+                    updateStep(3, false);
+                }
+            });
         });
     </script>
 }

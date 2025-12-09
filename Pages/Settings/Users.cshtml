@@ -5,64 +5,19 @@
     ViewData["Title"] = "User Management";
 }
 
-<style>
-    .apple-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .apple-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
-    }
-    
-    .apple-btn {
-        background: #007AFF;
-        color: white;
-        border-radius: 12px;
-        padding: 10px 20px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .apple-btn:hover {
-        background: #0051D5;
-        transform: scale(1.02);
-    }
-    
-    .filter-btn {
-        padding: 8px 20px;
-        border-radius: 10px;
-        font-weight: 500;
-        transition: all 0.2s;
-        color: #6B7280;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .filter-btn:hover {
-        background: #F3F4F6;
-    }
-    
-    .filter-btn.active {
-        background: #007AFF;
-        color: white;
-    }
-</style>
-
 <!-- Header -->
 <div class="mb-8">
     <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-4xl font-semibold text-gray-900 mb-1">Users</h1>
-            <p class="text-gray-500 text-sm">Manage team members and invitations</p>
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="bi bi-people-fill text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent">Users</h1>
+                <p class="text-slate-600 text-sm mt-1">Manage team members and invitations</p>
+            </div>
         </div>
-        <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" class="apple-btn flex items-center gap-2">
+        <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" class="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center gap-2 font-semibold">
             <i class="bi bi-person-plus-fill"></i>
             <span>Invite User</span>
         </button>
@@ -70,66 +25,85 @@
 </div>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Total Users</p>
-            <i class="bi bi-people text-blue-500"></i>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-6 mb-8">
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-blue-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Total Users</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="bi bi-people text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.Users.Count</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.Users.Count</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Active</p>
-            <i class="bi bi-person-check text-green-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-green-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Active</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                    <i class="bi bi-person-check-fill text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.Users.Count(u => u.IsActive)</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.Users.Count(u => u.IsActive)</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Pending</p>
-            <i class="bi bi-envelope text-orange-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-orange-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Pending</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                    <i class="bi bi-envelope-fill text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.PendingInvitations.Count</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.PendingInvitations.Count</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Admins</p>
-            <i class="bi bi-shield-check text-purple-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-purple-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Admins</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
+                    <i class="bi bi-shield-fill-check text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.Users.Count(u => u.Role <= Gixat.Web.Modules.Users.Entities.CompanyUserRole.Admin)</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.Users.Count(u => u.Role <= Gixat.Web.Modules.Users.Entities.CompanyUserRole.Admin)</p>
     </div>
 </div>
 
 <!-- Tabs -->
-<div class="apple-card mb-6 inline-flex gap-1 p-1">
-    <button onclick="showTab('users')" id="btnUsers" class="filter-btn active">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 inline-flex gap-2 mb-8">
+    <button onclick="showTab('users')" id="btnUsers" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
         Team Members
     </button>
-    <button onclick="showTab('invitations')" id="btnInvitations" class="filter-btn">
+    <button onclick="showTab('invitations')" id="btnInvitations" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
         Pending Invitations
     </button>
 </div>
 
 <!-- Users Table -->
-<div id="usersTable" class="apple-card overflow-hidden">
+<div id="usersTable" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Department</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Joined</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-slate-200">
                 @foreach (var user in Model.Users)
                 {
                     <tr class="hover:bg-gray-50 transition-colors">
@@ -194,20 +168,20 @@
 </div>
 
 <!-- Invitations Table -->
-<div id="invitationsTable" class="apple-card overflow-hidden hidden">
+<div id="invitationsTable" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hidden">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Sent</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Expires</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-slate-200">
                 @foreach (var invitation in Model.PendingInvitations)
                 {
                     var isExpired = invitation.ExpiresAt < DateTime.UtcNow;

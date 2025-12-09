@@ -5,144 +5,131 @@
     ViewData["Title"] = "Invoices";
 }
 
-<style>
-    .apple-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .apple-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
-    }
-    
-    .apple-btn {
-        background: #007AFF;
-        color: white;
-        border-radius: 12px;
-        padding: 10px 20px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .apple-btn:hover {
-        background: #0051D5;
-        transform: scale(1.02);
-    }
-    
-    .filter-btn {
-        padding: 8px 20px;
-        border-radius: 10px;
-        font-weight: 500;
-        transition: all 0.2s;
-        color: #6B7280;
-        background: transparent;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .filter-btn:hover {
-        background: #F3F4F6;
-    }
-    
-    .filter-btn.active {
-        background: #007AFF;
-        color: white;
-    }
-</style>
-
 <!-- Header -->
 <div class="mb-8">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-4xl font-semibold text-gray-900 mb-1">Invoices</h1>
-            <p class="text-gray-500 text-sm">Manage billing and payments</p>
+            <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent mb-2">Invoices</h1>
+            <p class="text-slate-600 flex items-center gap-2">
+                <i class="bi bi-receipt text-sm"></i>
+                <span>Manage billing and payments</span>
+            </p>
         </div>
-        <a asp-page="Create" class="apple-btn flex items-center gap-2">
-            <i class="bi bi-plus-lg"></i>
+        <a asp-page="Create" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-plus-circle-fill text-lg"></i>
             <span>New Invoice</span>
         </a>
     </div>
 </div>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Total</p>
-            <i class="bi bi-file-earmark-text text-blue-500"></i>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 lg:gap-6 mb-8">
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-blue-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Total</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="bi bi-file-earmark-text text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.AllInvoices.Count</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Draft</p>
-            <i class="bi bi-file-earmark text-gray-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-slate-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Draft</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white shadow-lg shadow-slate-500/30">
+                    <i class="bi bi-file-earmark text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Draft)</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Draft)</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Sent</p>
-            <i class="bi bi-send text-yellow-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-yellow-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Sent</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center text-white shadow-lg shadow-yellow-500/30">
+                    <i class="bi bi-send-fill text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Sent)</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Sent)</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Paid</p>
-            <i class="bi bi-check-circle text-green-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-green-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Paid</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                    <i class="bi bi-check-circle-fill text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Paid)</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Paid)</p>
     </div>
 
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Overdue</p>
-            <i class="bi bi-exclamation-circle text-red-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-red-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Overdue</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/30">
+                    <i class="bi bi-exclamation-circle-fill text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue)</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue)</p>
     </div>
 </div>
 
 <!-- Revenue Summary -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-    <div class="apple-card p-6">
-        <p class="text-sm font-medium text-gray-500 mb-2">Total Revenue</p>
-        <p class="text-4xl font-semibold text-gray-900">@Model.AllInvoices.Sum(i => i.Total).ToString("C0")</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 text-white shadow-xl">
+        <p class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+            <i class="bi bi-graph-up-arrow"></i>
+            Total Revenue
+        </p>
+        <p class="text-5xl font-bold">@Model.AllInvoices.Sum(i => i.Total).ToString("C0")</p>
     </div>
-    <div class="apple-card p-6">
-        <p class="text-sm font-medium text-gray-500 mb-2">Collected</p>
-        <p class="text-4xl font-semibold text-green-600">@Model.AllInvoices.Sum(i => i.PaidAmount).ToString("C0")</p>
+    <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 text-white shadow-xl">
+        <p class="text-sm font-semibold text-green-100 mb-3 flex items-center gap-2">
+            <i class="bi bi-check2-circle"></i>
+            Collected
+        </p>
+        <p class="text-5xl font-bold">@Model.AllInvoices.Sum(i => i.PaidAmount).ToString("C0")</p>
     </div>
-    <div class="apple-card p-6">
-        <p class="text-sm font-medium text-gray-500 mb-2">Outstanding</p>
-        <p class="text-4xl font-semibold text-orange-600">@Model.AllInvoices.Sum(i => i.BalanceDue).ToString("C0")</p>
+    <div class="bg-gradient-to-br from-orange-600 to-orange-700 rounded-2xl p-8 text-white shadow-xl">
+        <p class="text-sm font-semibold text-orange-100 mb-3 flex items-center gap-2">
+            <i class="bi bi-clock-history"></i>
+            Outstanding
+        </p>
+        <p class="text-5xl font-bold">@Model.AllInvoices.Sum(i => i.BalanceDue).ToString("C0")</p>
     </div>
 </div>
 
 <!-- Filter Tabs -->
-<div class="apple-card mb-6 inline-flex gap-1 p-1">
-    <button onclick="filterByStatus('all')" id="btnAll" class="filter-btn active">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 inline-flex gap-2 mb-8">
+    <button onclick="filterByStatus('all')" id="btnAll" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
         All
     </button>
-    <button onclick="filterByStatus('draft')" id="btnDraft" class="filter-btn">
+    <button onclick="filterByStatus('draft')" id="btnDraft" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
         Draft
     </button>
-    <button onclick="filterByStatus('sent')" id="btnSent" class="filter-btn">
+    <button onclick="filterByStatus('sent')" id="btnSent" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
         Sent
     </button>
-    <button onclick="filterByStatus('paid')" id="btnPaid" class="filter-btn">
+    <button onclick="filterByStatus('paid')" id="btnPaid" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
         Paid
     </button>
-    <button onclick="filterByStatus('overdue')" id="btnOverdue" class="filter-btn">
+    <button onclick="filterByStatus('overdue')" id="btnOverdue" class="px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
         Overdue
     </button>
 </div>
@@ -150,34 +137,40 @@
 <!-- Overdue Alert -->
 @if (Model.AllInvoices.Any(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue))
 {
-    <div class="apple-card border-l-4 border-red-500 p-4 mb-6">
-        <div class="flex items-center gap-3">
-            <i class="bi bi-exclamation-triangle text-red-600 text-xl"></i>
+    <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded-xl p-6 mb-8 shadow-sm">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg">
+                <i class="bi bi-exclamation-triangle-fill text-2xl"></i>
+            </div>
             <div>
-                <h3 class="font-semibold text-gray-900">Payment Overdue</h3>
-                <p class="text-sm text-gray-600">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue) invoice(s) are overdue</p>
+                <h3 class="font-bold text-slate-900 text-lg">Payment Overdue</h3>
+                <p class="text-sm text-slate-600 mt-1">@Model.AllInvoices.Count(i => i.Status == Gixat.Web.Modules.Invoices.Entities.InvoiceStatus.Overdue) invoice(s) are overdue</p>
             </div>
         </div>
     </div>
 }
 
 <!-- Invoices Table -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-gradient-to-r from-slate-50 to-slate-100"><!-- Invoices Table -->
 <div class="apple-card overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Invoice</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Client</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Amount</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Paid</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Balance</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-slate-200">
                 @foreach (var invoice in Model.AllInvoices)
                 {
                     var statusClass = invoice.Status switch

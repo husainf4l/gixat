@@ -13,9 +13,15 @@
 }
 
 <div class="client-search-wrapper">
-    <label for="@inputId" class="block text-sm font-medium text-apple-dark mb-2">
-        Select Client @if (required) { <span class="text-apple-red">*</span> }
-    </label>
+    <div class="flex items-center justify-between mb-2">
+        <label for="@inputId" class="block text-sm font-medium text-apple-dark">
+            Select Client @if (required) { <span class="text-apple-red">*</span> }
+        </label>
+        <button type="button" id="@(inputId)_refresh" class="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>Refresh</span>
+        </button>
+    </div>
     
     <select id="@inputId" name="@inputName" 
             class="input-apple-outlined w-full"
@@ -71,88 +77,129 @@
     console.log('[ClientSearch] Initializing simple dropdown for client selection...');
     const selectElement = document.getElementById('@inputId');
     const summaryCard = document.getElementById('@(inputId)_summary');
+    const refreshButton = document.getElementById('@(inputId)_refresh');
     
     if (!selectElement) {
         console.error('[ClientSearch] Select element not found with ID:', '@inputId');
         return;
     }
     
-    console.log('[ClientSearch] Loading all clients...');
-    
-    // Load all clients
-    fetch('/Clients?handler=Search&term=', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json'
+    // Function to load clients
+    function loadClients() {
+        console.log('[ClientSearch] Loading all clients...');
+        
+        // Show loading state
+        if (refreshButton) {
+            refreshButton.disabled = true;
+            refreshButton.querySelector('i').classList.add('animate-spin');
         }
-    })
-        .then(response => {
-            console.log('[ClientSearch] Response status:', response.status);
-            console.log('[ClientSearch] Response headers:', response.headers);
-            
-            if (response.status === 401) {
-                console.error('[ClientSearch] Unauthorized - user not logged in');
-                alert('You need to be logged in to view clients. Please log in and try again.');
-                window.location.href = '/Auth/Login';
-                return Promise.reject('Unauthorized');
+        
+        // Load all clients
+        fetch('/Clients?handler=Search&term=', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
             }
-            
-            if (response.status === 400) {
-                console.error('[ClientSearch] No company found for user');
-                alert('No company found. Please complete the setup wizard.');
-                window.location.href = '/Setup/Company';
-                return Promise.reject('No company');
-            }
-            
-            if (!response.ok) {
-                console.error('[ClientSearch] HTTP error:', response.status, response.statusText);
-                return response.text().then(text => {
-                    console.error('[ClientSearch] Error response body:', text);
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        })
+            .then(response => {
+                console.log('[ClientSearch] Response status:', response.status);
+                console.log('[ClientSearch] Response headers:', response.headers);
+                
+                if (response.status === 401) {
+                    console.error('[ClientSearch] Unauthorized - user not logged in');
+                    alert('You need to be logged in to view clients. Please log in and try again.');
+                    window.location.href = '/Auth/Login';
+                    return Promise.reject('Unauthorized');
+                }
+                
+                if (response.status === 400) {
+                    console.error('[ClientSearch] No company found for user');
+                    alert('No company found. Please complete the setup wizard.');
+                    window.location.href = '/Setup/Company';
+                    return Promise.reject('No company');
+                }
+                
+                if (!response.ok) {
+                    console.error('[ClientSearch] HTTP error:', response.status, response.statusText);
+                    return response.text().then(text => {
+                        console.error('[ClientSearch] Error response body:', text);
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(clients => {
+                if (!clients) return; // Handle rejected promises
+                
+                console.log('[ClientSearch] Loaded clients:', clients);
+                console.log('[ClientSearch] Number of clients:', clients.length);
+                
+                // Store current selection
+                const currentValue = selectElement.value;
+                
+                // Clear existing options except the first placeholder
+                while (selectElement.options.length > 1) {
+                    selectElement.remove(1);
+                }
+                
+                if (clients.length === 0) {
+                    console.warn('[ClientSearch] No clients found!');
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'No clients available - Add one first';
+                    option.disabled = true;
+                    selectElement.appendChild(option);
+                    return;
+                }
+                
+                // Add all clients to dropdown
+                clients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = `${client.fullName} - ${client.phone}`;
+                    option.dataset.client = JSON.stringify(client);
+                    selectElement.appendChild(option);
+                    console.log('[ClientSearch] Added client:', client.fullName);
                 });
-            }
-            
-            return response.json();
-        })
-        .then(clients => {
-            if (!clients) return; // Handle rejected promises
-            
-            console.log('[ClientSearch] Loaded clients:', clients);
-            console.log('[ClientSearch] Number of clients:', clients.length);
-            
-            // Clear existing options except the first placeholder
-            while (selectElement.options.length > 1) {
-                selectElement.remove(1);
-            }
-            
-            if (clients.length === 0) {
-                console.warn('[ClientSearch] No clients found!');
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'No clients available - Add one first';
-                option.disabled = true;
-                selectElement.appendChild(option);
-                return;
-            }
-            
-            // Add all clients to dropdown
-            clients.forEach(client => {
-                const option = document.createElement('option');
-                option.value = client.id;
-                option.textContent = `${client.fullName} - ${client.phone}`;
-                option.dataset.client = JSON.stringify(client);
-                selectElement.appendChild(option);
-                console.log('[ClientSearch] Added client:', client.fullName);
+                
+                // Restore selection if it still exists
+                if (currentValue) {
+                    selectElement.value = currentValue;
+                }
+                
+                console.log('[ClientSearch] Dropdown populated with', clients.length, 'clients');
+                
+                // Remove loading state
+                if (refreshButton) {
+                    refreshButton.disabled = false;
+                    refreshButton.querySelector('i').classList.remove('animate-spin');
+                }
+            })
+            .catch(error => {
+                console.error('[ClientSearch] Error loading clients:', error);
+                if (error !== 'Unauthorized' && error !== 'No company') {
+                    alert('Failed to load clients: ' + error.message + '\n\nPlease check the browser console for details.');
+                }
+                
+                // Remove loading state
+                if (refreshButton) {
+                    refreshButton.disabled = false;
+                    refreshButton.querySelector('i').classList.remove('animate-spin');
+                }
             });
-            
-            console.log('[ClientSearch] Dropdown populated with', clients.length, 'clients');
-        })
-        .catch(error => {
-            console.error('[ClientSearch] Error loading clients:', error);
-            if (error !== 'Unauthorized' && error !== 'No company') {
-                alert('Failed to load clients: ' + error.message + '\n\nPlease check the browser console for details.');
-            }
+    }
+    
+    // Initial load
+    loadClients();
+    
+    // Refresh button click handler
+    if (refreshButton) {
+        refreshButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadClients();
         });
+    }
     
     // Handle selection change
     selectElement.addEventListener('change', function() {

@@ -5,122 +5,35 @@
     ViewData["Title"] = "Appointments";
 }
 
-<style>
-    .apple-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .apple-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        transform: translateY(-2px);
-    }
-    
-    .apple-btn {
-        background: #007AFF;
-        color: white;
-        border-radius: 12px;
-        padding: 10px 20px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .apple-btn:hover {
-        background: #0051D5;
-        transform: scale(1.02);
-    }
-    
-    .apple-input {
-        background: #F5F5F7;
-        border: 1px solid transparent;
-        border-radius: 12px;
-        padding: 12px 16px;
-        font-size: 14px;
-        transition: all 0.2s;
-    }
-    
-    .apple-input:focus {
-        outline: none;
-        background: white;
-        border-color: #007AFF;
-        box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
-    }
-    
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 500;
-    }
-</style>
-
 <!-- Clean Header -->
 <div class="mb-8">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-4xl font-semibold text-gray-900 mb-1">Appointments</h1>
-            <p class="text-gray-500 text-sm">Manage your schedule</p>
+            <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent mb-2">Appointments</h1>
+            <p class="text-slate-600 flex items-center gap-2">
+                <i class="bi bi-calendar-event text-sm"></i>
+                <span>Manage your schedule</span>
+            </p>
         </div>
-        <a href="/Appointments/Create" class="apple-btn flex items-center gap-2">
-            <i class="bi bi-plus-lg"></i>
+        <a href="/Appointments/Create" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+            <i class="bi bi-plus-circle-fill text-lg"></i>
             <span>New Appointment</span>
         </a>
     </div>
     
     <!-- Search -->
     <div class="relative max-w-md">
-        <i class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <i class="bi bi-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
         <input type="text" 
                id="appointmentSearch"
                placeholder="Search appointments..." 
-               class="apple-input w-full pl-11"
+               class="w-full px-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all pl-11 hover:border-slate-300 bg-white"
                oninput="filterAppointments()">
     </div>
 </div>
 
-<script>
-    let currentFilter = 'all';
-    
-    function filterByStatus(status) {
-        currentFilter = status;
-        
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.closest('.filter-btn').classList.add('active');
-        
-        filterAppointments();
-    }
-    
-    function filterAppointments() {
-        const searchTerm = document.getElementById('appointmentSearch').value.toLowerCase();
-        const appointmentCards = document.querySelectorAll('[data-appointment-card]');
-        
-        appointmentCards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            const status = card.dataset.status;
-            
-            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
-            const matchesFilter = currentFilter === 'all' || status === currentFilter;
-            
-            if (matchesSearch && matchesFilter) {
-                card.style.display = '';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    }
-</script>
-
-<!-- Simple Stats Cards -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 lg:gap-6 mb-8">
     @{
         var scheduledCount = Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Scheduled);
         var confirmedCount = Model.Appointments.Count(a => a.Status == Gixat.Web.Modules.Appointments.Entities.AppointmentStatus.Confirmed);
@@ -128,50 +41,92 @@
         var totalCount = Model.Appointments.Count;
     }
     
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Scheduled</p>
-            <i class="bi bi-calendar text-blue-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-blue-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Scheduled</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="bi bi-calendar-check text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@scheduledCount</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@scheduledCount</p>
     </div>
     
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Confirmed</p>
-            <i class="bi bi-check-circle text-green-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-green-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Confirmed</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                    <i class="bi bi-check-circle-fill text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@confirmedCount</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@confirmedCount</p>
     </div>
     
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">In Progress</p>
-            <i class="bi bi-hourglass-split text-purple-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-purple-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">In Progress</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
+                    <i class="bi bi-hourglass-split text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@inProgressCount</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@inProgressCount</p>
     </div>
     
-    <div class="apple-card p-6">
-        <div class="flex items-center justify-between mb-2">
-            <p class="text-sm text-gray-500 font-medium">Total</p>
-            <i class="bi bi-calendar-event text-gray-500"></i>
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-slate-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-3">
+                <p class="text-sm text-slate-600 font-semibold">Total</p>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center text-white shadow-lg shadow-slate-500/30">
+                    <i class="bi bi-calendar-event text-lg"></i>
+                </div>
+            </div>
+            <p class="text-4xl font-bold text-slate-900">@totalCount</p>
         </div>
-        <p class="text-3xl font-semibold text-gray-900">@totalCount</p>
     </div>
 </div>
 
+<!-- Status Filter Buttons -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 inline-flex gap-2 mb-8">
+    <button onclick="filterByStatus('all')" class="filter-btn active px-6 py-3 rounded-xl font-semibold text-sm transition-all bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg">
+        All
+    </button>
+    <button onclick="filterByStatus('scheduled')" class="filter-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
+        Scheduled
+    </button>
+    <button onclick="filterByStatus('confirmed')" class="filter-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
+        Confirmed
+    </button>
+    <button onclick="filterByStatus('inprogress')" class="filter-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
+        In Progress
+    </button>
+    <button onclick="filterByStatus('completed')" class="filter-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
+        Completed
+    </button>
+    <button onclick="filterByStatus('cancelled')" class="filter-btn px-6 py-3 rounded-xl font-semibold text-sm transition-all text-slate-600 hover:bg-slate-100">
+        Cancelled
+    </button>
+</div>
+
 <!-- View Selector -->
-<div class="apple-card mb-6">
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
     <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="flex gap-2 bg-gray-100 rounded-xl p-1">
+        <div class="flex gap-2 bg-slate-100 rounded-xl p-1.5">
             <a href="?view=calendar&date=@Model.SelectedDate.ToString("yyyy-MM-dd")" 
-               class="@(Model.ViewMode == "calendar" ? "bg-blue-500 text-white" : "text-gray-600") px-5 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
+               class="@(Model.ViewMode == "calendar" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-slate-600 hover:bg-slate-200") px-6 py-3 rounded-lg font-semibold text-sm transition-all inline-flex items-center gap-2">
                 <i class="bi bi-calendar3"></i>
                 Calendar
             </a>
             <a href="?view=list" 
-               class="@(Model.ViewMode == "list" ? "bg-blue-500 text-white" : "text-gray-600") px-5 py-2.5 rounded-lg font-medium text-sm transition-all inline-flex items-center gap-2">
+               class="@(Model.ViewMode == "list" ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg" : "text-slate-600 hover:bg-slate-200") px-6 py-3 rounded-lg font-semibold text-sm transition-all inline-flex items-center gap-2">
                 <i class="bi bi-list-ul"></i>
                 List
             </a>
@@ -180,16 +135,16 @@
         @if (Model.ViewMode == "calendar")
         {
             <div class="flex items-center gap-3">
-                <button onclick="navigateDate(-1)" class="apple-btn p-2 bg-gray-100 text-gray-700">
+                <button onclick="navigateDate(-1)" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all hover:scale-110">
                     <i class="bi bi-chevron-left"></i>
                 </button>
-                <span class="text-sm font-medium text-gray-900 px-4">
+                <span class="text-sm font-semibold text-slate-900 px-4 min-w-[160px] text-center">
                     @Model.SelectedDate.ToString("MMMM dd, yyyy")
                 </span>
-                <button onclick="navigateDate(1)" class="apple-btn p-2 bg-gray-100 text-gray-700">
+                <button onclick="navigateDate(1)" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all hover:scale-110">
                     <i class="bi bi-chevron-right"></i>
                 </button>
-                <button onclick="goToToday()" class="apple-btn bg-gray-100 text-gray-700">
+                <button onclick="goToToday()" class="px-5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-semibold text-sm transition-all hover:scale-[1.02]">
                     Today
                 </button>
             </div>
@@ -461,6 +416,55 @@ else
     }
 }
 
+<script>
+    let currentFilter = 'all';
+    
+    function filterByStatus(status) {
+        currentFilter = status;
+        
+        // Update button states
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            // Remove active classes
+            btn.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600', 'text-white', 'shadow-lg');
+            // Add inactive classes
+            btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+        });
+        
+        // Add active classes to clicked button
+        const clickedBtn = event.target.closest('.filter-btn');
+        clickedBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+        clickedBtn.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-indigo-600', 'text-white', 'shadow-lg');
+        
+        filterAppointments();
+    }
+    
+    function filterAppointments() {
+        const searchTerm = document.getElementById('appointmentSearch').value.toLowerCase();
+        const appointmentCards = document.querySelectorAll('[data-appointment-card]');
+        
+        appointmentCards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            const status = card.dataset.status;
+            
+            const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+            const matchesFilter = currentFilter === 'all' || status === currentFilter;
+            
+            if (matchesSearch && matchesFilter) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // Add search event listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('appointmentSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterAppointments);
+        }
+    });
+</script>
 
 @functions {
     string GetStatusBadgeClass(Gixat.Web.Modules.Appointments.Entities.AppointmentStatus status)

@@ -48,284 +48,245 @@
         }
     </script>
 </head>
-<body class="bg-gradient-to-br from-primary-50 via-white to-accent-50 min-h-screen antialiased overflow-y-auto">
+<body class="bg-gray-50 min-h-screen antialiased">
     <!-- Navigation -->
     <partial name="../Components/_Navbar" />
 
-    <!-- Hero Section -->
-    <div class="relative min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 pt-20 pb-8">
-        <!-- Background Elements -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/20 to-accent-400/20 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-accent-400/20 to-primary-400/20 rounded-full blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-primary-300/10 to-accent-300/10 rounded-full blur-3xl"></div>
-        </div>
+    <!-- Main Container -->
+    <div class="min-h-screen flex pt-16">
+        <!-- Left Panel - Brand & Benefits -->
+        <div class="hidden lg:flex lg:w-1/2 bg-gray-900 relative overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0 pointer-events-none">
+                <img src="/images/hero/signuphero1.webp" 
+                     alt="Gixat Dashboard" 
+                     class="w-full h-full object-cover" />
+                <!-- Dark overlay for text readability -->
+                <div class="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/50"></div>
+            </div>
 
-        <!-- Top Section: Video and Heading Side by Side -->
-        <div class="relative w-full max-w-7xl mx-auto mb-8 pt-8">
-            <div class="grid lg:grid-cols-2 gap-8 items-center w-full">
-                <!-- Left Side - Marketing Content -->
-                <div class="text-center lg:text-left animate-in slide-in-from-bottom-4 duration-700 flex items-center">
-                    <div class="space-y-6">
-                        <h1 class="text-3xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                            Your Garage. One Platform.
-                            <span class="bg-gradient-to-r from-primary-600 via-accent-600 to-primary-700 bg-clip-text text-transparent">Unlimited Control.</span>
-                        </h1>
-
-                        <p class="text-lg text-gray-600 leading-relaxed">
-                            Sign up and centralize your sessions, clients, vehicles, and invoices effortlessly.
-                        </p>
-                    </div>
+            <!-- Content -->
+            <div class="relative z-10 flex flex-col justify-center px-12 xl:px-16 text-white">
+                <!-- Logo/Brand -->
+                <div class="mb-12">
+                    <h1 class="text-5xl xl:text-6xl font-bold mb-4">
+                        Gixat
+                    </h1>
+                    <div class="w-20 h-1 bg-white rounded-full"></div>
                 </div>
 
-                <!-- Right Side - Video -->
-                <div class="animate-in fade-in-0 duration-500 relative">
-                    <div class="relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl p-6 shadow-2xl border border-blue-100 overflow-hidden">
-                        <!-- Background Pattern -->
-                        <div class="absolute inset-0 opacity-10">
-                            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 20px 20px, #3b82f6 2px, transparent 2px); background-size: 40px 40px;"></div>
-                        </div>
+                <!-- Tagline -->
+                <div class="mb-16">
+                    <h2 class="text-3xl xl:text-4xl font-semibold mb-6 leading-tight">
+                        Your Garage Management,<br/>
+                        <span class="text-blue-200">Simplified.</span>
+                    </h2>
+                    <p class="text-lg text-blue-100 leading-relaxed">
+                        Join thousands of garage owners who trust Gixat to manage their daily operations seamlessly.
+                    </p>
+                </div>
 
-                        <!-- Garage Illustration with Video -->
-                        <div class="relative z-10">
-                            <!-- Hero Video -->
-                            <div>
-                                <video
-                                    class="w-full h-auto rounded-2xl shadow-lg"
-                                    autoplay
-                                    muted
-                                    loop
-                                    playsinline
-                                    poster="/images/gixathero.png">
-                                    <source src="/images/hero/herovideo.webm" type="video/webm">
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
+                <!-- Features List -->
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="bi bi-speedometer2 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-1">Real-time Dashboard</h3>
+                            <p class="text-blue-100 text-sm">Monitor all your operations at a glance</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="bi bi-people-fill text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-1">Client Management</h3>
+                            <p class="text-blue-100 text-sm">Keep track of all your clients and their vehicles</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="bi bi-shield-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-1">Secure & Reliable</h3>
+                            <p class="text-blue-100 text-sm">Enterprise-grade security for your data</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sign Up Form Section - Full Width -->
-        <div class="relative w-full max-w-6xl mx-auto">
-            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-200/50 p-6 lg:p-8 relative overflow-hidden">
-                <!-- Decorative gradient overlay -->
-                <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-primary-100/30 to-accent-100/30 rounded-full blur-3xl -z-0"></div>
-                <div class="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-accent-100/30 to-primary-100/30 rounded-full blur-3xl -z-0"></div>
-                
-                <div class="relative z-10">
-                    <!-- Form Header -->
-                    <div class="text-center mb-8">
-                        <div class="inline-block mb-4">
-                            <div class="bg-gradient-to-r from-primary-600 to-accent-600 text-white px-5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                                Get Started Today
-                            </div>
-                        </div>
-                        <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-3 tracking-tight">Create Your Account</h2>
-                        <p class="text-gray-600 text-base leading-relaxed max-w-2xl mx-auto">Join thousands of garage owners managing their business smarter</p>
+        <!-- Right Panel - Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center px-6 sm:px-12 py-12">
+            <div class="w-full max-w-md">
+                <!-- Mobile Logo -->
+                <div class="lg:hidden mb-8 text-center">
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Gixat
+                    </h1>
+                </div>
 
-                        <!-- Enhanced Progress Indicator -->
-                        <div class="flex items-center justify-center mt-8 mb-6">
-                            <div class="flex items-center space-x-3">
-                                <div class="relative">
-                                    <div class="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-xl flex items-center justify-center text-base font-bold shadow-lg transform rotate-3 hover:rotate-0 transition-transform">1</div>
-                                    <div class="absolute -top-7 left-1/2 transform -translate-x-1/2 text-xs font-bold text-primary-600 whitespace-nowrap">Account</div>
-                                </div>
-                                <div class="w-16 h-1 bg-gradient-to-r from-primary-200 to-primary-300 rounded-full"></div>
-                                <div class="relative">
-                                    <div class="w-11 h-11 bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 rounded-xl flex items-center justify-center text-base font-bold border-2 border-gray-300 transform -rotate-3 hover:rotate-0 transition-transform">2</div>
-                                    <div class="absolute -top-7 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-400 whitespace-nowrap">Verify</div>
-                                </div>
-                                <div class="w-16 h-1 bg-gradient-to-r from-primary-200 to-primary-300 rounded-full"></div>
-                                <div class="relative">
-                                    <div class="w-11 h-11 bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 rounded-xl flex items-center justify-center text-base font-bold border-2 border-gray-300 transform rotate-3 hover:rotate-0 transition-transform">3</div>
-                                    <div class="absolute -top-7 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-400 whitespace-nowrap">Complete</div>
-                                </div>
-                            </div>
+                <!-- Form Header -->
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
+                    <p class="text-gray-600">Start your 30-day free trial</p>
+                </div>
+
+                <!-- Error Messages -->
+                @if (Model.Errors.Any())
+                {
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <strong class="font-semibold">Please fix the following:</strong>
+                        </div>
+                        <ul class="list-disc list-inside text-sm space-y-1 ml-6">
+                            @foreach (var error in Model.Errors)
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <!-- Form -->
+                <form method="post" class="space-y-5">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Name Fields -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="Input.FirstName" class="block text-sm font-medium text-gray-700 mb-2">
+                                First name
+                            </label>
+                            <input asp-for="Input.FirstName" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-gray-900" 
+                                   placeholder="John" />
+                            <span asp-validation-for="Input.FirstName" class="text-red-600 text-sm mt-1"></span>
+                        </div>
+                        <div>
+                            <label asp-for="Input.LastName" class="block text-sm font-medium text-gray-700 mb-2">
+                                Last name
+                            </label>
+                            <input asp-for="Input.LastName" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-gray-900" 
+                                   placeholder="Doe" />
+                            <span asp-validation-for="Input.LastName" class="text-red-600 text-sm mt-1"></span>
                         </div>
                     </div>
 
-                    @if (Model.Errors.Any())
-                    {
-                        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 px-5 py-3 rounded-xl mb-6 shadow-md animate-fade-in">
-                            <div class="flex items-center gap-2 mb-2">
-                                <i class="bi bi-exclamation-triangle-fill text-lg"></i>
-                                <strong class="text-base">Please fix the following errors:</strong>
-                            </div>
-                            <ul class="list-disc list-inside text-sm space-y-1 ml-6">
-                                @foreach (var error in Model.Errors)
-                                {
-                                    <li>@error</li>
-                                }
-                            </ul>
+                    <!-- Email Field -->
+                    <div>
+                        <label asp-for="Input.Email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email address
+                        </label>
+                        <input asp-for="Input.Email" 
+                               type="email"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-gray-900" 
+                               placeholder="john.doe@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-red-600 text-sm mt-1"></span>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label asp-for="Input.Password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password
+                        </label>
+                        <div class="relative">
+                            <input asp-for="Input.Password" 
+                                   type="password" 
+                                   id="password-input"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-gray-900 pr-12" 
+                                   placeholder="Create a strong password" />
+                            <button type="button" 
+                                    id="toggle-password" 
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                <i class="bi bi-eye"></i>
+                            </button>
                         </div>
-                    }
-
-                    <form method="post" class="space-y-6">
-                        @Html.AntiForgeryToken()
-
-                        <div class="grid lg:grid-cols-3 gap-6">
-                            <!-- Personal Information Section -->
-                            <div class="space-y-5 p-6 bg-gradient-to-br from-primary-50/80 via-white to-primary-50/50 rounded-2xl border-2 border-primary-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                                <div class="flex items-center gap-3 mb-5 pb-4 border-b-2 border-primary-100">
-                                    <div class="w-11 h-11 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                        <i class="bi bi-person-fill text-white text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-bold text-gray-900">Personal Info</h3>
-                                        <p class="text-xs text-gray-600">Tell us about yourself</p>
-                                    </div>
-                                </div>
-
-                                <!-- Name Fields -->
-                                <div class="space-y-4">
-                                    <div class="space-y-2">
-                                        <label asp-for="Input.FirstName" class="block text-xs font-bold text-gray-800 uppercase tracking-wide">First name</label>
-                                        <div class="relative group/input">
-                                            <input asp-for="Input.FirstName" class="w-full pl-4 pr-11 py-3 text-sm border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all duration-300 outline-none shadow-sm hover:border-primary-400 hover:shadow-md" placeholder="John" />
-                                            <i class="bi bi-person absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary-500 group-hover/input:text-primary-400 transition-colors text-sm"></i>
-                                        </div>
-                                        <span asp-validation-for="Input.FirstName" class="text-red-500 text-xs font-medium"></span>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label asp-for="Input.LastName" class="block text-xs font-bold text-gray-800 uppercase tracking-wide">Last name</label>
-                                        <div class="relative group/input">
-                                            <input asp-for="Input.LastName" class="w-full pl-4 pr-11 py-3 text-sm border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all duration-300 outline-none shadow-sm hover:border-primary-400 hover:shadow-md" placeholder="Doe" />
-                                            <i class="bi bi-person-fill absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary-500 group-hover/input:text-primary-400 transition-colors text-sm"></i>
-                                        </div>
-                                        <span asp-validation-for="Input.LastName" class="text-red-500 text-xs font-medium"></span>
-                                    </div>
-
-                                    <!-- Email Field -->
-                                    <div class="space-y-2">
-                                        <label asp-for="Input.Email" class="block text-xs font-bold text-gray-800 uppercase tracking-wide">Email address</label>
-                                        <div class="relative group/input">
-                                            <input asp-for="Input.Email" type="email" class="w-full pl-4 pr-11 py-3 text-sm border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 focus:bg-white transition-all duration-300 outline-none shadow-sm hover:border-primary-400 hover:shadow-md" placeholder="john.doe@example.com" />
-                                            <i class="bi bi-envelope-fill absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within/input:text-primary-500 group-hover/input:text-primary-400 transition-colors text-sm"></i>
-                                        </div>
-                                        <span asp-validation-for="Input.Email" class="text-red-500 text-xs font-medium"></span>
-                                    </div>
-                                </div>
+                        <span asp-validation-for="Input.Password" class="text-red-600 text-sm mt-1"></span>
+                        
+                        <!-- Password Strength Indicator -->
+                        <div id="password-strength" class="hidden mt-3">
+                            <div class="flex gap-2 mb-2">
+                                <div id="strength-1" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all"></div>
+                                <div id="strength-2" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all"></div>
+                                <div id="strength-3" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all"></div>
+                                <div id="strength-4" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all"></div>
                             </div>
-
-                            <!-- Security Section -->
-                            <div class="space-y-5 p-6 bg-gradient-to-br from-accent-50/80 via-white to-accent-50/50 rounded-2xl border-2 border-accent-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                                <div class="flex items-center gap-3 mb-5 pb-4 border-b-2 border-accent-100">
-                                    <div class="w-11 h-11 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                        <i class="bi bi-shield-lock-fill text-white text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-bold text-gray-900">Security</h3>
-                                        <p class="text-xs text-gray-600">Secure your account</p>
-                                    </div>
-                                </div>
-
-                                <!-- Password Field -->
-                                <div class="space-y-2">
-                                    <label asp-for="Input.Password" class="block text-xs font-bold text-gray-800 uppercase tracking-wide">Password</label>
-                                    <div class="relative group/input">
-                                        <input asp-for="Input.Password" type="password" id="password-input" class="w-full pl-4 pr-11 py-3 text-sm border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100 focus:bg-white transition-all duration-300 outline-none shadow-sm hover:border-accent-400 hover:shadow-md" placeholder="Create a strong password" />
-                                        <button type="button" id="toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-accent-500 transition-colors p-1">
-                                            <i class="bi bi-eye text-sm"></i>
-                                        </button>
-                                    </div>
-                                    <span asp-validation-for="Input.Password" class="text-red-500 text-xs font-medium"></span>
-
-                                    <!-- Password Strength -->
-                                    <div id="password-strength" class="hidden mt-3">
-                                        <div class="flex gap-1.5 mb-2">
-                                            <div id="strength-1" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all duration-300"></div>
-                                            <div id="strength-2" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all duration-300"></div>
-                                            <div id="strength-3" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all duration-300"></div>
-                                            <div id="strength-4" class="h-1.5 flex-1 bg-gray-200 rounded-full transition-all duration-300"></div>
-                                        </div>
-                                        <p id="strength-text" class="text-xs font-bold text-gray-700"></p>
-                                    </div>
-
-                                    <div class="bg-gradient-to-r from-accent-50 to-primary-50 rounded-xl px-4 py-3 mt-3 border-2 border-accent-100 shadow-sm">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <i class="bi bi-shield-check text-accent-600 text-base"></i>
-                                            <strong class="text-accent-700 text-xs font-bold uppercase tracking-wide">Requirements:</strong>
-                                        </div>
-                                        <ul class="space-y-1 text-xs text-gray-600">
-                                            <li class="flex items-center gap-1.5">
-                                                <i class="bi bi-check-circle-fill text-accent-500 text-xs"></i>
-                                                At least 8 characters
-                                            </li>
-                                            <li class="flex items-center gap-1.5">
-                                                <i class="bi bi-check-circle-fill text-accent-500 text-xs"></i>
-                                                Upper and lowercase
-                                            </li>
-                                            <li class="flex items-center gap-1.5">
-                                                <i class="bi bi-check-circle-fill text-accent-500 text-xs"></i>
-                                                Number and symbol
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <!-- Confirm Password Field -->
-                                <div class="space-y-2">
-                                    <label asp-for="Input.ConfirmPassword" class="block text-xs font-bold text-gray-800 uppercase tracking-wide">Confirm password</label>
-                                    <div class="relative group/input">
-                                        <input asp-for="Input.ConfirmPassword" type="password" id="confirm-password-input" class="w-full pl-4 pr-11 py-3 text-sm border-2 border-gray-300 rounded-xl bg-white text-gray-900 placeholder:text-gray-400 focus:border-accent-500 focus:ring-4 focus:ring-accent-100 focus:bg-white transition-all duration-300 outline-none shadow-sm hover:border-accent-400 hover:shadow-md" placeholder="Confirm your password" />
-                                        <button type="button" id="toggle-confirm-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-accent-500 transition-colors p-1">
-                                            <i class="bi bi-eye text-sm"></i>
-                                        </button>
-                                    </div>
-                                    <span asp-validation-for="Input.ConfirmPassword" class="text-red-500 text-xs font-medium"></span>
-                                </div>
-                            </div>
-
-                            <!-- Terms and Agreement Section -->
-                            <div class="space-y-5 p-6 bg-gradient-to-br from-green-50/80 via-white to-green-50/50 rounded-2xl border-2 border-green-100 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                                <div class="flex items-center gap-3 mb-5 pb-4 border-b-2 border-green-100">
-                                    <div class="w-11 h-11 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                        <i class="bi bi-check-circle-fill text-white text-xl"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-lg font-bold text-gray-900">Agreement</h3>
-                                        <p class="text-xs text-gray-600">Review our terms</p>
-                                    </div>
-                                </div>
-
-                                <!-- Terms and Conditions -->
-                                <div class="space-y-4">
-                                    <div class="flex items-start gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md hover:border-green-300 transition-all">
-                                        <input type="checkbox" id="terms-checkbox" class="mt-0.5 w-5 h-5 text-primary-600 bg-gray-50 border-gray-300 rounded-lg focus:ring-primary-500 focus:ring-2 transition-colors cursor-pointer" required />
-                                        <label for="terms-checkbox" class="text-xs text-gray-700 leading-relaxed cursor-pointer">
-                                            I agree to the <a href="/Legal/TermsOfService" class="text-primary-600 hover:text-primary-700 font-bold transition-colors underline decoration-2 underline-offset-2">Terms of Service</a> and <a href="/Legal/PrivacyPolicy" class="text-primary-600 hover:text-primary-700 font-bold transition-colors underline decoration-2 underline-offset-2">Privacy Policy</a>
-                                        </label>
-                                    </div>
-
-                                    <button type="submit" class="w-full py-4 px-6 text-base font-bold text-white bg-gradient-to-r from-primary-600 via-primary-500 to-accent-600 border-none rounded-xl cursor-pointer hover:from-primary-700 hover:via-primary-600 hover:to-accent-700 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98] transition-all duration-300 shadow-xl group/button relative overflow-hidden">
-                                        <span class="relative z-10 flex items-center justify-center gap-2">
-                                            <i class="bi bi-rocket-takeoff-fill text-lg group-hover/button:rotate-12 transition-transform"></i>
-                                            Start My Free Trial
-                                            <i class="bi bi-arrow-right text-lg group-hover/button:translate-x-1 transition-transform"></i>
-                                        </span>
-                                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 translate-x-[-200%] group-hover/button:translate-x-[200%] transition-transform duration-1000"></div>
-                                    </button>
-
-                                    <div class="text-center p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 shadow-sm">
-                                        <p class="text-xs text-gray-600 leading-relaxed">
-                                            By creating an account, you agree to our
-                                            <a href="/Legal/TermsOfService" class="text-primary-600 hover:text-primary-700 font-bold transition-colors underline decoration-2 underline-offset-2">Terms</a> and
-                                            <a href="/Legal/PrivacyPolicy" class="text-primary-600 hover:text-primary-700 font-bold transition-colors underline decoration-2 underline-offset-2">Privacy Policy</a>
-                                        </p>
-                                    </div>
-                                    
-                                    <div class="text-center pt-2">
-                                        <p class="text-xs text-gray-600">
-                                            Already have an account? 
-                                            <a href="/Auth/Login" class="text-primary-600 hover:text-primary-700 font-bold transition-colors underline decoration-2 underline-offset-2">Sign in here</a>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            <p id="strength-text" class="text-sm font-medium"></p>
                         </div>
-                    </form>
+
+                        <!-- Password Requirements -->
+                        <div class="mt-3 text-xs text-gray-600 space-y-1">
+                            <p class="flex items-center gap-1.5">
+                                <i class="bi bi-check2 text-green-600"></i>
+                                At least 8 characters
+                            </p>
+                            <p class="flex items-center gap-1.5">
+                                <i class="bi bi-check2 text-green-600"></i>
+                                Upper and lowercase letters
+                            </p>
+                            <p class="flex items-center gap-1.5">
+                                <i class="bi bi-check2 text-green-600"></i>
+                                Numbers and symbols
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password Field -->
+                    <div>
+                        <label asp-for="Input.ConfirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                            Confirm password
+                        </label>
+                        <div class="relative">
+                            <input asp-for="Input.ConfirmPassword" 
+                                   type="password" 
+                                   id="confirm-password-input"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-gray-900 pr-12" 
+                                   placeholder="Confirm your password" />
+                            <button type="button" 
+                                    id="toggle-confirm-password" 
+                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-red-600 text-sm mt-1"></span>
+                    </div>
+
+                    <!-- Terms Checkbox -->
+                    <div class="flex items-start gap-3 pt-2">
+                        <input type="checkbox" 
+                               id="terms-checkbox" 
+                               class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                               required />
+                        <label for="terms-checkbox" class="text-sm text-gray-700 cursor-pointer">
+                            I agree to the 
+                            <a href="/Legal/TermsOfService" class="text-blue-600 hover:text-blue-700 font-medium underline">Terms of Service</a> 
+                            and 
+                            <a href="/Legal/PrivacyPolicy" class="text-blue-600 hover:text-blue-700 font-medium underline">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" 
+                            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3.5 px-6 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl active:scale-[0.98]">
+                        Create Account
+                    </button>
+
+                    <!-- Sign In Link -->
+                    <div class="text-center pt-4">
+                        <p class="text-sm text-gray-600">
+                            Already have an account? 
+                            <a href="/Auth/Login" class="text-blue-600 hover:text-blue-700 font-semibold">Sign in</a>
+                        </p>
+                    </div>
+                </form>
                 </div>
             </div>
         </div>
@@ -362,83 +323,67 @@
         // Password strength indicator
         document.getElementById('password-input').addEventListener('input', function() {
             const password = this.value;
-            const strengthIndicator = document.getElementById('password-strength');
-            const strengthBars = ['strength-1', 'strength-2', 'strength-3', 'strength-4'];
+            const strengthDiv = document.getElementById('password-strength');
             const strengthText = document.getElementById('strength-text');
+            const bars = [
+                document.getElementById('strength-1'),
+                document.getElementById('strength-2'),
+                document.getElementById('strength-3'),
+                document.getElementById('strength-4')
+            ];
 
             if (password.length === 0) {
-                strengthIndicator.classList.add('hidden');
+                strengthDiv.classList.add('hidden');
                 return;
             }
 
-            strengthIndicator.classList.remove('hidden');
+            strengthDiv.classList.remove('hidden');
 
             let strength = 0;
-            let feedback = [];
-
-            // Length check
-            if (password.length >= 8) {
-                strength += 1;
-            } else {
-                feedback.push('At least 8 characters');
-            }
-
-            // Lowercase check
-            if (/[a-z]/.test(password)) {
-                strength += 1;
-            } else {
-                feedback.push('Lowercase letter');
-            }
-
-            // Uppercase check
-            if (/[A-Z]/.test(password)) {
-                strength += 1;
-            } else {
-                feedback.push('Uppercase letter');
-            }
-
-            // Number and symbol check
-            if (/[\d\W]/.test(password)) {
-                strength += 1;
-            } else {
-                feedback.push('Number or symbol');
-            }
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
 
             // Reset all bars
-            strengthBars.forEach(id => {
-                const bar = document.getElementById(id);
-                bar.className = 'h-1 flex-1 bg-gray-200 rounded-full transition-all';
+            bars.forEach(bar => {
+                bar.classList.remove('bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500');
+                bar.classList.add('bg-gray-200');
             });
 
-            // Color bars based on strength
-            const colors = ['bg-red-400', 'bg-orange-400', 'bg-yellow-400', 'bg-green-400'];
-            for (let i = 0; i < strength; i++) {
-                document.getElementById(strengthBars[i]).classList.add(colors[Math.min(strength - 1, 3)]);
+            // Set color based on strength
+            let color = '';
+            let text = '';
+            
+            if (strength === 1) {
+                color = 'bg-red-500';
+                text = 'Weak';
+                strengthText.className = 'text-sm font-medium text-red-600';
+            } else if (strength === 2) {
+                color = 'bg-orange-500';
+                text = 'Fair';
+                strengthText.className = 'text-sm font-medium text-orange-600';
+            } else if (strength === 3) {
+                color = 'bg-yellow-500';
+                text = 'Good';
+                strengthText.className = 'text-sm font-medium text-yellow-600';
+            } else if (strength === 4) {
+                color = 'bg-green-500';
+                text = 'Strong';
+                strengthText.className = 'text-sm font-medium text-green-600';
             }
 
-            // Set strength text
-            const strengthTexts = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-            strengthText.textContent = strengthTexts[strength] || 'Very Weak';
-            strengthText.className = `text-xs ${strength >= 3 ? 'text-green-600' : strength >= 2 ? 'text-yellow-600' : 'text-red-600'}`;
-        });
+            for (let i = 0; i < strength; i++) {
+                bars[i].classList.remove('bg-gray-200');
+                bars[i].classList.add(color);
+            }
 
-        // Add entrance animations
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.animate-in');
-            elements.forEach((element, index) => {
-                element.style.animationDelay = `${index * 0.1}s`;
-            });
+            strengthText.textContent = text;
         });
     </script>
-    <style>
-        .animate-bounce-gentle {
-            animation: bounceGentle 2s infinite;
-        }
 
-        @@keyframes bounceGentle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-    </style>
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
 </body>
 </html>

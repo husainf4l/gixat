@@ -138,4 +138,50 @@ public class DetailsModel : PageModel
         var result = await _mediaService.DeleteAsync(mediaId, CompanyId);
         return new JsonResult(new { success = result });
     }
+
+    public async Task<IActionResult> OnPostStartInspectionAsync(Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return RedirectToPage("/Auth/Login");
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+        if (currentCompany == null)
+            return RedirectToPage("/Setup/Company");
+
+        CompanyId = currentCompany.CompanyId;
+
+        var inspection = await _inspectionService.GetBySessionIdAsync(id, CompanyId);
+        if (inspection == null)
+            return NotFound();
+
+        await _inspectionService.StartInspectionAsync(inspection.Id, Guid.Parse(userId), CompanyId);
+        
+        TempData["SuccessMessage"] = "Inspection started successfully";
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostCompleteInspectionAsync(Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return RedirectToPage("/Auth/Login");
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+        if (currentCompany == null)
+            return RedirectToPage("/Setup/Company");
+
+        CompanyId = currentCompany.CompanyId;
+
+        var inspection = await _inspectionService.GetBySessionIdAsync(id, CompanyId);
+        if (inspection == null)
+            return NotFound();
+
+        await _inspectionService.CompleteInspectionAsync(inspection.Id, CompanyId);
+        
+        TempData["SuccessMessage"] = "Inspection completed successfully";
+        return RedirectToPage(new { id });
+    }
 }
