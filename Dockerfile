@@ -29,11 +29,11 @@ RUN useradd -m -s /bin/bash appuser && chown -R appuser:appuser /app
 USER appuser
 
 # Expose port
-EXPOSE 80
+EXPOSE 3002
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:80/health/live || exit 1
+  CMD curl -f http://localhost:3002/health/live || exit 1
 
 # Entry point
 ENTRYPOINT ["dotnet", "Gixat.dll"]

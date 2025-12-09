@@ -41,6 +41,13 @@ DotEnv.Load(options: new DotEnvOptions(probeForEnv: true, probeLevelsToSearch: 5
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Kestrel to listen on port 3002
+builder.WebHost.ConfigureKestrel(options =>
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "3002";
+    options.ListenAnyIP(int.Parse(port));
+});
+
 // ====================================
 // CONFIGURE SERILOG (Structured Logging)
 // ====================================
