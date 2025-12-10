@@ -26,6 +26,7 @@
     <!-- Form Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 animate-slide-up" style="animation-delay: 0.1s">
         <form method="post" id="testDriveForm">
+            @Html.AntiForgeryToken()
             <div class="space-y-6">
                 <!-- Title -->
                 <div class="animate-slide-up" style="animation-delay: 0.15s">
@@ -50,26 +51,35 @@
                 <!-- Priority -->
                 <div class="animate-slide-up" style="animation-delay: 0.25s">
                     <label asp-for="Input.OverallPriority" class="block text-sm font-medium text-apple-dark mb-2">Priority Level</label>
-                    <div class="grid grid-cols-4 gap-3">
-                        @{
-                            var priorities = new[] {
-                                (Priority.Low, "Low", "apple-green", "bi-arrow-down"),
-                                (Priority.Normal, "Normal", "apple-blue", "bi-dash"),
-                                (Priority.High, "High", "apple-orange", "bi-arrow-up"),
-                                (Priority.Urgent, "Urgent", "apple-red", "bi-exclamation-lg")
-                            };
-                        }
-                        @foreach (var (value, label, color, icon) in priorities)
-                        {
-                            var isChecked = value == Priority.Normal;
-                            <label class="relative cursor-pointer">
-                                <input type="radio" asp-for="Input.OverallPriority" value="@value" class="peer sr-only" checked="@isChecked" />
-                                <div class="p-3 rounded-xl border-2 border-gray-200 text-center transition-all peer-checked:border-@color peer-checked:bg-@color/5 hover:border-gray-300">
-                                    <i class="bi @icon text-lg text-@color block mb-1"></i>
-                                    <span class="text-sm font-medium text-apple-dark">@label</span>
-                                </div>
-                            </label>
-                        }
+                    <div class="grid grid-cols-4 gap-3" id="prioritySelector">
+                        <label class="relative cursor-pointer priority-option" data-priority="@((int)Priority.Low)">
+                            <input type="radio" name="Input.OverallPriority" value="@((int)Priority.Low)" class="hidden priority-radio" />
+                            <div class="priority-card p-3 rounded-xl border-2 border-gray-200 text-center transition-all hover:border-gray-300" data-color="green">
+                                <i class="bi bi-arrow-down text-lg text-green-500 block mb-1"></i>
+                                <span class="text-sm font-medium text-apple-dark">Low</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer priority-option" data-priority="@((int)Priority.Normal)">
+                            <input type="radio" name="Input.OverallPriority" value="@((int)Priority.Normal)" class="hidden priority-radio" checked />
+                            <div class="priority-card p-3 rounded-xl border-2 border-gray-200 text-center transition-all hover:border-gray-300 active" data-color="blue">
+                                <i class="bi bi-dash text-lg text-blue-500 block mb-1"></i>
+                                <span class="text-sm font-medium text-apple-dark">Normal</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer priority-option" data-priority="@((int)Priority.High)">
+                            <input type="radio" name="Input.OverallPriority" value="@((int)Priority.High)" class="hidden priority-radio" />
+                            <div class="priority-card p-3 rounded-xl border-2 border-gray-200 text-center transition-all hover:border-gray-300" data-color="orange">
+                                <i class="bi bi-arrow-up text-lg text-orange-500 block mb-1"></i>
+                                <span class="text-sm font-medium text-apple-dark">High</span>
+                            </div>
+                        </label>
+                        <label class="relative cursor-pointer priority-option" data-priority="@((int)Priority.Urgent)">
+                            <input type="radio" name="Input.OverallPriority" value="@((int)Priority.Urgent)" class="hidden priority-radio" />
+                            <div class="priority-card p-3 rounded-xl border-2 border-gray-200 text-center transition-all hover:border-gray-300" data-color="red">
+                                <i class="bi bi-exclamation-lg text-lg text-red-500 block mb-1"></i>
+                                <span class="text-sm font-medium text-apple-dark">Urgent</span>
+                            </div>
+                        </label>
                     </div>
                 </div>
 
@@ -136,6 +146,53 @@
 
 @section Scripts {
 <script>
+    // Priority selector functionality
+    (function() {
+        console.log('Priority selector script loaded');
+        
+        function initPrioritySelector() {
+            const priorityOptions = document.querySelectorAll('.priority-option');
+            console.log('Found priority options:', priorityOptions.length);
+            
+            priorityOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Priority clicked');
+                    
+                    // Remove active class from all options
+                    document.querySelectorAll('.priority-card').forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked option
+                    const card = this.querySelector('.priority-card');
+                    card.classList.add('active');
+                    
+                    // Check the radio button
+                    const radio = this.querySelector('.priority-radio');
+                    radio.checked = true;
+                    console.log('Radio checked:', radio.value);
+                });
+            });
+            
+            // Initialize the default checked option on page load
+            setTimeout(() => {
+                const checkedRadio = document.querySelector('.priority-radio:checked');
+                if (checkedRadio) {
+                    const card = checkedRadio.closest('.priority-option').querySelector('.priority-card');
+                    card.classList.add('active');
+                    console.log('Default priority initialized');
+                }
+            }, 100);
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPrioritySelector);
+        } else {
+            initPrioritySelector();
+        }
+    })();
+
     const sessionId = '@Model.Session?.Id';
     const mediaGrid = document.getElementById('mediaGrid');
     const uploadProgress = document.getElementById('uploadProgress');
@@ -169,53 +226,67 @@
 
     async function handleFiles(files) {
         uploadProgress.classList.remove('hidden');
+        console.log('Starting upload for', files.length, 'files');
 
         for (const file of files) {
             try {
+                console.log('Processing file:', file.name, file.type, file.size);
+                
                 let processedFile = file;
                 if (file.type.startsWith('image/')) {
+                    console.log('Compressing image...');
                     processedFile = await compressImage(file);
+                    console.log('Compressed to:', processedFile.size);
                 }
 
                 const formData = new FormData();
                 formData.append('file', processedFile);
+                
+                // Get anti-forgery token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                console.log('Anti-forgery token found:', !!token);
 
+                console.log('Uploading file to server...');
                 const response = await fetch(`/Sessions/${sessionId}/TestDrive/Create?handler=Upload`, {
                     method: 'POST',
                     body: formData,
                     headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        'RequestVerificationToken': token || ''
                     }
                 });
 
-                const result = await response.json();
-                if (!result.success) continue;
-
-                await fetch(result.uploadUrl, {
-                    method: 'PUT',
-                    body: processedFile,
-                    headers: { 'Content-Type': processedFile.type }
-                });
-
-                const confirmResponse = await fetch(`/Sessions/${sessionId}/TestDrive/Create?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    }
-                });
-
-                const confirmResult = await confirmResponse.json();
-                if (confirmResult.success) {
-                    uploadedIds.push(confirmResult.media.id);
-                    mediaItemIds.value = uploadedIds.join(',');
-                    addMediaToGrid(confirmResult.media);
+                console.log('Upload response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Upload failed with status:', response.status, errorText);
+                    alert(`Upload failed: Server returned ${response.status}`);
+                    continue;
                 }
+                
+                const result = await response.json();
+                console.log('Upload result:', result);
+                
+                if (!result.success) {
+                    console.error('Upload failed:', result.error);
+                    alert(`Upload failed: ${result.error || 'Unknown error'}`);
+                    continue;
+                }
+
+                // File is uploaded and ready!
+                uploadedIds.push(result.media.id);
+                mediaItemIds.value = uploadedIds.join(',');
+                addMediaToGrid(result.media);
+                console.log('File uploaded successfully!');
+                
             } catch (error) {
                 console.error('Upload error:', error);
+                alert(`Upload error: ${error.message}`);
             }
         }
 
         uploadProgress.classList.add('hidden');
+        console.log('Upload process complete');
     }
 
     async function compressImage(file) {
@@ -294,12 +365,41 @@
         }
     }
 </script>
-<style>
-    @@keyframes scale-in {
-        from { transform: scale(0.8); opacity: 0; }
-        to { transform: scale(1); opacity: 1; }
+<style type="text/css">
+    /* Priority selector styles */
+    .priority-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
     }
-    .animate-scale-in { animation: scale-in 0.2s ease-out; }
+    
+    .priority-card.active[data-color="green"] {
+        border-color: #22c55e !important;
+        background-color: #f0fdf4 !important;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+    }
+    
+    .priority-card.active[data-color="blue"] {
+        border-color: #3b82f6 !important;
+        background-color: #eff6ff !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    .priority-card.active[data-color="orange"] {
+        border-color: #f97316 !important;
+        background-color: #fff7ed !important;
+        box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1) !important;
+    }
+    
+    .priority-card.active[data-color="red"] {
+        border-color: #ef4444 !important;
+        background-color: #fef2f2 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+    
+    .priority-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 </style>
 <form method="post" class="hidden">@Html.AntiForgeryToken()</form>
 }

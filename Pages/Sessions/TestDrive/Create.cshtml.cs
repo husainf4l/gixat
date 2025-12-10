@@ -16,17 +16,20 @@ public class CreateModel : PageModel
     private readonly ITestDriveService _testDriveService;
     private readonly IMediaService _mediaService;
     private readonly ICompanyUserService _companyUserService;
+    private readonly ILogger<CreateModel> _logger;
 
     public CreateModel(
         ISessionService sessionService,
         ITestDriveService testDriveService,
         IMediaService mediaService,
-        ICompanyUserService companyUserService)
+        ICompanyUserService companyUserService,
+        ILogger<CreateModel> logger)
     {
         _sessionService = sessionService;
         _testDriveService = testDriveService;
         _mediaService = mediaService;
         _companyUserService = companyUserService;
+        _logger = logger;
     }
 
     public SessionDto Session { get; set; } = default!;
@@ -129,60 +132,84 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostUploadAsync(Guid id, IFormFile file)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return new JsonResult(new { success = false, error = "Not authenticated" });
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return new JsonResult(new { success = false, error = "Not authenticated" });
 
-        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
-        var currentCompany = userCompanies.FirstOrDefault();
-        if (currentCompany == null)
-            return new JsonResult(new { success = false, error = "No company" });
+            var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+            var currentCompany = userCompanies.FirstOrDefault();
+            if (currentCompany == null)
+                return new JsonResult(new { success = false, error = "No company" });
 
-        CompanyId = currentCompany.CompanyId;
+            CompanyId = currentCompany.CompanyId;
 
-        if (file == null || file.Length == 0)
-            return new JsonResult(new { success = false, error = "No file provided" });
+            if (file == null || file.Length == 0)
+                return new JsonResult(new { success = false, error = "No file provided" });
 
-        var mediaType = file.ContentType.StartsWith("image/") ? MediaType.Image : MediaType.Video;
+            _logger.LogInformation("Starting direct upload for file: {FileName}", file.FileName);
 
-        var createDto = new CreateMediaItemDto(
-            SessionId: id,
-            OriginalFileName: file.FileName,
-            ContentType: file.ContentType,
-            FileSize: file.Length,
-            MediaType: mediaType,
-            Category: MediaCategory.TestDrive,
-            TestDriveId: null // Will be linked after test drive creation
-        );
+            var mediaType = file.ContentType.StartsWith("image/") ? MediaType.Image : MediaType.Video;
 
-        var uploadUrl = await _mediaService.CreateUploadUrlAsync(createDto, CompanyId);
+            var createDto = new CreateMediaItemDto(
+                SessionId: id,
+                OriginalFileName: file.FileName,
+                ContentType: file.ContentType,
+                FileSize: file.Length,
+                MediaType: mediaType,
+                Category: MediaCategory.TestDrive,
+                TestDriveId: null
+            );
 
-        return new JsonResult(new { 
-            success = true, 
-            mediaItemId = uploadUrl.MediaItemId,
-            uploadUrl = uploadUrl.UploadUrl,
-            s3Key = uploadUrl.S3Key
-        });
+            // Upload directly through server to S3
+            var result = await _mediaService.UploadDirectAsync(createDto, file.OpenReadStream(), CompanyId);
+            
+            if (result == null)
+            {
+                _logger.LogError("Direct upload returned null for file: {FileName}", file.FileName);
+                return new JsonResult(new { success = false, error = "Upload failed - file could not be processed. Check server logs for details." });
+            }
+
+            _logger.LogInformation("File uploaded successfully: {MediaId}", result.Id);
+
+            return new JsonResult(new { 
+                success = true, 
+                media = result
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception during file upload for session {SessionId}, file {FileName}", id, file?.FileName ?? "unknown");
+            return new JsonResult(new { success = false, error = $"Upload error: {ex.Message}" });
+        }
     }
 
     public async Task<IActionResult> OnPostConfirmUploadAsync(Guid id, Guid mediaItemId)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId))
-            return new JsonResult(new { success = false, error = "Not authenticated" });
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return new JsonResult(new { success = false, error = "Not authenticated" });
 
-        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
-        var currentCompany = userCompanies.FirstOrDefault();
-        if (currentCompany == null)
-            return new JsonResult(new { success = false, error = "No company" });
+            var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+            var currentCompany = userCompanies.FirstOrDefault();
+            if (currentCompany == null)
+                return new JsonResult(new { success = false, error = "No company" });
 
-        CompanyId = currentCompany.CompanyId;
+            CompanyId = currentCompany.CompanyId;
 
-        var result = await _mediaService.ConfirmUploadAsync(mediaItemId, CompanyId);
-        if (result == null)
-            return new JsonResult(new { success = false, error = "Upload confirmation failed" });
+            var result = await _mediaService.ConfirmUploadAsync(mediaItemId, CompanyId);
+            if (result == null)
+                return new JsonResult(new { success = false, error = "Media item not found or upload confirmation failed" });
 
-        return new JsonResult(new { success = true, media = result });
+            return new JsonResult(new { success = true, media = result });
+        }
+        catch (Exception ex)
+        {
+            return new JsonResult(new { success = false, error = $"Exception: {ex.Message}" });
+        }
     }
 
     public async Task<IActionResult> OnPostDeleteMediaAsync(Guid id, Guid mediaId)

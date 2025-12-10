@@ -96,17 +96,87 @@ public class MediaService : BaseService, IMediaService
 
     public async Task<MediaItemDto?> ConfirmUploadAsync(Guid mediaItemId, Guid companyId)
     {
+        _logger.LogInformation("Confirming upload for media {MediaId} in company {CompanyId}", mediaItemId, companyId);
+        
         var media = await MediaItems.Where(m => m.Id == mediaItemId && m.CompanyId == companyId).FirstOrDefaultAsync();
-        if (media == null) return null;
+        if (media == null)
+        {
+            _logger.LogWarning("Media item {MediaId} not found for company {CompanyId}", mediaItemId, companyId);
+            return null;
+        }
 
+        _logger.LogInformation("Checking if S3 object exists: {S3Key}", media.S3Key);
         var exists = await _s3Service.ObjectExistsAsync(media.S3Key);
-        if (!exists) return null;
+        if (!exists)
+        {
+            _logger.LogWarning("S3 object does not exist: {S3Key}", media.S3Key);
+            return null;
+        }
 
+        _logger.LogInformation("Generating download URL for {S3Key}", media.S3Key);
         media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
         media.UpdatedAt = DateTime.UtcNow;
 
         await SaveChangesAsync();
+        _logger.LogInformation("Upload confirmed successfully for media {MediaId}", mediaItemId);
         return media.ToDto();
+    }
+
+    public async Task<MediaItemDto?> UploadDirectAsync(CreateMediaItemDto dto, Stream fileStream, Guid companyId)
+    {
+        try
+        {
+            _logger.LogInformation("Direct upload for session {SessionId}, file {FileName}", dto.SessionId, dto.OriginalFileName);
+
+            var s3Key = _s3Service.GenerateS3Key(companyId, dto.SessionId, dto.Category, dto.OriginalFileName);
+            
+            // Upload to S3
+            var uploaded = await _s3Service.UploadFileAsync(s3Key, fileStream, dto.ContentType);
+            if (!uploaded)
+            {
+                _logger.LogError("Failed to upload file to S3");
+                return null;
+            }
+
+            // Generate download URL
+            var s3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(s3Key);
+
+            // Create media item
+            var media = new MediaItem
+            {
+                Id = Guid.NewGuid(),
+                SessionId = dto.SessionId,
+                CompanyId = companyId,
+                OriginalFileName = dto.OriginalFileName,
+                S3Key = s3Key,
+                S3Url = s3Url,
+                ContentType = dto.ContentType,
+                FileSize = dto.FileSize,
+                MediaType = dto.MediaType,
+                Category = dto.Category,
+                InspectionId = dto.InspectionId,
+                CustomerRequestId = dto.CustomerRequestId,
+                TestDriveId = dto.TestDriveId,
+                JobCardId = dto.JobCardId,
+                Title = dto.Title,
+                Description = dto.Description,
+                Tags = dto.Tags,
+                SortOrder = dto.SortOrder,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            MediaItems.Add(media);
+            await SaveChangesAsync();
+
+            _logger.LogInformation("Direct upload successful for media {MediaId}", media.Id);
+            return media.ToDto();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during direct upload");
+            return null;
+        }
     }
 
     public async Task<MediaDownloadUrlDto?> GetDownloadUrlAsync(Guid id, Guid companyId)

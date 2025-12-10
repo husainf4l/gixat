@@ -12,6 +12,7 @@ public interface IMediaService
     // Upload workflow
     Task<MediaUploadUrlDto> CreateUploadUrlAsync(CreateMediaItemDto dto, Guid companyId);
     Task<MediaItemDto?> ConfirmUploadAsync(Guid mediaItemId, Guid companyId);
+    Task<MediaItemDto?> UploadDirectAsync(CreateMediaItemDto dto, Stream fileStream, Guid companyId);
     
     // Download
     Task<MediaDownloadUrlDto?> GetDownloadUrlAsync(Guid id, Guid companyId);
@@ -35,6 +36,7 @@ public interface IAwsS3Service
 {
     Task<string> GeneratePresignedUploadUrlAsync(string key, string contentType, int expirationMinutes = 15);
     Task<string> GeneratePresignedDownloadUrlAsync(string key, int expirationMinutes = 60);
+    Task<bool> UploadFileAsync(string key, Stream fileStream, string contentType);
     Task<bool> DeleteObjectAsync(string key);
     Task<bool> ObjectExistsAsync(string key);
     string GenerateS3Key(Guid companyId, Guid sessionId, MediaCategory category, string fileName);
