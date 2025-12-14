@@ -92,13 +92,16 @@ public class DetailsModel : PageModel
             InspectionId: inspection.Id
         );
 
-        var uploadUrl = await _mediaService.CreateUploadUrlAsync(createDto, CompanyId);
+        // Use direct upload instead of presigned URL
+        using var stream = file.OpenReadStream();
+        var result = await _mediaService.UploadDirectAsync(createDto, stream, CompanyId);
+
+        if (result == null)
+            return new JsonResult(new { success = false, error = "Upload failed" });
 
         return new JsonResult(new { 
             success = true, 
-            mediaItemId = uploadUrl.MediaItemId,
-            uploadUrl = uploadUrl.UploadUrl,
-            s3Key = uploadUrl.S3Key
+            media = result
         });
     }
 

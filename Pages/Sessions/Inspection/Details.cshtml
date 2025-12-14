@@ -320,25 +320,15 @@
                 });
 
                 const result = await response.json();
-                if (!result.success) continue;
-
-                await fetch(result.uploadUrl, {
-                    method: 'PUT',
-                    body: processedFile,
-                    headers: { 'Content-Type': processedFile.type }
-                });
-
-                const confirmResponse = await fetch(`/Sessions/${sessionId}/Inspection?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    }
-                });
-
-                const confirmResult = await confirmResponse.json();
-                if (confirmResult.success) addMediaToGrid(confirmResult.media);
+                if (result.success && result.media) {
+                    addMediaToGrid(result.media);
+                } else {
+                    console.error('Upload failed:', result.error);
+                    alert('Upload failed: ' + (result.error || 'Unknown error'));
+                }
             } catch (error) {
                 console.error('Upload error:', error);
+                alert('Upload error: ' + error.message);
             }
         }
 

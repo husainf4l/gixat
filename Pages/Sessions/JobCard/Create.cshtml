@@ -6,101 +6,373 @@
     Layout = "_AppLayout";
 }
 
-<div class="max-w-3xl mx-auto animate-fade-in">
-    <!-- Header with gradient -->
-    <div class="bg-gradient-to-r from-apple-indigo to-apple-purple rounded-2xl p-6 mb-6 animate-slide-up">
-        <div class="flex items-center gap-4">
-            <a href="/Sessions/Details/@Model.Session?.Id" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
-                <i class="bi bi-arrow-left text-white text-lg"></i>
+<style>
+    .card-apple {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .input-apple {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    
+    .input-apple:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
+    
+    .template-card {
+        padding: 16px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    
+    .template-card:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        transform: translateY(-2px);
+    }
+    
+    .template-card.selected {
+        border-color: #3b82f6;
+        background: #dbeafe;
+    }
+    
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .priority-low { background: #f0fdf4; color: #15803d; }
+    .priority-normal { background: #eff6ff; color: #1d4ed8; }
+    .priority-high { background: #fef3c7; color: #b45309; }
+    .priority-urgent { background: #fee2e2; color: #dc2626; }
+    
+    .cost-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 24px;
+        color: white;
+    }
+    
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-slide-in {
+        animation: slideIn 0.4s ease-out;
+    }
+</style>
+
+<div class="max-w-5xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-4 mb-4">
+            <a href="/Sessions/Details/@Model.Session?.Id" class="w-12 h-12 bg-white rounded-xl flex items-center justify-center hover:bg-gray-50 transition-all shadow-sm border border-gray-200">
+                <i class="bi bi-arrow-left text-gray-700 text-lg"></i>
             </a>
             <div class="flex-1">
-                <h1 class="text-2xl font-semibold text-white">Create Job Card</h1>
-                <p class="text-white/80 text-sm mt-1">Session #@Model.Session?.SessionNumber • @Model.Session?.VehicleDisplayName</p>
+                <h1 class="text-3xl font-bold text-gray-900">Create Job Card</h1>
+                <p class="text-gray-600 mt-1">Session #@Model.Session?.SessionNumber • @Model.Session?.VehicleDisplayName</p>
             </div>
-            <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                <i class="bi bi-clipboard-check text-white text-2xl"></i>
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <i class="bi bi-clipboard-check text-white text-3xl"></i>
             </div>
         </div>
     </div>
 
-    <!-- Form Card -->
-    <div class="card-apple p-8 animate-slide-up" style="animation-delay: 0.1s">
-        <form method="post">
-            <div class="space-y-6">
-                <!-- Title -->
-                <div class="animate-slide-up" style="animation-delay: 0.15s">
-                    <label asp-for="Input.Title" class="block text-sm font-medium text-apple-dark mb-2">Job Card Title <span class="text-apple-red">*</span></label>
-                    <input asp-for="Input.Title" class="input-apple-outlined" placeholder="e.g., Major Engine Service" required />
-                    <span asp-validation-for="Input.Title" class="text-apple-red text-xs mt-1.5 block"></span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4 animate-slide-up" style="animation-delay: 0.2s">
-                    <!-- Priority -->
-                    <div>
-                        <label asp-for="Input.Priority" class="block text-sm font-medium text-apple-dark mb-2">Priority Level</label>
-                        <div class="relative">
-                            <i class="bi bi-flag absolute left-4 top-1/2 -translate-y-1/2 text-apple-gray"></i>
-                            <select asp-for="Input.Priority" class="input-apple-outlined pl-11 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%2386868b%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1rem_center]">
-                                <option value="@Priority.Low">Low Priority</option>
-                                <option value="@Priority.Normal" selected>Normal Priority</option>
-                                <option value="@Priority.High">High Priority</option>
-                                <option value="@Priority.Urgent">Urgent</option>
-                            </select>
+    <form method="post" id="jobCardForm">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Form (Left 2 columns) -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Quick Templates -->
+                <div class="card-apple p-6 animate-slide-in">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-lightning-charge text-blue-600"></i>
+                        Quick Templates
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="template-card" onclick="applyTemplate('Oil Change', 'Complete oil and filter change service', 1, 'Normal')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-droplet text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">Oil Change</div>
+                                    <div class="text-xs text-gray-500">~1 hour</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="applyTemplate('Brake Service', 'Brake inspection and repair service', 2, 'High')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-disc text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">Brake Service</div>
+                                    <div class="text-xs text-gray-500">~2 hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="applyTemplate('Engine Diagnostic', 'Complete engine diagnostic and troubleshooting', 3, 'High')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-gear text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">Diagnostic</div>
+                                    <div class="text-xs text-gray-500">~3 hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-card" onclick="applyTemplate('General Service', 'Comprehensive vehicle service and inspection', 4, 'Normal')">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="bi bi-wrench text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">Full Service</div>
+                                    <div class="text-xs text-gray-500">~4 hours</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Estimated Hours -->
-                    <div>
-                        <label asp-for="Input.EstimatedHours" class="block text-sm font-medium text-apple-dark mb-2">Estimated Hours</label>
-                        <div class="relative">
-                            <i class="bi bi-clock absolute left-4 top-1/2 -translate-y-1/2 text-apple-gray"></i>
-                            <input asp-for="Input.EstimatedHours" type="number" step="0.5" min="0" class="input-apple-outlined pl-11" placeholder="e.g., 2.5" />
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Description -->
-                <div class="animate-slide-up" style="animation-delay: 0.25s">
-                    <label asp-for="Input.Description" class="block text-sm font-medium text-apple-dark mb-2">Description</label>
-                    <textarea asp-for="Input.Description" rows="4" class="input-apple-outlined resize-none" placeholder="Describe the work to be performed in detail..."></textarea>
-                </div>
-
-                <!-- What happens next info box -->
-                <div class="bg-gradient-to-r from-apple-green/10 to-apple-teal/5 border border-apple-green/20 rounded-2xl p-5 animate-slide-up" style="animation-delay: 0.3s">
-                    <div class="flex gap-4">
-                        <div class="w-10 h-10 bg-apple-green/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <i class="bi bi-rocket-takeoff text-apple-green text-lg"></i>
-                        </div>
+                <!-- Job Card Details -->
+                <div class="card-apple p-6 animate-slide-in" style="animation-delay: 0.1s">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-5 flex items-center gap-2">
+                        <i class="bi bi-clipboard-data text-blue-600"></i>
+                        Job Card Details
+                    </h3>
+                    
+                    <div class="space-y-5">
+                        <!-- Title -->
                         <div>
-                            <h4 class="font-semibold text-apple-dark mb-2">What happens next?</h4>
-                            <ul class="space-y-2 text-sm text-apple-gray">
-                                <li class="flex items-center gap-2">
-                                    <i class="bi bi-1-circle text-apple-green"></i>
-                                    Add work items and assign technicians
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <i class="bi bi-2-circle text-apple-green"></i>
-                                    Get customer approval before starting work
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <i class="bi bi-3-circle text-apple-green"></i>
-                                    Track progress and complete the job
-                                </li>
-                            </ul>
+                            <label asp-for="Input.Title" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Job Title <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <i class="bi bi-pencil input-icon"></i>
+                                <input asp-for="Input.Title" class="input-apple pl-12" placeholder="e.g., Major Engine Service" required />
+                            </div>
+                            <span asp-validation-for="Input.Title" class="text-red-500 text-xs mt-1.5 block"></span>
+                        </div>
+
+                        <!-- Priority & Hours -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label asp-for="Input.Priority" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Priority Level
+                                </label>
+                                <div class="relative">
+                                    <i class="bi bi-flag input-icon"></i>
+                                    <select asp-for="Input.Priority" class="input-apple pl-12 appearance-none" style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%239ca3af%22 d=%22M6 8L1 3h10z%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 1rem center;">
+                                        <option value="@Priority.Low">🟢 Low Priority</option>
+                                        <option value="@Priority.Normal" selected>🔵 Normal</option>
+                                        <option value="@Priority.High">🟡 High Priority</option>
+                                        <option value="@Priority.Urgent">🔴 Urgent</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label asp-for="Input.EstimatedHours" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Estimated Hours
+                                </label>
+                                <div class="relative">
+                                    <i class="bi bi-clock input-icon"></i>
+                                    <input asp-for="Input.EstimatedHours" type="number" step="0.5" min="0" max="100" class="input-apple pl-12" placeholder="2.5" onchange="calculateCost()" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label asp-for="Input.Description" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Work Description
+                            </label>
+                            <textarea asp-for="Input.Description" rows="5" class="input-apple resize-none" placeholder="Describe the work to be performed in detail. Include any specific parts, procedures, or customer requests..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Steps Info -->
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 animate-slide-in" style="animation-delay: 0.2s">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                            <i class="bi bi-rocket-takeoff text-white text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-900 mb-3 text-lg">What happens next?</h4>
+                            <div class="space-y-3">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-7 h-7 bg-green-500 text-white rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Add Work Items</div>
+                                        <div class="text-sm text-gray-600">Add specific tasks, parts, and assign technicians</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-7 h-7 bg-green-500 text-white rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Customer Approval</div>
+                                        <div class="text-sm text-gray-600">Get approval before starting any work</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="w-7 h-7 bg-green-500 text-white rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">Track & Complete</div>
+                                        <div class="text-sm text-gray-600">Monitor progress and mark as complete</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Actions -->
-            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100 animate-slide-up" style="animation-delay: 0.35s">
-                <a href="/Sessions/Details/@Model.Session?.Id" class="btn-apple-secondary">
-                    Cancel
-                </a>
-                <button type="submit" class="btn-apple-primary bg-gradient-to-r from-apple-indigo to-apple-purple hover:shadow-lg hover:shadow-apple-indigo/25">
-                    <i class="bi bi-clipboard-check mr-2"></i> Create Job Card
-                </button>
+            <!-- Sidebar (Right column) -->
+            <div class="space-y-6">
+                <!-- Cost Calculator -->
+                <div class="cost-summary animate-slide-in" style="animation-delay: 0.15s">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg">Estimated Cost</h3>
+                        <i class="bi bi-calculator text-2xl opacity-80"></i>
+                    </div>
+                    
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between items-center pb-3 border-b border-white/20">
+                            <span class="opacity-90">Labor Rate/Hour</span>
+                            <input type="number" id="laborRate" value="50" class="w-20 px-2 py-1 rounded-lg bg-white/20 border border-white/30 text-white text-right" onchange="calculateCost()" />
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="opacity-90">Hours</span>
+                            <span id="displayHours" class="font-semibold">0</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-3 border-t border-white/20">
+                            <span class="font-bold text-xl">Total</span>
+                            <span id="totalCost" class="font-bold text-2xl">$0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs opacity-75">
+                        <i class="bi bi-info-circle mr-1"></i>
+                        This is an estimate. Actual costs may vary based on parts and additional work.
+                    </div>
+                </div>
+
+                <!-- Session Info -->
+                <div class="card-apple p-6 animate-slide-in" style="animation-delay: 0.25s">
+                    <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-info-circle text-blue-600"></i>
+                        Session Info
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+                            <i class="bi bi-car-front text-gray-400"></i>
+                            <div>
+                                <div class="text-gray-500 text-xs">Vehicle</div>
+                                <div class="font-semibold text-gray-900">@Model.Session?.VehicleDisplayName</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+                            <i class="bi bi-person text-gray-400"></i>
+                            <div>
+                                <div class="text-gray-500 text-xs">Client</div>
+                                <div class="font-semibold text-gray-900">@Model.Session?.ClientName</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="bi bi-hash text-gray-400"></i>
+                            <div>
+                                <div class="text-gray-500 text-xs">Session</div>
+                                <div class="font-semibold text-gray-900">#@Model.Session?.SessionNumber</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="sticky top-6">
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-6 rounded-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-lg">
+                        <i class="bi bi-check-circle text-xl"></i>
+                        Create Job Card
+                    </button>
+                    <a href="/Sessions/Details/@Model.Session?.Id" class="mt-3 block w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all text-center">
+                        Cancel
+                    </a>
+                </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function applyTemplate(title, description, hours, priority) {
+            document.querySelector('[name="Input.Title"]').value = title;
+            document.querySelector('[name="Input.Description"]').value = description;
+            document.querySelector('[name="Input.EstimatedHours"]').value = hours;
+            document.querySelector('[name="Input.Priority"]').value = priority;
+            
+            // Visual feedback
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            calculateCost();
+        }
+        
+        function calculateCost() {
+            const hours = parseFloat(document.querySelector('[name="Input.EstimatedHours"]').value) || 0;
+            const rate = parseFloat(document.getElementById('laborRate').value) || 50;
+            const total = hours * rate;
+            
+            document.getElementById('displayHours').textContent = hours.toFixed(1);
+            document.getElementById('totalCost').textContent = '$' + total.toFixed(2);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', calculateCost);
+    </script>
+}

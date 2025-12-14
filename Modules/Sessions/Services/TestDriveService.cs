@@ -73,7 +73,8 @@ public class TestDriveService : BaseService, ITestDriveService
             Description = dto.Description,
             MileageStart = dto.MileageStart,
             OverallPriority = dto.OverallPriority,
-            Status = RequestStatus.Pending
+            Status = RequestStatus.InProgress,
+            StartedAt = DateTime.UtcNow
         };
 
         TestDrives.Add(testDrive);

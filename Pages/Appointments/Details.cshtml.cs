@@ -21,9 +21,15 @@ public class DetailsModel : PageModel
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
+        var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+        if (string.IsNullOrEmpty(companyIdClaim) || !Guid.TryParse(companyIdClaim, out var companyId))
+        {
+            return BadRequest("Company information not found");
+        }
+
         Appointment = await _context.Appointments
             .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Id == id);
+            .FirstOrDefaultAsync(a => a.Id == id && a.CompanyId == companyId);
 
         if (Appointment == null)
         {
@@ -37,7 +43,16 @@ public class DetailsModel : PageModel
     {
         try
         {
-            var appointment = await _context.Appointments.FindAsync(id);
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim) || !Guid.TryParse(companyIdClaim, out var companyId))
+            {
+                ErrorMessage = "Company information not found";
+                return await OnGetAsync(id);
+            }
+
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == id && a.CompanyId == companyId);
+            
             if (appointment != null)
             {
                 appointment.Status = AppointmentStatus.Confirmed;
@@ -59,7 +74,16 @@ public class DetailsModel : PageModel
     {
         try
         {
-            var appointment = await _context.Appointments.FindAsync(id);
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim) || !Guid.TryParse(companyIdClaim, out var companyId))
+            {
+                ErrorMessage = "Company information not found";
+                return await OnGetAsync(id);
+            }
+
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == id && a.CompanyId == companyId);
+            
             if (appointment != null)
             {
                 appointment.Status = AppointmentStatus.Cancelled;
@@ -81,7 +105,16 @@ public class DetailsModel : PageModel
     {
         try
         {
-            var appointment = await _context.Appointments.FindAsync(id);
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim) || !Guid.TryParse(companyIdClaim, out var companyId))
+            {
+                ErrorMessage = "Company information not found";
+                return await OnGetAsync(id);
+            }
+
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == id && a.CompanyId == companyId);
+            
             if (appointment != null)
             {
                 appointment.Status = AppointmentStatus.NoShow;
@@ -101,7 +134,15 @@ public class DetailsModel : PageModel
     {
         try
         {
-            var appointment = await _context.Appointments.FindAsync(id);
+            var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+            if (string.IsNullOrEmpty(companyIdClaim) || !Guid.TryParse(companyIdClaim, out var companyId))
+            {
+                ErrorMessage = "Company information not found";
+                return await OnGetAsync(id);
+            }
+
+            var appointment = await _context.Appointments
+                .FirstOrDefaultAsync(a => a.Id == id && a.CompanyId == companyId);
 
             if (appointment == null)
             {

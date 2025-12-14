@@ -1,4 +1,5 @@
 using dotenv.net;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using Gixat.Web.Shared.Options;
 using System.IO.Compression;
 using Gixat.Web.Modules.Auth;
 using Gixat.Web.Modules.Auth.Entities;
+using Gixat.Web.Modules.Auth.Services;
 using Gixat.Web.Modules.Clients;
 using Gixat.Web.Modules.Clients.GraphQL.Queries;
 using Gixat.Web.Modules.Clients.GraphQL.Types;
@@ -212,6 +214,9 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
+
+// Add custom claims transformation for CompanyId and BranchId
+builder.Services.AddScoped<IClaimsTransformation, CustomClaimsTransformation>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

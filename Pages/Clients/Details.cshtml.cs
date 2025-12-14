@@ -93,9 +93,16 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
+        var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+        if (!Guid.TryParse(companyIdClaim, out var companyId))
+        {
+            return Unauthorized();
+        }
+
         var vehicle = new ClientVehicle
         {
             ClientId = id,
+            CompanyId = companyId,
             Make = NewVehicle.Make,
             Model = NewVehicle.Model,
             Year = NewVehicle.Year,

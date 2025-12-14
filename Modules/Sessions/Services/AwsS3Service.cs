@@ -80,27 +80,33 @@ public class AwsS3Service : IAwsS3Service
 
     public async Task<bool> UploadFileAsync(string key, Stream fileStream, string contentType)
     {
-        // Copy stream to MemoryStream first so we can retry if needed
-        var memoryStream = new MemoryStream();
-        try
+        // Copy stream to byte array first so we can retry if needed
+        byte[] fileBytes;
+        using (var memoryStream = new MemoryStream())
         {
             await fileStream.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-            
+            fileBytes = memoryStream.ToArray();
+        }
+        
+        try
+        {
             _logger.LogInformation("Uploading file to S3: {Key}, ContentType: {ContentType}", key, contentType);
             
-            var request = new PutObjectRequest
+            using (var uploadStream = new MemoryStream(fileBytes))
             {
-                BucketName = _bucketName,
-                Key = key,
-                InputStream = memoryStream,
-                ContentType = contentType
-            };
+                var request = new PutObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = key,
+                    InputStream = uploadStream,
+                    ContentType = contentType
+                };
 
-            var response = await _s3Client.PutObjectAsync(request);
-            
-            _logger.LogInformation("Successfully uploaded file to S3: {Key}, ETag: {ETag}", key, response.ETag);
-            return true;
+                var response = await _s3Client.PutObjectAsync(request);
+                
+                _logger.LogInformation("Successfully uploaded file to S3: {Key}, ETag: {ETag}", key, response.ETag);
+                return true;
+            }
         }
         catch (AmazonS3Exception ex) when (ex.Message.Contains("not authorized") || ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
         {
@@ -117,11 +123,7 @@ public class AwsS3Service : IAwsS3Service
                     System.IO.Directory.CreateDirectory(directory);
                 }
                 
-                memoryStream.Position = 0; // Reset stream position
-                using (var fileStreamOut = System.IO.File.Create(localPath))
-                {
-                    await memoryStream.CopyToAsync(fileStreamOut);
-                }
+                await System.IO.File.WriteAllBytesAsync(localPath, fileBytes);
                 
                 _logger.LogInformation("File saved locally at: {LocalPath}", localPath);
                 return true;
@@ -136,10 +138,6 @@ public class AwsS3Service : IAwsS3Service
         {
             _logger.LogError(ex, "Failed to upload file to S3: {Key}", key);
             return false;
-        }
-        finally
-        {
-            memoryStream?.Dispose();
         }
     }
 

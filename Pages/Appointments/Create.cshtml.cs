@@ -102,7 +102,16 @@ public class CreateModel : PageModel
 
     private async Task LoadDataAsync()
     {
+        var companyIdClaim = User.FindFirst("CompanyId")?.Value;
+        if (!Guid.TryParse(companyIdClaim, out var companyId))
+        {
+            Clients = new List<ClientItem>();
+            Vehicles = new List<VehicleItem>();
+            return;
+        }
+
         Clients = await _context.Clients
+            .Where(c => c.CompanyId == companyId)
             .OrderBy(c => c.FirstName)
             .ThenBy(c => c.LastName)
             .Select(c => new ClientItem
@@ -115,6 +124,7 @@ public class CreateModel : PageModel
             .ToListAsync();
 
         Vehicles = await _context.ClientVehicles
+            .Where(v => v.CompanyId == companyId && v.IsActive)
             .OrderBy(v => v.Make)
             .ThenBy(v => v.Model)
             .Select(v => new VehicleItem

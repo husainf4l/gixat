@@ -1,0 +1,271 @@
+@page
+@model Gixat.Web.Pages.Inventory.CreateModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Add Inventory Item";
+}
+
+<!-- Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent mb-2">Add Inventory Item</h1>
+            <p class="text-slate-600 flex items-center gap-2">
+                <i class="bi bi-box-seam text-sm"></i>
+                <span>Add a new item to your inventory</span>
+            </p>
+        </div>
+        <a asp-page="Index" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-xl shadow-sm border border-slate-200 transition-all duration-200 hover:scale-[1.02]">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Inventory</span>
+        </a>
+    </div>
+</div>
+
+<form method="post" class="space-y-6">
+    <div asp-validation-summary="ModelOnly" class="text-red-600 bg-red-50 p-4 rounded-lg"></div>
+
+    <!-- Basic Information Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <i class="bi bi-info-circle text-blue-600"></i>
+            Basic Information
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Name -->
+            <div class="md:col-span-2">
+                <label asp-for="Input.Name" class="block text-sm font-semibold text-slate-700 mb-2">Item Name *</label>
+                <input asp-for="Input.Name" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="e.g., Engine Oil 5W-30" required />
+                <span asp-validation-for="Input.Name" class="text-red-600 text-sm"></span>
+            </div>
+
+            <!-- Category -->
+            <div>
+                <label asp-for="Input.Category" class="block text-sm font-semibold text-slate-700 mb-2">Category *</label>
+                <select asp-for="Input.Category" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" required>
+                    <option value="0">Parts</option>
+                    <option value="1">Fluids</option>
+                    <option value="2">Filters</option>
+                    <option value="3">Tires</option>
+                    <option value="4">Batteries</option>
+                    <option value="5">Brake Pads</option>
+                    <option value="6">Accessories</option>
+                    <option value="7">Tools</option>
+                    <option value="8">Chemicals</option>
+                    <option value="9">Other</option>
+                </select>
+                <span asp-validation-for="Input.Category" class="text-red-600 text-sm"></span>
+            </div>
+
+            <!-- Unit -->
+            <div>
+                <label asp-for="Input.Unit" class="block text-sm font-semibold text-slate-700 mb-2">Unit</label>
+                <select asp-for="Input.Unit" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all">
+                    <option value="piece">Piece</option>
+                    <option value="liter">Liter</option>
+                    <option value="kg">Kilogram</option>
+                    <option value="meter">Meter</option>
+                    <option value="set">Set</option>
+                    <option value="box">Box</option>
+                    <option value="bottle">Bottle</option>
+                </select>
+            </div>
+
+            <!-- Description -->
+            <div class="md:col-span-2">
+                <label asp-for="Input.Description" class="block text-sm font-semibold text-slate-700 mb-2">Description</label>
+                <textarea asp-for="Input.Description" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Detailed description of the item"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Identification Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <i class="bi bi-upc-scan text-blue-600"></i>
+            Identification
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Barcode -->
+            <div>
+                <label asp-for="Input.Barcode" class="block text-sm font-semibold text-slate-700 mb-2">Barcode</label>
+                <input asp-for="Input.Barcode" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Scan or enter barcode" />
+            </div>
+
+            <!-- SKU -->
+            <div>
+                <label asp-for="Input.SKU" class="block text-sm font-semibold text-slate-700 mb-2">SKU</label>
+                <input asp-for="Input.SKU" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Stock Keeping Unit" />
+            </div>
+
+            <!-- Part Number -->
+            <div>
+                <label asp-for="Input.PartNumber" class="block text-sm font-semibold text-slate-700 mb-2">Part Number</label>
+                <input asp-for="Input.PartNumber" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Manufacturer part #" />
+            </div>
+
+            <!-- Manufacturer -->
+            <div class="md:col-span-3">
+                <label asp-for="Input.Manufacturer" class="block text-sm font-semibold text-slate-700 mb-2">Manufacturer</label>
+                <input asp-for="Input.Manufacturer" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="e.g., Castrol, Bosch, Michelin" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <i class="bi bi-currency-dollar text-blue-600"></i>
+            Pricing
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Cost Price -->
+            <div>
+                <label asp-for="Input.CostPrice" class="block text-sm font-semibold text-slate-700 mb-2">Cost Price *</label>
+                <input asp-for="Input.CostPrice" type="number" step="0.01" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="0.00" required />
+                <span asp-validation-for="Input.CostPrice" class="text-red-600 text-sm"></span>
+            </div>
+
+            <!-- Selling Price -->
+            <div>
+                <label asp-for="Input.SellingPrice" class="block text-sm font-semibold text-slate-700 mb-2">Selling Price *</label>
+                <input asp-for="Input.SellingPrice" type="number" step="0.01" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="0.00" required />
+                <span asp-validation-for="Input.SellingPrice" class="text-red-600 text-sm"></span>
+            </div>
+
+            <!-- Wholesale Price -->
+            <div>
+                <label asp-for="Input.WholesalePrice" class="block text-sm font-semibold text-slate-700 mb-2">Wholesale Price</label>
+                <input asp-for="Input.WholesalePrice" type="number" step="0.01" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="0.00" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Management Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <i class="bi bi-bar-chart text-blue-600"></i>
+            Stock Management
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Quantity On Hand -->
+            <div>
+                <label asp-for="Input.QuantityOnHand" class="block text-sm font-semibold text-slate-700 mb-2">Quantity On Hand *</label>
+                <input asp-for="Input.QuantityOnHand" type="number" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" required />
+            </div>
+
+            <!-- Minimum Quantity -->
+            <div>
+                <label asp-for="Input.MinimumQuantity" class="block text-sm font-semibold text-slate-700 mb-2">Minimum Quantity</label>
+                <input asp-for="Input.MinimumQuantity" type="number" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+            </div>
+
+            <!-- Maximum Quantity -->
+            <div>
+                <label asp-for="Input.MaximumQuantity" class="block text-sm font-semibold text-slate-700 mb-2">Maximum Quantity</label>
+                <input asp-for="Input.MaximumQuantity" type="number" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+            </div>
+
+            <!-- Reorder Point -->
+            <div>
+                <label asp-for="Input.ReorderPoint" class="block text-sm font-semibold text-slate-700 mb-2">Reorder Point</label>
+                <input asp-for="Input.ReorderPoint" type="number" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                <p class="text-xs text-slate-500 mt-1">Alert when stock reaches this level</p>
+            </div>
+
+            <!-- Reorder Quantity -->
+            <div>
+                <label asp-for="Input.ReorderQuantity" class="block text-sm font-semibold text-slate-700 mb-2">Reorder Quantity</label>
+                <input asp-for="Input.ReorderQuantity" type="number" min="0" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" />
+                <p class="text-xs text-slate-500 mt-1">How much to reorder</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location & Supplier Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <i class="bi bi-geo-alt text-blue-600"></i>
+            Location & Supplier
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Storage Location -->
+            <div>
+                <label asp-for="Input.StorageLocation" class="block text-sm font-semibold text-slate-700 mb-2">Storage Location</label>
+                <input asp-for="Input.StorageLocation" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="e.g., Warehouse A" />
+            </div>
+
+            <!-- Shelf -->
+            <div>
+                <label asp-for="Input.Shelf" class="block text-sm font-semibold text-slate-700 mb-2">Shelf</label>
+                <input asp-for="Input.Shelf" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="e.g., A1" />
+            </div>
+
+            <!-- Bin -->
+            <div>
+                <label asp-for="Input.Bin" class="block text-sm font-semibold text-slate-700 mb-2">Bin</label>
+                <input asp-for="Input.Bin" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="e.g., 01" />
+            </div>
+
+            <!-- Supplier Name -->
+            <div class="md:col-span-2">
+                <label asp-for="Input.SupplierName" class="block text-sm font-semibold text-slate-700 mb-2">Supplier Name</label>
+                <input asp-for="Input.SupplierName" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Primary supplier" />
+            </div>
+
+            <!-- Supplier Contact -->
+            <div>
+                <label asp-for="Input.SupplierContact" class="block text-sm font-semibold text-slate-700 mb-2">Supplier Contact</label>
+                <input asp-for="Input.SupplierContact" type="text" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Phone or email" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 lg:p-8">
+        <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <i class="bi bi-gear text-blue-600"></i>
+            Settings
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Is Active -->
+            <div class="flex items-center gap-3">
+                <input asp-for="Input.IsActive" type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20" />
+                <label asp-for="Input.IsActive" class="text-sm font-semibold text-slate-700">Item is Active</label>
+            </div>
+
+            <!-- Is Tracked -->
+            <div class="flex items-center gap-3">
+                <input asp-for="Input.IsTracked" type="checkbox" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500/20" />
+                <label asp-for="Input.IsTracked" class="text-sm font-semibold text-slate-700">Track Inventory</label>
+            </div>
+
+            <!-- Notes -->
+            <div class="md:col-span-2">
+                <label asp-for="Input.Notes" class="block text-sm font-semibold text-slate-700 mb-2">Notes</label>
+                <textarea asp-for="Input.Notes" rows="3" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Additional notes or special instructions"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center justify-end gap-4">
+        <a asp-page="Index" class="px-6 py-3 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 rounded-xl shadow-sm border border-slate-200 transition-all">
+            Cancel
+        </a>
+        <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02]">
+            <i class="bi bi-check-circle"></i>
+            Add Item
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

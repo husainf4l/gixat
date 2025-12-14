@@ -74,7 +74,8 @@ public class InspectionService : BaseService, IInspectionService
             Title = dto.Title,
             Description = dto.Description,
             OverallPriority = dto.OverallPriority,
-            Status = RequestStatus.Pending
+            Status = RequestStatus.InProgress,
+            InspectionStartedAt = DateTime.UtcNow
         };
 
         Inspections.Add(inspection);
