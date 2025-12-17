@@ -2,6 +2,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 using Gixat.Web.Modules.Sessions.Enums;
 using Gixat.Web.Modules.Sessions.Interfaces;
 
@@ -11,11 +12,13 @@ public class AwsS3Service : IAwsS3Service
 {
     private readonly IAmazonS3 _s3Client;
     private readonly ILogger<AwsS3Service> _logger;
+    private readonly IWebHostEnvironment _environment;
     private readonly string _bucketName;
 
-    public AwsS3Service(IAmazonS3 s3Client, IConfiguration configuration, ILogger<AwsS3Service> logger)
+    public AwsS3Service(IAmazonS3 s3Client, IWebHostEnvironment environment, IConfiguration configuration, ILogger<AwsS3Service> logger)
     {
         _s3Client = s3Client;
+        _environment = environment;
         _logger = logger;
         _bucketName = configuration["AWS:S3:BucketName"] ?? "gixat-media";
     }
@@ -37,13 +40,18 @@ public class AwsS3Service : IAwsS3Service
     public async Task<string> GeneratePresignedDownloadUrlAsync(string key, int expirationMinutes = 60)
     {
         // Check if file exists locally first
-        var localPath = System.IO.Path.Combine("wwwroot", "uploads", key);
+        var localPath = System.IO.Path.Combine(_environment.WebRootPath, "uploads", key);
+        _logger.LogInformation("Checking for local file. WebRootPath: {WebRoot}, Key: {Key}, FullPath: {LocalPath}", 
+            _environment.WebRootPath, key, localPath);
+        
         if (System.IO.File.Exists(localPath))
         {
-            _logger.LogInformation("File found locally, returning local URL for: {Key}", key);
+            _logger.LogInformation("✓ File found locally, returning local URL for: {Key}", key);
             return $"/uploads/{key}";
         }
 
+        _logger.LogWarning("✗ File NOT found locally at {LocalPath}, generating S3 URL instead", localPath);
+        
         // Otherwise, generate S3 URL
         var request = new GetPreSignedUrlRequest
         {
@@ -53,7 +61,9 @@ public class AwsS3Service : IAwsS3Service
             Expires = DateTime.UtcNow.AddMinutes(expirationMinutes)
         };
 
-        return await Task.FromResult(_s3Client.GetPreSignedURL(request));
+        var s3Url = _s3Client.GetPreSignedURL(request);
+        _logger.LogInformation("Generated S3 URL: {S3Url}", s3Url);
+        return await Task.FromResult(s3Url);
     }
 
     public async Task<bool> DeleteObjectAsync(string key)
@@ -74,6 +84,35 @@ public class AwsS3Service : IAwsS3Service
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to delete S3 object: {Key}", key);
+            return false;
+        }
+    }
+
+    public async Task<bool> SaveFileLocallyAsync(string key, Stream fileStream)
+    {
+        try
+        {
+            var localPath = System.IO.Path.Combine(_environment.WebRootPath, "uploads", key);
+            var directory = System.IO.Path.GetDirectoryName(localPath);
+            
+            if (!System.IO.Directory.Exists(directory))
+            {
+                System.IO.Directory.CreateDirectory(directory!);
+                _logger.LogInformation("Created directory: {Directory}", directory);
+            }
+
+            using (var fileStreamOutput = System.IO.File.Create(localPath))
+            {
+                fileStream.Position = 0; // Reset stream position
+                await fileStream.CopyToAsync(fileStreamOutput);
+            }
+
+            _logger.LogInformation("✓ Saved file locally: {LocalPath}", localPath);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save file locally: {Key}", key);
             return false;
         }
     }

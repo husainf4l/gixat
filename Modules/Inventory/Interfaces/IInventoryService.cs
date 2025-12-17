@@ -1,4 +1,5 @@
 using Gixat.Web.Modules.Inventory.Entities;
+using Gixat.Web.Modules.Inventory.DTOs;
 
 namespace Gixat.Web.Modules.Inventory.Interfaces;
 
@@ -15,4 +16,7 @@ public interface IInventoryService
     Task<bool> AdjustStockAsync(Guid itemId, int quantity, MovementType type, string? reference = null, string? notes = null);
     Task<List<StockMovement>> GetStockHistoryAsync(Guid itemId);
     Task<bool> RestockItemAsync(Guid itemId, int quantity, decimal unitCost);
+    
+    // Stats
+    Task<InventoryStatsDto> GetInventoryStatsAsync(Guid companyId);
 }

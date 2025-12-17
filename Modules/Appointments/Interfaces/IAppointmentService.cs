@@ -1,4 +1,5 @@
 using Gixat.Web.Modules.Appointments.Entities;
+using Gixat.Web.Modules.Appointments.DTOs;
 
 namespace Gixat.Web.Modules.Appointments.Interfaces;
 
@@ -16,6 +17,7 @@ public interface IAppointmentService
     Task<bool> ConvertToSessionAsync(Guid appointmentId, Guid sessionId);
     Task<bool> IsTimeSlotAvailableAsync(DateTime date, TimeSpan time, int durationMinutes, Guid? excludeAppointmentId = null);
     Task<List<TimeSlot>> GetAvailableTimeSlotsAsync(DateTime date, int durationMinutes);
+    Task<AppointmentStatsDto> GetAppointmentStatsAsync(Guid companyId);
 }
 
 public class TimeSlot

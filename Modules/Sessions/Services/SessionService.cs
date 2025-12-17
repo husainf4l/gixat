@@ -260,16 +260,26 @@ public class SessionService : BaseService, ISessionService
     {
         var session = await GarageSessions
             .Where(s => s.Id == id && s.CompanyId == companyId)
+            .AsTracking() // Enable tracking for this query
             .FirstOrDefaultAsync();
 
         if (session == null) return false;
 
+        _logger.LogInformation("[CheckOutAsync] Before update - Status: {Status}, CheckOutAt: {CheckOutAt}", session.Status, session.CheckOutAt);
+        
         session.Status = SessionStatus.Closed;
         session.MileageOut = mileageOut;
         session.CheckOutAt = DateTime.UtcNow;
         session.UpdatedAt = DateTime.UtcNow;
 
-        await SaveChangesAsync();
+        _logger.LogInformation("[CheckOutAsync] After update - Status: {Status}, CheckOutAt: {CheckOutAt}", session.Status, session.CheckOutAt);
+        
+        var changeCount = await SaveChangesAsync();
+        _logger.LogInformation("[CheckOutAsync] SaveChanges completed - {ChangeCount} entities modified", changeCount);
+        
+        // Clear the change tracker to ensure fresh data on next query
+        Context.ChangeTracker.Clear();
+        
         _logger.LogInformation("Session {SessionId} checked out with mileage {MileageOut}", id, mileageOut);
         return true;
     }
@@ -378,6 +388,41 @@ public class SessionService : BaseService, ISessionService
             .Take(count);
 
         return await ProjectSessionsToDto(baseQuery).ToListAsync();
+    }
+
+    public async Task<SessionAnalyticsDto> GetSessionAnalyticsAsync(Guid companyId)
+    {
+        var today = DateTime.UtcNow.Date;
+        var weekStart = today.AddDays(-(int)today.DayOfWeek);
+        var monthStart = new DateTime(today.Year, today.Month, 1);
+
+        var sessions = await GarageSessions
+            .Where(s => s.CompanyId == companyId)
+            .ToListAsync();
+
+        var completedSessions = sessions
+            .Where(s => s.Status == SessionStatus.Completed || s.Status == SessionStatus.Closed)
+            .Where(s => s.CheckOutAt.HasValue)
+            .ToList();
+
+        var analytics = new SessionAnalyticsDto
+        {
+            AverageCompletionHours = completedSessions.Any()
+                ? completedSessions.Average(s => (s.CheckOutAt!.Value - s.CheckInAt).TotalHours)
+                : 0,
+            
+            WeekSessions = sessions.Count(s => s.CheckInAt >= weekStart),
+            
+            MonthSessions = sessions.Count(s => s.CheckInAt >= monthStart),
+            
+            CompletedThisWeek = sessions.Count(s => s.CheckInAt >= weekStart && 
+                                                   (s.Status == SessionStatus.Completed || s.Status == SessionStatus.Closed)),
+            
+            CompletedThisMonth = sessions.Count(s => s.CheckInAt >= monthStart && 
+                                                    (s.Status == SessionStatus.Completed || s.Status == SessionStatus.Closed))
+        };
+
+        return analytics;
     }
 
     private async Task<SessionDto> MapToDto(GarageSession session)

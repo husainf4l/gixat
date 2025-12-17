@@ -6,130 +6,206 @@
     Layout = "_AppLayout";
 }
 
-<div class="max-w-3xl mx-auto animate-fade-in">
+<div class="max-w-5xl mx-auto animate-fade-in">
     <!-- Back Navigation -->
-    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors">
-        <i class="bi bi-arrow-left"></i>
+    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors group">
+        <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
         <span class="text-sm font-medium">Back to Session</span>
     </a>
 
     <!-- Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Customer Request</h1>
-        <p class="text-slate-600 mt-1">Session #@Model.Session?.SessionNumber • @Model.Session?.VehicleDisplayName</p>
+    <div class="mb-8">
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">New Customer Request</h1>
+                <p class="text-slate-600 mt-2 flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
+                        <i class="bi bi-hash text-xs"></i>
+                        @Model.Session?.SessionNumber
+                    </span>
+                    <span class="text-slate-400">•</span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <i class="bi bi-car-front text-primary-600"></i>
+                        @Model.Session?.VehicleDisplayName
+                    </span>
+                </p>
+            </div>
+            <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl">
+                <i class="bi bi-info-circle"></i>
+                <span class="text-sm font-medium">Detailed Request Form</span>
+            </div>
+        </div>
     </div>
 
     <!-- Form Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <form method="post">
-            <!-- Title -->
-            <div class="mb-5">
-                <label asp-for="Input.Title" class="block text-sm font-medium text-slate-900 mb-2">
-                    Request Title <span class="text-red-600">*</span>
-                </label>
-                <input asp-for="Input.Title" class="input-apple-outlined" placeholder="e.g., General Service, Oil Change, Brake Inspection" required />
-                <span asp-validation-for="Input.Title" class="text-red-600 text-xs mt-1"></span>
-            </div>
-
-            <!-- Priority -->
-            <div class="mb-5">
-                <label asp-for="Input.Priority" class="block text-sm font-medium text-slate-900 mb-2">Priority Level</label>
-                <div class="grid grid-cols-4 gap-2">
-                    <label class="relative cursor-pointer">
-                        <input type="radio" name="Input.Priority" value="@Priority.Low" class="peer sr-only" />
-                        <div class="p-3 text-center rounded-2xl border-2 border-gray-200 peer-checked:border-green-600 peer-checked:bg-green-100 transition-all">
-                            <span class="text-sm font-medium text-slate-900 peer-checked:text-green-600">Low</span>
+    <form method="post">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Form -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Basic Information Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-pencil-square text-lg"></i>
                         </div>
-                    </label>
-                    <label class="relative cursor-pointer">
-                        <input type="radio" name="Input.Priority" value="@Priority.Normal" class="peer sr-only" checked />
-                        <div class="p-3 text-center rounded-2xl border-2 border-gray-200 peer-checked:border-primary-600 peer-checked:bg-primary-100 transition-all">
-                            <span class="text-sm font-medium">Normal</span>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Basic Information</h2>
+                            <p class="text-sm text-slate-600">Request title and priority level</p>
                         </div>
-                    </label>
-                    <label class="relative cursor-pointer">
-                        <input type="radio" name="Input.Priority" value="@Priority.High" class="peer sr-only" />
-                        <div class="p-3 text-center rounded-2xl border-2 border-gray-200 peer-checked:border-orange-600 peer-checked:bg-orange-100 transition-all">
-                            <span class="text-sm font-medium">High</span>
-                        </div>
-                    </label>
-                    <label class="relative cursor-pointer">
-                        <input type="radio" name="Input.Priority" value="@Priority.Urgent" class="peer sr-only" />
-                        <div class="p-3 text-center rounded-2xl border-2 border-gray-200 peer-checked:border-red-600 peer-checked:bg-red-100 transition-all">
-                            <span class="text-sm font-medium">Urgent</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Customer Concerns -->
-            <div class="mb-5">
-                <label asp-for="Input.CustomerConcerns" class="block text-sm font-medium text-slate-900 mb-2">
-                    Customer Concerns
-                </label>
-                <textarea asp-for="Input.CustomerConcerns" rows="3" class="input-apple-outlined resize-none" 
-                          placeholder="What issues is the customer experiencing? Describe symptoms..."></textarea>
-                <p class="text-xs text-slate-600 mt-1.5">Describe the issues or symptoms reported by the customer</p>
-            </div>
-
-            <!-- Requested Services -->
-            <div class="mb-5">
-                <label asp-for="Input.RequestedServices" class="block text-sm font-medium text-slate-900 mb-2">
-                    Requested Services
-                </label>
-                <textarea asp-for="Input.RequestedServices" rows="3" class="input-apple-outlined resize-none" 
-                          placeholder="e.g., Oil change, brake inspection, tire rotation, AC service..."></textarea>
-                <p class="text-xs text-slate-600 mt-1.5">List any specific services requested by the customer</p>
-            </div>
-
-            <!-- Additional Description -->
-            <div class="mb-5">
-                <label asp-for="Input.Description" class="block text-sm font-medium text-slate-900 mb-2">
-                    Additional Details
-                </label>
-                <textarea asp-for="Input.Description" rows="2" class="input-apple-outlined resize-none" 
-                          placeholder="Any other relevant information..."></textarea>
-            </div>
-
-            <!-- Internal Notes -->
-            <div class="mb-6">
-                <label asp-for="Input.Notes" class="block text-sm font-medium text-slate-900 mb-2">
-                    <span class="flex items-center gap-2">
-                        Internal Notes
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">Staff Only</span>
-                    </span>
-                </label>
-                <textarea asp-for="Input.Notes" rows="2" class="input-apple-outlined resize-none bg-gray-50" 
-                          placeholder="Notes visible only to staff..."></textarea>
-            </div>
-
-            <!-- Divider -->
-            <hr class="border-gray-100 my-6" />
-
-            <!-- Media Upload Section -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h3 class="text-sm font-medium text-slate-900">Photos & Videos</h3>
-                        <p class="text-xs text-slate-600 mt-0.5">Upload images or videos to document the request</p>
                     </div>
+
+                    <!-- Title -->
+                    <div class="mb-6">
+                        <label asp-for="Input.Title" class="block text-sm font-semibold text-slate-900 mb-2">
+                            Request Title <span class="text-red-600">*</span>
+                        </label>
+                        <input asp-for="Input.Title" class="input-apple-outlined text-base" placeholder="e.g., General Service, Oil Change, Brake Inspection" required />
+                        <span asp-validation-for="Input.Title" class="text-red-600 text-xs mt-1"></span>
+                    </div>
+
+                    <!-- Priority -->
+                    <div>
+                        <label asp-for="Input.Priority" class="block text-sm font-semibold text-slate-900 mb-3">Priority Level</label>
+                        <div class="grid grid-cols-4 gap-3">
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.Priority" value="@Priority.Low" class="peer sr-only" />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-green-500 peer-checked:bg-green-50 hover:border-green-300 transition-all">
+                                    <i class="bi bi-flag text-xl text-green-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">Low</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.Priority" value="@Priority.Normal" class="peer sr-only" checked />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:border-blue-300 transition-all">
+                                    <i class="bi bi-flag-fill text-xl text-blue-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">Normal</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.Priority" value="@Priority.High" class="peer sr-only" />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-orange-500 peer-checked:bg-orange-50 hover:border-orange-300 transition-all">
+                                    <i class="bi bi-flag-fill text-xl text-orange-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">High</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.Priority" value="@Priority.Urgent" class="peer sr-only" />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-red-500 peer-checked:bg-red-50 hover:border-red-300 transition-all">
+                                    <i class="bi bi-exclamation-triangle-fill text-xl text-red-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">Urgent</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Customer Details Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-chat-left-text text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Customer Information</h2>
+                        <p class="text-sm text-slate-600">What the customer reported and requested</p>
+                    </div>
+                </div>
+
+                    <!-- Customer Concerns -->
+                    <div class="mb-6">
+                        <label asp-for="Input.CustomerConcerns" class="block text-sm font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                            <i class="bi bi-exclamation-circle text-amber-600"></i>
+                            Customer Concerns & Symptoms
+                        </label>
+                        <textarea asp-for="Input.CustomerConcerns" rows="4" class="input-apple-outlined resize-none text-base" 
+                                  placeholder="Describe the issues or symptoms reported by the customer...&#10;&#10;Examples:&#10;• Strange noise when braking&#10;• Engine light is on&#10;• Poor fuel economy"></textarea>
+                        <p class="text-xs text-slate-600 mt-2 flex items-start gap-2">
+                            <i class="bi bi-lightbulb text-amber-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Be specific about when issues occur, sounds, smells, or warning lights</span>
+                        </p>
+                    </div>
+
+                    <!-- Requested Services -->
+                    <div>
+                        <label asp-for="Input.RequestedServices" class="block text-sm font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                            <i class="bi bi-tools text-primary-600"></i>
+                            Requested Services
+                        </label>
+                        <textarea asp-for="Input.RequestedServices" rows="4" class="input-apple-outlined resize-none text-base" 
+                                  placeholder="List specific services requested by the customer...&#10;&#10;Examples:&#10;• Oil and filter change&#10;• Brake inspection&#10;• Tire rotation and alignment&#10;• AC system check"></textarea>
+                        <p class="text-xs text-slate-600 mt-2 flex items-start gap-2">
+                            <i class="bi bi-lightbulb text-amber-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Include maintenance services, repairs, or inspections requested</span>
+                        </p>
+                    </div>
+            </div>
+
+            <!-- Additional Details Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-file-text text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Additional Details</h2>
+                        <p class="text-sm text-slate-600">Extra information and internal notes</p>
+                    </div>
+                </div>
+
+                    <!-- Additional Description -->
+                    <div class="mb-6">
+                        <label asp-for="Input.Description" class="block text-sm font-semibold text-slate-900 mb-2">
+                            Additional Information
+                        </label>
+                        <textarea asp-for="Input.Description" rows="3" class="input-apple-outlined resize-none text-base" 
+                                  placeholder="Any other relevant details, special requirements, or context..."></textarea>
+                    </div>
+
+                    <!-- Internal Notes -->
+                    <div>
+                        <label asp-for="Input.Notes" class="block text-sm font-semibold text-slate-900 mb-2">
+                            <span class="flex items-center gap-2">
+                                <i class="bi bi-lock text-slate-600"></i>
+                                Internal Notes
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700">
+                                    <i class="bi bi-eye-slash text-xs"></i>
+                                    Staff Only
+                                </span>
+                            </span>
+                        </label>
+                        <textarea asp-for="Input.Notes" rows="3" class="input-apple-outlined resize-none bg-slate-50 border-slate-300 text-base" 
+                                  placeholder="Private notes visible only to staff members...&#10;&#10;• Technician assignments&#10;• Internal observations&#10;• Parts availability notes"></textarea>
+                    </div>
+            </div>
+
+            <!-- Media Upload Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-images text-lg"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h2 class="text-lg font-semibold text-slate-900">Photos & Videos</h2>
+                        <p class="text-sm text-slate-600">Visual documentation of issues or requests</p>
+                    </div>
+                    <span class="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full">Optional</span>
                 </div>
 
                 <!-- Drag & Drop Zone -->
-                <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-primary-600 hover:bg-primary-100 transition-all cursor-pointer">
+                <div id="dropZone" class="border-2 border-dashed border-slate-200 rounded-xl p-10 text-center hover:border-primary-500 hover:bg-primary-50 transition-all cursor-pointer group">
                     <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
-                    <div class="w-14 h-14 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                        <i class="bi bi-cloud-arrow-up text-2xl text-slate-600"></i>
+                    <div class="w-16 h-16 rounded-xl bg-slate-100 group-hover:bg-primary-100 flex items-center justify-center mx-auto mb-4 transition-colors">
+                        <i class="bi bi-cloud-arrow-up text-3xl text-slate-600 group-hover:text-primary-600 transition-colors"></i>
                     </div>
-                    <p class="text-sm font-medium text-slate-900">Drop files here or click to upload</p>
-                    <p class="text-xs text-slate-600 mt-1">Supports images and videos up to 50MB</p>
+                    <p class="text-base font-semibold text-slate-900 mb-1">Drop files here or click to browse</p>
+                    <p class="text-sm text-slate-600">Supports JPG, PNG, MP4, MOV • Max 50MB per file</p>
                 </div>
 
                 <!-- Upload Progress -->
                 <div id="uploadProgress" class="hidden mt-4">
-                    <div class="flex items-center gap-3 p-3 bg-apple-blue/5 rounded-apple">
-                        <div class="animate-spin rounded-full h-5 w-5 border-2 border-apple-blue border-t-transparent"></div>
-                        <span class="text-sm text-primary-600 font-medium">Uploading and processing...</span>
+                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                        <span class="text-sm text-blue-700 font-medium">Uploading and processing files...</span>
                     </div>
                 </div>
 
@@ -141,14 +217,110 @@
             </div>
 
             <!-- Actions -->
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">Cancel</a>
-                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
-                    <i class="bi bi-check-lg"></i>
+            <div class="flex justify-end gap-3 pt-2">
+                <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all">
+                    <i class="bi bi-x-lg"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transition-all">
+                    <i class="bi bi-check-circle-fill"></i>
                     Save Customer Request
                 </button>
             </div>
-        </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Quick Tips -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-6">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="bi bi-lightbulb-fill text-yellow-500 text-xl"></i>
+                    <h3 class="font-semibold text-slate-900">Quick Tips</h3>
+                </div>
+                <ul class="space-y-3 text-sm text-slate-700">
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Be specific about customer concerns and symptoms</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>List all requested services separately</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Upload photos of visible issues or damage</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Set priority based on urgency and safety</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Priority Guide -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-primary-600"></i>
+                    Priority Levels
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                        <i class="bi bi-exclamation-triangle-fill text-red-600 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <div class="font-semibold text-red-900">Urgent</div>
+                            <div class="text-red-700 text-xs mt-0.5">Safety issues, breakdowns</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                        <i class="bi bi-flag-fill text-orange-600 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <div class="font-semibold text-orange-900">High</div>
+                            <div class="text-orange-700 text-xs mt-0.5">Important repairs needed</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <i class="bi bi-flag-fill text-blue-600 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <div class="font-semibold text-blue-900">Normal</div>
+                            <div class="text-blue-700 text-xs mt-0.5">Standard service requests</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <i class="bi bi-flag text-green-600 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <div class="font-semibold text-green-900">Low</div>
+                            <div class="text-green-700 text-xs mt-0.5">Can be scheduled later</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session Info -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-clipboard-check text-primary-600"></i>
+                    Session Details
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-600">Session #</span>
+                        <span class="font-semibold text-slate-900">@Model.Session?.SessionNumber</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-600">Vehicle</span>
+                        <span class="font-semibold text-slate-900">@Model.Session?.VehicleDisplayName</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-slate-600">Status</span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-semibold">
+                            <i class="bi bi-circle-fill" style="font-size: 6px;"></i>
+                            Active
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
     </div>
 </div>
 
@@ -200,41 +372,69 @@
                     processedFile = await compressImage(file);
                 }
 
+                // Create preview immediately
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const tempId = 'temp_' + Date.now() + '_' + Math.random();
+                    const media = {
+                        id: tempId,
+                        s3Url: e.target.result,
+                        mediaType: file.type.startsWith('image/') ? 0 : 1
+                    };
+                    addMediaToGrid(media);
+                    uploadedMediaIds.push(tempId);
+                };
+                reader.readAsDataURL(processedFile);
+
+                // Upload in background
                 const formData = new FormData();
                 formData.append('file', processedFile);
 
-                const response = await fetch(`/Sessions/${sessionId}/CustomerRequest/Create?handler=Upload`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                try {
+                    const response = await fetch(`/Sessions/${sessionId}/CustomerRequest/Create?handler=Upload`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        }
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success && result.uploadUrl) {
+                            await fetch(result.uploadUrl, {
+                                method: 'PUT',
+                                body: processedFile,
+                                headers: { 'Content-Type': processedFile.type }
+                            });
+
+                            const confirmResponse = await fetch(`/Sessions/${sessionId}/CustomerRequest/Create?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                                }
+                            });
+
+                            const confirmResult = await confirmResponse.json();
+                            if (confirmResult.success && confirmResult.media) {
+                                // Replace temp preview with real media
+                                const tempDiv = document.querySelector(`[data-media-id="${media.id}"]`);
+                                if (tempDiv) {
+                                    tempDiv.dataset.mediaId = confirmResult.media.id;
+                                    const idx = uploadedMediaIds.indexOf(media.id);
+                                    if (idx > -1) uploadedMediaIds[idx] = confirmResult.media.id;
+                                }
+                            }
+                        }
                     }
-                });
-
-                const result = await response.json();
-                if (!result.success) continue;
-
-                await fetch(result.uploadUrl, {
-                    method: 'PUT',
-                    body: processedFile,
-                    headers: { 'Content-Type': processedFile.type }
-                });
-
-                const confirmResponse = await fetch(`/Sessions/${sessionId}/CustomerRequest/Create?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    }
-                });
-
-                const confirmResult = await confirmResponse.json();
-                if (confirmResult.success) {
-                    addMediaToGrid(confirmResult.media);
-                    uploadedMediaIds.push(confirmResult.media.id);
-                    mediaItemIdsInput.value = uploadedMediaIds.join(',');
+                } catch (uploadError) {
+                    console.log('Background upload error (preview still shown):', uploadError);
                 }
+
+                mediaItemIdsInput.value = uploadedMediaIds.join(',');
             } catch (error) {
                 console.error('Upload error:', error);
+                alert('Error uploading file: ' + file.name);
             }
         }
 
@@ -276,25 +476,39 @@
 
     function addMediaToGrid(media) {
         const div = document.createElement('div');
-        div.className = 'relative group aspect-square';
+        div.className = 'relative group aspect-square rounded-xl overflow-hidden';
         div.dataset.mediaId = media.id;
 
         if (media.mediaType === 0) {
             div.innerHTML = `
-                <img src="${media.s3Url}" class="w-full h-full object-cover rounded-apple" />
+                <img src="${media.s3Url}" class="w-full h-full object-cover" />
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all"></div>
                 <button type="button" onclick="deleteMedia('${media.id}')" 
-                        class="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                    <i class="bi bi-x text-sm"></i>
-                </button>`;
+                        class="absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-red-700 hover:scale-110">
+                    <i class="bi bi-trash text-sm"></i>
+                </button>
+                <div class="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm text-slate-900 rounded-lg text-xs font-medium">
+                        <i class="bi bi-image"></i>
+                        Image
+                    </span>
+                </div>`;
         } else {
             div.innerHTML = `
-                <div class="w-full h-full bg-gray-100 rounded-2xl flex items-center justify-center">
-                    <i class="bi bi-play-circle text-3xl text-slate-600"></i>
+                <div class="w-full h-full bg-slate-900 flex items-center justify-center">
+                    <i class="bi bi-play-circle text-4xl text-white"></i>
                 </div>
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all"></div>
                 <button type="button" onclick="deleteMedia('${media.id}')" 
-                        class="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
-                    <i class="bi bi-x text-sm"></i>
-                </button>`;
+                        class="absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:bg-red-700 hover:scale-110">
+                    <i class="bi bi-trash text-sm"></i>
+                </button>
+                <div class="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-white/90 backdrop-blur-sm text-slate-900 rounded-lg text-xs font-medium">
+                        <i class="bi bi-camera-video"></i>
+                        Video
+                    </span>
+                </div>`;
         }
         mediaGrid.appendChild(div);
     }

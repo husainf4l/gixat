@@ -240,6 +240,24 @@ public class SessionMutations
     }
 
     [Authorize]
+    public async Task<bool> MoveJobCardToWaitingParts(
+        [Service] IJobCardService service,
+        Guid id,
+        Guid companyId)
+    {
+        return await service.MoveToWaitingPartsAsync(id, companyId);
+    }
+
+    [Authorize]
+    public async Task<bool> MoveJobCardToQualityCheck(
+        [Service] IJobCardService service,
+        Guid id,
+        Guid companyId)
+    {
+        return await service.MoveToQualityCheckAsync(id, companyId);
+    }
+
+    [Authorize]
     public async Task<bool> CompleteJobCardWork(
         [Service] IJobCardService service,
         Guid id,

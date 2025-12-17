@@ -102,11 +102,23 @@ public class IndexModel : PageModel
 
         Console.WriteLine($"[DEBUG] Creating client for CompanyId: {currentCompany.CompanyId}, Name: {firstName} {lastName}");
         
+        // Check if client with same phone already exists
+        var allClients = await _clientService.GetByCompanyIdAsync(currentCompany.CompanyId);
+        var existingClient = allClients.FirstOrDefault(c => c.Phone == phone);
+        
+        if (existingClient != null)
+        {
+            Console.WriteLine($"[DEBUG] Duplicate phone detected: {phone} for client {existingClient.FirstName} {existingClient.LastName}");
+            TempData["Error"] = $"A client with phone number {phone} already exists: {existingClient.FirstName} {existingClient.LastName}";
+            return RedirectToPage();
+        }
+        
+        Console.WriteLine($"[DEBUG] No duplicate found, creating new client...");
         await _clientService.CreateAsync(client);
         
         Console.WriteLine($"[DEBUG] Client created with ID: {client.Id}");
 
-        TempData["SuccessMessage"] = $"Client {firstName} {lastName} added successfully!";
+        TempData["Success"] = $"Client {firstName} {lastName} added successfully!";
         
         return RedirectToPage();
     }

@@ -1,6 +1,7 @@
 using Gixat.Web.Data;
 using Gixat.Web.Modules.Inventory.Entities;
 using Gixat.Web.Modules.Inventory.Interfaces;
+using Gixat.Web.Modules.Inventory.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gixat.Web.Modules.Inventory.Services;
@@ -133,5 +134,29 @@ public class InventoryService : IInventoryService
         item.LastRestockDate = DateTime.UtcNow;
         
         return await AdjustStockAsync(itemId, quantity, MovementType.Purchase, "Restock", null);
+    }
+
+    public async Task<InventoryStatsDto> GetInventoryStatsAsync(Guid companyId)
+    {
+        var items = await _context.InventoryItems
+            .Where(i => i.CompanyId == companyId)
+            .ToListAsync();
+
+        var stats = new InventoryStatsDto
+        {
+            TotalItems = items.Count,
+            
+            LowStockItems = items.Count(i => i.IsActive && i.QuantityOnHand <= i.MinimumQuantity),
+            
+            OutOfStockItems = items.Count(i => i.IsActive && i.QuantityOnHand == 0),
+            
+            TotalInventoryValue = items
+                .Where(i => i.IsActive)
+                .Sum(i => i.QuantityOnHand * i.CostPrice),
+            
+            ActiveItems = items.Count(i => i.IsActive)
+        };
+
+        return stats;
     }
 }

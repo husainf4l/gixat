@@ -143,7 +143,10 @@
                                 </span>
                             }
                         </td>
-                        <td class="px-6 py-4 text-right text-sm font-medium">
+                        <td class="px-6 py-4 text-right text-sm font-medium space-x-3">
+                            <button onclick="openEditModal('@user.Id', '@user.FirstName', '@user.LastName', '@user.Email', '@((int)user.Role)', '@(user.Department ?? "")')" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <i class="bi bi-pencil mr-1"></i>Edit
+                            </button>
                             <form method="post" class="inline">
                                 <input type="hidden" name="UserId" value="@user.Id" />
                                 @if (user.IsActive)
@@ -235,6 +238,61 @@
     </div>
 </div>
 
+<!-- Edit User Modal -->
+<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-2xl font-semibold text-gray-900">Edit User</h2>
+                <button onclick="document.getElementById('editModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                    <i class="bi bi-x-lg text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <form method="post" asp-page-handler="UpdateUser" class="p-6">
+            <input type="hidden" id="editUserId" name="UserId" />
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                        <input type="text" id="editFirstName" name="FirstName" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                        <input type="text" id="editLastName" name="LastName" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" id="editEmail" name="Email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                    <input type="text" id="editDepartment" name="Department" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="e.g., Service, Sales" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Role *</label>
+                    <select id="editRole" name="Role" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="5">Employee</option>
+                        <option value="4">Receptionist</option>
+                        <option value="3">Technician</option>
+                        <option value="2">Manager</option>
+                        <option value="1">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="flex-1 px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 apple-btn">
+                    Update User
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Invite Modal -->
 <div id="inviteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4">
@@ -304,6 +362,16 @@
                 btnUsers.classList.remove('active');
                 btnInvitations.classList.add('active');
             }
+        }
+
+        function openEditModal(userId, firstName, lastName, email, role, department) {
+            document.getElementById('editUserId').value = userId;
+            document.getElementById('editFirstName').value = firstName;
+            document.getElementById('editLastName').value = lastName;
+            document.getElementById('editEmail').value = email;
+            document.getElementById('editRole').value = role;
+            document.getElementById('editDepartment').value = department;
+            document.getElementById('editModal').classList.remove('hidden');
         }
 
         function copyInviteLink(token) {

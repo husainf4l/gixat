@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Gixat.Web.Modules.Auth.DTOs;
@@ -5,6 +6,7 @@ using Gixat.Web.Modules.Auth.Interfaces;
 
 namespace Gixat.Web.Pages.Auth;
 
+[AllowAnonymous]
 public class LoginModel : PageModel
 {
     private readonly IAuthService _authService;

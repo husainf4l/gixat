@@ -6,120 +6,272 @@
     Layout = "_AppLayout";
 }
 
-<div class="max-w-3xl mx-auto">
+<div class="max-w-5xl mx-auto animate-fade-in">
     <!-- Back Navigation -->
-    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
-        <i class="bi bi-arrow-left"></i>
-        Back to Session
+    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors group">
+        <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+        <span class="text-sm font-medium">Back to Session</span>
     </a>
 
-    <!-- Header Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6 animate-slide-up">
-        <div class="bg-gradient-to-r from-cyan-600 to-primary-600 p-6 text-white">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-                    <i class="bi bi-search text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-semibold tracking-tight">Start Inspection</h1>
-                    <p class="text-sm opacity-90">Session #@Model.Session?.SessionNumber • @Model.Session?.VehicleDisplayName</p>
-                </div>
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Vehicle Inspection</h1>
+                <p class="text-slate-600 mt-2 flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
+                        <i class="bi bi-hash text-xs"></i>
+                        @Model.Session?.SessionNumber
+                    </span>
+                    <span class="text-slate-400">•</span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <i class="bi bi-car-front text-primary-600"></i>
+                        @Model.Session?.VehicleDisplayName
+                    </span>
+                </p>
+            </div>
+            <div class="w-16 h-16 bg-gradient-to-br from-cyan-600 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <i class="bi bi-search text-white text-2xl"></i>
             </div>
         </div>
     </div>
 
-    <!-- Form Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 animate-slide-up" style="animation-delay: 0.1s;">
-        <form method="post" id="inspectionForm">
-            <div class="space-y-5">
-                <!-- Title -->
-                <div>
-                    <label asp-for="Input.Title" class="block text-sm font-medium text-slate-900 mb-1.5">Inspection Title <span class="text-red-600">*</span></label>
-                    <input asp-for="Input.Title" class="input-apple-outlined" placeholder="e.g., Full Vehicle Inspection" required />
-                    <span asp-validation-for="Input.Title" class="text-red-600 text-xs mt-1"></span>
-                </div>
+    <form method="post" id="inspectionForm">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Form -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Basic Information Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-pencil-square text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Inspection Details</h2>
+                            <p class="text-sm text-slate-600">Basic information about this inspection</p>
+                        </div>
+                    </div>
 
-                <!-- Priority -->
-                <div>
-                    <label asp-for="Input.OverallPriority" class="block text-sm font-medium text-slate-900 mb-3">Priority</label>
-                    <div class="flex flex-wrap gap-3">
-                        <label class="priority-option">
-                            <input type="radio" name="Input.OverallPriority" value="@Priority.Low" class="hidden peer" />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-green-600 peer-checked:bg-green-100 peer-checked:text-green-600 transition-all">
-                                <i class="bi bi-arrow-down-short"></i> Low
-                            </div>
+                    <!-- Title -->
+                    <div class="mb-6">
+                        <label asp-for="Input.Title" class="block text-sm font-semibold text-slate-900 mb-2">
+                            Inspection Title <span class="text-red-600">*</span>
                         </label>
-                        <label class="priority-option">
-                            <input type="radio" name="Input.OverallPriority" value="@Priority.Normal" class="hidden peer" checked />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-primary-600 peer-checked:bg-primary-100 peer-checked:text-primary-600 transition-all">
-                                <i class="bi bi-dash"></i> Normal
-                            </div>
-                        </label>
-                        <label class="priority-option">
-                            <input type="radio" name="Input.OverallPriority" value="@Priority.High" class="hidden peer" />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-orange-600 peer-checked:bg-orange-100 peer-checked:text-orange-600 transition-all">
-                                <i class="bi bi-arrow-up-short"></i> High
-                            </div>
-                        </label>
-                        <label class="priority-option">
-                            <input type="radio" name="Input.OverallPriority" value="@Priority.Urgent" class="hidden peer" />
-                            <div class="px-4 py-2 border border-gray-200 rounded-xl cursor-pointer text-sm font-medium text-slate-600 peer-checked:border-red-600 peer-checked:bg-red-100 peer-checked:text-red-600 transition-all">
-                                <i class="bi bi-exclamation-triangle"></i> Urgent
-                            </div>
-                        </label>
+                        <input asp-for="Input.Title" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" placeholder="e.g., Pre-delivery Inspection, Safety Check" required />
+                        <span asp-validation-for="Input.Title" class="text-red-600 text-xs mt-1"></span>
+                    </div>
+
+                    <!-- Priority -->
+                    <div>
+                        <label asp-for="Input.OverallPriority" class="block text-sm font-semibold text-slate-900 mb-3">Priority Level</label>
+                        <div class="grid grid-cols-4 gap-3">
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.OverallPriority" value="@Priority.Low" class="peer sr-only" />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-green-500 peer-checked:bg-green-50 hover:border-green-300 transition-all">
+                                    <i class="bi bi-flag text-xl text-green-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">Low</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.OverallPriority" value="@Priority.Normal" class="peer sr-only" checked />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:border-blue-300 transition-all">
+                                    <i class="bi bi-flag-fill text-xl text-blue-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">Normal</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.OverallPriority" value="@Priority.High" class="peer sr-only" />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-orange-500 peer-checked:bg-orange-50 hover:border-orange-300 transition-all">
+                                    <i class="bi bi-flag-fill text-xl text-orange-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">High</span>
+                                </div>
+                            </label>
+                            <label class="relative cursor-pointer">
+                                <input type="radio" name="Input.OverallPriority" value="@Priority.Urgent" class="peer sr-only" />
+                                <div class="p-4 text-center rounded-xl border-2 border-slate-200 peer-checked:border-red-500 peer-checked:bg-red-50 hover:border-red-300 transition-all">
+                                    <i class="bi bi-exclamation-triangle-fill text-xl text-red-600 mb-2 block"></i>
+                                    <span class="text-sm font-semibold text-slate-900">Urgent</span>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Description -->
-                <div>
-                    <label asp-for="Input.Description" class="block text-sm font-medium text-slate-900 mb-1.5">Description</label>
-                    <textarea asp-for="Input.Description" rows="3" class="input-apple-outlined resize-none" placeholder="Describe the scope of the inspection..."></textarea>
+                <!-- Description Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-file-text text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Description</h2>
+                            <p class="text-sm text-slate-600">Scope and purpose of the inspection</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label asp-for="Input.Description" class="block text-sm font-semibold text-slate-900 mb-2">
+                            Inspection Scope
+                        </label>
+                        <textarea asp-for="Input.Description" rows="4" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none" 
+                                  placeholder="Describe what will be inspected...&#10;&#10;Examples:&#10;• Complete safety inspection&#10;• Pre-purchase evaluation&#10;• Routine maintenance check"></textarea>
+                        <p class="text-xs text-slate-600 mt-2 flex items-start gap-2">
+                            <i class="bi bi-lightbulb text-amber-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Include specific areas to inspect or any customer concerns</span>
+                        </p>
+                    </div>
                 </div>
 
-                <!-- Media Upload Section -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-900 mb-3">Photos & Videos</label>
-                    <div id="dropZone" class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center hover:border-primary-600 hover:bg-primary-100 transition-all cursor-pointer group">
+                <!-- Media Upload Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-images text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h2 class="text-lg font-semibold text-slate-900">Photos & Videos</h2>
+                            <p class="text-sm text-slate-600">Document vehicle condition</p>
+                        </div>
+                        <span class="text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full">Optional</span>
+                    </div>
+
+                    <!-- Drag & Drop Zone -->
+                    <div id="dropZone" class="border-2 border-dashed border-slate-200 rounded-xl p-10 text-center hover:border-primary-500 hover:bg-primary-50 transition-all cursor-pointer group">
                         <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
-                        <div class="w-14 h-14 rounded-2xl bg-gray-100 group-hover:bg-primary-600/10 flex items-center justify-center mx-auto mb-4 transition-colors">
-                            <i class="bi bi-cloud-arrow-up text-2xl text-slate-600 group-hover:text-primary-600 transition-colors"></i>
+                        <div class="w-16 h-16 rounded-xl bg-slate-100 group-hover:bg-primary-100 flex items-center justify-center mx-auto mb-4 transition-colors">
+                            <i class="bi bi-cloud-arrow-up text-3xl text-slate-600 group-hover:text-primary-600 transition-colors"></i>
                         </div>
-                        <p class="text-sm font-medium text-slate-900 mb-1">Drop photos or videos here</p>
-                        <p class="text-xs text-slate-600">or click to browse • Images will be compressed automatically</p>
+                        <p class="text-base font-semibold text-slate-900 mb-1">Drop files here or click to browse</p>
+                        <p class="text-sm text-slate-600">Supports JPG, PNG, MP4, MOV • Max 50MB per file</p>
                     </div>
 
+                    <!-- Upload Progress -->
                     <div id="uploadProgress" class="hidden mt-4">
-                        <div class="flex items-center gap-3 p-4 bg-primary-600/10 rounded-xl">
-                            <div class="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent"></div>
-                            <span class="text-sm font-medium text-primary-600">Uploading and compressing...</span>
+                        <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                            <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                            <span class="text-sm text-blue-700 font-medium">Uploading and processing files...</span>
                         </div>
                     </div>
 
-                    <div id="mediaGrid" class="grid grid-cols-3 md:grid-cols-4 gap-3 mt-4"></div>
+                    <!-- Media Grid -->
+                    <div id="mediaGrid" class="grid grid-cols-4 gap-3 mt-4"></div>
                     <input type="hidden" asp-for="Input.MediaItemIds" id="mediaItemIds" />
                 </div>
 
-                <!-- Info Box -->
-                <div class="bg-primary-600/10 border border-primary-600/20 rounded-xl p-4">
-                    <div class="flex gap-3">
-                        <i class="bi bi-info-circle text-primary-600 text-lg flex-shrink-0"></i>
-                        <div>
-                            <h4 class="text-sm font-medium text-slate-900">What happens next?</h4>
-                            <p class="text-sm text-slate-600 mt-1">After creating the inspection, you'll be able to add inspection items, record conditions, and upload more photos.</p>
+                <!-- Actions -->
+                <div class="flex justify-end gap-3 pt-2">
+                    <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-white text-slate-700 border-2 border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all">
+                        <i class="bi bi-x-lg"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-cyan-600 to-primary-700 text-white hover:from-cyan-700 hover:to-primary-800 shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 transition-all">
+                        <i class="bi bi-search"></i>
+                        Start Inspection
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Inspection Guide -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="bi bi-lightbulb-fill text-yellow-500 text-xl"></i>
+                        <h3 class="font-semibold text-slate-900">Inspection Checklist</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Check all fluid levels and conditions</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Inspect tire tread depth and pressure</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Test all lights and electrical systems</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Check brake system and components</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Examine suspension and steering</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                            <span>Document any damage or wear</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Next Steps -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-list-check text-primary-600"></i>
+                        After Starting
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">1</div>
+                            <div>
+                                <div class="font-semibold text-slate-900">Add Inspection Items</div>
+                                <div class="text-slate-600 text-xs mt-0.5">Create detailed checklist items</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">2</div>
+                            <div>
+                                <div class="font-semibold text-slate-900">Record Conditions</div>
+                                <div class="text-slate-600 text-xs mt-0.5">Document findings for each item</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">3</div>
+                            <div>
+                                <div class="font-semibold text-slate-900">Upload Photos</div>
+                                <div class="text-slate-600 text-xs mt-0.5">Add visual documentation</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0 text-xs font-bold">4</div>
+                            <div>
+                                <div class="font-semibold text-slate-900">Complete & Share</div>
+                                <div class="text-slate-600 text-xs mt-0.5">Finalize and send to customer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Info -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="bi bi-info-circle text-primary-600"></i>
+                        Session Details
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                            <span class="text-slate-600">Session #</span>
+                            <span class="font-semibold text-slate-900">@Model.Session?.SessionNumber</span>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                            <span class="text-slate-600">Vehicle</span>
+                            <span class="font-semibold text-slate-900">@Model.Session?.VehicleDisplayName</span>
+                        </div>
+                        <div class="flex items-center justify-between py-2">
+                            <span class="text-slate-600">Status</span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary-100 text-primary-700 rounded-full text-xs font-semibold">
+                                <i class="bi bi-circle-fill" style="font-size: 6px;"></i>
+                                Active
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Actions -->
-            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-                <a href="/Sessions/Details/@Model.Session?.Id" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">Cancel</a>
-                <button type="submit" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors bg-gradient-to-r from-cyan-600 to-primary-600">
-                    <i class="bi bi-search"></i>Start Inspection
-                </button>
-            </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
@@ -161,6 +313,21 @@
 
         for (const file of files) {
             try {
+                // Show immediate preview using FileReader
+                const tempId = 'temp_' + Date.now() + '_' + Math.random();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const tempMedia = {
+                        id: tempId,
+                        mediaType: file.type.startsWith('image/') ? 0 : 1,
+                        s3Url: e.target.result,
+                        isTemp: true
+                    };
+                    addMediaToGrid(tempMedia);
+                };
+                reader.readAsDataURL(file);
+
+                // Then upload in the background
                 let processedFile = file;
                 if (file.type.startsWith('image/')) {
                     processedFile = await compressImage(file);
@@ -178,6 +345,8 @@
                 if (!response.ok) {
                     console.error('Upload failed:', response.statusText);
                     alert('Upload failed: ' + response.statusText);
+                    // Remove temp preview on error
+                    document.querySelector(`[data-media-id="${tempId}"]`)?.remove();
                     continue;
                 }
                 
@@ -185,6 +354,8 @@
                 if (!result.success) {
                     console.error('Upload failed:', result);
                     alert('Upload failed: ' + (result.error || 'Unknown error'));
+                    // Remove temp preview on error
+                    document.querySelector(`[data-media-id="${tempId}"]`)?.remove();
                     continue;
                 }
 
@@ -202,7 +373,11 @@
                 if (confirmResult.success) {
                     uploadedIds.push(confirmResult.media.id);
                     mediaItemIds.value = uploadedIds.join(',');
-                    // Use the public URL from the upload response
+                    
+                    // Remove temp preview
+                    document.querySelector(`[data-media-id="${tempId}"]`)?.remove();
+                    
+                    // Add confirmed media with real URL
                     confirmResult.media.s3Url = result.publicUrl || result.uploadUrl;
                     addMediaToGrid(confirmResult.media);
                 }

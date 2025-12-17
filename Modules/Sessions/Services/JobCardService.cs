@@ -13,11 +13,13 @@ public class JobCardService : BaseService, IJobCardService
 {
     private readonly ILogger<JobCardService> _logger;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IAwsS3Service _s3Service;
 
-    public JobCardService(DbContext context, ILogger<JobCardService> logger, IHttpContextAccessor httpContextAccessor) : base(context)
+    public JobCardService(DbContext context, IAwsS3Service s3Service, ILogger<JobCardService> logger, IHttpContextAccessor httpContextAccessor) : base(context)
     {
         _logger = logger;
         _httpContextAccessor = httpContextAccessor;
+        _s3Service = s3Service;
     }
 
     private DbSet<JobCard> JobCards => Set<JobCard>();
@@ -33,7 +35,15 @@ public class JobCardService : BaseService, IJobCardService
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return jobCard?.ToDto();
+        if (jobCard == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in jobCard.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return jobCard.ToDto();
     }
 
     public async Task<JobCardDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
@@ -45,7 +55,15 @@ public class JobCardService : BaseService, IJobCardService
             .Where(j => j.SessionId == sessionId && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return jobCard?.ToDto();
+        if (jobCard == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in jobCard.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return jobCard.ToDto();
     }
 
     public async Task<JobCardDto?> GetByJobCardNumberAsync(string jobCardNumber, Guid companyId)
@@ -57,7 +75,15 @@ public class JobCardService : BaseService, IJobCardService
             .Where(j => j.JobCardNumber == jobCardNumber && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return jobCard?.ToDto();
+        if (jobCard == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in jobCard.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return jobCard.ToDto();
     }
 
     public async Task<IEnumerable<JobCardDto>> GetAllAsync(Guid companyId, JobCardStatus? status = null)
@@ -92,7 +118,7 @@ public class JobCardService : BaseService, IJobCardService
             EstimatedHours = dto.EstimatedHours,
             SupervisorId = dto.SupervisorId,
             PrimaryTechnicianId = dto.PrimaryTechnicianId,
-            Status = JobCardStatus.Draft
+            Status = JobCardStatus.Pending  // Changed from Draft to Pending - ready for approval
         };
 
         JobCards.Add(jobCard);
@@ -134,17 +160,39 @@ public class JobCardService : BaseService, IJobCardService
 
     public async Task<bool> ApproveAsync(Guid id, Guid approvedById, string? notes, Guid companyId)
     {
-        var jobCard = await JobCards.Where(j => j.Id == id && j.CompanyId == companyId).FirstOrDefaultAsync();
-        if (jobCard == null) return false;
+        _logger.LogInformation($"[ApproveAsync] START - JobCardId: {id}, CompanyId: {companyId}");
+        
+        var jobCard = await JobCards
+            .Where(j => j.Id == id && j.CompanyId == companyId)
+            .FirstOrDefaultAsync();
+            
+        if (jobCard == null)
+        {
+            _logger.LogWarning($"[ApproveAsync] JobCard not found - Id: {id}");
+            return false;
+        }
 
+        _logger.LogInformation($"[ApproveAsync] BEFORE - Status: {jobCard.Status}, IsApproved: {jobCard.IsApproved}");
+        
+        // Update all fields
         jobCard.IsApproved = true;
         jobCard.ApprovedAt = DateTime.UtcNow;
         jobCard.ApprovedById = approvedById;
         jobCard.ApprovalNotes = notes;
-        jobCard.Status = JobCardStatus.Approved;
+        jobCard.Status = JobCardStatus.InProgress;
+        jobCard.ActualStartAt = DateTime.UtcNow;
         jobCard.UpdatedAt = DateTime.UtcNow;
 
-        await SaveChangesAsync();
+        // Explicitly mark as modified
+        Context.Entry(jobCard).State = EntityState.Modified;
+
+        _logger.LogInformation($"[ApproveAsync] AFTER CHANGES - Status: {jobCard.Status}, IsApproved: {jobCard.IsApproved}");
+        
+        await UpdateSessionStatus(jobCard.SessionId, SessionStatus.InProgress);
+        
+        var changes = await Context.SaveChangesAsync();
+        _logger.LogInformation($"[ApproveAsync] SaveChanges returned {changes} modified records");
+        
         return true;
     }
 
@@ -165,33 +213,119 @@ public class JobCardService : BaseService, IJobCardService
 
     public async Task<bool> StartWorkAsync(Guid id, Guid companyId)
     {
-        var jobCard = await JobCards.Where(j => j.Id == id && j.CompanyId == companyId).FirstOrDefaultAsync();
-        if (jobCard == null) return false;
+        _logger.LogInformation($"[DEBUG] StartWorkAsync called - JobCardId: {id}, CompanyId: {companyId}");
+        
+        var jobCard = await JobCards
+            .Where(j => j.Id == id && j.CompanyId == companyId)
+            .FirstOrDefaultAsync();
+            
+        if (jobCard == null)
+        {
+            _logger.LogWarning($"[DEBUG] JobCard not found - Id: {id}, CompanyId: {companyId}");
+            return false;
+        }
 
+        _logger.LogInformation($"[DEBUG] Current Status: {jobCard.Status}, Updating to InProgress");
+        
         jobCard.Status = JobCardStatus.InProgress;
         jobCard.ActualStartAt = DateTime.UtcNow;
         jobCard.UpdatedAt = DateTime.UtcNow;
+        
+        Context.Entry(jobCard).State = EntityState.Modified;
 
         await UpdateSessionStatus(jobCard.SessionId, SessionStatus.InProgress);
-        await SaveChangesAsync();
+        var changes = await Context.SaveChangesAsync();
+        
+        _logger.LogInformation($"[DEBUG] JobCard started successfully - Id: {id}, Changes: {changes}");
+        return true;
+    }
+
+    public async Task<bool> MoveToWaitingPartsAsync(Guid id, Guid companyId)
+    {
+        _logger.LogInformation($"[MoveToWaitingParts] JobCardId: {id}, CompanyId: {companyId}");
+        
+        var jobCard = await JobCards
+            .Where(j => j.Id == id && j.CompanyId == companyId)
+            .FirstOrDefaultAsync();
+            
+        if (jobCard == null)
+        {
+            _logger.LogWarning($"[MoveToWaitingParts] JobCard not found - Id: {id}");
+            return false;
+        }
+
+        _logger.LogInformation($"[MoveToWaitingParts] Current Status: {jobCard.Status}, Moving to WaitingParts");
+        
+        jobCard.Status = JobCardStatus.WaitingParts;
+        jobCard.UpdatedAt = DateTime.UtcNow;
+        
+        Context.Entry(jobCard).State = EntityState.Modified;
+
+        var changes = await Context.SaveChangesAsync();
+        
+        _logger.LogInformation($"[MoveToWaitingParts] JobCard moved to WaitingParts - Id: {id}, Changes: {changes}");
+        return true;
+    }
+
+    public async Task<bool> MoveToQualityCheckAsync(Guid id, Guid companyId)
+    {
+        _logger.LogInformation($"[MoveToQualityCheck] JobCardId: {id}, CompanyId: {companyId}");
+        
+        var jobCard = await JobCards
+            .Include(j => j.Items)
+            .Where(j => j.Id == id && j.CompanyId == companyId)
+            .FirstOrDefaultAsync();
+            
+        if (jobCard == null)
+        {
+            _logger.LogWarning($"[MoveToQualityCheck] JobCard not found - Id: {id}");
+            return false;
+        }
+
+        _logger.LogInformation($"[MoveToQualityCheck] Current Status: {jobCard.Status}, Moving to QualityCheck");
+        
+        jobCard.Status = JobCardStatus.QualityCheck;
+        jobCard.ActualCompletionAt = DateTime.UtcNow;
+        jobCard.ActualHours = jobCard.Items?.Sum(i => i.ActualHours) ?? 0;
+        jobCard.UpdatedAt = DateTime.UtcNow;
+        
+        Context.Entry(jobCard).State = EntityState.Modified;
+
+        await UpdateSessionStatus(jobCard.SessionId, SessionStatus.QualityCheck);
+        var changes = await Context.SaveChangesAsync();
+        
+        _logger.LogInformation($"[MoveToQualityCheck] JobCard moved to QualityCheck - Id: {id}, Changes: {changes}");
         return true;
     }
 
     public async Task<bool> CompleteWorkAsync(Guid id, Guid companyId)
     {
+        _logger.LogInformation($"[CompleteWork] JobCardId: {id}, CompanyId: {companyId}");
+        
         var jobCard = await JobCards
             .Include(j => j.Items)
             .Where(j => j.Id == id && j.CompanyId == companyId)
             .FirstOrDefaultAsync();
-        if (jobCard == null) return false;
+            
+        if (jobCard == null)
+        {
+            _logger.LogWarning($"[CompleteWork] JobCard not found - Id: {id}");
+            return false;
+        }
 
+        _logger.LogInformation($"[CompleteWork] Current Status: {jobCard.Status}, Moving to Completed");
+        
         jobCard.Status = JobCardStatus.Completed;
         jobCard.ActualCompletionAt = DateTime.UtcNow;
         jobCard.ActualHours = jobCard.Items?.Sum(i => i.ActualHours) ?? 0;
         jobCard.UpdatedAt = DateTime.UtcNow;
+        
+        Context.Entry(jobCard).State = EntityState.Modified;
 
         await UpdateSessionStatus(jobCard.SessionId, SessionStatus.Completed);
-        await SaveChangesAsync();
+        var changes = await Context.SaveChangesAsync();
+        
+        _logger.LogInformation($"[CompleteWork] JobCard completed - Id: {id}, Changes: {changes}");
         return true;
     }
 
@@ -301,7 +435,20 @@ public class JobCardService : BaseService, IJobCardService
     public async Task<bool> QualityCheckItemAsync(Guid itemId, Guid checkedById, string? notes, Guid companyId)
     {
         var item = await JobCardItems.Where(i => i.Id == itemId && i.CompanyId == companyId).FirstOrDefaultAsync();
-        if (item == null) return false;
+        if (item == null)
+        {
+            _logger.LogWarning($"[QC ITEM] Item not found: {itemId}");
+            return false;
+        }
+
+        // Validate: can only approve Completed items
+        if (item.Status != Enums.TaskStatus.Completed)
+        {
+            _logger.LogWarning($"[QC ITEM] Cannot approve item {itemId} - status is {item.Status}, must be Completed");
+            return false;
+        }
+
+        _logger.LogInformation($"[QC ITEM] Approving item {itemId} - Current QC: {item.QualityChecked}");
 
         item.QualityChecked = true;
         item.QualityCheckedAt = DateTime.UtcNow;
@@ -310,6 +457,8 @@ public class JobCardService : BaseService, IJobCardService
         item.UpdatedAt = DateTime.UtcNow;
 
         await SaveChangesAsync();
+        
+        _logger.LogInformation($"[QC ITEM] Item {itemId} approved successfully - QC: {item.QualityChecked}");
         return true;
     }
 

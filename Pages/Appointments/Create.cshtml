@@ -5,129 +5,44 @@
     ViewData["Title"] = "New Appointment";
 }
 
-<!-- Timestamp: @DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") -->
+<div class="max-w-5xl mx-auto animate-fade-in">
+    <!-- Back Navigation -->
+    <a href="/Appointments" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors group">
+        <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+        <span class="text-sm font-medium">Back to Appointments</span>
+    </a>
 
-<style>
-    /* Apple-style Card - v2.0 */
-    div.apple-card {
-        background-color: #ffffff !important;
-        border-radius: 16px !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-        padding: 32px !important;
-        margin-bottom: 24px !important;
-        border: 1px solid #e5e7eb !important;
-    }
-    
-    /* Apple-style Inputs - v2.0 */
-    select.apple-input,
-    input[type="date"].apple-input,
-    input[type="tel"].apple-input,
-    input[type="email"].apple-input,
-    textarea.apple-input {
-        width: 100% !important;
-        padding: 14px 16px !important;
-        border: 1.5px solid #d1d5db !important;
-        border-radius: 12px !important;
-        font-size: 16px !important;
-        line-height: 1.5 !important;
-        transition: all 0.2s ease !important;
-        background-color: #ffffff !important;
-        color: #1f2937 !important;
-    }
-    
-    select.apple-input:focus,
-    input[type="date"].apple-input:focus,
-    input[type="tel"].apple-input:focus,
-    input[type="email"].apple-input:focus,
-    textarea.apple-input:focus {
-        outline: none !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
-        background-color: #ffffff !important;
-    }
-    
-    /* Apple-style Primary Button - v2.0 */
-    button.apple-btn {
-        background-color: #3b82f6 !important;
-        color: #ffffff !important;
-        border-radius: 12px !important;
-        padding: 14px 28px !important;
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        border: none !important;
-        cursor: pointer !important;
-        text-decoration: none !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    button.apple-btn:hover {
-        background-color: #2563eb !important;
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
-    }
-    
-    /* Apple-style Secondary Button - v2.0 */
-    a.apple-btn-secondary {
-        background-color: #f3f4f6 !important;
-        color: #374151 !important;
-        border-radius: 12px !important;
-        padding: 14px 28px !important;
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        text-decoration: none !important;
-        border: 1px solid #e5e7eb !important;
-    }
-    
-    a.apple-btn-secondary:hover {
-        background-color: #e5e7eb !important;
-        border-color: #d1d5db !important;
-    }
-    
-    textarea.apple-input {
-        resize: vertical !important;
-        min-height: 120px !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-    }
-</style>
-
-<div class="mb-6">
-    <div class="flex items-center gap-3 mb-2">
-        <a href="/Appointments" class="text-gray-600 hover:text-gray-900">
-            <i class="bi bi-arrow-left text-xl"></i>
-        </a>
-        <h1 class="text-3xl font-semibold text-gray-900">New Appointment</h1>
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Schedule New Appointment</h1>
+                <p class="text-slate-600 mt-2 flex items-center gap-2">
+                    <i class="bi bi-calendar-check text-primary-600"></i>
+                    <span>Book a service appointment for your customer</span>
+                </p>
+            </div>
+            <div class="w-16 h-16 bg-gradient-to-br from-primary-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
+                <i class="bi bi-calendar-plus text-white text-2xl"></i>
+            </div>
+        </div>
     </div>
-    <p class="text-gray-600 ml-10">Schedule a service appointment</p>
-</div>
 
-<form method="post" class="max-w-3xl">
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-            <i class="bi bi-exclamation-triangle text-red-600 mt-0.5"></i>
-            <div>
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-xl p-4 flex items-start gap-3">
+            <i class="bi bi-exclamation-triangle-fill text-red-600 text-xl flex-shrink-0 mt-0.5"></i>
+            <div class="flex-1">
                 <h4 class="font-semibold text-red-900 mb-1">Error</h4>
                 <p class="text-sm text-red-800">@Model.ErrorMessage</p>
             </div>
         </div>
     }
 
-    <!-- Client Selection -->
-    <div class="apple-card">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <i class="bi bi-person-circle text-blue-600"></i>
-            Client Information
-        </h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form method="post">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Form -->
+            <div class="lg:col-span-2 space-y-6">
             <div>
                 <label class="block text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
                     <i class="bi bi-person text-gray-500"></i>

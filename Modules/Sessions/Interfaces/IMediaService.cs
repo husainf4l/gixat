@@ -37,6 +37,7 @@ public interface IAwsS3Service
     Task<string> GeneratePresignedUploadUrlAsync(string key, string contentType, int expirationMinutes = 15);
     Task<string> GeneratePresignedDownloadUrlAsync(string key, int expirationMinutes = 60);
     Task<bool> UploadFileAsync(string key, Stream fileStream, string contentType);
+    Task<bool> SaveFileLocallyAsync(string key, Stream fileStream);
     Task<bool> DeleteObjectAsync(string key);
     Task<bool> ObjectExistsAsync(string key);
     string GenerateS3Key(Guid companyId, Guid sessionId, MediaCategory category, string fileName);

@@ -6,245 +6,353 @@
     Layout = "_AppLayout";
 }
 
-<div class="space-y-6 animate-fade-in">
-    <!-- Header with gradient -->
-    <div class="bg-gradient-to-r from-apple-teal to-apple-green rounded-2xl p-6 animate-slide-up">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <a href="/Sessions/Details/@Model.Session.Id" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all">
-                    <i class="bi bi-arrow-left text-white text-lg"></i>
-                </a>
-                <div>
-                    <h1 class="text-2xl font-semibold text-white">Test Drive</h1>
-                    <p class="text-white/80 text-sm mt-1">Session #@Model.Session.SessionNumber • @Model.Session.VehicleDisplayName</p>
+<div class="max-w-7xl mx-auto animate-fade-in">
+    <!-- Back Navigation -->
+    <a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors group">
+        <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+        <span class="text-sm font-medium">Back to Session</span>
+    </a>
+
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight mb-2">Test Drive Report</h1>
+                <p class="text-slate-600 flex items-center gap-2 flex-wrap">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
+                        <i class="bi bi-hash text-xs"></i>
+                        @Model.Session.SessionNumber
+                    </span>
+                    <span class="text-slate-400">•</span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <i class="bi bi-car-front text-primary-600"></i>
+                        @Model.Session.VehicleDisplayName
+                    </span>
+                </p>
+            </div>
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-600 to-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/30">
+                <i class="bi bi-speedometer2 text-white text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Test Drive Details Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-info-circle text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Test Drive Information</h2>
+                        <p class="text-sm text-slate-600">Basic details and route</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="p-4 bg-slate-50 rounded-xl">
+                        <div class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Title</div>
+                        <div class="text-base font-semibold text-slate-900">@Model.TestDrive.Title</div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.TestDrive.Description))
+                    {
+                        <div class="p-4 bg-slate-50 rounded-xl">
+                            <div class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Description</div>
+                            <div class="text-base text-slate-900">@Model.TestDrive.Description</div>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.TestDrive.RouteDescription))
+                    {
+                        <div class="p-4 bg-slate-50 rounded-xl">
+                            <div class="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1">Route Description</div>
+                            <div class="text-base text-slate-900">@Model.TestDrive.RouteDescription</div>
+                        </div>
+                    }
                 </div>
             </div>
-            <div class="flex items-center gap-3">
+
+            <!-- Mileage Card -->
+            @if (Model.TestDrive.MileageStart.HasValue || Model.TestDrive.MileageEnd.HasValue)
+            {
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-speedometer text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Mileage Tracking</h2>
+                            <p class="text-sm text-slate-600">Odometer readings</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+                            <div class="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-2">Start</div>
+                            <div class="text-2xl font-bold text-slate-900">@(Model.TestDrive.MileageStart?.ToString("N0") ?? "—")</div>
+                            <div class="text-xs text-slate-600 mt-1">kilometers</div>
+                        </div>
+                        
+                        <div class="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                            <div class="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-2">End</div>
+                            <div class="text-2xl font-bold text-slate-900">@(Model.TestDrive.MileageEnd?.ToString("N0") ?? "—")</div>
+                            <div class="text-xs text-slate-600 mt-1">kilometers</div>
+                        </div>
+                        
+                        @if (Model.TestDrive.MileageStart.HasValue && Model.TestDrive.MileageEnd.HasValue)
+                        {
+                            <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                                <div class="text-xs font-semibold text-green-700 uppercase tracking-wide mb-2">Distance</div>
+                                <div class="text-2xl font-bold text-green-600">@((Model.TestDrive.MileageEnd.Value - Model.TestDrive.MileageStart.Value).ToString("N0"))</div>
+                                <div class="text-xs text-green-700 mt-1">kilometers</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Performance Summary -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-graph-up text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Performance Observations</h2>
+                        <p class="text-sm text-slate-600">Component assessments</p>
+                    </div>
+                </div>
+                
+                @{
+                    var observations = new[] {
+                        ("Engine", Model.TestDrive.EnginePerformance, "bi-gear-wide-connected", "from-blue-500 to-blue-600"),
+                        ("Transmission", Model.TestDrive.TransmissionPerformance, "bi-gear", "from-purple-500 to-purple-600"),
+                        ("Brakes", Model.TestDrive.BrakePerformance, "bi-disc", "from-red-500 to-red-600"),
+                        ("Steering", Model.TestDrive.SteeringPerformance, "bi-joystick", "from-cyan-500 to-cyan-600"),
+                        ("Suspension", Model.TestDrive.SuspensionPerformance, "bi-arrows-expand", "from-orange-500 to-orange-600"),
+                        ("Noise", Model.TestDrive.NoiseObservations, "bi-volume-up", "from-slate-500 to-slate-600"),
+                        ("Vibration", Model.TestDrive.VibrationObservations, "bi-activity", "from-amber-500 to-amber-600"),
+                        ("Electrical", Model.TestDrive.ElectricalObservations, "bi-lightning", "from-yellow-500 to-yellow-600"),
+                        ("A/C", Model.TestDrive.AcPerformance, "bi-snow2", "from-sky-500 to-sky-600")
+                    };
+                    var hasObservations = observations.Any(o => !string.IsNullOrEmpty(o.Item2));
+                }
+                
+                @if (hasObservations)
+                {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach (var (name, value, icon, gradient) in observations)
+                        {
+                            if (!string.IsNullOrEmpty(value))
+                            {
+                                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 transition-all">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br @gradient rounded-xl flex items-center justify-center shadow-sm">
+                                            <i class="bi @icon text-white"></i>
+                                        </div>
+                                        <span class="font-semibold text-slate-900">@name</span>
+                                    </div>
+                                    <p class="text-sm text-slate-700 leading-relaxed">@value</p>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12">
+                        <i class="bi bi-clipboard text-5xl text-slate-200 mb-3"></i>
+                        <p class="text-slate-600 font-medium">No performance observations recorded</p>
+                        <p class="text-sm text-slate-500 mt-1">Observations will appear here after the test drive</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Findings & Recommendations -->
+            @if (!string.IsNullOrEmpty(Model.TestDrive.Findings) || !string.IsNullOrEmpty(Model.TestDrive.Recommendations))
+            {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @if (!string.IsNullOrEmpty(Model.TestDrive.Findings))
+                    {
+                        <div class="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                                    <i class="bi bi-exclamation-triangle text-orange-600 text-lg"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-900">Key Findings</h3>
+                            </div>
+                            <p class="text-slate-800 leading-relaxed">@Model.TestDrive.Findings</p>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.TestDrive.Recommendations))
+                    {
+                        <div class="bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200 rounded-2xl p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                                    <i class="bi bi-lightbulb text-blue-600 text-lg"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-900">Recommendations</h3>
+                            </div>
+                            <p class="text-slate-800 leading-relaxed">@Model.TestDrive.Recommendations</p>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Media Upload Section -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
+                            <i class="bi bi-images text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-slate-900">Test Drive Media</h2>
+                            <p class="text-sm text-slate-600">Photos and videos</p>
+                        </div>
+                    </div>
+                    <label class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-500/30 cursor-pointer transition-all">
+                        <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
+                        <i class="bi bi-plus-lg"></i>
+                        Upload Media
+                    </label>
+                </div>
+
+                <div id="uploadProgress" class="hidden mb-4">
+                    <div class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                        <div class="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                        <span class="text-sm text-blue-700 font-medium">Uploading and processing files...</span>
+                    </div>
+                </div>
+
+                <div id="mediaGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    @if (Model.TestDrive.MediaItems?.Any() == true)
+                    {
+                        @foreach (var media in Model.TestDrive.MediaItems)
+                        {
+                            <div class="relative group rounded-xl overflow-hidden" data-media-id="@media.Id">
+                                @if (media.MediaType == MediaType.Image)
+                                {
+                                    <img src="@media.S3Url" alt="@media.Title" 
+                                         class="w-full h-32 object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                         onclick="openMediaViewer('@media.S3Url', 'image')" />
+                                }
+                                else if (media.MediaType == MediaType.Video)
+                                {
+                                    <div class="w-full h-32 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center cursor-pointer hover:from-slate-200 hover:to-slate-100 transition-all"
+                                         onclick="openMediaViewer('@media.S3Url', 'video')">
+                                        <div class="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                                            <i class="bi bi-play-fill text-2xl text-slate-700"></i>
+                                        </div>
+                                    </div>
+                                }
+                                <button onclick="deleteMedia('@media.Id')" 
+                                        class="absolute top-2 right-2 w-8 h-8 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg flex items-center justify-center hover:scale-110">
+                                    <i class="bi bi-x-lg text-sm"></i>
+                                </button>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div id="emptyMedia" class="@(Model.TestDrive.MediaItems?.Any() == true ? "hidden" : "") text-center py-12">
+                    <i class="bi bi-image text-5xl text-slate-200 mb-3"></i>
+                    <p class="text-slate-600 font-medium">No photos or videos yet</p>
+                    <p class="text-sm text-slate-500 mt-1">Upload images to document test drive observations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Status Card -->
+            <div class="bg-gradient-to-br from-primary-50 to-purple-50 rounded-2xl shadow-sm border border-primary-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-primary-600"></i>
+                    Status
+                </h3>
                 @{
                     var statusConfig = Model.TestDrive.Status switch
                     {
-                        RequestStatus.Completed => ("bg-white/20 text-white", "bi-check-circle-fill"),
-                        RequestStatus.InProgress => ("bg-white/20 text-white", "bi-arrow-repeat"),
-                        _ => ("bg-white/20 text-white", "bi-clock")
+                        RequestStatus.Completed => ("bg-green-100 text-green-700 border-green-200", "bi-check-circle-fill"),
+                        RequestStatus.InProgress => ("bg-blue-100 text-blue-700 border-blue-200", "bi-arrow-repeat"),
+                        _ => ("bg-slate-100 text-slate-700 border-slate-200", "bi-clock")
                     };
                 }
-                <span class="px-4 py-2 @statusConfig.Item1 backdrop-blur-sm rounded-xl text-sm font-medium flex items-center gap-2">
+                <div class="inline-flex items-center gap-2 px-4 py-2.5 @statusConfig.Item1 border rounded-xl text-sm font-semibold mb-4">
                     <i class="bi @statusConfig.Item2"></i>
                     @Model.TestDrive.Status
-                </span>
-            </div>
-        </div>
-    </div>
+                </div>
 
-    <!-- Test Drive Details Card -->
-    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.1s">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-br from-apple-teal/10 to-apple-green/10 rounded-xl flex items-center justify-center">
-                <i class="bi bi-speedometer2 text-apple-teal text-lg"></i>
-            </div>
-            <h2 class="text-lg font-semibold text-apple-dark">Test Drive Details</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-1">
-                <p class="text-sm text-apple-gray">Title</p>
-                <p class="text-base font-medium text-apple-dark">@Model.TestDrive.Title</p>
-            </div>
-            @if (!string.IsNullOrEmpty(Model.TestDrive.Description))
-            {
-                <div class="space-y-1">
-                    <p class="text-sm text-apple-gray">Description</p>
-                    <p class="text-base text-apple-dark">@Model.TestDrive.Description</p>
-                </div>
-            }
-            @if (Model.TestDrive.MileageStart.HasValue || Model.TestDrive.MileageEnd.HasValue)
-            {
-                <div class="md:col-span-2">
-                    <p class="text-sm text-apple-gray mb-2">Mileage</p>
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1 bg-gradient-to-r from-apple-teal/5 to-transparent rounded-xl p-4 border border-apple-teal/10">
-                            <p class="text-xs text-apple-gray mb-1">Start</p>
-                            <p class="text-xl font-semibold text-apple-dark">@(Model.TestDrive.MileageStart?.ToString("N0") ?? "—") <span class="text-sm font-normal text-apple-gray">km</span></p>
-                        </div>
-                        <div class="w-12 h-12 bg-apple-teal/10 rounded-full flex items-center justify-center">
-                            <i class="bi bi-arrow-right text-apple-teal text-xl"></i>
-                        </div>
-                        <div class="flex-1 bg-gradient-to-l from-apple-green/5 to-transparent rounded-xl p-4 border border-apple-green/10">
-                            <p class="text-xs text-apple-gray mb-1">End</p>
-                            <p class="text-xl font-semibold text-apple-dark">@(Model.TestDrive.MileageEnd?.ToString("N0") ?? "—") <span class="text-sm font-normal text-apple-gray">km</span></p>
-                        </div>
-                        @if (Model.TestDrive.MileageStart.HasValue && Model.TestDrive.MileageEnd.HasValue)
-                        {
-                            <div class="bg-apple-green/10 rounded-xl p-4 border border-apple-green/20">
-                                <p class="text-xs text-apple-gray mb-1">Distance</p>
-                                <p class="text-xl font-bold text-apple-green">@((Model.TestDrive.MileageEnd.Value - Model.TestDrive.MileageStart.Value).ToString("N0")) <span class="text-sm font-normal">km</span></p>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-            @if (!string.IsNullOrEmpty(Model.TestDrive.RouteDescription))
-            {
-                <div class="md:col-span-2 space-y-1">
-                    <p class="text-sm text-apple-gray">Route Description</p>
-                    <p class="text-base text-apple-dark">@Model.TestDrive.RouteDescription</p>
-                </div>
-            }
-        </div>
-    </div>
-
-    <!-- Performance Summary -->
-    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.2s">
-        <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-10 bg-gradient-to-br from-apple-blue/10 to-apple-indigo/10 rounded-xl flex items-center justify-center">
-                <i class="bi bi-graph-up text-apple-blue text-lg"></i>
-            </div>
-            <h2 class="text-lg font-semibold text-apple-dark">Performance Observations</h2>
-        </div>
-        
-        @{
-            var observations = new[] {
-                ("Engine", Model.TestDrive.EnginePerformance, "bi-gear-wide-connected", "from-apple-blue to-apple-indigo"),
-                ("Transmission", Model.TestDrive.TransmissionPerformance, "bi-gear", "from-apple-purple to-apple-indigo"),
-                ("Brakes", Model.TestDrive.BrakePerformance, "bi-disc", "from-apple-red to-apple-orange"),
-                ("Steering", Model.TestDrive.SteeringPerformance, "bi-joystick", "from-apple-teal to-apple-green"),
-                ("Suspension", Model.TestDrive.SuspensionPerformance, "bi-arrows-expand", "from-apple-orange to-apple-red"),
-                ("Noise", Model.TestDrive.NoiseObservations, "bi-volume-up", "from-gray-500 to-gray-600"),
-                ("Vibration", Model.TestDrive.VibrationObservations, "bi-activity", "from-apple-orange to-amber-600"),
-                ("Electrical", Model.TestDrive.ElectricalObservations, "bi-lightning", "from-yellow-500 to-apple-orange"),
-                ("A/C", Model.TestDrive.AcPerformance, "bi-snow2", "from-cyan-500 to-apple-blue")
-            };
-            var hasObservations = observations.Any(o => !string.IsNullOrEmpty(o.Item2));
-        }
-        
-        @if (hasObservations)
-        {
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                @foreach (var (name, value, icon, gradient) in observations)
+                @if (Model.TestDrive.Status == RequestStatus.InProgress)
                 {
-                    if (!string.IsNullOrEmpty(value))
-                    {
-                        <div class="group p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all">
-                            <div class="flex items-center gap-3 mb-2">
-                                <div class="w-8 h-8 bg-gradient-to-br @gradient rounded-lg flex items-center justify-center">
-                                    <i class="bi @icon text-white text-sm"></i>
-                                </div>
-                                <span class="font-medium text-apple-dark">@name</span>
-                            </div>
-                            <p class="text-sm text-apple-gray leading-relaxed">@value</p>
-                        </div>
-                    }
+                    <button onclick="openCompleteModal()" 
+                            class="w-full mt-4 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                        <i class="bi bi-check-circle"></i>
+                        Complete Test Drive
+                    </button>
                 }
             </div>
-        }
-        else
-        {
-            <div class="text-center py-12">
-                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <i class="bi bi-clipboard text-3xl text-gray-300"></i>
-                </div>
-                <p class="text-apple-gray font-medium">No performance observations recorded yet</p>
-                <p class="text-sm text-gray-400 mt-1">Observations will appear here after the test drive</p>
-            </div>
-        }
-    </div>
 
-    <!-- Findings & Recommendations -->
-    @if (!string.IsNullOrEmpty(Model.TestDrive.Findings) || !string.IsNullOrEmpty(Model.TestDrive.Recommendations))
-    {
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up" style="animation-delay: 0.3s">
-            @if (!string.IsNullOrEmpty(Model.TestDrive.Findings))
-            {
-                <div class="bg-gradient-to-br from-apple-orange/5 to-amber-50 border border-apple-orange/20 rounded-2xl p-5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 bg-apple-orange/20 rounded-xl flex items-center justify-center">
-                            <i class="bi bi-exclamation-triangle text-apple-orange text-lg"></i>
-                        </div>
-                        <h3 class="font-semibold text-apple-dark">Key Findings</h3>
+            <!-- Session Info -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-calendar-check text-primary-600"></i>
+                    Session Info
+                </h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-600">Session #</span>
+                        <span class="font-semibold text-slate-900">@Model.Session.SessionNumber</span>
                     </div>
-                    <p class="text-apple-dark leading-relaxed">@Model.TestDrive.Findings</p>
-                </div>
-            }
-            @if (!string.IsNullOrEmpty(Model.TestDrive.Recommendations))
-            {
-                <div class="bg-gradient-to-br from-apple-blue/5 to-blue-50 border border-apple-blue/20 rounded-2xl p-5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-10 h-10 bg-apple-blue/20 rounded-xl flex items-center justify-center">
-                            <i class="bi bi-lightbulb text-apple-blue text-lg"></i>
-                        </div>
-                        <h3 class="font-semibold text-apple-dark">Recommendations</h3>
+                    <div class="flex items-center justify-between py-2 border-b border-slate-100">
+                        <span class="text-slate-600">Vehicle</span>
+                        <span class="font-semibold text-slate-900">@Model.Session.VehicleDisplayName</span>
                     </div>
-                    <p class="text-apple-dark leading-relaxed">@Model.TestDrive.Recommendations</p>
-                </div>
-            }
-        </div>
-    }
-
-    <!-- Media Upload Section -->
-    <div class="card-apple p-6 animate-slide-up" style="animation-delay: 0.4s">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-apple-purple/10 to-apple-indigo/10 rounded-xl flex items-center justify-center">
-                    <i class="bi bi-images text-apple-purple text-lg"></i>
-                </div>
-                <h2 class="text-lg font-semibold text-apple-dark">Test Drive Media</h2>
-            </div>
-            <label class="btn-apple-primary cursor-pointer">
-                <input type="file" id="mediaUpload" class="hidden" accept="image/*,video/*" multiple />
-                <i class="bi bi-plus-lg mr-2"></i> Upload Media
-            </label>
-        </div>
-
-        <div id="uploadProgress" class="hidden mb-4">
-            <div class="flex items-center gap-3 p-4 bg-apple-blue/5 border border-apple-blue/20 rounded-xl">
-                <div class="animate-spin rounded-full h-5 w-5 border-2 border-apple-blue border-t-transparent"></div>
-                <span class="text-sm text-apple-blue font-medium">Uploading and compressing...</span>
-            </div>
-        </div>
-
-        <div id="mediaGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            @if (Model.TestDrive.MediaItems?.Any() == true)
-            {
-                @foreach (var media in Model.TestDrive.MediaItems)
-                {
-                    <div class="relative group rounded-xl overflow-hidden" data-media-id="@media.Id">
-                        @if (media.MediaType == MediaType.Image)
-                        {
-                            <img src="@media.S3Url" alt="@media.Title" 
-                                 class="w-full h-32 object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                                 onclick="openMediaViewer('@media.S3Url', 'image')" />
-                        }
-                        else if (media.MediaType == MediaType.Video)
-                        {
-                            <div class="w-full h-32 bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-100 transition-all"
-                                 onclick="openMediaViewer('@media.S3Url', 'video')">
-                                <div class="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
-                                    <i class="bi bi-play-fill text-2xl text-apple-dark"></i>
-                                </div>
-                            </div>
-                        }
-                        <button onclick="deleteMedia('@media.Id')" 
-                                class="absolute top-2 right-2 w-8 h-8 bg-apple-red/90 backdrop-blur-sm text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-lg flex items-center justify-center hover:scale-110">
-                            <i class="bi bi-x-lg text-sm"></i>
-                        </button>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="text-slate-600">Client</span>
+                        <span class="font-semibold text-slate-900">@Model.Session.ClientName</span>
                     </div>
-                }
-            }
-        </div>
-
-        <div id="emptyMedia" class="@(Model.TestDrive.MediaItems?.Any() == true ? "hidden" : "") text-center py-12">
-            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <i class="bi bi-image text-3xl text-gray-300"></i>
+                </div>
             </div>
-            <p class="text-apple-gray font-medium">No photos or videos yet</p>
-            <p class="text-sm text-gray-400 mt-1">Upload images to document test drive observations</p>
-        </div>
-    </div>
 
-    <!-- Back Link -->
-    <div class="flex justify-start animate-slide-up" style="animation-delay: 0.5s">
-        <a href="/Sessions/Details/@Model.Session.Id" class="btn-apple-ghost">
-            <i class="bi bi-arrow-left mr-2"></i> Back to Session
-        </a>
+            <!-- Test Drive Checklist -->
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-list-check text-primary-600"></i>
+                    Evaluation Points
+                </h3>
+                <ul class="space-y-2.5 text-sm">
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Engine response and acceleration</span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Transmission shifting smoothness</span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Brake system effectiveness</span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Steering precision and feedback</span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Suspension comfort and handling</span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-700">
+                        <i class="bi bi-check-circle-fill text-green-500 flex-shrink-0 mt-0.5"></i>
+                        <span>Unusual noises or vibrations</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -271,11 +379,27 @@
 
         for (const file of files) {
             try {
+                // Show immediate preview using FileReader
+                const tempId = 'temp_' + Date.now() + '_' + Math.random();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const tempMedia = {
+                        id: tempId,
+                        mediaType: file.type.startsWith('image/') ? 0 : 1,
+                        s3Url: e.target.result,
+                        isTemp: true
+                    };
+                    addMediaToGrid(tempMedia);
+                };
+                reader.readAsDataURL(file);
+
+                // Compress image if needed
                 let processedFile = file;
                 if (file.type.startsWith('image/')) {
                     processedFile = await compressImage(file);
                 }
 
+                // Upload file directly to server
                 const formData = new FormData();
                 formData.append('file', processedFile);
 
@@ -288,25 +412,23 @@
                 });
 
                 const result = await response.json();
-                if (!result.success) continue;
+                if (!result.success) {
+                    // Remove temp preview on error
+                    document.querySelector(`[data-media-id="${tempId}"]`)?.remove();
+                    alert('Upload failed: ' + (result.error || 'Unknown error'));
+                    continue;
+                }
 
-                await fetch(result.uploadUrl, {
-                    method: 'PUT',
-                    body: processedFile,
-                    headers: { 'Content-Type': processedFile.type }
-                });
-
-                const confirmResponse = await fetch(`/Sessions/${sessionId}/TestDrive?handler=ConfirmUpload&mediaItemId=${result.mediaItemId}`, {
-                    method: 'POST',
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    }
-                });
-
-                const confirmResult = await confirmResponse.json();
-                if (confirmResult.success) addMediaToGrid(confirmResult.media);
+                // Remove temp preview
+                document.querySelector(`[data-media-id="${tempId}"]`)?.remove();
+                
+                // Add confirmed media with real URL
+                addMediaToGrid(result.media);
+                
             } catch (error) {
                 console.error('Upload error:', error);
+                document.querySelector(`[data-media-id="${tempId}"]`)?.remove();
+                alert('Upload error: ' + error.message);
             }
         }
 
@@ -411,7 +533,121 @@
     }
 
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMediaViewer(); });
+
+    // Complete Test Drive Modal
+    function openCompleteModal() {
+        document.getElementById('completeModal').classList.remove('hidden');
+        document.getElementById('completeModal').classList.add('flex');
+        document.getElementById('mileageEnd').value = '';
+        document.getElementById('mileageEnd').focus();
+    }
+
+    function closeCompleteModal() {
+        document.getElementById('completeModal').classList.add('hidden');
+        document.getElementById('completeModal').classList.remove('flex');
+    }
+
+    async function completeTestDrive() {
+        const mileageEndInput = document.getElementById('mileageEnd');
+        const mileageEnd = mileageEndInput.value ? parseInt(mileageEndInput.value) : null;
+
+        if (mileageEnd && mileageEnd < @(Model.TestDrive.MileageStart ?? 0)) {
+            alert('End mileage cannot be less than start mileage (@(Model.TestDrive.MileageStart?.ToString("N0") ?? "0") km)');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to complete this test drive? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            if (mileageEnd) {
+                formData.append('mileageEnd', mileageEnd);
+            }
+            
+            // Add anti-forgery token to FormData
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            const response = await fetch(`/Sessions/${sessionId}/TestDrive?handler=Complete`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to complete test drive: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error completing test drive:', error);
+            alert('Error completing test drive: ' + error.message);
+        }
+    }
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMediaViewer(); closeCompleteModal(); } });
 </script>
+
+<!-- Complete Test Drive Modal -->
+<div id="completeModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-scale-in">
+        <button onclick="closeCompleteModal()" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center transition-colors">
+            <i class="bi bi-x text-xl text-slate-700"></i>
+        </button>
+
+        <div class="mb-6">
+            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-4">
+                <i class="bi bi-check-circle text-2xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Complete Test Drive</h2>
+            <p class="text-slate-600">Enter the ending mileage to finalize the test drive report.</p>
+        </div>
+
+        <div class="mb-6">
+            <label for="mileageEnd" class="block text-sm font-semibold text-slate-700 mb-2">
+                Ending Mileage (km) <span class="text-slate-400 font-normal">- Optional</span>
+            </label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="bi bi-speedometer text-slate-400"></i>
+                </div>
+                <input type="number" 
+                       id="mileageEnd" 
+                       class="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" 
+                       placeholder="e.g., @(Model.TestDrive.MileageStart.HasValue ? (Model.TestDrive.MileageStart.Value + 10).ToString() : "12350")"
+                       @(Model.TestDrive.MileageStart.HasValue ? $"min=\"{Model.TestDrive.MileageStart.Value}\"" : "")>
+            </div>
+            @if (Model.TestDrive.MileageStart.HasValue)
+            {
+                <p class="mt-2 text-xs text-slate-500">
+                    <i class="bi bi-info-circle"></i>
+                    Start mileage: @Model.TestDrive.MileageStart.Value.ToString("N0") km
+                </p>
+            }
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="closeCompleteModal()" 
+                    class="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+                Cancel
+            </button>
+            <button onclick="completeTestDrive()" 
+                    class="flex-1 px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                <i class="bi bi-check-circle"></i>
+                Complete
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
     @@keyframes scale-in {
         from { transform: scale(0.8); opacity: 0; }

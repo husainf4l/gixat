@@ -11,10 +11,12 @@ namespace Gixat.Web.Modules.Sessions.Services;
 public class InspectionService : BaseService, IInspectionService
 {
     private readonly ILogger<InspectionService> _logger;
+    private readonly IAwsS3Service _s3Service;
 
-    public InspectionService(DbContext context, ILogger<InspectionService> logger) : base(context)
+    public InspectionService(DbContext context, IAwsS3Service s3Service, ILogger<InspectionService> logger) : base(context)
     {
         _logger = logger;
+        _s3Service = s3Service;
     }
 
     private DbSet<Inspection> Inspections => Set<Inspection>();
@@ -30,7 +32,15 @@ public class InspectionService : BaseService, IInspectionService
             .Where(i => i.Id == id && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return inspection?.ToDto();
+        if (inspection == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in inspection.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return inspection.ToDto();
     }
 
     public async Task<InspectionDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
@@ -42,7 +52,15 @@ public class InspectionService : BaseService, IInspectionService
             .Where(i => i.SessionId == sessionId && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return inspection?.ToDto();
+        if (inspection == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in inspection.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return inspection.ToDto();
     }
 
     public async Task<InspectionDto> CreateAsync(CreateInspectionDto dto, Guid companyId)
@@ -140,17 +158,27 @@ public class InspectionService : BaseService, IInspectionService
 
     public async Task<bool> CompleteInspectionAsync(Guid id, Guid companyId)
     {
+        _logger.LogInformation("[DEBUG] CompleteInspectionAsync called - InspectionId: {Id}, CompanyId: {CompanyId}", id, companyId);
+        
         var inspection = await Inspections
             .Where(i => i.Id == id && i.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        if (inspection == null) return false;
+        if (inspection == null)
+        {
+            _logger.LogWarning("[DEBUG] Inspection not found - Id: {Id}, CompanyId: {CompanyId}", id, companyId);
+            return false;
+        }
 
+        _logger.LogInformation("[DEBUG] Current Status: {Status}, Updating to Completed", inspection.Status);
+        
         inspection.Status = RequestStatus.Completed;
         inspection.InspectionCompletedAt = DateTime.UtcNow;
         inspection.UpdatedAt = DateTime.UtcNow;
 
         await SaveChangesAsync();
+        
+        _logger.LogInformation("[DEBUG] Inspection completed successfully - Id: {Id}", id);
         return true;
     }
 

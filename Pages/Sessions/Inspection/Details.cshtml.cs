@@ -167,6 +167,8 @@ public class DetailsModel : PageModel
 
     public async Task<IActionResult> OnPostCompleteInspectionAsync(Guid id)
     {
+        Console.WriteLine($"[DEBUG] OnPostCompleteInspectionAsync called - SessionId: {id}");
+        
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return RedirectToPage("/Auth/Login");
@@ -180,9 +182,16 @@ public class DetailsModel : PageModel
 
         var inspection = await _inspectionService.GetBySessionIdAsync(id, CompanyId);
         if (inspection == null)
+        {
+            Console.WriteLine($"[DEBUG] Inspection not found for session {id}");
             return NotFound();
+        }
 
-        await _inspectionService.CompleteInspectionAsync(inspection.Id, CompanyId);
+        Console.WriteLine($"[DEBUG] Found inspection {inspection.Id}, Status: {inspection.Status}");
+        
+        var result = await _inspectionService.CompleteInspectionAsync(inspection.Id, CompanyId);
+        
+        Console.WriteLine($"[DEBUG] CompleteInspectionAsync result: {result}");
         
         TempData["SuccessMessage"] = "Inspection completed successfully";
         return RedirectToPage(new { id });

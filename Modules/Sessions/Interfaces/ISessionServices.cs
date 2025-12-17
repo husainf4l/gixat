@@ -31,6 +31,7 @@ public interface ISessionService
     // Stats
     Task<SessionStatsDto> GetSessionStatsAsync(Guid companyId);
     Task<IEnumerable<SessionDto>> GetRecentSessionsAsync(Guid companyId, int count);
+    Task<SessionAnalyticsDto> GetSessionAnalyticsAsync(Guid companyId);
 }
 
 public interface ICustomerRequestService
@@ -81,6 +82,8 @@ public interface IJobCardService
     Task<bool> ApproveAsync(Guid id, Guid approvedById, string? notes, Guid companyId);
     Task<bool> AuthorizeAsync(Guid id, string method, string? notes, Guid companyId);
     Task<bool> StartWorkAsync(Guid id, Guid companyId);
+    Task<bool> MoveToWaitingPartsAsync(Guid id, Guid companyId);
+    Task<bool> MoveToQualityCheckAsync(Guid id, Guid companyId);
     Task<bool> CompleteWorkAsync(Guid id, Guid companyId);
     Task<bool> DeleteAsync(Guid id, Guid companyId);
     

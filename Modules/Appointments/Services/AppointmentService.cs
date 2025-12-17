@@ -1,6 +1,7 @@
 using Gixat.Web.Data;
 using Gixat.Web.Modules.Appointments.Entities;
 using Gixat.Web.Modules.Appointments.Interfaces;
+using Gixat.Web.Modules.Appointments.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gixat.Web.Modules.Appointments.Services;
@@ -171,5 +172,37 @@ public class AppointmentService : IAppointmentService
         }
 
         return slots;
+    }
+
+    public async Task<AppointmentStatsDto> GetAppointmentStatsAsync(Guid companyId)
+    {
+        var today = DateTime.UtcNow.Date;
+        var sevenDaysFromNow = today.AddDays(7);
+
+        var appointments = await _context.Appointments
+            .Where(a => a.CompanyId == companyId)
+            .ToListAsync();
+
+        var stats = new AppointmentStatsDto
+        {
+            TodayAppointments = appointments.Count(a => a.ScheduledDate.Date == today && 
+                                                       a.Status != AppointmentStatus.Cancelled),
+            
+            UpcomingAppointments = appointments.Count(a => a.ScheduledDate > today && 
+                                                          a.ScheduledDate <= sevenDaysFromNow &&
+                                                          a.Status != AppointmentStatus.Cancelled),
+            
+            PendingConfirmations = appointments.Count(a => a.Status == AppointmentStatus.Scheduled && 
+                                                          !a.IsConfirmed &&
+                                                          a.ScheduledDate >= today),
+            
+            NoShowCount = appointments.Count(a => a.Status == AppointmentStatus.NoShow),
+            
+            TotalAppointments = appointments.Count,
+            
+            CompletedAppointments = appointments.Count(a => a.Status == AppointmentStatus.Completed)
+        };
+
+        return stats;
     }
 }

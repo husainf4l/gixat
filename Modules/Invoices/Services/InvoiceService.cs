@@ -1,6 +1,7 @@
 using Gixat.Web.Data;
 using Gixat.Web.Modules.Invoices.Entities;
 using Gixat.Web.Modules.Invoices.Interfaces;
+using Gixat.Web.Modules.Invoices.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gixat.Web.Modules.Invoices.Services;
@@ -209,5 +210,49 @@ public class InvoiceService : IInvoiceService
     public Task<bool> DeleteInvoiceAsync(Guid id)
     {
         return DeleteItemAsync(id);
+    }
+
+    public async Task<InvoiceStatsDto> GetInvoiceStatsAsync(Guid companyId)
+    {
+        var today = DateTime.UtcNow.Date;
+        var weekStart = today.AddDays(-(int)today.DayOfWeek);
+        var monthStart = new DateTime(today.Year, today.Month, 1);
+
+        var invoices = await _context.Invoices
+            .Where(i => i.CompanyId == companyId)
+            .ToListAsync();
+
+        var stats = new InvoiceStatsDto
+        {
+            TodayRevenue = invoices
+                .Where(i => i.InvoiceDate.Date == today && i.Status == InvoiceStatus.Paid)
+                .Sum(i => i.Total),
+            
+            WeekRevenue = invoices
+                .Where(i => i.InvoiceDate >= weekStart && i.Status == InvoiceStatus.Paid)
+                .Sum(i => i.Total),
+            
+            MonthRevenue = invoices
+                .Where(i => i.InvoiceDate >= monthStart && i.Status == InvoiceStatus.Paid)
+                .Sum(i => i.Total),
+            
+            OutstandingAmount = invoices
+                .Where(i => i.Status == InvoiceStatus.Sent || i.Status == InvoiceStatus.PartiallyPaid || i.Status == InvoiceStatus.Overdue)
+                .Sum(i => i.BalanceDue),
+            
+            OverdueInvoices = invoices.Count(i => i.Status == InvoiceStatus.Overdue),
+            
+            OverdueAmount = invoices
+                .Where(i => i.Status == InvoiceStatus.Overdue)
+                .Sum(i => i.BalanceDue),
+            
+            TotalInvoices = invoices.Count,
+            
+            PaidInvoices = invoices.Count(i => i.Status == InvoiceStatus.Paid),
+            
+            AverageInvoiceValue = invoices.Any() ? invoices.Average(i => i.Total) : 0
+        };
+
+        return stats;
     }
 }

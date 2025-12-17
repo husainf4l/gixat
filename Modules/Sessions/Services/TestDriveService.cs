@@ -11,10 +11,12 @@ namespace Gixat.Web.Modules.Sessions.Services;
 public class TestDriveService : BaseService, ITestDriveService
 {
     private readonly ILogger<TestDriveService> _logger;
+    private readonly IAwsS3Service _s3Service;
 
-    public TestDriveService(DbContext context, ILogger<TestDriveService> logger) : base(context)
+    public TestDriveService(DbContext context, IAwsS3Service s3Service, ILogger<TestDriveService> logger) : base(context)
     {
         _logger = logger;
+        _s3Service = s3Service;
     }
 
     private DbSet<TestDrive> TestDrives => Set<TestDrive>();
@@ -28,18 +30,42 @@ public class TestDriveService : BaseService, ITestDriveService
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return testDrive?.ToDto();
+        if (testDrive == null) return null;
+
+        // Regenerate presigned URLs for media items
+        _logger.LogInformation("Regenerating URLs for {Count} media items in test drive {Id}", testDrive.MediaItems?.Count ?? 0, testDrive.Id);
+        foreach (var media in testDrive.MediaItems ?? [])
+        {
+            var newUrl = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+            _logger.LogDebug("Updated media {MediaId} URL to '{NewUrl}'", media.Id, newUrl);
+            media.S3Url = newUrl;
+        }
+
+        return testDrive.ToDto();
     }
 
     public async Task<TestDriveDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
     {
+        // Use a fresh query context to ensure we get the latest data from database
         var testDrive = await TestDrives
-            .AsNoTracking()
             .Include(t => t.MediaItems)
             .Where(t => t.SessionId == sessionId && t.CompanyId == companyId)
+            .AsNoTracking()
+            .AsSplitQuery()
             .FirstOrDefaultAsync();
 
-        return testDrive?.ToDto();
+        if (testDrive == null) return null;
+
+        // Regenerate presigned URLs for media items
+        _logger.LogInformation("Regenerating URLs for {Count} media items in test drive {Id}", testDrive.MediaItems?.Count ?? 0, testDrive.Id);
+        foreach (var media in testDrive.MediaItems ?? [])
+        {
+            var newUrl = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+            _logger.LogDebug("Updated media {MediaId} URL to '{NewUrl}'", media.Id, newUrl);
+            media.S3Url = newUrl;
+        }
+
+        return testDrive.ToDto();
     }
 
     public async Task<TestDriveDto> CreateAsync(CreateTestDriveDto dto, Guid companyId)
@@ -142,18 +168,34 @@ public class TestDriveService : BaseService, ITestDriveService
 
     public async Task<bool> CompleteTestDriveAsync(Guid id, int? mileageEnd, Guid companyId)
     {
+        Console.WriteLine($"[SERVICE] CompleteTestDriveAsync - TestDriveId: {id}, MileageEnd: {mileageEnd}, CompanyId: {companyId}");
+        
         var testDrive = await TestDrives
             .Where(t => t.Id == id && t.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        if (testDrive == null) return false;
+        if (testDrive == null)
+        {
+            Console.WriteLine($"[SERVICE] TestDrive not found in database");
+            return false;
+        }
 
+        Console.WriteLine($"[SERVICE] BEFORE - TestDrive Status: {testDrive.Status}, CompletedAt: {testDrive.CompletedAt}, MileageEnd: {testDrive.MileageEnd}");
+        
         testDrive.Status = RequestStatus.Completed;
         testDrive.CompletedAt = DateTime.UtcNow;
         if (mileageEnd.HasValue) testDrive.MileageEnd = mileageEnd.Value;
         testDrive.UpdatedAt = DateTime.UtcNow;
 
+        Console.WriteLine($"[SERVICE] AFTER - TestDrive Status: {testDrive.Status}, CompletedAt: {testDrive.CompletedAt}, MileageEnd: {testDrive.MileageEnd}");
+        
         await SaveChangesAsync();
+        Console.WriteLine($"[SERVICE] SaveChangesAsync completed");
+        
+        // Clear the change tracker to ensure fresh data is loaded on next query
+        Context.ChangeTracker.Clear();
+        Console.WriteLine($"[SERVICE] ChangeTracker cleared");
+        
         return true;
     }
 

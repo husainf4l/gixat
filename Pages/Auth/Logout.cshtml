@@ -1,7 +1,7 @@
 @page "/Auth/Logout"
 @model Gixat.Web.Pages.Auth.LogoutModel
 @{
-    ViewData["Title"] = "Logged Out";
+    ViewData["Title"] = "Logout";
     Layout = null;
 }
 
@@ -15,16 +15,42 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" />
 </head>
 <body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md w-full mx-4">
-        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="bi bi-check-lg text-green-600 text-3xl"></i>
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <!-- User is logged out -->
+        <div class="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md w-full mx-4">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="bi bi-check-lg text-green-600 text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-3">You have been logged out</h2>
+            <p class="text-gray-500 mb-6">Thank you for using Gixat. See you soon!</p>
+            <a href="/Auth/Login" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors no-underline">
+                <i class="bi bi-box-arrow-in-right"></i>
+                Sign In Again
+            </a>
         </div>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-3">You have been logged out</h2>
-        <p class="text-gray-500 mb-6">Thank you for using Gixat. See you soon!</p>
-        <a href="/Auth/Login" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors no-underline">
-            <i class="bi bi-box-arrow-in-right"></i>
-            Sign In Again
-        </a>
-    </div>
+    }
+    else
+    {
+        <!-- Logout confirmation -->
+        <div class="bg-white rounded-2xl shadow-xl p-10 text-center max-w-md w-full mx-4">
+            <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="bi bi-box-arrow-right text-yellow-600 text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-gray-900 mb-3">Confirm Logout</h2>
+            <p class="text-gray-500 mb-6">Are you sure you want to log out of your account?</p>
+            <form method="post" class="flex gap-3">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors">
+                    <i class="bi bi-box-arrow-right me-2"></i>
+                    Yes, Logout
+                </button>
+                <a href="javascript:history.back()" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors no-underline inline-flex items-center justify-center">
+                    <i class="bi bi-x-lg me-2"></i>
+                    Cancel
+                </a>
+            </form>
+        </div>
+    }
 </body>
 </html>

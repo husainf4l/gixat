@@ -128,11 +128,11 @@
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold text-gray-900">Waiting Parts</h3>
             <span class="px-2.5 py-1 text-xs font-medium text-orange-600 bg-orange-100 rounded-full">
-                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.OnHold)
+                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.WaitingParts)
             </span>
         </div>
         <div class="space-y-3">
-            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.OnHold))
+            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.WaitingParts))
             {
                 <a href="/JobCards/Details?id=@job.Id" class="job-card block border-l-4 border-orange-500">
                     <div class="flex items-start justify-between mb-2">
@@ -151,16 +151,16 @@
         </div>
     </div>
 
-    <!-- Completed Column -->
+    <!-- Quality Check Column -->
     <div class="kanban-column">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-semibold text-gray-900">Quality Check</h3>
             <span class="px-2.5 py-1 text-xs font-medium text-purple-600 bg-purple-100 rounded-full">
-                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Approved || j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Completed)
+                @Model.JobCards.Count(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.QualityCheck)
             </span>
         </div>
         <div class="space-y-3">
-            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Approved || j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.Completed))
+            @foreach (var job in Model.JobCards.Where(j => j.Status == Gixat.Web.Modules.Sessions.Enums.JobCardStatus.QualityCheck))
             {
                 <a href="/JobCards/Details?id=@job.Id" class="job-card block border-l-4 border-purple-500">
                     <div class="flex items-start justify-between mb-2">
@@ -171,8 +171,8 @@
                     </div>
                     <h4 class="font-medium text-gray-900 text-sm mb-3">@job.Title</h4>
                     <div class="flex items-center text-xs text-gray-600">
-                        <i class="bi bi-check-circle text-green-600 mr-1"></i>
-                        @job.Status
+                        <i class="bi bi-award text-purple-600 mr-1"></i>
+                        Quality Check
                     </div>
                 </a>
             }

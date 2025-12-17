@@ -1,4 +1,5 @@
 using Gixat.Web.Modules.Invoices.Entities;
+using Gixat.Web.Modules.Invoices.DTOs;
 
 namespace Gixat.Web.Modules.Invoices.Interfaces;
 
@@ -28,4 +29,7 @@ public interface IInvoiceService
     
     // Calculations
     Task RecalculateInvoiceAsync(Guid invoiceId);
+    
+    // Stats
+    Task<InvoiceStatsDto> GetInvoiceStatsAsync(Guid companyId);
 }

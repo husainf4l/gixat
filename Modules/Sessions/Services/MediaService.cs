@@ -130,15 +130,15 @@ public class MediaService : BaseService, IMediaService
 
             var s3Key = _s3Service.GenerateS3Key(companyId, dto.SessionId, dto.Category, dto.OriginalFileName);
             
-            // Upload to S3
-            var uploaded = await _s3Service.UploadFileAsync(s3Key, fileStream, dto.ContentType);
-            if (!uploaded)
+            // Save file locally
+            var savedLocally = await _s3Service.SaveFileLocallyAsync(s3Key, fileStream);
+            if (!savedLocally)
             {
-                _logger.LogError("Failed to upload file to S3");
+                _logger.LogError("Failed to save file locally");
                 return null;
             }
 
-            // Generate download URL
+            // Generate download URL (will return local URL since file exists locally)
             var s3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(s3Key);
 
             // Create media item
@@ -147,6 +147,7 @@ public class MediaService : BaseService, IMediaService
                 Id = Guid.NewGuid(),
                 SessionId = dto.SessionId,
                 CompanyId = companyId,
+                FileName = System.IO.Path.GetFileName(s3Key),
                 OriginalFileName = dto.OriginalFileName,
                 S3Key = s3Key,
                 S3Url = s3Url,

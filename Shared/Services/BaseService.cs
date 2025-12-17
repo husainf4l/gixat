@@ -16,5 +16,5 @@ public abstract class BaseService
 
     protected DbSet<T> Set<T>() where T : class => Context.Set<T>();
 
-    protected async Task SaveChangesAsync() => await Context.SaveChangesAsync();
+    protected async Task<int> SaveChangesAsync() => await Context.SaveChangesAsync();
 }

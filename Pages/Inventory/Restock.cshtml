@@ -1,0 +1,231 @@
+@page
+@model Gixat.Web.Pages.Inventory.RestockModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = "Restock Item";
+}
+
+@if (Model.Item == null)
+{
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-exclamation-triangle text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Item Not Found</h3>
+        <p class="text-sm text-gray-500 mb-6">The inventory item you're looking for doesn't exist.</p>
+        <a asp-page="Index" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Inventory</span>
+        </a>
+    </div>
+}
+else
+{
+    var isLowStock = Model.Item.QuantityOnHand <= Model.Item.ReorderPoint;
+
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-4">
+            <a asp-page="Details" asp-route-id="@Model.Item.Id" class="w-12 h-12 rounded-xl bg-white border border-slate-200 hover:border-blue-300 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all shadow-sm hover:shadow">
+                <i class="bi bi-arrow-left text-lg"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-green-900 to-slate-900 bg-clip-text text-transparent">Restock Item</h1>
+                <p class="text-slate-600 mt-1">Add stock for @Model.Item.Name</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Restock Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i class="bi bi-truck text-green-600"></i>
+                    Restock Information
+                </h2>
+
+                <form method="post" class="space-y-6">
+                    <input type="hidden" name="ItemId" value="@Model.Item.Id" />
+
+                    <!-- Current Stock Alert -->
+                    @if (isLowStock)
+                    {
+                        <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded-lg p-4">
+                            <div class="flex items-center gap-3">
+                                <i class="bi bi-exclamation-triangle-fill text-red-600 text-xl"></i>
+                                <div>
+                                    <p class="font-semibold text-slate-900">Low Stock Alert</p>
+                                    <p class="text-sm text-slate-600">Current stock is below reorder point</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Quantity to Add -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Quantity to Add <span class="text-red-600">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="number" 
+                                   name="QuantityToAdd" 
+                                   required 
+                                   min="1"
+                                   value="@(Model.Item.ReorderPoint - Model.Item.QuantityOnHand + 10)"
+                                   class="w-full px-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                   placeholder="Enter quantity" />
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 font-medium">@Model.Item.Unit</span>
+                        </div>
+                        <p class="text-sm text-slate-600 mt-2">Suggested: @(Math.Max(1, Model.Item.ReorderPoint - Model.Item.QuantityOnHand + 10)) @Model.Item.Unit</p>
+                    </div>
+
+                    <!-- Supplier -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Supplier
+                        </label>
+                        <input type="text" 
+                               name="Supplier" 
+                               value="@Model.Item.SupplierName"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                               placeholder="Supplier name" />
+                    </div>
+
+                    <!-- Unit Cost -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Unit Cost <span class="text-red-600">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 font-medium">$</span>
+                            <input type="number" 
+                                   name="UnitCost" 
+                                   required 
+                                   step="0.01"
+                                   min="0"
+                                   value="@Model.Item.CostPrice"
+                                   class="w-full pl-10 pr-4 py-3 text-lg border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                   placeholder="0.00" />
+                        </div>
+                    </div>
+
+                    <!-- Reference Number -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Purchase Order / Invoice #
+                        </label>
+                        <input type="text" 
+                               name="ReferenceNumber" 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                               placeholder="PO-12345" />
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Notes
+                        </label>
+                        <textarea name="Notes" 
+                                  rows="3"
+                                  class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                                  placeholder="Additional notes about this restock..."></textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-4 pt-4 border-t border-slate-200">
+                        <a asp-page="Details" asp-route-id="@Model.Item.Id" class="flex-1 px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-all text-center">
+                            Cancel
+                        </a>
+                        <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-lg hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all">
+                            <i class="bi bi-check-circle mr-2"></i>Confirm Restock
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary Sidebar -->
+        <div class="space-y-6">
+            <!-- Item Info -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-box text-blue-600"></i>
+                    Item Details
+                </h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm text-slate-600">Name</label>
+                        <p class="font-medium text-slate-900">@Model.Item.Name</p>
+                    </div>
+                    <div class="border-t border-slate-200 pt-3">
+                        <label class="text-sm text-slate-600">Item Number</label>
+                        <p class="font-medium text-slate-900">@Model.Item.ItemNumber</p>
+                    </div>
+                    <div class="border-t border-slate-200 pt-3">
+                        <label class="text-sm text-slate-600">Category</label>
+                        <p class="font-medium text-slate-900">@Model.Item.Category</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Stock -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4">Current Stock</h3>
+                <div class="text-center py-4">
+                    <p class="text-5xl font-bold @(isLowStock ? "text-red-600" : "text-blue-600")">
+                        @Model.Item.QuantityOnHand
+                    </p>
+                    <p class="text-lg text-slate-600 mt-2">@Model.Item.Unit</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-blue-200 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">Minimum:</span>
+                        <span class="font-medium text-slate-900">@Model.Item.MinimumQuantity @Model.Item.Unit</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">Reorder Point:</span>
+                        <span class="font-medium text-slate-900">@Model.Item.ReorderPoint @Model.Item.Unit</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Value -->
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl shadow-sm border border-green-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4">Current Value</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-sm text-slate-600">Cost Value</label>
+                        <p class="text-2xl font-bold text-slate-900">
+                            @((Model.Item.CostPrice * Model.Item.QuantityOnHand).ToString("C"))
+                        </p>
+                    </div>
+                    <div class="border-t border-green-200 pt-3">
+                        <label class="text-sm text-slate-600">Selling Value</label>
+                        <p class="text-2xl font-bold text-green-600">
+                            @((Model.Item.SellingPrice * Model.Item.QuantityOnHand).ToString("C"))
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Calculate total cost on quantity/price change
+        const quantityInput = document.querySelector('input[name="QuantityToAdd"]');
+        const costInput = document.querySelector('input[name="UnitCost"]');
+        
+        function updateTotal() {
+            const quantity = parseFloat(quantityInput?.value || 0);
+            const cost = parseFloat(costInput?.value || 0);
+            const total = quantity * cost;
+            console.log('Total cost:', total.toFixed(2));
+        }
+
+        quantityInput?.addEventListener('input', updateTotal);
+        costInput?.addEventListener('input', updateTotal);
+    </script>
+}

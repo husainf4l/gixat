@@ -21,414 +21,623 @@
     };
 }
 
-<!-- Back Navigation -->
-<a href="/Sessions" class="inline-flex items-center gap-2 text-slate-600 hover:text-primary-600 no-underline mb-6 text-sm transition-colors animate-fade-in">
-    <i class="bi bi-arrow-left"></i>
-    Back to Sessions
-</a>
+<div class="max-w-7xl mx-auto animate-fade-in">
+    <!-- Back Navigation -->
+    <a href="/Sessions" class="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors group">
+        <i class="bi bi-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+        <span class="text-sm font-medium">Back to Sessions</span>
+    </a>
 
-<!-- Header Card -->
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8 animate-slide-up">
-    <div class="bg-gradient-to-r from-primary-600 to-purple-600 p-6 text-white">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-2xl font-semibold tracking-tight">Session #@Model.Session!.SessionNumber</h1>
-                    <span class="bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-medium">
-                        @Model.Session.Status.ToString().Replace("InProgress", "In Progress").Replace("AwaitingApproval", "Awaiting Approval").Replace("ReadyForPickup", "Ready for Pickup")
-                    </span>
-                </div>
-                <div class="flex gap-4 text-sm opacity-90">
-                    <span class="flex items-center gap-2">
-                        <i class="bi bi-person"></i>@Model.Session.ClientName
-                    </span>
-                    <span class="flex items-center gap-2">
-                        <i class="bi bi-car-front"></i>@Model.Session.VehicleDisplayName
-                    </span>
-                </div>
-            </div>
-            <div class="flex gap-3 flex-wrap">
-                <div class="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-center min-w-[90px]">
-                    <div class="text-lg font-bold">@Model.Session.MileageIn?.ToString("N0")</div>
-                    <div class="text-[10px] uppercase tracking-wider opacity-80">Mileage In</div>
-                </div>
-                @if (Model.Session.CheckOutAt.HasValue)
-                {
-                    <div class="bg-white/15 backdrop-blur rounded-xl px-4 py-3 text-center min-w-[90px]">
-                        <div class="text-lg font-bold">@Model.Session.MileageOut?.ToString("N0")</div>
-                        <div class="text-[10px] uppercase tracking-wider opacity-80">Mileage Out</div>
+    <!-- Header Card -->
+    <div class="mb-6">
+        <div class="relative overflow-hidden bg-gradient-to-br from-sky-50 via-cyan-50 to-blue-50 rounded-2xl border border-sky-100 shadow-sm">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-sky-400/10 to-cyan-400/10 rounded-full blur-2xl -mr-24 -mt-24"></div>
+            
+            <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-6">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/30">
+                            <i class="bi bi-calendar-check text-2xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-800 via-sky-700 to-sky-600 bg-clip-text text-transparent leading-tight">
+                                Session #@Model.Session!.SessionNumber
+                            </h1>
+                        </div>
                     </div>
-                }
+                    
+                    <div class="flex flex-wrap items-center gap-3 ml-15">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                            <i class="bi bi-circle-fill text-sky-600" style="font-size: 6px;"></i>
+                            <span class="font-medium text-slate-700">@Model.Session.Status.ToString().Replace("InProgress", "In Progress").Replace("AwaitingApproval", "Awaiting Approval").Replace("ReadyForPickup", "Ready for Pickup").Replace("CheckedIn", "Checked In")</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                            <i class="bi bi-person text-sky-600"></i>
+                            <span class="font-medium text-slate-700">@Model.Session.ClientName</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                            <i class="bi bi-car-front text-sky-600"></i>
+                            <span class="font-medium text-slate-700">@Model.Session.VehicleDisplayName</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                            <i class="bi bi-credit-card text-sky-600"></i>
+                            <span class="font-medium text-slate-700">@Model.Session.VehicleLicensePlate</span>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                            <i class="bi bi-clock text-sky-600"></i>
+                            <span class="font-medium text-slate-700">@Model.Session.CheckInAt.ToString("MMM dd • h:mm tt")</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <div class="inline-flex items-center gap-2 px-4 py-3 bg-white/70 backdrop-blur-sm rounded-xl text-center border border-sky-100">
+                        <i class="bi bi-speedometer2 text-sky-600"></i>
+                        <div class="text-left">
+                            <div class="text-xl font-bold text-slate-900">@Model.Session.MileageIn?.ToString("N0")</div>
+                            <div class="text-[10px] uppercase tracking-wider text-slate-600">Mileage In</div>
+                        </div>
+                    </div>
+                    @if (Model.Session.CheckOutAt.HasValue)
+                    {
+                        <div class="inline-flex items-center gap-2 px-4 py-3 bg-white/70 backdrop-blur-sm rounded-xl text-center border border-sky-100">
+                            <i class="bi bi-speedometer text-sky-600"></i>
+                            <div class="text-left">
+                                <div class="text-xl font-bold text-slate-900">@Model.Session.MileageOut?.ToString("N0")</div>
+                                <div class="text-[10px] uppercase tracking-wider text-slate-600">Mileage Out</div>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="p-5 bg-gray-50/50">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-                <span class="block text-[10px] text-apple-gray uppercase tracking-wide mb-0.5">Check-In</span>
-                <span class="text-sm font-medium text-apple-dark">@Model.Session.CheckInAt.ToString("MMM dd, yyyy • h:mm tt")</span>
-            </div>
+            
             @if (Model.Session.CheckOutAt.HasValue)
             {
-                <div>
-                    <span class="block text-[10px] text-slate-600 uppercase tracking-wide mb-0.5">Check-Out</span>
-                    <span class="text-sm font-medium text-slate-900">@Model.Session.CheckOutAt.Value.ToString("MMM dd, yyyy • h:mm tt")</span>
-                </div>
-            }
-            <div>
-                <span class="block text-[10px] text-slate-600 uppercase tracking-wide mb-0.5">License Plate</span>
-                <span class="text-sm font-medium text-slate-900">@Model.Session.VehicleLicensePlate</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Workflow Progress -->
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 animate-slide-up" style="animation-delay: 0.1s;">
-    <h2 class="text-lg font-semibold text-slate-900 mb-6 flex items-center gap-2">
-        <i class="bi bi-diagram-3 text-primary-600"></i>Workflow Progress
-    </h2>
-    
-    <div class="flex items-center justify-between relative px-4">
-        <!-- Progress Line Background -->
-        <div class="absolute top-6 left-[10%] right-[10%] h-1 bg-gray-200 rounded-full z-0"></div>
-        <!-- Progress Line Fill -->
-        <div class="absolute top-6 left-[10%] h-1 bg-gradient-to-r from-apple-blue to-apple-green rounded-full z-0 transition-all duration-500" 
-             style="width: calc(@(GetProgressWidth())% * 0.8);"></div>
-
-        <!-- Step: Customer Request -->
-        <div class="relative z-10 flex flex-col items-center flex-1">
-            <div class="w-12 h-12 rounded-xl @(Model.CustomerRequest != null ? "bg-green-600 text-white" : "bg-gray-200 text-slate-600") flex items-center justify-center shadow-sm transition-all">
-                @if (Model.CustomerRequest != null)
-                {
-                    <i class="bi bi-check-lg text-lg"></i>
-                }
-                else
-                {
-                    <i class="bi bi-chat-left-text"></i>
-                }
-            </div>
-            <span class="mt-3 text-xs font-medium @(Model.CustomerRequest != null ? "text-green-600" : "text-slate-600") text-center">Customer<br/>Request</span>
-        </div>
-
-        <!-- Step: Inspection -->
-        <div class="relative z-10 flex flex-col items-center flex-1">
-            <div class="w-12 h-12 rounded-xl @(Model.Inspection != null ? "bg-green-600 text-white" : "bg-gray-200 text-slate-600") flex items-center justify-center shadow-sm transition-all">
-                @if (Model.Inspection != null)
-                {
-                    <i class="bi bi-check-lg text-lg"></i>
-                }
-                else
-                {
-                    <i class="bi bi-search"></i>
-                }
-            </div>
-            <span class="mt-3 text-xs font-medium @(Model.Inspection != null ? "text-green-600" : "text-slate-600") text-center">Inspection</span>
-        </div>
-
-        <!-- Step: Test Drive -->
-        <div class="relative z-10 flex flex-col items-center flex-1">
-            <div class="w-12 h-12 rounded-xl @(Model.TestDrive != null ? "bg-green-600 text-white" : "bg-gray-200 text-slate-600") flex items-center justify-center shadow-sm transition-all">
-                @if (Model.TestDrive != null)
-                {
-                    <i class="bi bi-check-lg text-lg"></i>
-                }
-                else
-                {
-                    <i class="bi bi-speedometer2"></i>
-                }
-            </div>
-            <span class="mt-3 text-xs font-medium @(Model.TestDrive != null ? "text-green-600" : "text-slate-600") text-center">Test Drive</span>
-        </div>
-
-        <!-- Step: Job Card -->
-        <div class="relative z-10 flex flex-col items-center flex-1">
-            <div class="w-12 h-12 rounded-xl @(Model.JobCard != null ? "bg-green-600 text-white" : "bg-gray-200 text-slate-600") flex items-center justify-center shadow-sm transition-all">
-                @if (Model.JobCard != null)
-                {
-                    <i class="bi bi-check-lg text-lg"></i>
-                }
-                else
-                {
-                    <i class="bi bi-card-checklist"></i>
-                }
-            </div>
-            <span class="mt-3 text-xs font-medium @(Model.JobCard != null ? "text-green-600" : "text-slate-600") text-center">Job Card</span>
-        </div>
-    </div>
-</div>
-
-<!-- Workflow Module Cards -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8 animate-slide-up" style="animation-delay: 0.15s;">
-    <!-- Customer Request Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:shadow-lg transition-all">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl @(Model.CustomerRequest != null ? "bg-green-100 text-green-600" : "bg-gray-100 text-slate-600") flex items-center justify-center">
-                    <i class="bi bi-chat-left-text"></i>
-                </div>
-                <h3 class="font-semibold text-slate-900">Customer Request</h3>
-            </div>
-            @if (Model.CustomerRequest == null)
-            {
-                <a href="/Sessions/@Model.Session.Id/CustomerRequest/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
-                    <i class="bi bi-plus-lg"></i>Add
-                </a>
-            }
-            else
-            {
-                <a href="/Sessions/@Model.Session.Id/CustomerRequest" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors text-sm py-2 px-3">
-                    View <i class="bi bi-arrow-right"></i>
-                </a>
-            }
-        </div>
-        @if (Model.CustomerRequest != null)
-        {
-            <div class="space-y-2.5">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-600">Title</span>
-                    <span class="font-medium text-slate-900">@Model.CustomerRequest.Title</span>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-600">Priority</span>
-                    <span class="@(Model.CustomerRequest.Priority == Priority.High || Model.CustomerRequest.Priority == Priority.Urgent ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700" : Model.CustomerRequest.Priority == Priority.Normal ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700" : "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700") text-xs">
-                        @Model.CustomerRequest.Priority
-                    </span>
-                </div>
-                @if (!string.IsNullOrEmpty(Model.CustomerRequest.Description))
-                {
-                    <p class="text-sm text-slate-600 mt-2 line-clamp-2">@Model.CustomerRequest.Description</p>
-                }
-            </div>
-        }
-        else
-        {
-            <p class="text-sm text-slate-600">No customer request recorded yet.</p>
-        }
-    </div>
-
-    <!-- Inspection Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:shadow-lg transition-all">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl @(Model.Inspection != null ? "bg-green-100 text-green-600" : "bg-gray-100 text-slate-600") flex items-center justify-center">
-                    <i class="bi bi-search"></i>
-                </div>
-                <h3 class="font-semibold text-slate-900">Inspection</h3>
-            </div>
-            @if (Model.Inspection == null && Model.CustomerRequest != null)
-            {
-                <a href="/Sessions/@Model.Session.Id/Inspection/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
-                    <i class="bi bi-plus-lg"></i>Start
-                </a>
-            }
-            else if (Model.Inspection != null)
-            {
-                <a href="/Sessions/@Model.Session.Id/Inspection" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors text-sm py-2 px-3">
-                    View <i class="bi bi-arrow-right"></i>
-                </a>
-            }
-        </div>
-        @if (Model.Inspection != null)
-        {
-            <div class="space-y-2.5">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-600">Status</span>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700 text-xs">@Model.Inspection.Status</span>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-600">Title</span>
-                    <span class="font-medium text-slate-900">@Model.Inspection.Title</span>
-                </div>
-                @if (Model.Inspection.InspectionStartedAt.HasValue)
-                {
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-600">Started</span>
-                        <span class="font-medium text-slate-900">@Model.Inspection.InspectionStartedAt.Value.ToString("MMM dd, yyyy")</span>
+                <div class="relative px-6 pb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 backdrop-blur-sm rounded-lg text-sm border border-green-200">
+                        <i class="bi bi-box-arrow-right text-green-700"></i>
+                        <span class="font-medium text-green-700">Checked out on @Model.Session.CheckOutAt.Value.ToString("MMM dd, yyyy • h:mm tt")</span>
                     </div>
-                }
-            </div>
-        }
-        else if (Model.CustomerRequest == null)
-        {
-            <p class="text-sm text-slate-600">Complete customer request first.</p>
-        }
-        else
-        {
-            <p class="text-sm text-slate-600">No inspection recorded yet.</p>
-        }
-    </div>
-
-    <!-- Test Drive Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 hover:shadow-lg transition-all">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl @(Model.TestDrive != null ? "bg-green-100 text-green-600" : "bg-gray-100 text-slate-600") flex items-center justify-center">
-                    <i class="bi bi-speedometer2"></i>
                 </div>
-                <h3 class="font-semibold text-slate-900">Test Drive</h3>
-            </div>
-            @if (Model.TestDrive == null && Model.Inspection != null)
-            {
-                <a href="/Sessions/@Model.Session.Id/TestDrive/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors text-sm py-2 px-3">
-                    <i class="bi bi-plus-lg"></i>Record
-                </a>
-            }
-            else if (Model.TestDrive != null)
-            {
-                <a href="/Sessions/@Model.Session.Id/TestDrive" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors text-sm py-2 px-3">
-                    View <i class="bi bi-arrow-right"></i>
-                </a>
             }
         </div>
-        @if (Model.TestDrive != null)
-        {
-            <div class="space-y-2.5">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-600">Status</span>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700 text-xs">@Model.TestDrive.Status</span>
-                </div>
-                @if (Model.TestDrive.MileageStart.HasValue && Model.TestDrive.MileageEnd.HasValue)
-                {
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-600">Distance</span>
-                        <span class="font-medium text-slate-900">@((Model.TestDrive.MileageEnd.Value - Model.TestDrive.MileageStart.Value).ToString("N0")) km</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Workflow Progress -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                <h2 class="text-xl font-bold text-slate-900 mb-8 flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary-100 text-primary-600 rounded-xl flex items-center justify-center">
+                        <i class="bi bi-diagram-3"></i>
                     </div>
-                }
-                @if (Model.TestDrive.StartedAt.HasValue && Model.TestDrive.CompletedAt.HasValue)
-                {
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="text-slate-600">Duration</span>
-                        <span class="font-medium text-slate-900">@((Model.TestDrive.CompletedAt.Value - Model.TestDrive.StartedAt.Value).TotalMinutes.ToString("N0")) min</span>
+                    <span>Workflow Progress</span>
+                </h2>
+                
+                <div class="relative">
+                    <!-- Progress Line -->
+                    <div class="absolute top-8 left-0 right-0 h-1.5 bg-slate-200 rounded-full"></div>
+                    <div class="absolute top-8 left-0 h-1.5 bg-gradient-to-r from-primary-600 to-green-500 rounded-full transition-all duration-700" 
+                         style="width: @(GetProgressWidth())%;"></div>
+
+                    <!-- Steps -->
+                    <div class="relative grid grid-cols-4 gap-4">
+                        <!-- Customer Request -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-2xl @(Model.CustomerRequest != null ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30" : "bg-slate-100 text-slate-400") flex items-center justify-center transition-all mb-3">
+                                @if (Model.CustomerRequest != null)
+                                {
+                                    <i class="bi bi-check-lg text-2xl"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-chat-left-text text-xl"></i>
+                                }
+                            </div>
+                            <span class="text-xs font-semibold @(Model.CustomerRequest != null ? "text-green-600" : "text-slate-600") text-center">Customer<br/>Request</span>
+                        </div>
+
+                        <!-- Inspection -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-2xl @(Model.Inspection != null ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30" : "bg-slate-100 text-slate-400") flex items-center justify-center transition-all mb-3">
+                                @if (Model.Inspection != null)
+                                {
+                                    <i class="bi bi-check-lg text-2xl"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-search text-xl"></i>
+                                }
+                            </div>
+                            <span class="text-xs font-semibold @(Model.Inspection != null ? "text-green-600" : "text-slate-600") text-center">Inspection</span>
+                        </div>
+
+                        <!-- Test Drive -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-2xl @(Model.TestDrive != null ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30" : "bg-slate-100 text-slate-400") flex items-center justify-center transition-all mb-3">
+                                @if (Model.TestDrive != null)
+                                {
+                                    <i class="bi bi-check-lg text-2xl"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-speedometer2 text-xl"></i>
+                                }
+                            </div>
+                            <span class="text-xs font-semibold @(Model.TestDrive != null ? "text-green-600" : "text-slate-600") text-center">Test Drive</span>
+                        </div>
+
+                        <!-- Job Card -->
+                        <div class="flex flex-col items-center">
+                            <div class="w-16 h-16 rounded-2xl @(Model.JobCard != null ? "bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30" : "bg-slate-100 text-slate-400") flex items-center justify-center transition-all mb-3">
+                                @if (Model.JobCard != null)
+                                {
+                                    <i class="bi bi-check-lg text-2xl"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-card-checklist text-xl"></i>
+                                }
+                            </div>
+                            <span class="text-xs font-semibold @(Model.JobCard != null ? "text-green-600" : "text-slate-600") text-center">Job Card</span>
+                        </div>
                     </div>
-                }
-            </div>
-        }
-        else if (Model.Inspection == null)
-        {
-            <p class="text-sm text-slate-600">Complete inspection first.</p>
-        }
-        else
-        {
-            <p class="text-sm text-slate-600">No test drive recorded yet.</p>
-        }
-    </div>
-</div>
-
-<!-- Reports Section -->
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 animate-slide-up" style="animation-delay: 0.2s;">
-    <h2 class="text-lg font-semibold text-slate-900 mb-5 flex items-center gap-2">
-        <i class="bi bi-file-earmark-text text-primary-600"></i>Reports
-    </h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a href="/Sessions/@Model.Session.Id/Reports/Initial" 
-           class="flex items-center p-4 border border-gray-200 rounded-xl hover:border-primary-600 hover:bg-primary-100 transition-all group">
-            <div class="w-12 h-12 bg-primary-600/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-primary-600/20 transition-colors">
-                <i class="bi bi-file-earmark-text text-primary-600 text-xl"></i>
-            </div>
-            <div>
-                <h4 class="font-medium text-slate-900">Initial Report</h4>
-                <p class="text-sm text-slate-600">View check-in report</p>
-            </div>
-            <i class="bi bi-chevron-right text-slate-600 ml-auto"></i>
-        </a>
-
-        <a href="/Sessions/@Model.Session.Id/Reports/Final" 
-           class="flex items-center p-4 border border-gray-200 rounded-xl transition-all group @(Model.Session.Status != SessionStatus.Completed ? "opacity-50 pointer-events-none" : "hover:border-green-600 hover:bg-green-100")">
-            <div class="w-12 h-12 bg-green-600/10 rounded-xl flex items-center justify-center mr-4 group-hover:bg-green-600/20 transition-colors">
-                <i class="bi bi-check-circle text-green-600 text-xl"></i>
-            </div>
-            <div>
-                <h4 class="font-medium text-slate-900">Final Report</h4>
-                <p class="text-sm text-slate-600">@(Model.Session.Status == SessionStatus.Completed ? "View completion report" : "Available after checkout")</p>
-            </div>
-            <i class="bi bi-chevron-right text-slate-600 ml-auto"></i>
-        </a>
-    </div>
-</div>
-
-<!-- Job Card Section -->
-<div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8 animate-slide-up" style="animation-delay: 0.25s;">
-    <div class="flex items-center justify-between mb-5">
-        <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
-            <i class="bi bi-card-checklist text-primary-600"></i>Job Card
-        </h2>
-        @if (Model.JobCard == null && Model.Inspection != null)
-        {
-            <a href="/Sessions/@Model.Session.Id/JobCard/Create" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors">
-                <i class="bi bi-plus-lg"></i>Create Job Card
-            </a>
-        }
-        else if (Model.JobCard != null)
-        {
-            <a href="/Sessions/@Model.Session.Id/JobCard" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors">
-                View Details <i class="bi bi-arrow-right"></i>
-            </a>
-        }
-    </div>
-    @if (Model.JobCard != null)
-    {
-        <div class="space-y-3">
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span class="text-sm text-slate-600">Status</span>
-                <span class="@(Model.JobCard.Status == JobCardStatus.Completed ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700" : Model.JobCard.Status == JobCardStatus.InProgress ? "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-700" : "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700")">
-                    @Model.JobCard.Status
-                </span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span class="text-sm text-slate-600">Estimated Hours</span>
-                <span class="font-medium text-slate-900">@Model.JobCard.EstimatedHours.ToString("N1") hrs</span>
-            </div>
-            @if (Model.JobCard.ActualHours > 0)
-            {
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <span class="text-sm text-slate-600">Actual Hours</span>
-                    <span class="font-medium text-slate-900">@Model.JobCard.ActualHours.ToString("N1") hrs</span>
                 </div>
-            }
-        </div>
-    }
-    else if (Model.Inspection == null)
-    {
-        <div class="text-center py-8">
-            <i class="bi bi-clipboard-x text-4xl text-gray-300 mb-3"></i>
-            <p class="text-sm text-slate-600">Complete inspection first before creating a job card.</p>
-        </div>
-    }
-    else
-    {
-        <div class="text-center py-8">
-            <i class="bi bi-card-checklist text-4xl text-gray-300 mb-3"></i>
-            <p class="text-sm text-slate-600">No job card created yet. Create one to start tracking work.</p>
-        </div>
-    }
-</div>
+            </div>
 
-<!-- Actions -->
-<div class="flex flex-col sm:flex-row justify-between items-center gap-4 animate-slide-up" style="animation-delay: 0.25s;">
-    <a href="/Sessions" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 transition-colors">
-        <i class="bi bi-arrow-left"></i>Back to Sessions
-    </a>
-    @if (Model.Session.Status != SessionStatus.Completed && Model.Session.Status != SessionStatus.Cancelled)
-    {
-        <div class="flex gap-3">
-            @if (Model.JobCard != null && Model.JobCard.Status == JobCardStatus.Completed)
-            {
-                <a href="/Sessions/@Model.Session.Id/Checkout" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors bg-green-600 hover:bg-green-600/90">
-                    <i class="bi bi-check-circle"></i>
-                    Complete & Check Out
-                </a>
-            }
-            <form method="post" asp-page-handler="Cancel" class="inline">
-                <button type="submit" 
-                        class="px-5 py-2.5 bg-red-600/10 text-red-600 font-medium rounded-xl hover:bg-red-600/20 transition-colors inline-flex items-center gap-2"
-                        onclick="return confirm('Are you sure you want to cancel this session?')">
-                    <i class="bi bi-x-circle"></i>
-                    Cancel Session
-                </button>
-            </form>
+            <!-- Workflow Module Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Customer Request Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-lg transition-all group">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl @(Model.CustomerRequest != null ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white" : "bg-slate-100 text-slate-400") flex items-center justify-center">
+                                <i class="bi bi-chat-left-text text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Customer Request</h3>
+                                <p class="text-xs text-slate-600">Service requirements</p>
+                            </div>
+                        </div>
+                        @if (Model.CustomerRequest == null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/CustomerRequest/Create" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 transition-all">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/Sessions/@Model.Session.Id/CustomerRequest" class="inline-flex items-center justify-center w-8 h-8 text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                                <i class="bi bi-arrow-right text-lg"></i>
+                            </a>
+                        }
+                    </div>
+                    @if (Model.CustomerRequest != null)
+                    {
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between">
+                                <span class="text-sm text-slate-600 flex-shrink-0">Title</span>
+                                <span class="font-semibold text-slate-900 text-sm text-right">@Model.CustomerRequest.Title</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-600">Priority</span>
+                                <span class="@(Model.CustomerRequest.Priority == Priority.High || Model.CustomerRequest.Priority == Priority.Urgent ? "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700" : Model.CustomerRequest.Priority == Priority.Normal ? "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700" : "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700")">
+                                    <i class="bi bi-flag-fill" style="font-size: 10px;"></i>
+                                    @Model.CustomerRequest.Priority
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.CustomerRequest.Description))
+                            {
+                                <p class="text-sm text-slate-600 mt-3 p-3 bg-slate-50 rounded-lg line-clamp-2">@Model.CustomerRequest.Description</p>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-chat-left-dots text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">No request recorded yet</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Inspection Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-lg transition-all group">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl @(Model.Inspection != null ? "bg-gradient-to-br from-cyan-500 to-blue-600 text-white" : "bg-slate-100 text-slate-400") flex items-center justify-center">
+                                <i class="bi bi-search text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Inspection</h3>
+                                <p class="text-xs text-slate-600">Vehicle assessment</p>
+                            </div>
+                        </div>
+                        @if (Model.Inspection == null && Model.CustomerRequest != null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/Inspection/Create" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-700 hover:to-blue-700 shadow-lg shadow-cyan-500/30 transition-all">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        }
+                        else if (Model.Inspection != null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/Inspection" class="inline-flex items-center justify-center w-8 h-8 text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                                <i class="bi bi-arrow-right text-lg"></i>
+                            </a>
+                        }
+                    </div>
+                    @if (Model.Inspection != null)
+                    {
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between">
+                                <span class="text-sm text-slate-600 flex-shrink-0">Title</span>
+                                <span class="font-semibold text-slate-900 text-sm text-right">@Model.Inspection.Title</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-600">Status</span>
+                                @{
+                                    var inspectionStatusClass = Model.Inspection.Status switch
+                                    {
+                                        RequestStatus.Completed => "bg-green-100 text-green-700",
+                                        RequestStatus.InProgress => "bg-cyan-100 text-cyan-700",
+                                        _ => "bg-orange-100 text-orange-700"
+                                    };
+                                }
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full @inspectionStatusClass">
+                                    <i class="bi bi-circle-fill" style="font-size: 6px;"></i>
+                                    @Model.Inspection.Status
+                                </span>
+                            </div>
+                            @if (Model.Inspection.InspectionStartedAt.HasValue)
+                            {
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-slate-600">Started</span>
+                                    <span class="font-semibold text-slate-900 text-sm">@Model.Inspection.InspectionStartedAt.Value.ToString("MMM dd, yyyy")</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else if (Model.CustomerRequest == null)
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-lock text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">Complete customer request first</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-search text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">No inspection recorded yet</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Test Drive Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-lg transition-all group">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl @(Model.TestDrive != null ? "bg-gradient-to-br from-orange-500 to-red-600 text-white" : "bg-slate-100 text-slate-400") flex items-center justify-center">
+                                <i class="bi bi-speedometer2 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Test Drive</h3>
+                                <p class="text-xs text-slate-600">Performance check</p>
+                            </div>
+                        </div>
+                        @if (Model.TestDrive == null && Model.Inspection != null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/TestDrive/Create" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 shadow-lg shadow-orange-500/30 transition-all">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        }
+                        else if (Model.TestDrive != null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/TestDrive" class="inline-flex items-center justify-center w-8 h-8 text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                                <i class="bi bi-arrow-right text-lg"></i>
+                            </a>
+                        }
+                    </div>
+                    @if (Model.TestDrive != null)
+                    {
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-600">Status</span>
+                                @{
+                                    var testDriveStatusClass = Model.TestDrive.Status switch
+                                    {
+                                        RequestStatus.Completed => "bg-green-100 text-green-700",
+                                        RequestStatus.InProgress => "bg-orange-100 text-orange-700",
+                                        _ => "bg-slate-100 text-slate-700"
+                                    };
+                                }
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full @testDriveStatusClass">
+                                    <i class="bi bi-circle-fill" style="font-size: 6px;"></i>
+                                    @Model.TestDrive.Status
+                                </span>
+                            </div>
+                            @if (Model.TestDrive.MileageStart.HasValue && Model.TestDrive.MileageEnd.HasValue)
+                            {
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-slate-600">Distance</span>
+                                    <span class="font-semibold text-slate-900 text-sm">@((Model.TestDrive.MileageEnd.Value - Model.TestDrive.MileageStart.Value).ToString("N0")) km</span>
+                                </div>
+                            }
+                            @if (Model.TestDrive.StartedAt.HasValue && Model.TestDrive.CompletedAt.HasValue)
+                            {
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-slate-600">Duration</span>
+                                    <span class="font-semibold text-slate-900 text-sm">@((Model.TestDrive.CompletedAt.Value - Model.TestDrive.StartedAt.Value).TotalMinutes.ToString("N0")) min</span>
+                                </div>
+                            }
+                            @if (Model.TestDrive.Status == RequestStatus.InProgress)
+                            {
+                                <div class="pt-3 border-t border-slate-100">
+                                    <button onclick="openTestDriveCompleteModal()" class="w-full px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-orange-600 to-red-600 text-white hover:from-orange-700 hover:to-red-700 shadow-md transition-all">
+                                        <i class="bi bi-check-circle mr-2"></i>Complete Test Drive
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else if (Model.Inspection == null)
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-lock text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">Complete inspection first</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-speedometer text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">No test drive recorded yet</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Job Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-lg transition-all group">
+                    <div class="flex items-center justify-between mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl @(Model.JobCard != null ? "bg-gradient-to-br from-green-500 to-emerald-600 text-white" : "bg-slate-100 text-slate-400") flex items-center justify-center">
+                                <i class="bi bi-card-checklist text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Job Card</h3>
+                                <p class="text-xs text-slate-600">Work tracking</p>
+                            </div>
+                        </div>
+                        @if (Model.JobCard == null && Model.Inspection != null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/JobCard/Create" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-500/30 transition-all">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        }
+                        else if (Model.JobCard != null)
+                        {
+                            <a href="/Sessions/@Model.Session.Id/JobCard" class="inline-flex items-center justify-center w-8 h-8 text-slate-600 hover:bg-slate-100 rounded-lg transition-all">
+                                <i class="bi bi-arrow-right text-lg"></i>
+                            </a>
+                        }
+                    </div>
+                    @if (Model.JobCard != null)
+                    {
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-600">Status</span>
+                                <span class="@(Model.JobCard.Status == JobCardStatus.Completed ? "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700" : Model.JobCard.Status == JobCardStatus.InProgress ? "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-primary-100 text-primary-700" : "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-700")">
+                                    <i class="bi bi-circle-fill" style="font-size: 6px;"></i>
+                                    @Model.JobCard.Status
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-600">Estimated Hours</span>
+                                <span class="font-semibold text-slate-900 text-sm">@Model.JobCard.EstimatedHours.ToString("N1") hrs</span>
+                            </div>
+                            @if (Model.JobCard.ActualHours > 0)
+                            {
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-slate-600">Actual Hours</span>
+                                    <span class="font-semibold text-slate-900 text-sm">@Model.JobCard.ActualHours.ToString("N1") hrs</span>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else if (Model.Inspection == null)
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-lock text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">Complete inspection first</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-8">
+                            <i class="bi bi-clipboard text-3xl text-slate-300 mb-2"></i>
+                            <p class="text-sm text-slate-600">No job card created yet</p>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
-    }
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Quick Actions -->
+            <div class="bg-gradient-to-br from-primary-50 to-purple-50 rounded-2xl shadow-sm border border-primary-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-lightning-fill text-primary-600"></i>
+                    Quick Actions
+                </h3>
+                <div class="space-y-3">
+                    @if (Model.JobCard != null && Model.JobCard.Status == JobCardStatus.Completed)
+                    {
+                        <a href="/Sessions/Checkout/@Model.Session.Id" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 shadow-lg shadow-green-500/30 transition-all">
+                            <i class="bi bi-check-circle"></i>
+                            Complete & Check Out
+                        </a>
+                    }
+                    @if (Model.Session.Status != SessionStatus.Completed && Model.Session.Status != SessionStatus.Cancelled)
+                    {
+                        <form method="post" asp-page-handler="Cancel" class="w-full">
+                            <button type="submit" 
+                                    class="w-full px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl hover:bg-red-100 border border-red-200 transition-all inline-flex items-center justify-center gap-2 text-sm"
+                                    onclick="return confirm('Are you sure you want to cancel this session?')">
+                                <i class="bi bi-x-circle"></i>
+                                Cancel Session
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <!-- Reports -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-file-earmark-text text-primary-600"></i>
+                    Reports
+                </h3>
+                <div class="space-y-3">
+                    <a href="/Sessions/@Model.Session.Id/Reports/Initial" 
+                       class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl hover:border-primary-600 hover:bg-primary-50 transition-all group">
+                        <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center group-hover:bg-primary-600 transition-all">
+                            <i class="bi bi-file-earmark-text text-primary-600 group-hover:text-white transition-all"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-slate-900 text-sm">Initial Report</h4>
+                            <p class="text-xs text-slate-600">Check-in details</p>
+                        </div>
+                        <i class="bi bi-chevron-right text-slate-400 group-hover:text-primary-600"></i>
+                    </a>
+
+                    <a href="/Sessions/@Model.Session.Id/Reports/Final" 
+                       class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl transition-all group @(Model.Session.Status != SessionStatus.Completed && Model.Session.Status != SessionStatus.Closed ? "opacity-50 pointer-events-none" : "hover:border-green-600 hover:bg-green-50")">
+                        <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-600 transition-all">
+                            <i class="bi bi-check-circle text-green-600 group-hover:text-white transition-all"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-slate-900 text-sm">Final Report</h4>
+                            <p class="text-xs text-slate-600">@(Model.Session.Status == SessionStatus.Completed || Model.Session.Status == SessionStatus.Closed ? "Completion details" : "After checkout")</p>
+                        </div>
+                        <i class="bi bi-chevron-right text-slate-400 group-hover:text-green-600"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Session Timeline -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-clock-history text-primary-600"></i>
+                    Timeline
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex gap-3">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                <i class="bi bi-check-lg text-sm"></i>
+                            </div>
+                            @if (Model.CustomerRequest != null || Model.Inspection != null || Model.TestDrive != null)
+                            {
+                                <div class="w-0.5 h-full bg-slate-200 mt-2"></div>
+                            }
+                        </div>
+                        <div class="pb-4">
+                            <div class="font-semibold text-slate-900 text-sm">Check-In</div>
+                            <div class="text-xs text-slate-600">@Model.Session.CheckInAt.ToString("MMM dd, yyyy • h:mm tt")</div>
+                        </div>
+                    </div>
+
+                    @if (Model.CustomerRequest != null)
+                    {
+                        <div class="flex gap-3">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                    <i class="bi bi-check-lg text-sm"></i>
+                                </div>
+                                @if (Model.Inspection != null || Model.TestDrive != null)
+                                {
+                                    <div class="w-0.5 h-full bg-slate-200 mt-2"></div>
+                                }
+                            </div>
+                            <div class="pb-4">
+                                <div class="font-semibold text-slate-900 text-sm">Customer Request</div>
+                                <div class="text-xs text-slate-600">Request recorded</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Inspection != null)
+                    {
+                        <div class="flex gap-3">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                    <i class="bi bi-check-lg text-sm"></i>
+                                </div>
+                                @if (Model.TestDrive != null)
+                                {
+                                    <div class="w-0.5 h-full bg-slate-200 mt-2"></div>
+                                }
+                            </div>
+                            <div class="pb-4">
+                                <div class="font-semibold text-slate-900 text-sm">Inspection</div>
+                                <div class="text-xs text-slate-600">@(Model.Inspection.InspectionStartedAt?.ToString("MMM dd, yyyy") ?? "Started")</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.TestDrive != null)
+                    {
+                        <div class="flex gap-3">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                    <i class="bi bi-check-lg text-sm"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-slate-900 text-sm">Test Drive</div>
+                                <div class="text-xs text-slate-600">@(Model.TestDrive.StartedAt?.ToString("MMM dd, yyyy") ?? "Completed")</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Session.CheckOutAt.HasValue)
+                    {
+                        <div class="flex gap-3">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                                    <i class="bi bi-check-lg text-sm"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-slate-900 text-sm">Check-Out</div>
+                                <div class="text-xs text-slate-600">@Model.Session.CheckOutAt.Value.ToString("MMM dd, yyyy • h:mm tt")</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Session Stats -->
+            <div class="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-bar-chart text-primary-600"></i>
+                    Statistics
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-600">Completion</span>
+                        <span class="font-bold text-primary-600">@(GetProgressWidth())%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2.5">
+                        <div class="bg-gradient-to-r from-primary-600 to-green-500 h-2.5 rounded-full transition-all duration-700" style="width: @(GetProgressWidth())%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @functions {
@@ -451,3 +660,121 @@
         };
     }
 }
+
+<!-- Test Drive Complete Modal -->
+<div id="testDriveCompleteModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-check-circle text-3xl text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Complete Test Drive</h2>
+            <p class="text-slate-600">Enter the ending mileage to complete this test drive</p>
+        </div>
+
+        <form id="testDriveCompleteForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                    Ending Mileage (Optional)
+                </label>
+                <div class="relative">
+                    <input 
+                        type="number" 
+                        id="testDriveMileageEnd" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        placeholder="Enter ending mileage"
+                        min="@Model.TestDrive?.MileageStart">
+                    <span class="absolute right-4 top-3.5 text-slate-400 text-sm">km</span>
+                </div>
+                @if (Model.TestDrive?.MileageStart.HasValue == true)
+                {
+                    <p class="mt-2 text-sm text-slate-500">
+                        Start mileage: <span class="font-semibold">@Model.TestDrive.MileageStart.Value.ToString("N0") km</span>
+                    </p>
+                }
+            </div>
+
+            <div class="flex gap-3 pt-4">
+                <button 
+                    type="button" 
+                    onclick="closeTestDriveCompleteModal()" 
+                    class="flex-1 px-4 py-3 border border-slate-300 rounded-lg text-slate-700 font-semibold hover:bg-slate-50 transition-all">
+                    Cancel
+                </button>
+                <button 
+                    type="button" 
+                    onclick="submitTestDriveComplete()" 
+                    class="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg font-semibold hover:from-orange-700 hover:to-red-700 shadow-lg transition-all">
+                    Complete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const sessionId = '@Model.Session.Id';
+    const testDriveMileageStart = @(Model.TestDrive?.MileageStart ?? 0);
+
+    function openTestDriveCompleteModal() {
+        document.getElementById('testDriveCompleteModal').classList.remove('hidden');
+    }
+
+    function closeTestDriveCompleteModal() {
+        document.getElementById('testDriveCompleteModal').classList.add('hidden');
+        document.getElementById('testDriveMileageEnd').value = '';
+    }
+
+    async function submitTestDriveComplete() {
+        const mileageEndInput = document.getElementById('testDriveMileageEnd');
+        const mileageEnd = mileageEndInput.value ? parseInt(mileageEndInput.value) : null;
+
+        if (testDriveMileageStart > 0 && mileageEnd && mileageEnd < testDriveMileageStart) {
+            alert(`End mileage cannot be less than start mileage (${testDriveMileageStart.toLocaleString()} km)`);
+            return;
+        }
+
+        if (!confirm('Are you sure you want to complete this test drive?')) {
+            return;
+        }
+
+        try {
+            const formData = new FormData();
+            if (mileageEnd) {
+                formData.append('mileageEnd', mileageEnd);
+            }
+            formData.append('id', sessionId);
+            
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                formData.append('__RequestVerificationToken', token);
+            }
+
+            const response = await fetch(`?handler=CompleteTestDrive`, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.success) {
+                window.location.reload();
+            } else {
+                alert('Failed to complete test drive: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error completing test drive:', error);
+            alert('Error completing test drive: ' + error.message);
+        }
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeTestDriveCompleteModal();
+        }
+    });
+</script>

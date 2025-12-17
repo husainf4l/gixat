@@ -11,10 +11,12 @@ namespace Gixat.Web.Modules.Sessions.Services;
 public class CustomerRequestService : BaseService, ICustomerRequestService
 {
     private readonly ILogger<CustomerRequestService> _logger;
+    private readonly IAwsS3Service _s3Service;
 
-    public CustomerRequestService(DbContext context, ILogger<CustomerRequestService> logger) : base(context)
+    public CustomerRequestService(DbContext context, IAwsS3Service s3Service, ILogger<CustomerRequestService> logger) : base(context)
     {
         _logger = logger;
+        _s3Service = s3Service;
     }
 
     private DbSet<CustomerRequest> CustomerRequests => Set<CustomerRequest>();
@@ -28,7 +30,15 @@ public class CustomerRequestService : BaseService, ICustomerRequestService
             .Where(r => r.Id == id && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return request?.ToDto();
+        if (request == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in request.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return request.ToDto();
     }
 
     public async Task<CustomerRequestDto?> GetBySessionIdAsync(Guid sessionId, Guid companyId)
@@ -39,7 +49,15 @@ public class CustomerRequestService : BaseService, ICustomerRequestService
             .Where(r => r.SessionId == sessionId && r.CompanyId == companyId)
             .FirstOrDefaultAsync();
 
-        return request?.ToDto();
+        if (request == null) return null;
+
+        // Regenerate presigned URLs for media items
+        foreach (var media in request.MediaItems ?? [])
+        {
+            media.S3Url = await _s3Service.GeneratePresignedDownloadUrlAsync(media.S3Key);
+        }
+
+        return request.ToDto();
     }
 
     public async Task<CustomerRequestDto> CreateAsync(CreateCustomerRequestDto dto, Guid companyId)

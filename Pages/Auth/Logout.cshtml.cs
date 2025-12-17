@@ -16,12 +16,12 @@ public class LogoutModel : PageModel
     public async Task<IActionResult> OnGetAsync()
     {
         await _authService.LogoutAsync();
-        return Page();
+        return RedirectToPage("/Index");
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
         await _authService.LogoutAsync();
-        return RedirectToPage("/Auth/Login");
+        return RedirectToPage("/Index");
     }
 }

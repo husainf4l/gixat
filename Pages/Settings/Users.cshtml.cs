@@ -146,4 +146,25 @@ public class UsersModel : PageModel
         }
         return RedirectToPage();
     }
+
+    public async Task<IActionResult> OnPostUpdateUserAsync(Guid UserId, string FirstName, string LastName, string Email, int Role, string? Department)
+    {
+        var user = await _context.CompanyUsers.FindAsync(UserId);
+        if (user != null)
+        {
+            user.FirstName = FirstName;
+            user.LastName = LastName;
+            user.Email = Email;
+            user.Role = (CompanyUserRole)Role;
+            user.Department = Department;
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "User updated successfully";
+        }
+        else
+        {
+            TempData["Error"] = "User not found";
+        }
+        return RedirectToPage();
+    }
 }

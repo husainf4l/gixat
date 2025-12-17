@@ -1,0 +1,542 @@
+@page "{id:guid?}"
+@model Gixat.Web.Pages.JobCards.DetailsModel
+@using Gixat.Web.Modules.Sessions.Enums
+@{
+    ViewData["Title"] = $"Job Card - {Model.JobCard.JobCardNumber}";
+    Layout = "_AppLayout";
+    
+    // Calculate progress metrics
+    var totalItems = Model.JobCard.Items.Count();
+    var completedItems = Model.JobCard.Items.Count(i => i.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.Completed);
+    var inProgressItems = Model.JobCard.Items.Count(i => i.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.InProgress);
+    var progressPercent = totalItems > 0 ? (completedItems * 100.0 / totalItems) : 0;
+    var totalEstimatedHours = Model.JobCard.Items.Sum(i => i.EstimatedHours);
+    var totalActualHours = Model.JobCard.Items.Sum(i => i.ActualHours);
+}
+
+<!-- Welcome/Header Section -->
+<div class="mb-8 lg:mb-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="/Sessions/Details/@Model.Session.Id" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent">
+                        Job Card #@Model.JobCard.JobCardNumber
+                    </h1>
+                    <p class="text-slate-600 mt-1 flex items-center gap-2">
+                        <i class="bi bi-wrench text-sm"></i>
+                        <span>@Model.JobCard.Title</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        @if (Model.JobCard.Status != JobCardStatus.Completed && Model.JobCard.Status != JobCardStatus.Cancelled)
+        {
+            <a href="/JobCards/AddItem?id=@Model.JobCard.Id" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <i class="bi bi-plus-circle-fill text-lg"></i>
+                Add Work Item
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-10">
+    <!-- Progress -->
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-blue-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                    <i class="bi bi-graph-up-arrow text-xl"></i>
+                </div>
+                @if(progressPercent >= 100)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 ring-1 ring-green-200">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Done
+                    </span>
+                }
+                else if(inProgressItems > 0)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-700 ring-1 ring-orange-200">
+                        <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                        Working
+                    </span>
+                }
+            </div>
+            <p class="text-4xl font-bold text-slate-900 mb-2">@progressPercent.ToString("F0")%</p>
+            <p class="text-sm font-medium text-slate-600">Overall Progress</p>
+        </div>
+    </div>
+
+    <!-- Estimated Hours -->
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-purple-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
+                    <i class="bi bi-clock text-xl"></i>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-700 ring-1 ring-purple-200">
+                    Planned
+                </span>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 mb-2">@totalEstimatedHours.ToString("F1")</p>
+            <p class="text-sm font-medium text-slate-600">Estimated Hours</p>
+        </div>
+    </div>
+
+    <!-- Actual Hours -->
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-orange-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
+                    <i class="bi bi-clock-history text-xl"></i>
+                </div>
+                @if(totalActualHours > totalEstimatedHours)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">
+                        Over
+                    </span>
+                }
+                else if(totalActualHours > 0)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 ring-1 ring-green-200">
+                        On Track
+                    </span>
+                }
+            </div>
+            <p class="text-4xl font-bold text-slate-900 mb-2">@totalActualHours.ToString("F1")</p>
+            <p class="text-sm font-medium text-slate-600">Actual Hours</p>
+        </div>
+    </div>
+
+    <!-- Work Items -->
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-green-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-green-500/30">
+                    <i class="bi bi-list-check text-xl"></i>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-green-100 text-green-700 ring-1 ring-green-200">
+                    <i class="bi bi-check text-xs"></i>
+                    @completedItems/@totalItems
+                </span>
+            </div>
+            <p class="text-4xl font-bold text-slate-900 mb-2">@totalItems</p>
+            <p class="text-sm font-medium text-slate-600">Total Tasks</p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <!-- Work Items (2/3 width) -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Approval Status Banner -->
+        @if (!Model.JobCard.IsApproved)
+        {
+            <div class="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 rounded-xl p-4 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-exclamation-triangle-fill text-2xl text-amber-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-amber-900 mb-1 flex items-center gap-2">
+                            <i class="bi bi-hand-thumbs-up"></i>
+                            Approval Required
+                        </h4>
+                        <p class="text-sm text-amber-800 leading-relaxed">This job card requires supervisor approval before work can begin. Please review all work items below and click the "Approve Job Card" button in the sidebar.</p>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-xl p-4 shadow-sm">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <i class="bi bi-check-circle-fill text-2xl text-green-600"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-green-900 mb-1">✓ Approved</h4>
+                        <p class="text-sm text-green-800">This job card has been approved and work can proceed. @(Model.JobCard.ApprovedAt.HasValue ? $"Approved on {Model.JobCard.ApprovedAt.Value:MMM dd, yyyy}" : "")</p>
+                    </div>
+                </div>
+            </div>
+        }
+        
+        <!-- Work Items Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <i class="bi bi-list-check text-blue-600"></i>
+                    Work Items
+                </h2>
+                <p class="text-sm text-slate-600 mt-1">Tasks and jobs to be performed</p>
+            </div>
+        </div>
+        
+        @if (Model.JobCard.Items.Any())
+        {
+            <div class="divide-y divide-slate-100">
+                @foreach (var item in Model.JobCard.Items.OrderBy(i => i.SortOrder))
+                {
+                    var itemStatusBadge = item.Status switch
+                    {
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Pending => ("bg-slate-100 text-slate-700 ring-slate-200", "bi-circle"),
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.InProgress => ("bg-orange-100 text-orange-700 ring-orange-200", "bi-arrow-repeat"),
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Completed => ("bg-green-100 text-green-700 ring-green-200", "bi-check-circle-fill"),
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Deferred => ("bg-blue-100 text-blue-700 ring-blue-200", "bi-pause-circle"),
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Cancelled => ("bg-red-100 text-red-700 ring-red-200", "bi-x-circle"),
+                        _ => ("bg-slate-100 text-slate-700 ring-slate-200", "bi-circle")
+                    };
+                    
+                    var itemDotColor = item.Status switch
+                    {
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.InProgress => "bg-orange-500",
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Completed => "bg-green-500",
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Deferred => "bg-blue-500",
+                        Gixat.Web.Modules.Sessions.Enums.TaskStatus.Cancelled => "bg-red-500",
+                        _ => "bg-slate-400"
+                    };
+                    
+                    <div class="flex items-center gap-4 p-5 hover:bg-slate-50 transition-all duration-200 group">
+                        <!-- Icon with status dot -->
+                        <div class="relative">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center group-hover:from-blue-50 group-hover:to-blue-100 transition-all duration-200">
+                                <i class="bi bi-wrench-adjustable text-2xl text-slate-600 group-hover:text-blue-600 transition-colors"></i>
+                            </div>
+                            <span class="absolute -bottom-1 -right-1 w-4 h-4 @itemDotColor rounded-full border-2 border-white ring-2 ring-white/50"></span>
+                        </div>
+                        
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2.5 mb-1 flex-wrap">
+                                <span class="font-semibold text-slate-900">@item.Title</span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full @itemStatusBadge.Item1 ring-1">
+                                    <i class="bi @itemStatusBadge.Item2"></i>
+                                    @item.Status.ToString().Replace("InProgress", "In Progress")
+                                </span>
+                                @if (!Model.JobCard.IsApproved)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800 ring-1 ring-amber-300 animate-pulse">
+                                        <i class="bi bi-exclamation-circle-fill"></i>
+                                        Requires Approval
+                                    </span>
+                                }
+                                @if (item.QualityChecked)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-700 ring-1 ring-purple-200">
+                                        <i class="bi bi-award"></i> QC
+                                    </span>
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                <p class="text-sm text-slate-600 truncate mb-1">@item.Description</p>
+                            }
+                            <div class="flex items-center gap-4 text-sm text-slate-500">
+                                @if (!string.IsNullOrEmpty(item.Category))
+                                {
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="bi bi-tag text-xs"></i>
+                                        @item.Category
+                                    </span>
+                                }
+                                <span class="flex items-center gap-1.5">
+                                    <i class="bi bi-clock text-xs"></i>
+                                    @item.EstimatedHours.ToString("N1")h est.
+                                </span>
+                                @if (item.ActualHours > 0)
+                                {
+                                    <span class="flex items-center gap-1.5 text-green-600 font-medium">
+                                        <i class="bi bi-clock-history text-xs"></i>
+                                        @item.ActualHours.ToString("N1")h actual
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-2">
+                            @if (item.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.Pending)
+                            {
+                                <form method="post" asp-page-handler="StartItem" asp-route-id="@Model.JobCard.Id" class="inline">
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" title="Start Work" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-500 hover:text-white transition-all duration-200 flex items-center gap-1">
+                                        <i class="bi bi-play-fill"></i>
+                                        <span>Start</span>
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="CompleteItem" asp-route-id="@Model.JobCard.Id" class="inline">
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" title="Mark Complete" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-100 text-green-700 hover:bg-green-500 hover:text-white transition-all duration-200 flex items-center gap-1">
+                                        <i class="bi bi-check-lg"></i>
+                                        <span>Done</span>
+                                    </button>
+                                </form>
+                            }
+                            else if (item.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.InProgress)
+                            {
+                                <form method="post" asp-page-handler="CompleteItem" asp-route-id="@Model.JobCard.Id" class="inline">
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" title="Mark Complete" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-green-100 text-green-700 hover:bg-green-500 hover:text-white transition-all duration-200 flex items-center gap-1">
+                                        <i class="bi bi-check-lg"></i>
+                                        <span>Done</span>
+                                    </button>
+                                </form>
+                            }
+                            else if (item.Status == Gixat.Web.Modules.Sessions.Enums.TaskStatus.Completed && !item.QualityChecked)
+                            {
+                                <form method="post" asp-page-handler="ApproveItem" asp-route-id="@Model.JobCard.Id" class="inline">
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" title="Quality Check / Approve" class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-500 hover:text-white transition-all duration-200 flex items-center gap-1">
+                                        <i class="bi bi-award-fill"></i>
+                                        <span>Approve</span>
+                                    </button>
+                                </form>
+                            }
+                            else if (item.QualityChecked)
+                            {
+                                <span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded font-bold">✓ Approved</span>
+                            }
+                            <i class="bi bi-chevron-right text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200"></i>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="p-12 text-center">
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center mx-auto mb-5">
+                    <i class="bi bi-clipboard text-4xl text-slate-400"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg mb-2">No work items yet</h3>
+                <p class="text-sm text-slate-600 mb-6 max-w-xs mx-auto">Add work items to track the jobs and services to be performed</p>
+                @if (Model.JobCard.Status != JobCardStatus.Completed && Model.JobCard.Status != JobCardStatus.Cancelled)
+                {
+                    <a href="/JobCards/AddItem?id=@Model.JobCard.Id" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 transition-all duration-200 hover:scale-[1.02]">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        Add Work Item
+                    </a>
+                }
+            </div>
+        }
+    </div>
+    </div>
+
+    <!-- Right Column (1/3 width) -->
+    <div class="space-y-6 lg:space-y-8">
+        <!-- Job Card Info -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-blue-600"></i>
+                    Job Card Details
+                </h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Status</p>
+                    @{
+                        var statusBadge = Model.JobCard.Status switch
+                        {
+                            JobCardStatus.Draft => ("bg-slate-100 text-slate-700 ring-slate-200", "bi-file-earmark"),
+                            JobCardStatus.Pending => ("bg-blue-100 text-blue-700 ring-blue-200", "bi-hourglass-split"),
+                            JobCardStatus.Approved => ("bg-purple-100 text-purple-700 ring-purple-200", "bi-check-circle"),
+                            JobCardStatus.InProgress => ("bg-orange-100 text-orange-700 ring-orange-200", "bi-arrow-repeat"),
+                            JobCardStatus.WaitingParts => ("bg-amber-100 text-amber-700 ring-amber-200", "bi-box-seam"),
+                            JobCardStatus.QualityCheck => ("bg-indigo-100 text-indigo-700 ring-indigo-200", "bi-award"),
+                            JobCardStatus.Completed => ("bg-green-100 text-green-700 ring-green-200", "bi-check-circle-fill"),
+                            JobCardStatus.OnHold => ("bg-yellow-100 text-yellow-700 ring-yellow-200", "bi-pause-circle"),
+                            JobCardStatus.Cancelled => ("bg-red-100 text-red-700 ring-red-200", "bi-x-circle"),
+                            _ => ("bg-slate-100 text-slate-700 ring-slate-200", "bi-file-earmark")
+                        };
+                    }
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-full @statusBadge.Item1 ring-1">
+                        <i class="bi @statusBadge.Item2"></i>
+                        @Model.JobCard.Status.ToString().Replace("InProgress", "In Progress").Replace("WaitingParts", "Waiting Parts").Replace("QualityCheck", "Quality Check").Replace("OnHold", "On Hold")
+                    </span>
+                </div>
+                
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Priority</p>
+                    @{
+                        var priorityBadge = Model.JobCard.Priority switch
+                        {
+                            Priority.Urgent => ("bg-red-100 text-red-700 ring-red-200", "🔴"),
+                            Priority.High => ("bg-orange-100 text-orange-700 ring-orange-200", "🟡"),
+                            Priority.Normal => ("bg-blue-100 text-blue-700 ring-blue-200", "🔵"),
+                            _ => ("bg-green-100 text-green-700 ring-green-200", "🟢")
+                        };
+                    }
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-full @priorityBadge.Item1 ring-1">
+                        @priorityBadge.Item2 @Model.JobCard.Priority
+                    </span>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Session</p>
+                    <p class="text-sm font-semibold text-slate-900">#@Model.Session.SessionNumber</p>
+                    <p class="text-sm text-slate-600 flex items-center gap-1.5 mt-1">
+                        <i class="bi bi-car-front text-xs"></i>
+                        @Model.Session.VehicleDisplayName
+                    </p>
+                </div>
+
+                @if (Model.JobCard.ActualStartAt.HasValue)
+                {
+                    <div class="pt-4 border-t border-slate-100">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Started</p>
+                        <p class="text-sm text-slate-900">@Model.JobCard.ActualStartAt.Value.ToString("MMM dd, yyyy")</p>
+                        <p class="text-xs text-slate-600">@Model.JobCard.ActualStartAt.Value.ToString("HH:mm")</p>
+                    </div>
+                }
+
+                @if (Model.JobCard.ActualCompletionAt.HasValue)
+                {
+                    <div class="pt-4 border-t border-slate-100">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Completed</p>
+                        <p class="text-sm text-slate-900">@Model.JobCard.ActualCompletionAt.Value.ToString("MMM dd, yyyy")</p>
+                        <p class="text-xs text-slate-600">@Model.JobCard.ActualCompletionAt.Value.ToString("HH:mm")</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Approvals -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="bi bi-shield-check text-green-600"></i>
+                    Approvals
+                </h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <!-- Internal Approval -->
+                <div class="p-4 rounded-xl @(Model.JobCard.IsApproved ? "bg-green-50 border-2 border-green-200" : "bg-slate-50 border-2 border-slate-200")">
+                    <div class="flex items-center gap-3 mb-2">
+                        @if (Model.JobCard.IsApproved)
+                        {
+                            <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-check-lg text-green-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-green-700 text-sm">Internal Approved</p>
+                                @if (Model.JobCard.ApprovedAt.HasValue)
+                                {
+                                    <p class="text-xs text-slate-600">@Model.JobCard.ApprovedAt.Value.ToString("MMM dd, HH:mm")</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-hourglass-split text-slate-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-slate-600 text-sm">Pending Approval</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Customer Authorization -->
+                <div class="p-4 rounded-xl @(Model.JobCard.CustomerAuthorized ? "bg-blue-50 border-2 border-blue-200" : "bg-slate-50 border-2 border-slate-200")">
+                    <div class="flex items-center gap-3 mb-2">
+                        @if (Model.JobCard.CustomerAuthorized)
+                        {
+                            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-person-check text-blue-600 text-lg"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-blue-700 text-sm">Customer Authorized</p>
+                                @if (Model.JobCard.CustomerAuthorizedAt.HasValue)
+                                {
+                                    <p class="text-xs text-slate-600">@Model.JobCard.CustomerAuthorizedAt.Value.ToString("MMM dd, HH:mm")</p>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
+                                <i class="bi bi-person-dash text-slate-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-slate-600 text-sm">Awaiting Authorization</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+            <div class="space-y-3">
+                @if (!Model.JobCard.IsApproved)
+                {
+                    <form method="post" asp-page-handler="Approve" asp-route-id="@Model.JobCard.Id" class="w-full">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="bi bi-check-circle text-lg"></i>
+                            Approve Job Card
+                        </button>
+                    </form>
+                }
+                @if (Model.JobCard.IsApproved && (Model.JobCard.Status == JobCardStatus.Approved || Model.JobCard.Status == JobCardStatus.Pending))
+                {
+                    <form method="post" asp-page-handler="StartWork" asp-route-id="@Model.JobCard.Id" class="w-full">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="bi bi-play-circle text-lg"></i>
+                            Start Work
+                        </button>
+                    </form>
+                }
+                @if (Model.JobCard.Status == JobCardStatus.InProgress || Model.JobCard.Status == JobCardStatus.WaitingParts)
+                {
+                    <div class="grid grid-cols-2 gap-3">
+                        <form method="post" asp-page-handler="NeedParts" asp-route-id="@Model.JobCard.Id" class="w-full">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                                <i class="bi bi-box-seam text-lg"></i>
+                                Need Parts
+                            </button>
+                        </form>
+                        <form method="post" asp-page-handler="QualityCheck" asp-route-id="@Model.JobCard.Id" class="w-full">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                                <i class="bi bi-award text-lg"></i>
+                                Send to QC
+                            </button>
+                        </form>
+                    </div>
+                }
+                @if (Model.JobCard.Status == JobCardStatus.QualityCheck)
+                {
+                    <form method="post" asp-page-handler="CompleteWork" asp-route-id="@Model.JobCard.Id" class="w-full">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" onclick="return confirm('Mark job card as completed?')" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="bi bi-check-all text-lg"></i>
+                            Complete Job Card
+                        </button>
+                    </form>
+                }
+                <a href="/Sessions/Details/@Model.Session.Id" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200">
+                    <i class="bi bi-arrow-left"></i>
+                    Back to Session
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

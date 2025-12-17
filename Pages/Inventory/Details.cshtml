@@ -1,0 +1,316 @@
+@page
+@model Gixat.Web.Pages.Inventory.DetailsModel
+@{
+    Layout = "_AppLayout";
+    ViewData["Title"] = Model.Item?.Name ?? "Item Details";
+}
+
+@if (Model.Item == null)
+{
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-exclamation-triangle text-gray-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Item Not Found</h3>
+        <p class="text-sm text-gray-500 mb-6">The inventory item you're looking for doesn't exist.</p>
+        <a asp-page="Index" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Inventory</span>
+        </a>
+    </div>
+}
+else
+{
+    var isLowStock = Model.Item.QuantityOnHand <= Model.Item.ReorderPoint;
+
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-4 mb-4">
+            <a asp-page="Index" class="w-12 h-12 rounded-xl bg-white border border-slate-200 hover:border-blue-300 flex items-center justify-center text-slate-600 hover:text-blue-600 transition-all shadow-sm hover:shadow">
+                <i class="bi bi-arrow-left text-lg"></i>
+            </a>
+            <div class="flex-1">
+                <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent">@Model.Item.Name</h1>
+                <p class="text-slate-600 mt-1">@Model.Item.ItemNumber</p>
+            </div>
+            <div class="flex gap-3">
+                @if (isLowStock)
+                {
+                    <a asp-page="Restock" asp-route-id="@Model.Item.Id" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
+                        <i class="bi bi-truck"></i>
+                        <span>Restock</span>
+                    </a>
+                }
+                <button onclick="document.getElementById('editModal').classList.remove('hidden')" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all">
+                    <i class="bi bi-pencil"></i>
+                    <span>Edit</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (isLowStock)
+    {
+        <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded-xl p-6 mb-8 shadow-sm">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-red-500 flex items-center justify-center text-white shadow-lg">
+                    <i class="bi bi-exclamation-circle-fill text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-lg">Low Stock Alert</h3>
+                    <p class="text-sm text-slate-600 mt-1">Current stock (@Model.Item.QuantityOnHand @Model.Item.Unit) is below reorder point (@Model.Item.ReorderPoint @Model.Item.Unit)</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Left Column - Main Info -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Basic Info Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i class="bi bi-info-circle text-blue-600"></i>
+                    Basic Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Item Number</label>
+                        <p class="text-lg text-slate-900 mt-1">@Model.Item.ItemNumber</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Category</label>
+                        <p class="mt-1">
+                            <span class="px-3 py-1.5 inline-flex text-sm font-medium rounded-full bg-blue-100 text-blue-700">
+                                @Model.Item.Category
+                            </span>
+                        </p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Supplier</label>
+                        <p class="text-lg text-slate-900 mt-1">@(Model.Item.SupplierName ?? "-")</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Barcode</label>
+                        <p class="text-lg text-slate-900 mt-1 font-mono">@(Model.Item.Barcode ?? "-")</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Item.Description))
+                    {
+                        <div class="md:col-span-2">
+                            <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Description</label>
+                            <p class="text-slate-900 mt-1">@Model.Item.Description</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Stock Info Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i class="bi bi-box-seam text-blue-600"></i>
+                    Stock Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Current Stock</label>
+                        <p class="text-3xl font-bold @(isLowStock ? "text-red-600" : "text-slate-900") mt-2">
+                            @Model.Item.QuantityOnHand <span class="text-lg text-slate-600">@Model.Item.Unit</span>
+                        </p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Minimum Quantity</label>
+                        <p class="text-3xl font-bold text-slate-900 mt-2">
+                            @Model.Item.MinimumQuantity <span class="text-lg text-slate-600">@Model.Item.Unit</span>
+                        </p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Reorder Point</label>
+                        <p class="text-3xl font-bold text-slate-900 mt-2">
+                            @Model.Item.ReorderPoint <span class="text-lg text-slate-600">@Model.Item.Unit</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <i class="bi bi-geo-alt text-blue-600"></i>
+                    Storage Location
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Location</label>
+                        <p class="text-lg text-slate-900 mt-1">@(Model.Item.StorageLocation ?? "-")</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Shelf</label>
+                        <p class="text-lg text-slate-900 mt-1">@(Model.Item.Shelf ?? "-")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Stats -->
+        <div class="space-y-6">
+            <!-- Pricing Card -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-currency-dollar text-blue-600"></i>
+                    Pricing
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-slate-600">Cost Price</label>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">@Model.Item.CostPrice.ToString("C")</p>
+                    </div>
+                    <div class="border-t border-blue-200 pt-4">
+                        <label class="text-sm font-medium text-slate-600">Selling Price</label>
+                        <p class="text-2xl font-bold text-blue-600 mt-1">@Model.Item.SellingPrice.ToString("C")</p>
+                    </div>
+                    <div class="border-t border-blue-200 pt-4">
+                        <label class="text-sm font-medium text-slate-600">Margin</label>
+                        @{
+                            var margin = Model.Item.CostPrice > 0 ? ((Model.Item.SellingPrice - Model.Item.CostPrice) / Model.Item.CostPrice * 100) : 0;
+                        }
+                        <p class="text-2xl font-bold text-green-600 mt-1">@margin.ToString("F1")%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Value Card -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl shadow-sm border border-purple-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="bi bi-calculator text-purple-600"></i>
+                    Stock Value
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-slate-600">Total Cost</label>
+                        <p class="text-2xl font-bold text-slate-900 mt-1">@((Model.Item.CostPrice * Model.Item.QuantityOnHand).ToString("C"))</p>
+                    </div>
+                    <div class="border-t border-purple-200 pt-4">
+                        <label class="text-sm font-medium text-slate-600">Total Value</label>
+                        <p class="text-2xl font-bold text-purple-600 mt-1">@((Model.Item.SellingPrice * Model.Item.QuantityOnHand).ToString("C"))</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                <h3 class="font-bold text-slate-900 mb-4">Status</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-600">Active</span>
+                        @if (Model.Item.IsActive)
+                        {
+                            <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-700">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 text-gray-700">No</span>
+                        }
+                    </div>
+                    <div class="border-t border-slate-200 pt-3">
+                        <span class="text-sm text-slate-600">Created</span>
+                        <p class="text-sm text-slate-900 mt-1">@Model.Item.CreatedAt.ToString("MMM dd, yyyy")</p>
+                    </div>
+                    @if (Model.Item.UpdatedAt.HasValue)
+                    {
+                        <div class="border-t border-slate-200 pt-3">
+                            <span class="text-sm text-slate-600">Last Updated</span>
+                            <p class="text-sm text-slate-900 mt-1">@Model.Item.UpdatedAt.Value.ToString("MMM dd, yyyy")</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-semibold text-gray-900">Edit Item</h2>
+                    <button onclick="document.getElementById('editModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                        <i class="bi bi-x-lg text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <form method="post" asp-page-handler="Update" class="p-6 max-h-[70vh] overflow-y-auto">
+                <input type="hidden" name="Id" value="@Model.Item.Id" />
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                            <input type="text" name="Name" value="@Model.Item.Name" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                            <select name="Category" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                @foreach (var category in Enum.GetValues<Gixat.Web.Modules.Inventory.Entities.InventoryCategory>())
+                                {
+                                    <option value="@category" selected="@(category == Model.Item.Category)">@category</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea name="Description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">@Model.Item.Description</textarea>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                            <input type="number" name="QuantityOnHand" value="@Model.Item.QuantityOnHand" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Min Qty *</label>
+                            <input type="number" name="MinimumQuantity" value="@Model.Item.MinimumQuantity" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Reorder Point *</label>
+                            <input type="number" name="ReorderPoint" value="@Model.Item.ReorderPoint" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Cost Price *</label>
+                            <input type="number" name="CostPrice" value="@Model.Item.CostPrice" step="0.01" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Selling Price *</label>
+                            <input type="number" name="SellingPrice" value="@Model.Item.SellingPrice" step="0.01" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Storage Location</label>
+                            <input type="text" name="StorageLocation" value="@Model.Item.StorageLocation" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Shelf</label>
+                            <input type="text" name="Shelf" value="@Model.Item.Shelf" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" name="IsActive" value="true" @(Model.Item.IsActive ? "checked" : "") class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
+                            <span class="text-sm font-medium text-gray-700">Active</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="flex-1 px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700">
+                        Update Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

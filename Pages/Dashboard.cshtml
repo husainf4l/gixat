@@ -6,21 +6,41 @@
 }
 
 <!-- Welcome Section -->
-<div class="mb-8 lg:mb-10">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
-        <div>
-            <h1 class="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent">
-                Good @(DateTime.Now.Hour < 12 ? "morning" : DateTime.Now.Hour < 17 ? "afternoon" : "evening"), @User.Identity?.Name 👋
-            </h1>
-            <p class="text-slate-600 mt-2 flex items-center gap-2">
-                <i class="bi bi-calendar3 text-sm"></i>
-                <span>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
-            </p>
+<div class="mb-6 lg:mb-8">
+    <div class="relative overflow-hidden bg-gradient-to-br from-sky-50 via-cyan-50 to-blue-50 rounded-2xl border border-sky-100 shadow-sm">
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-sky-400/10 to-cyan-400/10 rounded-full blur-2xl -mr-24 -mt-24"></div>
+        
+        <div class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 lg:p-7">
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/30">
+                        <i class="bi bi-@(DateTime.Now.Hour < 12 ? "sunrise" : DateTime.Now.Hour < 17 ? "sun" : "moon-stars") text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-slate-800 via-sky-700 to-sky-600 bg-clip-text text-transparent leading-tight">
+                            Good @(DateTime.Now.Hour < 12 ? "Morning" : DateTime.Now.Hour < 17 ? "Afternoon" : "Evening"), @User.Identity?.Name
+                        </h1>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-3 ml-15">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                        <i class="bi bi-calendar-event text-sky-600"></i>
+                        <span class="font-medium text-slate-700">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm rounded-lg text-sm">
+                        <i class="bi bi-clock text-sky-600"></i>
+                        <span class="font-medium text-slate-700">@DateTime.Now.ToString("h:mm tt")</span>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="/Sessions/Create" class="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-lg shadow-sky-500/30 hover:shadow-xl hover:shadow-sky-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
+                <i class="bi bi-plus-circle-fill text-lg"></i>
+                <span>New Check-In</span>
+            </a>
         </div>
-        <a href="/Sessions/Create" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]">
-            <i class="bi bi-plus-circle-fill text-lg"></i>
-            New Check-In
-        </a>
     </div>
 </div>
 
@@ -85,21 +105,95 @@
         </div>
     </div>
 
-    <!-- Total Clients -->
-    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-purple-200 overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+    <!-- Month Revenue -->
+    <div class="group relative bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-slate-100 hover:border-emerald-200 overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-transparent rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-100 transition-opacity"></div>
         <div class="relative">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
-                    <i class="bi bi-people-fill text-xl"></i>
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
+                    <i class="bi bi-cash-stack text-xl"></i>
                 </div>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-700 ring-1 ring-purple-200">
-                    <i class="bi bi-star-fill text-xs"></i>
-                    +@Model.VipClients VIP
-                </span>
+                @if(Model.MonthRevenue > 0)
+                {
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200">
+                        <i class="bi bi-graph-up text-xs"></i>
+                        Month
+                    </span>
+                }
             </div>
-            <p class="text-4xl font-bold text-slate-900 mb-2">@Model.TotalClients</p>
-            <p class="text-sm font-medium text-slate-600">Total Clients</p>
+            <p class="text-4xl font-bold text-slate-900 mb-2">@Model.MonthRevenue.ToString("N0") JOD</p>
+            <p class="text-sm font-medium text-slate-600">Revenue This Month</p>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8 lg:mb-10">
+    <!-- Total Clients -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                <i class="bi bi-people-fill text-2xl text-purple-600"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-2xl font-bold text-slate-900">@Model.TotalClients</p>
+                <p class="text-xs font-medium text-slate-600">Total Clients</p>
+            </div>
+            @if(Model.VipClients > 0)
+            {
+                <span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">+@Model.VipClients VIP</span>
+            }
+        </div>
+    </div>
+
+    <!-- Today's Appointments -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center">
+                <i class="bi bi-calendar-check-fill text-2xl text-cyan-600"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-2xl font-bold text-slate-900">@Model.TodayAppointments</p>
+                <p class="text-xs font-medium text-slate-600">Today's Appointments</p>
+            </div>
+            @if(Model.UpcomingAppointments > 0)
+            {
+                <span class="text-xs font-semibold text-cyan-600 bg-cyan-50 px-2.5 py-1 rounded-full">+@Model.UpcomingAppointments Soon</span>
+            }
+        </div>
+    </div>
+
+    <!-- Outstanding Invoices -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl @(Model.OutstandingAmount > 0 ? "bg-amber-100" : "bg-slate-100") flex items-center justify-center">
+                <i class="bi bi-receipt text-2xl @(Model.OutstandingAmount > 0 ? "text-amber-600" : "text-slate-400")"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-2xl font-bold text-slate-900">@Model.OutstandingAmount.ToString("N0")</p>
+                <p class="text-xs font-medium text-slate-600">Outstanding (JOD)</p>
+            </div>
+            @if(Model.OverdueInvoices > 0)
+            {
+                <span class="text-xs font-semibold text-red-600 bg-red-50 px-2.5 py-1 rounded-full ring-1 ring-red-200">@Model.OverdueInvoices Overdue</span>
+            }
+        </div>
+    </div>
+
+    <!-- Inventory Alerts -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-200">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl @(Model.LowStockItems > 0 ? "bg-rose-100" : "bg-slate-100") flex items-center justify-center">
+                <i class="bi bi-box-seam text-2xl @(Model.LowStockItems > 0 ? "text-rose-600" : "text-slate-400")"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-2xl font-bold text-slate-900">@Model.LowStockItems</p>
+                <p class="text-xs font-medium text-slate-600">Low Stock Items</p>
+            </div>
+            @if(Model.OutOfStockItems > 0)
+            {
+                <span class="text-xs font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full ring-1 ring-rose-200">@Model.OutOfStockItems Out</span>
+            }
         </div>
     </div>
 </div>
@@ -226,6 +320,21 @@
                     <i class="bi bi-arrow-right text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                 </a>
                 
+                <a href="/Appointments" class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all duration-200 group">
+                    <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 transition-colors">
+                        <i class="bi bi-calendar-plus-fill text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="font-semibold text-slate-900 text-sm block">Schedule Appointment</span>
+                        <p class="text-xs text-slate-600 mt-0.5">Book a service slot</p>
+                    </div>
+                    @if(Model.PendingConfirmations > 0)
+                    {
+                        <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">@Model.PendingConfirmations</span>
+                    }
+                    <i class="bi bi-arrow-right text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                </a>
+                
                 <a href="/Sessions" class="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all duration-200 group">
                     <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 transition-colors">
                         <i class="bi bi-list-ul text-xl"></i>
@@ -236,6 +345,63 @@
                     </div>
                     <i class="bi bi-arrow-right text-slate-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
                 </a>
+                
+                @if(Model.LowStockItems > 0 || Model.OutOfStockItems > 0)
+                {
+                    <a href="/Inventory" class="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-rose-50 to-red-50 border border-rose-200 hover:border-rose-300 transition-all duration-200 group">
+                        <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 group-hover:bg-rose-200 transition-colors">
+                            <i class="bi bi-exclamation-triangle-fill text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-rose-900 text-sm block">Stock Alert</span>
+                            <p class="text-xs text-rose-700 mt-0.5">@Model.LowStockItems low, @Model.OutOfStockItems out</p>
+                        </div>
+                        <i class="bi bi-arrow-right text-rose-600 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Performance Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+            <h3 class="font-bold text-slate-900 text-lg mb-5 flex items-center gap-2">
+                <i class="bi bi-graph-up-arrow text-blue-600"></i>
+                This Week
+            </h3>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i class="bi bi-clipboard-data text-blue-600"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-700">Sessions</span>
+                    </div>
+                    <span class="text-2xl font-bold text-slate-900">@Model.WeekSessions</span>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                            <i class="bi bi-check-circle-fill text-green-600"></i>
+                        </div>
+                        <span class="text-sm font-semibold text-slate-700">Completed</span>
+                    </div>
+                    <span class="text-2xl font-bold text-slate-900">@Model.CompletedThisWeek</span>
+                </div>
+
+                @if(Model.WeekSessions > 0)
+                {
+                    var completionRate = (int)((double)Model.CompletedThisWeek / Model.WeekSessions * 100);
+                    <div class="pt-3 border-t border-slate-100">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-semibold text-slate-600">Completion Rate</span>
+                            <span class="text-sm font-bold text-slate-900">@completionRate%</span>
+                        </div>
+                        <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-700 ease-out" style="width: @completionRate%"></div>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
@@ -250,13 +416,24 @@
                         <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
                             <i class="bi bi-calendar-event-fill text-xl"></i>
                         </div>
-                        Today's Overview
+                        Today's Revenue
                     </h3>
                     <span class="text-xs font-semibold text-white/60 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full">@DateTime.Now.ToString("MMM dd")</span>
                 </div>
                 
                 <div class="space-y-6">
-                    <!-- Sessions Today -->
+                    <!-- Revenue Today -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"></div>
+                                <span class="text-white/90 text-sm font-semibold">Revenue Today</span>
+                            </div>
+                            <span class="font-bold text-2xl">@Model.TodayRevenue.ToString("N0") JOD</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Sessions & Vehicles -->
                     <div>
                         <div class="flex justify-between items-center mb-3">
                             <div class="flex items-center gap-2.5">

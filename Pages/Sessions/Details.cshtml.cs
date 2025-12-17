@@ -65,6 +65,9 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
+        Console.WriteLine($"[DEBUG] Session Status: {Session.Status} (Value: {(int)Session.Status})");
+        Console.WriteLine($"[DEBUG] Session CheckOutAt: {Session.CheckOutAt}");
+
         // Load related data
         CustomerRequest = await _customerRequestService.GetBySessionIdAsync(id, CompanyId);
         Inspection = await _inspectionService.GetBySessionIdAsync(id, CompanyId);
@@ -101,5 +104,29 @@ public class DetailsModel : PageModel
         await _sessionService.CancelSessionAsync(id, CompanyId);
 
         return RedirectToPage("/Sessions/Index");
+    }
+
+    public async Task<IActionResult> OnPostCompleteTestDriveAsync(Guid id, int? mileageEnd)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return new JsonResult(new { success = false, error = "Not authenticated" });
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+        if (currentCompany == null)
+            return new JsonResult(new { success = false, error = "No company" });
+
+        CompanyId = currentCompany.CompanyId;
+
+        var testDrive = await _testDriveService.GetBySessionIdAsync(id, CompanyId);
+        if (testDrive == null)
+            return new JsonResult(new { success = false, error = "Test drive not found" });
+
+        var result = await _testDriveService.CompleteTestDriveAsync(testDrive.Id, mileageEnd, CompanyId);
+        if (!result)
+            return new JsonResult(new { success = false, error = "Failed to complete test drive" });
+
+        return new JsonResult(new { success = true });
     }
 }

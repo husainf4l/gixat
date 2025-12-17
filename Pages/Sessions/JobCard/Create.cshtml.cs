@@ -66,8 +66,8 @@ public class CreateModel : PageModel
         var existingJobCard = await _jobCardService.GetBySessionIdAsync(id, CompanyId);
         if (existingJobCard != null)
         {
-            // Redirect to the existing JobCard details
-            return RedirectToPage("/Sessions/JobCard/Details", new { id = existingJobCard.Id });
+            // Redirect to the existing JobCard details (use session id for route)
+            return RedirectToPage(new { id });
         }
 
         Session = session;
@@ -103,7 +103,7 @@ public class CreateModel : PageModel
         if (existingJobCard != null)
         {
             // Redirect to the existing JobCard details (route uses session id)
-            return RedirectToPage("/Sessions/JobCard/Details", new { id });
+            return RedirectToPage(new { id });
         }
 
         if (!ModelState.IsValid)

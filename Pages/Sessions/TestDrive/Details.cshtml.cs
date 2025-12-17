@@ -92,13 +92,16 @@ public class DetailsModel : PageModel
             TestDriveId: testDrive.Id
         );
 
-        var uploadUrl = await _mediaService.CreateUploadUrlAsync(createDto, CompanyId);
+        // Save file directly using the media service
+        using var stream = file.OpenReadStream();
+        var media = await _mediaService.UploadDirectAsync(createDto, stream, CompanyId);
+
+        if (media == null)
+            return new JsonResult(new { success = false, error = "Upload failed" });
 
         return new JsonResult(new { 
             success = true, 
-            mediaItemId = uploadUrl.MediaItemId,
-            uploadUrl = uploadUrl.UploadUrl,
-            s3Key = uploadUrl.S3Key
+            media = media
         });
     }
 
@@ -137,5 +140,46 @@ public class DetailsModel : PageModel
 
         var result = await _mediaService.DeleteAsync(mediaId, CompanyId);
         return new JsonResult(new { success = result });
+    }
+
+    public async Task<IActionResult> OnPostCompleteAsync(Guid id, int? mileageEnd)
+    {
+        Console.WriteLine($"[COMPLETE] OnPostCompleteAsync called - SessionId: {id}, MileageEnd: {mileageEnd}");
+        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            Console.WriteLine($"[COMPLETE] Not authenticated");
+            return new JsonResult(new { success = false, error = "Not authenticated" });
+        }
+
+        var userCompanies = await _companyUserService.GetUserCompaniesAsync(Guid.Parse(userId));
+        var currentCompany = userCompanies.FirstOrDefault();
+        if (currentCompany == null)
+        {
+            Console.WriteLine($"[COMPLETE] No company found for user {userId}");
+            return new JsonResult(new { success = false, error = "No company" });
+        }
+
+        CompanyId = currentCompany.CompanyId;
+        Console.WriteLine($"[COMPLETE] CompanyId: {CompanyId}");
+
+        var testDrive = await _testDriveService.GetBySessionIdAsync(id, CompanyId);
+        if (testDrive == null)
+        {
+            Console.WriteLine($"[COMPLETE] Test drive not found for session {id}");
+            return new JsonResult(new { success = false, error = "Test drive not found" });
+        }
+
+        Console.WriteLine($"[COMPLETE] Found TestDrive ID: {testDrive.Id}, Current Status: {testDrive.Status}");
+        
+        var result = await _testDriveService.CompleteTestDriveAsync(testDrive.Id, mileageEnd, CompanyId);
+        Console.WriteLine($"[COMPLETE] CompleteTestDriveAsync result: {result}");
+        
+        if (!result)
+            return new JsonResult(new { success = false, error = "Failed to complete test drive" });
+
+        Console.WriteLine($"[COMPLETE] Test drive {testDrive.Id} completed successfully");
+        return new JsonResult(new { success = true });
     }
 }

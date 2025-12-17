@@ -38,7 +38,7 @@ public class IndexModel : PageModel
         
         TotalActive = JobCards.Count(j => j.Status != JobCardStatus.Completed && j.Status != JobCardStatus.Cancelled);
         InProgress = JobCards.Count(j => j.Status == JobCardStatus.InProgress);
-        WaitingParts = JobCards.Count(j => j.Status == JobCardStatus.OnHold);
+        WaitingParts = JobCards.Count(j => j.Status == JobCardStatus.WaitingParts);
         CompletedToday = JobCards.Count(j => j.Status == JobCardStatus.Completed && j.CreatedAt.Date == DateTime.UtcNow.Date);
     }
 }

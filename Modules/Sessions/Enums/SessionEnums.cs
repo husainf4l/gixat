@@ -36,24 +36,29 @@ public enum SessionStatus
     InProgress = 5,
     
     /// <summary>
+    /// Final quality check in progress
+    /// </summary>
+    QualityCheck = 6,
+    
+    /// <summary>
     /// All work completed
     /// </summary>
-    Completed = 6,
+    Completed = 7,
     
     /// <summary>
     /// Vehicle ready for pickup
     /// </summary>
-    ReadyForPickup = 7,
+    ReadyForPickup = 8,
     
     /// <summary>
     /// Vehicle picked up, session closed
     /// </summary>
-    Closed = 8,
+    Closed = 9,
     
     /// <summary>
     /// Session cancelled
     /// </summary>
-    Cancelled = 9
+    Cancelled = 10
 }
 
 /// <summary>
@@ -110,9 +115,11 @@ public enum JobCardStatus
     Pending = 1,
     Approved = 2,
     InProgress = 3,
-    OnHold = 4,
-    Completed = 5,
-    Cancelled = 6
+    WaitingParts = 4,
+    QualityCheck = 5,
+    Completed = 6,
+    OnHold = 7,
+    Cancelled = 8
 }
 
 /// <summary>
